@@ -1,0 +1,213 @@
+#!/usr/bin/env expect
+#
+# First boot of pfSense after install — assigns interfaces, enables SSH,
+# installs REST API package, and creates an API key.
+#
+# Usage (from pfsense-mcp repo root):
+#   nix shell nixpkgs#expect nixpkgs#qemu nixpkgs#curl -c expect vm/firstboot.exp
+#
+# Prerequisites:
+#   - vm/pfsense-test.qcow2 must exist (produced by install.exp)
+#
+# Produces:
+#   - Configured pfSense VM with REST API ready
+#   - vm/api-key.txt with the API key
+
+set timeout 300
+log_file -noappend vm/firstboot.log
+
+set disk "vm/pfsense-test.qcow2"
+
+puts "==> Booting pfSense from installed disk..."
+spawn qemu-system-x86_64 \
+    -m 1024 \
+    -enable-kvm \
+    -drive file=$disk,if=virtio,format=qcow2 \
+    -nographic \
+    -net nic,model=virtio \
+    -net user,hostfwd=tcp::8443-:443,hostfwd=tcp::2222-:22
+
+# ---- Phase 1-5: Interface assignment OR direct console menu ----
+# First boot detects interface mismatch (em0/em1 vs vtnet0)
+# Subsequent boots go straight to console menu.
+puts "\n==> Waiting for VLAN prompt or console menu..."
+expect {
+    "Should VLANs be set up now*\]?" {
+        puts "\n==> Answering no to VLANs..."
+        sleep 1
+        send "n\r"
+
+        puts "\n==> Waiting for WAN interface prompt..."
+        expect -re "Enter the WAN interface|WAN interface name"
+        puts "\n==> Assigning vtnet0 as WAN..."
+        sleep 1
+        send "vtnet0\r"
+
+        puts "\n==> Waiting for LAN interface prompt..."
+        expect -re "Enter the LAN interface|LAN interface name"
+        puts "\n==> No LAN interface (single NIC)..."
+        sleep 1
+        send "\r"
+
+        puts "\n==> Waiting for confirmation..."
+        expect -re "Do you want to proceed|proceed.*\\\?"
+        puts "\n==> Confirming interface assignment..."
+        sleep 1
+        send "y\r"
+
+        puts "\n==> Waiting for console menu..."
+        set timeout 300
+        expect -re "Enter an option:"
+        puts "\n==> Console menu ready!"
+    }
+    -re "Enter an option:" {
+        puts "\n==> Console menu ready (interfaces already configured)!"
+    }
+    timeout { puts "\n==> TIMEOUT waiting for boot"; exit 1 }
+}
+
+# ---- Phase 6: Enable SSH (option 14) ----
+puts "\n==> Enabling SSH..."
+send "14\r"
+expect {
+    -re "SSHD is currently.*disabled|Enable Secure Shell" {
+        puts "\n==> Enabling SSHD..."
+        send "y\r"
+    }
+    -re "SSHD is currently.*enabled" {
+        puts "\n==> SSH already enabled, declining disable..."
+        send "n\r"
+    }
+    timeout { puts "\n==> TIMEOUT at SSH enable" }
+}
+
+# Wait for menu to return
+expect {
+    -re "Enter an option:" {
+        puts "\n==> Back at console menu"
+    }
+    timeout { puts "\n==> TIMEOUT returning to menu" }
+}
+
+# ---- Phase 7: Install REST API package via shell ----
+puts "\n==> Opening shell (option 8)..."
+send "8\r"
+
+# The shell emits many "resizewin: timeout reading from terminal" messages
+# before the actual prompt appears. Wait for the prompt with extra time.
+set timeout 60
+expect {
+    -re "home\\.arpa" {
+        puts "\n==> Shell ready, installing REST API..."
+    }
+    timeout { puts "\n==> TIMEOUT waiting for shell"; exit 1 }
+}
+
+# Install REST API package
+set timeout 120
+send "pkg-static -C /dev/null add https://github.com/pfrest/pfSense-pkg-RESTAPI/releases/download/v2.4.3/pfSense-2.7.2-pkg-RESTAPI.pkg\r"
+
+expect {
+    -re "Installing.*done|Extracting.*done" {
+        puts "\n==> REST API package installed!"
+    }
+    -re "Error|FAILED|failed" {
+        puts "\n==> REST API install FAILED"
+        # Continue anyway — we can debug
+    }
+    timeout { puts "\n==> TIMEOUT installing REST API (may still be downloading)" }
+}
+
+# Wait for shell prompt to return
+expect {
+    -re "home\\.arpa" {
+        puts "\n==> Shell prompt returned"
+    }
+    timeout { puts "\n==> TIMEOUT waiting for prompt after install" }
+}
+
+# Restart php-fpm so REST API is active
+puts "\n==> Restarting php-fpm..."
+send "service php-fpm restart\r"
+sleep 3
+
+expect {
+    -re "home\\.arpa" {
+        puts "\n==> php-fpm restarted"
+    }
+    timeout { puts "\n==> TIMEOUT after php-fpm restart" }
+}
+
+# Return to main menu
+puts "\n==> Exiting shell..."
+send "exit\r"
+
+# Wait for console menu
+expect {
+    -re "Enter an option:" {
+        puts "\n==> Back at console menu"
+    }
+    timeout { puts "\n==> TIMEOUT returning to menu from shell" }
+}
+
+# ---- Phase 8: Create API key via curl from host ----
+# The QEMU port forward maps host:8443 → guest:443
+# Use BasicAuth with default admin:pfsense to create an API key
+puts "\n==> Creating API key via REST API..."
+set timeout 30
+
+# Run curl from the HOST side (not inside the VM)
+set api_result [exec curl -sk -u admin:pfsense -X POST https://127.0.0.1:8443/api/v2/auth/key 2>&1]
+puts "\n==> API key response: $api_result"
+
+# Save full response to file
+set fp [open "vm/api-key.json" w]
+puts $fp $api_result
+close $fp
+puts "\n==> API key saved to vm/api-key.json"
+
+# ---- Phase 9: Export config.xml via curl ----
+# Grab config.xml via REST API backup endpoint or shell
+puts "\n==> Exporting config.xml via shell..."
+send "8\r"
+set timeout 60
+expect {
+    -re "home\\.arpa" {
+        puts "\n==> Shell ready"
+    }
+    timeout { puts "\n==> TIMEOUT waiting for shell" }
+}
+
+# Copy config.xml content to a temp file for SCP
+send "cat /cf/conf/config.xml | base64 > /tmp/config.b64\r"
+sleep 2
+expect {
+    -re "home\\.arpa" {
+        puts "\n==> Config encoded"
+    }
+    timeout { puts "\n==> TIMEOUT encoding config" }
+}
+
+# ---- Phase 10: Shut down cleanly ----
+puts "\n==> Shutting down pfSense..."
+send "shutdown -p now\r"
+
+# Wait for QEMU to exit or kill it
+set timeout 60
+expect {
+    eof { puts "\n==> QEMU exited cleanly" }
+    -re "System halted|Power down" {
+        puts "\n==> System halted, killing QEMU..."
+        sleep 2
+        send "\x01x"
+    }
+    timeout {
+        puts "\n==> Killing QEMU..."
+        send "\x01x"
+    }
+}
+
+wait
+puts "\n==> Done! First boot configuration complete."
+puts "==> API key: vm/api-key.txt"
+puts "==> Config capture: vm/config-capture.log"

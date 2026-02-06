@@ -1,0 +1,228 @@
+#!/usr/bin/env expect
+#
+# Automated pfSense CE 2.7.2 installation via serial console in QEMU
+#
+# Usage (from pfsense-mcp repo root):
+#   nix shell nixpkgs#expect nixpkgs#qemu -c expect vm/install.exp
+#
+# Produces a bootable pfsense-test.qcow2 with pfSense installed on ZFS.
+
+set timeout 300
+log_file -noappend vm/install.log
+
+set memstick "vm/pfSense-CE-memstick-serial-2.7.2-RELEASE-amd64.img"
+set disk     "vm/pfsense-test.qcow2"
+
+# Recreate target disk
+puts "==> Creating fresh QCOW2 disk..."
+exec qemu-img create -f qcow2 $disk 4G
+
+puts "==> Booting pfSense installer..."
+spawn qemu-system-x86_64 \
+    -m 1024 \
+    -enable-kvm \
+    -drive file=$disk,if=virtio,format=qcow2 \
+    -drive file=$memstick,format=raw,if=none,id=usbstick \
+    -device usb-ehci \
+    -device usb-storage,drive=usbstick,bootindex=0 \
+    -nographic \
+    -net nic,model=virtio \
+    -net user,hostfwd=tcp::8443-:443,hostfwd=tcp::2222-:22
+
+# ---- Phase 1: Console type prompt ----
+# "Console type [vt100]: "
+puts "\n==> Waiting for console type prompt..."
+expect {
+    "Console type*\]: " {
+        puts "\n==> Sending xterm"
+        send "xterm\r"
+    }
+    timeout { puts "\n==> TIMEOUT at console type"; exit 1 }
+}
+
+# ---- Phase 2: Copyright/License ----
+# ncurses dialog with Accept button. Match on copyright text.
+puts "\n==> Waiting for copyright screen..."
+expect {
+    -re "Copyright|Trademark|Redistribution" {
+        puts "\n==> Accepting license..."
+        sleep 2
+        send "\r"
+    }
+    timeout { puts "\n==> TIMEOUT at copyright"; exit 1 }
+}
+
+# ---- Phase 3: Welcome — Install / Rescue Shell / Recover ----
+# "Install" is the default highlighted option
+puts "\n==> Waiting for install menu..."
+expect {
+    -re "Install.*Rescue|Install.*pfSense" {
+        puts "\n==> Selecting Install..."
+        sleep 1
+        send "\r"
+    }
+    timeout { puts "\n==> TIMEOUT at install menu"; exit 1 }
+}
+
+# ---- Phase 4: Keymap selection ----
+puts "\n==> Waiting for keymap..."
+expect {
+    -re "Keymap|keymap|Continue with" {
+        puts "\n==> Accepting default keymap..."
+        sleep 1
+        # "Continue with default keymap" is highlighted.
+        # Need to select it and press Enter. It's a list — the first
+        # item should be selected. Just press Enter.
+        send "\r"
+    }
+    -re "Partitioning|How would you like" {
+        puts "\n==> Skipped keymap"
+    }
+    timeout { puts "\n==> TIMEOUT at keymap, pressing Enter"; send "\r" }
+}
+
+# ---- Phase 5: Partitioning — Auto (ZFS) ----
+# Options: Auto (ZFS), Auto (UFS), Manual, Shell
+# Auto (ZFS) is the first/highlighted option
+puts "\n==> Waiting for partitioning menu..."
+expect {
+    -re "Partitioning|How would you like|Auto.*ZFS" {
+        puts "\n==> Selecting Auto (ZFS)..."
+        sleep 1
+        send "\r"
+    }
+    timeout { puts "\n==> TIMEOUT at partitioning"; exit 1 }
+}
+
+# ---- Phase 6: ZFS Configuration screen ----
+# Shows menu with letter shortcuts:
+#   >>> Install    Proceed with Installation
+#   T Pool Type/Disks:  stripe: 0 disks
+#   - Rescan Devices    *
+#   - Disk Info         *
+#   N Pool Name         pfSense
+#   etc.
+#
+# Strategy: Use 'T' shortcut to go to Pool Type/Disks configuration
+puts "\n==> Waiting for ZFS Configuration..."
+expect {
+    -re "ZFS Configuration|Configure Options|Pool Type" {
+        puts "\n==> ZFS config screen, pressing T for Pool Type..."
+        sleep 1
+        # Type 'T' to jump to Pool Type/Disks and activate it
+        send "T"
+        sleep 0.5
+        send "\r"
+    }
+    timeout { puts "\n==> TIMEOUT at ZFS config"; exit 1 }
+}
+
+# ---- Phase 7: Virtual Device Type — stripe ----
+# Options: stripe, mirror, raid10, raidz1, raidz2, raidz3
+# stripe is the default (first option)
+puts "\n==> Waiting for virtual device type..."
+expect {
+    -re "stripe|Virtual Device|device type|Stripe.*No Redundancy" {
+        puts "\n==> Selecting stripe..."
+        sleep 1
+        send "\r"
+    }
+    timeout { puts "\n==> TIMEOUT at device type"; send "\r" }
+}
+
+# ---- Phase 8: Disk selection — vtbd0 ----
+# Checkbox list: [ ] vtbd0  VirtIO Block Device
+# Space toggles, OK button confirms.
+puts "\n==> Waiting for disk selection..."
+expect {
+    -re "vtbd0|VirtIO|ZFS.*Disks" {
+        puts "\n==> Toggling vtbd0 selection with Space..."
+        sleep 1
+        # Space to toggle the checkbox for vtbd0
+        send " "
+        sleep 0.5
+        # Now press Enter (or Tab to OK button first, then Enter)
+        # In FreeBSD bsdinstall dialogs, Enter on a checklist item
+        # usually confirms. But we may need Tab to reach OK.
+        # Let's try Enter first.
+        send "\r"
+    }
+    timeout { puts "\n==> TIMEOUT at disk selection"; send " \r" }
+}
+
+# ---- Phase 9: Back at ZFS Config — select >>> Install ----
+# After disk selection, we return to ZFS Configuration.
+# The cursor lands on the "T Pool Type/Disks" row.
+# Match on "stripe: 1 disk" to ensure menu is fully rendered.
+# Then use ">" shortcut to jump to ">>> Install" (avoids escape sequence
+# timing issues with ncurses), then Enter to activate it.
+puts "\n==> Waiting to return to ZFS config..."
+expect {
+    "stripe: 1 disk" {
+        puts "\n==> Back at ZFS config with 1 disk, selecting >>> Install..."
+        sleep 2
+        # ">" shortcut jumps to the ">>> Install" menu item
+        send ">"
+        sleep 1
+        send "\r"
+    }
+    timeout { puts "\n==> TIMEOUT returning to ZFS config"; send "\r" }
+}
+
+# ---- Phase 10: Last Chance confirmation ----
+# "Last Chance! Are you sure you want to destroy the current contents..."
+# IMPORTANT: NO is focused by default (safety feature). Must Tab to YES first.
+puts "\n==> Waiting for Last Chance confirmation..."
+expect {
+    -re "Last Chance|Are you sure" {
+        puts "\n==> Confirming destruction (Tab to YES, then Enter)..."
+        sleep 1
+        # Tab from NO to YES
+        send "\t"
+        sleep 0.5
+        # Enter to confirm YES
+        send "\r"
+    }
+    -re "Abort|failed" {
+        puts "\n==> ZFS setup ABORTED/FAILED!"
+        puts "==> Check vm/install.log"
+        exit 1
+    }
+    timeout { puts "\n==> TIMEOUT at confirmation"; send "\r" }
+}
+
+# ---- Phase 11: Wait for installation to complete ----
+puts "\n==> Waiting for installation to complete..."
+set timeout 900
+
+expect {
+    -re "Complete|Installation Complete|Reboot|Manual Configuration" {
+        puts "\n==> Installation complete!"
+    }
+    timeout { puts "\n==> TIMEOUT waiting for install"; exit 1 }
+}
+
+# ---- Phase 12: Post-install — Reboot ----
+puts "\n==> Selecting Reboot..."
+sleep 2
+# "Reboot" should be the default option
+send "\r"
+
+# ---- Phase 13: Kill QEMU during reboot ----
+puts "\n==> Waiting for shutdown..."
+set timeout 60
+expect {
+    -re "Rebooting|reboot|syncing disks|Uptime" {
+        puts "\n==> System rebooting, stopping QEMU..."
+        sleep 3
+        send "\x01x"
+    }
+    eof { puts "\n==> QEMU exited" }
+    timeout {
+        puts "\n==> Killing QEMU..."
+        send "\x01x"
+    }
+}
+
+wait
+puts "\n==> Done! Disk image: vm/pfsense-test.qcow2"

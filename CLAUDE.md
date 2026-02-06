@@ -277,6 +277,38 @@ From `endpoint-inventory.json`:
 
 ## Testing
 
+### VM Test Infrastructure
+
+A local pfSense VM provides a safe testing target. See `vm/RESEARCH.md` for full research findings.
+
+**Expect scripts** automate the entire lifecycle:
+
+```bash
+# 1. Install pfSense on a fresh QCOW2 (requires serial memstick image in vm/)
+nix shell nixpkgs#expect nixpkgs#qemu -c expect vm/install.exp
+
+# 2. First boot: configure interfaces, SSH, install REST API, create API key
+nix shell nixpkgs#expect nixpkgs#qemu nixpkgs#curl -c expect vm/firstboot.exp
+
+# 3. Quick boot to extract/verify config
+nix shell nixpkgs#expect nixpkgs#qemu -c expect vm/extract-config.exp
+```
+
+**QEMU requirements**: KVM support, 1024 MB RAM, 4 GB disk.
+**Port forwards**: host:8443 -> guest:443 (HTTPS/API), host:2222 -> guest:22 (SSH).
+
+**Key files**:
+- `vm/install.exp` — Automated ZFS install via serial console (~5 min)
+- `vm/firstboot.exp` — Interface assignment, SSH, REST API package, API key
+- `vm/extract-config.exp` — Boot and export config.xml
+- `vm/reference-config.xml` — Studied config showing all pre-seedable fields
+- `vm/api-key.json` — API key creation response from firstboot
+
+**Known issues**:
+- `auth_methods` defaults to `BasicAuth` only after key creation — must be set to `BasicAuth,KeyAuth` for API key auth to work on subsequent boots
+- REST API package binary must be installed via `pkg-static` (config.xml only stores settings)
+- Shell prompt contains ANSI codes — match on `home\\.arpa`, not `$` or `#`
+
 ### Manual Testing Against Live pfSense
 
 ```bash
@@ -293,6 +325,23 @@ fastmcp run generated/server.py
 
 # Or test directly with curl
 curl -sk "${PFSENSE_HOST}/api/v2/firewall/aliases" -H "X-API-Key: ${PFSENSE_API_KEY}"
+```
+
+### Testing Against Local VM
+
+```bash
+# Boot the VM (after install.exp + firstboot.exp)
+qemu-system-x86_64 -m 1024 -enable-kvm \
+    -drive file=vm/pfsense-test.qcow2,if=virtio,format=qcow2 \
+    -nographic -net nic,model=virtio \
+    -net user,hostfwd=tcp::8443-:443,hostfwd=tcp::2222-:22
+
+# Test API (BasicAuth — works on any boot)
+curl -sk -u admin:pfsense https://127.0.0.1:8443/api/v2/system/version
+
+# Test API (API key — requires auth_methods to include KeyAuth)
+curl -sk https://127.0.0.1:8443/api/v2/system/version \
+    -H "X-API-Key: ef7b3ce5917e32840aff17a409fb6abeaaee3bef4b495fa3"
 ```
 
 ### Sample-Based Tests
