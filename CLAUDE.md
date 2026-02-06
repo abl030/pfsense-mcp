@@ -1,30 +1,141 @@
-# pfSense MCP Server Generator
+# pfSense MCP Server
 
 ## Goal
 
-Build a **self-contained, auto-generated MCP server** for the pfSense REST API v2. The server is generated from the official OpenAPI 3.0.0 spec — not hand-maintained. When pfSense updates their API, pull a new spec and re-run the generator.
+Build a **self-contained, auto-generated MCP server** for the pfSense REST API v2. The server is generated from `openapi-spec.json` (the official OpenAPI 3.0.0 spec, 258 paths, 178 schemas, 677 operations). When pfSense updates their API, pull a new spec and re-run the generator.
 
-**Key advantage over unifi-mcp**: pfSense ships a proper OpenAPI 3.0.0 spec with 258 paths and 178 schemas. The generator doesn't need to infer schemas from samples — it reads them directly from the spec. This makes the generator simpler and more accurate.
+## Work Order
 
-## What's Already Here
+Complete these phases in order. Phase 1 gives you a working test target. Phase 2 builds the generator and tests against it.
 
-| File | Purpose |
-|------|---------|
-| `openapi-spec.json` | Raw OpenAPI 3.0.0 spec from live pfSense (v2.7.1, 4.1MB) |
-| `endpoint-inventory.json` | Processed catalog: 677 operations across 11 categories |
-| `api-samples/*.json` | 143 real GET responses showing exact field names and values |
-| `flake.nix` | Nix package that wraps `fastmcp run generated/server.py` |
-| `generated/server.py` | Placeholder — the generator replaces this |
-| `generator/` | Empty package — the generator code goes here |
-| `templates/` | Jinja2 templates for code generation go here |
+### Phase 1: VM Test Infrastructure
 
-## Architecture
+Build `vm/setup.sh` — a single script that produces a golden pfSense QCOW2 with the REST API installed and configured. Then build a test harness so each test copies the golden image, boots it, runs tests, and destroys it.
 
-### The Generator
+**Deliverables:**
+- `vm/setup.sh` — downloads pfSense serial memstick, runs `install.exp`, runs `firstboot.exp`, fixes `auth_methods`, produces `vm/golden.qcow2`
+- Test harness script or Python wrapper that: copies golden → boots QEMU → waits for API ready → runs tests → kills QEMU → deletes copy
+- Smoke test that creates a firewall alias via the API and reads it back
 
-A Python package under `generator/` that reads `openapi-spec.json` and outputs `generated/server.py`.
+**What already exists (read these first):**
+- `vm/install.exp` — working automated ZFS installer via serial console
+- `vm/firstboot.exp` — working first-boot config (interfaces, SSH, REST API install, API key)
+- `vm/reference-config.xml` — full config.xml exported from a configured VM
+- `vm/RESEARCH.md` — comprehensive findings from manual research
 
-Recommended module structure:
+### Phase 2: Generator
+
+Build the Python generator that reads `openapi-spec.json` and outputs `generated/server.py`. Test every generated tool against the VM from Phase 1.
+
+**Deliverables:**
+- `generator/` — Python package that reads the spec and generates the server
+- `templates/server.py.j2` — Jinja2 template for code generation
+- `generated/server.py` — the generated FastMCP server (output of the generator)
+- Tests that verify generated tools work against the live VM
+
+---
+
+## Phase 1 Reference: VM Test Infrastructure
+
+### pfSense Image (serial memstick)
+
+Download: `https://atxfiles.netgate.com/mirror/downloads/pfSense-CE-memstick-serial-2.7.2-RELEASE-amd64.img.gz`
+
+This is a serial-console installer image. `-nographic` in QEMU gives serial on stdio, which `expect` automates.
+
+### QEMU Commands
+
+```bash
+# Create disk
+qemu-img create -f qcow2 vm/pfsense-test.qcow2 4G
+
+# Install (boots from memstick, installs to QCOW2)
+qemu-system-x86_64 -m 1024 -enable-kvm \
+    -drive file=vm/pfsense-test.qcow2,if=virtio,format=qcow2 \
+    -drive file=vm/pfSense-CE-memstick-serial-2.7.2-RELEASE-amd64.img,format=raw,if=none,id=usbstick \
+    -device usb-ehci -device usb-storage,drive=usbstick,bootindex=0 \
+    -nographic -net nic,model=virtio \
+    -net user,hostfwd=tcp::8443-:443,hostfwd=tcp::2222-:22
+
+# Boot from disk (after install)
+qemu-system-x86_64 -m 1024 -enable-kvm \
+    -drive file=vm/pfsense-test.qcow2,if=virtio,format=qcow2 \
+    -nographic -net nic,model=virtio \
+    -net user,hostfwd=tcp::8443-:443,hostfwd=tcp::2222-:22
+```
+
+Requirements: KVM, 1024 MB RAM, 4 GB disk. QEMU user-mode networking assigns 10.0.2.15 via DHCP.
+
+### Expect Script Gotchas (CRITICAL)
+
+These were discovered through painful trial and error. Do NOT change the working patterns:
+
+1. **ncurses escape sequences**: Arrow keys (`\033[A`) get misinterpreted as standalone ESC + garbage. Use letter shortcuts (`T`, `N`, `>`) instead.
+
+2. **"Last Chance" dialog defaults to NO**: The ZFS confirmation dialog focuses NO as a safety feature. Must send `\t` (Tab) before `\r` (Enter) to switch to YES.
+
+3. **Phase 9 pattern matching**: Matching on `"ZFS Configuration"` matches too early (dialog title renders before menu items). Match on `"stripe: 1 disk"` instead.
+
+4. **pfSense tcsh prompt**: `[2.7.2-RELEASE][root@pfSense.home.arpa]/root:` — contains ANSI escape codes between `/root` and `:`. Match on `home\\.arpa` (consecutive bytes), NOT `$`, `#`, `%`, or `/root:`.
+
+5. **SSH toggle**: Option 14 shows "enable" if disabled, "disable" if already enabled. Handle both cases.
+
+6. **`service php-fpm restart` fails**: Returns error about php_fpm_enable. Ignore it — REST API works anyway because package installation triggers a webConfigurator restart.
+
+7. **Disk appears as `vtbd0`** (VirtIO block device), NIC as `vtnet0`.
+
+### Config.xml: What Needs Fixing
+
+After `firstboot.exp` runs, the `auth_methods` in config.xml is set to `BasicAuth` only. API key auth returns 401 on subsequent boots because `KeyAuth` is not included.
+
+**Fix**: The setup script must patch config.xml after firstboot to set:
+```xml
+<auth_methods>BasicAuth,KeyAuth</auth_methods>
+```
+
+This can be done via the REST API itself (BasicAuth still works) or by booting the VM, opening a shell, and using `sed` on `/cf/conf/config.xml`.
+
+REST API config location in config.xml: `<pfsense><installedpackages><package><conf>`
+
+### Config.xml: API Key Format
+
+Keys are stored as SHA256 hashes:
+- `<hash_algo>sha256</hash_algo>`
+- `<hash>` contains `sha256(raw_key_hex_string)`
+
+The firstboot script creates a key via `POST /api/v2/auth/key` using BasicAuth (`admin:pfsense`). The response contains the raw key. The hash in config.xml is `sha256` of that raw key.
+
+### Test Harness Design
+
+Each test run should be fully isolated:
+
+```
+1. cp vm/golden.qcow2 /tmp/pfsense-test-$$.qcow2
+2. Boot QEMU in background (port-forwarded to random or fixed ports)
+3. Poll https://127.0.0.1:8443/api/v2/system/version until 200 (API ready)
+4. Run test suite against the API
+5. Kill QEMU
+6. rm /tmp/pfsense-test-$$.qcow2
+```
+
+Auth for tests: use BasicAuth (`admin:pfsense`) or the API key created by firstboot. Boot to API-ready takes ~45-75 seconds.
+
+### Timing
+
+- Install from memstick: ~3-5 minutes
+- First boot + REST API install: ~2-3 minutes
+- Boot to API-ready: ~45-75 seconds
+- Total golden image build: ~8 minutes (one-time)
+
+---
+
+## Phase 2 Reference: Generator
+
+### Source of Truth
+
+`openapi-spec.json` — the raw OpenAPI 3.0.0 spec from pfSense REST API v2. This is the ONLY input to the generator. Do not use `endpoint-inventory.json` or `api-samples/` — they were exploratory artifacts. Read everything from the spec directly.
+
+### Generator Architecture
 
 ```
 generator/
@@ -37,323 +148,108 @@ generator/
 └── codegen.py           # Render templates and write output
 ```
 
-The generator should:
-1. Load `openapi-spec.json`
-2. For each path+method, build a tool definition with:
-   - Tool name (from operationId via naming conventions)
-   - Docstring (from summary/description)
-   - Parameters with types (from spec schemas and parameters)
-   - HTTP method, URL path, and request body schema
-   - Whether it's a mutation (requires confirmation)
-3. Render `templates/server.py.j2` → `generated/server.py`
+The generator:
+1. Loads `openapi-spec.json`
+2. For each path+method, builds a tool definition with: name, docstring, parameters with types, HTTP method, URL path, request body schema, whether it's a mutation
+3. Renders `templates/server.py.j2` → `generated/server.py`
 
-### The Generated Server (`generated/server.py`)
+### Generated Server Design
 
-- Uses **FastMCP** (same as unifi-mcp)
-- Single `PfSenseClient` class handles auth and HTTP
+- Uses **FastMCP** (`from fastmcp import FastMCP`)
+- Single `PfSenseClient` class handles auth (X-API-Key header) and HTTP (httpx)
 - Environment variables: `PFSENSE_HOST`, `PFSENSE_API_KEY`, `PFSENSE_VERIFY_SSL`
 - One async tool function per API operation
 - Graceful error handling with clear messages
 
-## pfSense REST API v2 Patterns
-
 ### Authentication
 
-```
-X-API-Key: <key>
-```
-
-All requests use the `X-API-Key` header. No session/cookie management needed. The API also supports BasicAuth and JWT, but API key is simplest for MCP use.
+All requests use `X-API-Key: <key>` header. No session/cookie management needed.
 
 ### Response Envelope
 
-Every response follows this structure:
-
+Every response follows:
 ```json
-{
-  "code": 200,
-  "status": "ok",
-  "response_id": "SUCCESS",
-  "message": "",
-  "data": { ... }  // object for singular, array for plural
-}
+{"code": 200, "status": "ok", "response_id": "SUCCESS", "message": "", "data": { ... }}
 ```
 
-Errors return non-200 codes with `response_id` like `VALIDATION_ERROR`, `NOT_FOUND`.
+The generated tools should unwrap this and return `data` directly. On error, return the full envelope for debugging.
 
-### CRUD Pattern (Singular/Plural)
+### CRUD Pattern
 
-Most resources follow this pattern:
-
+Most resources follow:
 ```
-GET    /api/v2/{category}/{resource}s          → list all (plural)
-GET    /api/v2/{category}/{resource}           → get one (singular, requires ?id=N)
-POST   /api/v2/{category}/{resource}           → create
-PATCH  /api/v2/{category}/{resource}           → update (requires id in body)
-DELETE /api/v2/{category}/{resource}           → delete (requires ?id=N)
+GET    /api/v2/{category}/{resource}s   → list all (plural, supports limit/offset/sort_by/sort_order/query)
+GET    /api/v2/{category}/{resource}    → get one (singular, requires ?id=N)
+POST   /api/v2/{category}/{resource}    → create (request body from schema)
+PATCH  /api/v2/{category}/{resource}    → update (id + fields in body)
+DELETE /api/v2/{category}/{resource}    → delete (requires ?id=N, optional ?apply=true)
 ```
-
-**Plural GET** supports pagination/filtering via query params:
-- `limit` — max results (default varies)
-- `offset` — pagination offset
-- `sort_by` — field to sort on
-- `sort_order` — `SORT_ASC` or `SORT_DESC`
-- `query` — filter query
-
-**Singular GET** requires `id` (integer) as a query parameter.
-
-**POST** (create) uses a request body referencing the schema via `allOf`:
-```json
-{
-  "allOf": [
-    {"$ref": "#/components/schemas/FirewallAlias"},
-    {"type": "object", "required": ["name", "type"]}
-  ]
-}
-```
-
-**PATCH** (update) includes `id` as a required field in the body alongside the schema.
-
-**DELETE** takes `id` as a required query param and optional `apply` boolean.
 
 ### Apply Pattern
 
-Some subsystems require explicit "apply" after changes take effect:
+Some subsystems require explicit apply after mutations: `firewall`, `firewall/virtual_ip`, `interface`, `routing`, `services/dhcp_server`, `services/dns_forwarder`, `services/dns_resolver`, `services/haproxy`, `vpn/ipsec`, `vpn/wireguard`.
 
 ```
 GET  /api/v2/{category}/apply    → check apply status
 POST /api/v2/{category}/apply    → apply pending changes
 ```
 
-Apply status response:
-```json
-{"data": {"applied": true, "pending_subsystems": []}}
-```
-
-Subsystems with apply endpoints:
-- `firewall` (rules, NAT, aliases, etc.)
-- `firewall/virtual_ip`
-- `interface`
-- `routing`
-- `services/dhcp_server`
-- `services/dns_forwarder`
-- `services/dns_resolver`
-- `services/haproxy`
-- `vpn/ipsec`
-- `vpn/wireguard`
-
-**Important**: After create/update/delete on these subsystems, remind the user to call the apply endpoint. Consider auto-applying when `apply=true` is passed to delete.
+After create/update/delete on these subsystems, the tool docstring should remind the user to call the apply endpoint.
 
 ### Settings Pattern
 
-Some resources are singletons (not CRUD collections):
-
+Singletons (not CRUD collections):
 ```
 GET   /api/v2/{category}/settings   → read settings
 PATCH /api/v2/{category}/settings   → update settings
 ```
 
-Examples: `firewall/advanced_settings`, `services/dns_resolver/settings`, `services/ntp/settings`, `services/ssh`, `system/console`, `system/dns`, `system/hostname`, `system/timezone`, `system/webgui/settings`
+### Tool Naming
+
+Convert operationId to tool name:
+1. Strip `Endpoint` suffix
+2. `get` (singular) → `get`, `get` (plural) → `list`
+3. `post` → `create` (CRUD) or keep for actions/apply
+4. `patch` → `update`, `delete` → `delete`
+5. CamelCase → snake_case
+6. Prefix with `pfsense_`
+7. Flatten nested resources: `/services/haproxy/backend/acl` → `pfsense_create_haproxy_backend_acl`
+
+Apply endpoints: `pfsense_apply_{subsystem}` / `pfsense_get_{subsystem}_apply_status`
+
+### Confirmation Gates
+
+All mutations (POST, PATCH, PUT, DELETE) require `confirm: bool = False`:
+- `confirm=False` (default): return preview (parameters, endpoint URL)
+- `confirm=True`: execute the mutation
+
+Read-only operations (GET) never need confirmation.
 
 ### Dangerous Endpoints (Exclude or Gate)
 
-These should either be excluded from generation or require extra confirmation:
+Exclude from generation or add extra warnings:
+- `POST /api/v2/diagnostics/halt_system`
+- `POST /api/v2/diagnostics/reboot`
+- `POST /api/v2/diagnostics/command_prompt`
+- `DELETE /api/v2/diagnostics/arp_table` (bulk clear)
+- `DELETE /api/v2/diagnostics/config_history/revisions` (bulk clear)
+- `DELETE /api/v2/firewall/states` (bulk clear)
+- `POST /api/v2/graphql` (raw execution)
 
-- `POST /api/v2/diagnostics/halt_system` — shuts down pfSense
-- `POST /api/v2/diagnostics/reboot` — reboots pfSense
-- `POST /api/v2/diagnostics/command_prompt` — arbitrary command execution
-- `DELETE /api/v2/diagnostics/arp_table` — clears entire ARP table
-- `DELETE /api/v2/diagnostics/config_history/revisions` — deletes all config history
-- `DELETE /api/v2/firewall/states` — clears all firewall states
-- `POST /api/v2/graphql` — raw GraphQL execution
+### Known Quirks
 
-## Tool Naming Conventions
+1. **Singular GET returns 400 without `id`**: Expected behavior, not a bug.
+2. **DELETE `apply` parameter**: Some DELETEs accept `?apply=true`.
+3. **PUT vs PATCH**: PUT is bulk replacement on plural endpoints. PATCH is partial update. Prefer PATCH for tools.
+4. **Status endpoints**: All read-only (GET only). No confirmation needed.
+5. **Log endpoints**: Can return megabytes. Tools must accept `limit`.
+6. **CARP status**: `PATCH /status/carp` is a mutation disguised as status.
 
-Convert operationId to tool name using this pattern:
-
-```
-operationId: getFirewallAliasEndpoint
-tool name:   pfsense_get_firewall_alias
-
-operationId: postFirewallAliasEndpoint
-tool name:   pfsense_create_firewall_alias
-
-operationId: patchFirewallAliasEndpoint
-tool name:   pfsense_update_firewall_alias
-
-operationId: deleteFirewallAliasEndpoint
-tool name:   pfsense_delete_firewall_alias
-
-operationId: getFirewallAliasesEndpoint
-tool name:   pfsense_list_firewall_aliases
-
-operationId: postFirewallApplyEndpoint
-tool name:   pfsense_apply_firewall
-```
-
-Rules:
-1. Strip `Endpoint` suffix
-2. Replace `get` (singular) → `get`, `get` (plural) → `list`
-3. Replace `post` → `create` (for CRUD) or keep `post` for actions/apply
-4. Replace `patch` → `update`
-5. Replace `delete` → `delete`
-6. Convert CamelCase to snake_case
-7. Prefix all tools with `pfsense_`
-
-Naming for apply endpoints: `pfsense_apply_{subsystem}` and `pfsense_get_{subsystem}_apply_status`
-
-Naming for settings: `pfsense_get_{subsystem}_settings` and `pfsense_update_{subsystem}_settings`
-
-## Confirmation Gates
-
-**All mutation operations** (POST, PATCH, PUT, DELETE) must require `confirm: bool = False`:
-
-- When `confirm=False` (default): return a preview of what would happen (parameters that would be sent, endpoint that would be called)
-- When `confirm=True`: execute the mutation
-
-This prevents accidental destructive changes. The LLM must explicitly set `confirm=true` after reviewing the preview.
-
-Exception: Read-only operations (GET) never need confirmation.
-
-## Schema Reference
-
-The spec has 178 schemas under `components.schemas`. Key ones:
-
-| Schema | Fields (sample) |
-|--------|-----------------|
-| `FirewallAlias` | `name`, `type`, `descr`, `address`, `detail` |
-| `FirewallRule` | `type`, `interface`, `ipprotocol`, `protocol`, `src`, `dst`, `srcport`, `dstport`, `descr` |
-| `NATPortForward` | `interface`, `protocol`, `src`, `srcport`, `dst`, `dstport`, `target`, `local-port` |
-| `InterfaceVLAN` | `if`, `tag`, `pcp`, `descr` |
-| `RoutingGateway` | `name`, `interface`, `ipprotocol`, `gateway`, `weight`, `descr` |
-| `RoutingStaticRoute` | `network`, `gateway`, `descr` |
-| `DHCPServer` | `enable`, `range_from`, `range_to`, `dnsserver`, `gateway` |
-| `DNSResolverSettings` | `enable`, `dnssec`, `port`, `active_interface`, `outgoing_interface` |
-| `WireGuardTunnel` | `name`, `listenport`, `privatekey`, `publickey`, `mtu` |
-| `WireGuardPeer` | `enabled`, `tun`, `descr`, `endpoint`, `port`, `persistentkeepalive`, `publickey`, `allowedips` |
-| `User` | `name`, `password`, `scope`, `priv`, `descr` |
-| `SystemCertificate` | `descr`, `type`, `crt`, `prv`, `caref` |
-
-All schemas are fully defined in `openapi-spec.json` at `$.components.schemas.*`. Use them directly for parameter type annotations.
-
-## Category Inventory
-
-From `endpoint-inventory.json`:
-
-| Category | Endpoints | Pairs | Has Apply | Key Resources |
-|----------|-----------|-------|-----------|---------------|
-| auth | 5 | 1 | No | keys, JWT |
-| diagnostics | 15 | 2 | No | arp_table, config_history, tables |
-| firewall | 99 | 11 | Yes | rules, aliases, NAT, states, schedules, traffic_shapers, virtual_ips |
-| graphql | 1 | 0 | No | raw GraphQL (exclude) |
-| interface | 39 | 6 | Yes | interfaces, bridges, GREs, groups, LAGGs, VLANs |
-| routing | 28 | 3 | Yes | gateways, gateway_groups, static_routes |
-| services | 291 | 28 | Yes | DHCP, DNS, HAProxy, NTP, ACME, BIND, cron, FreeRADIUS, SSH |
-| status | 28 | 4 | No | CARP, DHCP leases, gateway status, interfaces, logs, OpenVPN, services, system |
-| system | 67 | 4 | No | CAs, certificates, CRLs, console, DNS, hostname, packages, REST API, timezone, tunables, webgui |
-| user | 20 | 3 | No | users, groups, auth_servers |
-| vpn | 84 | 10 | Yes | IPsec (phases 1&2), OpenVPN (clients/servers/CSOs), WireGuard (tunnels/peers) |
-
-**Total: 677 operations → generates ~350-400 unique tools** (after deduplication of GET singular/plural → get/list).
-
-## Known Quirks and Edge Cases
-
-1. **Singular GET returns 400 without `id`**: Singular endpoints (`/firewall/alias`) require `?id=N`. The 400 response is normal when called without `id` — it's not a broken endpoint.
-
-2. **DELETE `apply` parameter**: Some DELETE endpoints accept `?apply=true` to auto-apply changes. The generator should expose this as an optional parameter.
-
-3. **Nested resources**: Some resources are deeply nested:
-   - `/services/haproxy/backend/acl` — an ACL within a backend within HAProxy
-   - `/services/bind/access_list/entry` — an entry within an access list within BIND
-   The tool name should flatten these: `pfsense_create_haproxy_backend_acl`
-
-4. **PUT vs PATCH**: The API uses `PUT` for bulk replacement and `PATCH` for partial update. Most tools should use PATCH. PUT is for bulk operations on plural endpoints.
-
-5. **Status endpoints are read-only**: Everything under `/status/` is GET-only. No confirmation needed.
-
-6. **Log endpoints return large payloads**: `/status/logs/*` can return megabytes. The tools should accept `limit` parameters.
-
-7. **CARP status update**: `PATCH /status/carp` can enable/disable CARP — this is a mutation disguised as a status endpoint.
-
-## Testing
-
-### VM Test Infrastructure
-
-A local pfSense VM provides a safe testing target. See `vm/RESEARCH.md` for full research findings.
-
-**Expect scripts** automate the entire lifecycle:
-
-```bash
-# 1. Install pfSense on a fresh QCOW2 (requires serial memstick image in vm/)
-nix shell nixpkgs#expect nixpkgs#qemu -c expect vm/install.exp
-
-# 2. First boot: configure interfaces, SSH, install REST API, create API key
-nix shell nixpkgs#expect nixpkgs#qemu nixpkgs#curl -c expect vm/firstboot.exp
-
-# 3. Quick boot to extract/verify config
-nix shell nixpkgs#expect nixpkgs#qemu -c expect vm/extract-config.exp
-```
-
-**QEMU requirements**: KVM support, 1024 MB RAM, 4 GB disk.
-**Port forwards**: host:8443 -> guest:443 (HTTPS/API), host:2222 -> guest:22 (SSH).
-
-**Key files**:
-- `vm/install.exp` — Automated ZFS install via serial console (~5 min)
-- `vm/firstboot.exp` — Interface assignment, SSH, REST API package, API key
-- `vm/extract-config.exp` — Boot and export config.xml
-- `vm/reference-config.xml` — Studied config showing all pre-seedable fields
-- `vm/api-key.json` — API key creation response from firstboot
-
-**Known issues**:
-- `auth_methods` defaults to `BasicAuth` only after key creation — must be set to `BasicAuth,KeyAuth` for API key auth to work on subsequent boots
-- REST API package binary must be installed via `pkg-static` (config.xml only stores settings)
-- Shell prompt contains ANSI codes — match on `home\\.arpa`, not `$` or `#`
-
-### Manual Testing Against Live pfSense
-
-```bash
-# Enter dev shell
-nix develop
-
-# Set credentials
-export PFSENSE_HOST=https://192.168.1.1
-export PFSENSE_API_KEY=your-key
-export PFSENSE_VERIFY_SSL=false
-
-# Run the server
-fastmcp run generated/server.py
-
-# Or test directly with curl
-curl -sk "${PFSENSE_HOST}/api/v2/firewall/aliases" -H "X-API-Key: ${PFSENSE_API_KEY}"
-```
-
-### Testing Against Local VM
-
-```bash
-# Boot the VM (after install.exp + firstboot.exp)
-qemu-system-x86_64 -m 1024 -enable-kvm \
-    -drive file=vm/pfsense-test.qcow2,if=virtio,format=qcow2 \
-    -nographic -net nic,model=virtio \
-    -net user,hostfwd=tcp::8443-:443,hostfwd=tcp::2222-:22
-
-# Test API (BasicAuth — works on any boot)
-curl -sk -u admin:pfsense https://127.0.0.1:8443/api/v2/system/version
-
-# Test API (API key — requires auth_methods to include KeyAuth)
-curl -sk https://127.0.0.1:8443/api/v2/system/version \
-    -H "X-API-Key: ef7b3ce5917e32840aff17a409fb6abeaaee3bef4b495fa3"
-```
-
-### Sample-Based Tests
-
-The `api-samples/` directory contains real responses that can be used for offline testing:
-- Verify the generated server parses response envelopes correctly
-- Verify tool parameter types match the spec
-- Verify naming conventions are applied consistently
+---
 
 ## Nix Packaging
 
-The `flake.nix` produces a single package:
+`flake.nix` wraps the generated server:
 
 ```nix
 packages.x86_64-linux.default = writeShellApplication {
@@ -363,27 +259,15 @@ packages.x86_64-linux.default = writeShellApplication {
 };
 ```
 
-After generating `server.py`, the package "just works":
-```bash
-nix build  # produces ./result/bin/pfsense-mcp
-PFSENSE_HOST=... PFSENSE_API_KEY=... ./result/bin/pfsense-mcp
-```
+The dev shell includes jinja2 and pytest for generator development.
 
-## Critical Rule: Never Touch Generated Code
+## Rules
 
-**NEVER manually edit `generated/server.py`**. If the generated code has bugs, fix the generator or templates so re-running produces correct output. Hand-patching defeats the entire purpose.
-
-## Getting Started
-
-1. Read `endpoint-inventory.json` to understand the full API surface
-2. Read a few `api-samples/*.json` files to understand response shapes
-3. Read `openapi-spec.json` schema definitions for parameter types
-4. Build the generator under `generator/`
-5. Create `templates/server.py.j2` for the Jinja2 template
-6. Generate `generated/server.py`
-7. Test with `nix develop` → `fastmcp run generated/server.py`
-8. Verify with `nix build` → run the package
+1. **Never manually edit `generated/server.py`**. Fix the generator or templates instead.
+2. **`openapi-spec.json` is the single source of truth**. All type information, parameter names, and endpoint structure come from the spec.
+3. **Test against the VM, not production**. The golden image exists for this purpose.
+4. **Expect scripts are fragile but working**. Do not change timing, patterns, or shortcuts unless something breaks. See gotchas above.
 
 ## Integration
 
-See `examples/nixosconfig-integration.md` for how this server gets deployed into the homelab fleet via NixOS.
+See `examples/nixosconfig-integration.md` for deploying into the homelab NixOS fleet.
