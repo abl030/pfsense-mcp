@@ -1,0 +1,19 @@
+[project]
+name = "pfsense-mcp"
+version = "0.1.0"
+description = "AI-generated MCP server for the pfSense REST API v2"
+requires-python = ">=3.11"
+dependencies = [
+    "fastmcp>=2.0",
+    "httpx>=0.27",
+    "jinja2>=3.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+]
+
+[build-system]
+requires = ["setuptools>=70"]
+build-backend = "setuptools.build_meta"
