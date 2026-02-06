@@ -25,6 +25,8 @@ Build `vm/setup.sh` — a single script that produces a golden pfSense QCOW2 wit
 
 ### Phase 2: Generator
 
+**CRITICAL: NEVER edit `generated/server.py` directly. EVER.** If a generated tool has a bug, fix the generator or templates so re-running produces correct output. You are testing the generator, not the generated code. Hand-patching the output defeats the entire purpose of code generation.
+
 Build the Python generator that reads `openapi-spec.json` and outputs `generated/server.py`. Test every generated tool against the VM from Phase 1.
 
 **Deliverables:**
