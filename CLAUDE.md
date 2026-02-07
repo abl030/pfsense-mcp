@@ -275,11 +275,18 @@ Exclude from generation or add extra warnings:
 
 ## Phase 2 Status: Test Coverage
 
-**Current: 185 tests, 185 passing**
+**Current: 185 tests, 185 passing** against 258 API paths (677 operations)
 
-Note: test count decreased from previous estimate (206) after discovering that REST API v2.6.8+ only supports pfSense 2.8+ — v2.4.3 is the latest for pfSense CE 2.7.2. Endpoints that need v2.6+ (FreeRADIUS, timezone, cert generation) remain skipped.
+### Coverage summary
 
-The test generator (`generator/test_generator.py`) produces `generated/tests.py` against the live VM. Tests cover CRUD lifecycles, settings roundtrips, read-only GETs, apply endpoints, and plural list endpoints.
+| Metric | Count | % |
+|---|---|---|
+| Paths with active tests | 185 | 71.7% |
+| Paths with documented skip | 67 | 26.0% |
+| Unaccounted gaps | 6 | 2.3% |
+| **Total accounted** | **252** | **97.7%** |
+
+REST API v2.4.3 is the latest version that supports pfSense CE 2.7.2. v2.6.8+ only targets pfSense 2.8+. This blocks FreeRADIUS, timezone, and cert generation endpoints.
 
 ### Test infrastructure
 
@@ -289,6 +296,14 @@ The test generator (`generator/test_generator.py`) produces `generated/tests.py`
 - PEM certificates embedded in test constants for CA/cert-dependent endpoints (IPsec, OpenVPN, CRL, HAProxy frontend/certificate)
 - VM uses 3 e1000 NICs (em0=WAN, em1=LAN, em2=spare for LAGG), VirtIO RNG, 2GB RAM
 - REST API v2.4.3 (only version with pfSense CE 2.7.2 package; v2.6.8+ requires pfSense 2.8+)
+
+### Unaccounted gaps (6 paths — bookkeeping only)
+
+These paths have no test AND no formal skip entry. All are explainable — they just need `# SKIP` comments added:
+
+- `diagnostics/command_prompt`, `diagnostics/halt_system`, `diagnostics/reboot`, `graphql` — dangerous endpoints excluded via `_DANGEROUS_ENDPOINTS` in `context_builder.py` but not in test skip lists
+- `system/timezone` — nginx 404 on v2.4.3, noted in a comment but not in `_SKIP_SINGLETON`
+- `system/package` — install/uninstall can destabilize VM, not in `_SKIP_CRUD_PATHS`
 
 ### Permanently skipped endpoints — with reasons
 
@@ -309,12 +324,9 @@ Every skip is documented in `_SKIP_CRUD_PATHS`, `_SKIP_ACTION`, `_SKIP_SINGLETON
 - `services/haproxy/settings/dns_resolver`, `email_mailer` — 500 parent model construction bug
 - `services/haproxy/backend/action`, `frontend/action` — acl field cannot be empty (needs ACL sibling chain)
 
-**Phantom action routes (2):**
+**Phantom/404 routes (2):**
 - `diagnostics/ping` — version-gated to REST API v2.7.0+, not available on CE 2.7.2
 - `system/timezone` — nginx 404 (needs REST API v2.6+ / pfSense 2.8+)
-
-**Requires BasicAuth (not API key auth):**
-- `auth/key` and `auth/jwt` — tested with dedicated BasicAuth client
 
 **External dependencies (5):**
 - `services/acme/account_key/register` — needs real ACME server
@@ -323,9 +335,27 @@ Every skip is documented in `_SKIP_CRUD_PATHS`, `_SKIP_ACTION`, `_SKIP_SINGLETON
 - `services/wake_on_lan/send` — needs real MAC address on LAN
 - `system/restapi/settings/sync` — HA sync endpoint times out without peer
 
+**Other (2):**
+- `auth/key` and `auth/jwt` — tested with dedicated BasicAuth client (not skipped, just uses different auth)
+- `system/restapi/version` — PATCH triggers API version change (destructive)
+
 ### Phantom plural routes (39)
 
 Routes present in the OpenAPI spec but return nginx 404 on the real server. These are sub-resource plural endpoints whose singular forms require `parent_id`. The pfSense REST API simply doesn't register these routes. All are tested via their singular CRUD endpoints instead.
+
+### Potential future improvements (not blocked, just not prioritized)
+
+These could add tests without needing upstream pfSense fixes:
+
+1. **HAProxy actions** (+2 tests) — retry with non-empty `acl` field or create ACL as sibling in chain
+2. **HAProxy frontend/certificate** (+1 test) — needs `certref` injection from parent cert chain
+3. **OpenVPN client_export** (+2 tests) — build 5-step chain: CA → cert → OVPN server → user cert → export
+4. **system/package** (+1 test) — install/uninstall a small utility like `iftop`
+
+### Known stale entries to clean up
+
+- `_CHAINED_CRUD` has entry for `/api/v2/services/bind/sync/domain` — path does not exist in OpenAPI spec
+- `_PHANTOM_PLURAL_ROUTES` has `/api/v2/services/bind/sync/domains` — corresponding stale entry
 
 ### Key test patterns
 
@@ -333,6 +363,7 @@ Routes present in the OpenAPI spec but return nginx 404 on the real server. Thes
 - **Gateway group priority**: Need a second gateway as parent — the priority's `gateway` field must reference an existing gateway by name
 - **CRL `descr` field**: Not editable via PATCH — set `update_field=None` for CRL chains
 - **Auth endpoints**: `auth/key` and `auth/jwt` require BasicAuth, not API key. Tests use a dedicated httpx.Client with `auth=(user, pass)`
+- **Skip priority**: `_SKIP_CRUD_PATHS` is checked before `_CHAINED_CRUD`, `_SKIP_ACTION` is checked before `_ACTION_TESTS` — this ensures skips always win
 
 ---
 
