@@ -328,6 +328,14 @@ _SKIP_CRUD_PATHS: dict[str, str] = {
     # HAProxy settings sub-resources return 500 (requires parent model)
     "/api/v2/services/haproxy/settings/dns_resolver": "server error: requires parent model",
     "/api/v2/services/haproxy/settings/email_mailer": "server error: requires parent model",
+    # HAProxy frontend/certificate needs certref from system/certificate
+    "/api/v2/services/haproxy/frontend/certificate": "needs certref from system/certificate chain",
+    # DHCP server sub-resources need LAN interface (VM has only WAN)
+    "/api/v2/services/dhcp_server/address_pool": "requires LAN interface (VM has only WAN)",
+    "/api/v2/services/dhcp_server/custom_option": "requires LAN interface (VM has only WAN)",
+    "/api/v2/services/dhcp_server/static_mapping": "requires LAN interface (VM has only WAN)",
+    # 3-level chains deferred
+    "/api/v2/routing/gateway/group/priority": "3-level chain: needs gateway + group parents",
 }
 
 # ── Pre-generated test PEM certificates ───────────────────────────────────────
@@ -693,6 +701,278 @@ _CHAINED_CRUD: dict[str, dict[str, Any]] = {
         },
         "update_field": "descr",
     },
+    # ── Firewall schedule/time_range ─────────────────────────────────────
+    "/api/v2/firewall/schedule/time_range": {
+        "parents": [
+            {
+                "path": "/api/v2/firewall/schedule",
+                "body": {
+                    "name": "pft_sched_tr",
+                    "timerange": [{"month": "1,2,3", "day": "1,2,3", "hour": "0:00-23:59", "position": []}],
+                    "descr": "Test schedule for time_range",
+                },
+                "inject": {"parent_id": "id"},
+            }
+        ],
+        "child_body": {
+            "month": [4, 5, 6],
+            "day": [10, 11, 12],
+            "hour": "8:00-17:00",
+        },
+        "update_field": None,
+    },
+    # ── Traffic shaper limiter/bandwidth ──────────────────────────────────
+    "/api/v2/firewall/traffic_shaper/limiter/bandwidth": {
+        "parents": [
+            {
+                "path": "/api/v2/firewall/traffic_shaper/limiter",
+                "body": {
+                    "aqm": "droptail",
+                    "name": "pft_lim_bw",
+                    "sched": "wf2q+",
+                    "bandwidth": [{"bw": 100, "bwscale": "Mb", "schedule": "none"}],
+                    "buckets": 16,
+                    "ecn": False,
+                    "enabled": False,
+                    "mask": "none",
+                    "maskbits": 1,
+                    "maskbitsv6": 1,
+                    "queue": [],
+                },
+                "inject": {"parent_id": "id"},
+            }
+        ],
+        "child_body": {
+            "bw": 50,
+            "bwscale": "Mb",
+        },
+        "update_field": None,
+    },
+    # ── Traffic shaper limiter/queue ──────────────────────────────────────
+    "/api/v2/firewall/traffic_shaper/limiter/queue": {
+        "parents": [
+            {
+                "path": "/api/v2/firewall/traffic_shaper/limiter",
+                "body": {
+                    "aqm": "droptail",
+                    "name": "pft_lim_q",
+                    "sched": "wf2q+",
+                    "bandwidth": [{"bw": 100, "bwscale": "Mb", "schedule": "none"}],
+                    "buckets": 16,
+                    "ecn": False,
+                    "enabled": False,
+                    "mask": "none",
+                    "maskbits": 1,
+                    "maskbitsv6": 1,
+                    "queue": [],
+                },
+                "inject": {"parent_id": "id"},
+            }
+        ],
+        "child_body": {
+            "name": "pft_limq",
+            "aqm": "droptail",
+        },
+        "update_field": None,
+    },
+    # ── Traffic shaper/queue ──────────────────────────────────────────────
+    "/api/v2/firewall/traffic_shaper/queue": {
+        "parents": [
+            {
+                "path": "/api/v2/firewall/traffic_shaper",
+                "body": {
+                    "bandwidth": 100,
+                    "bandwidthtype": "Mb",
+                    "interface": "wan",
+                    "scheduler": "HFSC",
+                    "enabled": False,
+                    "qlimit": 50,
+                    "queue": [],
+                    "tbrconfig": 1,
+                },
+                "inject": {"parent_id": "id"},
+            }
+        ],
+        "child_body": {
+            "name": "pft_tsq",
+            "qlimit": 50,
+            "bandwidth": 100,
+            "upperlimit_m2": "",
+            "realtime_m2": "",
+            "linkshare_m2": "10%",
+        },
+        "update_field": None,
+    },
+    # ── BIND access_list/entry ────────────────────────────────────────────
+    "/api/v2/services/bind/access_list/entry": {
+        "parents": [
+            {
+                "path": "/api/v2/services/bind/access_list",
+                "body": {
+                    "entries": [{"value": "10.0.0.0/8", "description": "test entry"}],
+                    "name": "pft_bacl_en",
+                },
+                "inject": {"parent_id": "id"},
+            }
+        ],
+        "child_body": {
+            "value": "10.1.0.0/16",
+        },
+        "update_field": None,
+    },
+    # ── BIND zone/record ──────────────────────────────────────────────────
+    "/api/v2/services/bind/zone/record": {
+        "parents": [
+            {
+                "path": "/api/v2/services/bind/zone",
+                "body": {
+                    "name": "pftzr.example.com",
+                    "nameserver": "ns1.example.com",
+                    "mail": "admin.example.com",
+                    "serial": 2024010101,
+                    "forwarders": [],
+                    "baseip": "10.99.99.0",
+                },
+                "inject": {"parent_id": "id"},
+            }
+        ],
+        "child_body": {
+            "name": "testrec",
+            "type": "A",
+            "rdata": "10.99.99.1",
+            "priority": 0,
+        },
+        "update_field": None,
+    },
+    # ── DNS forwarder host_override/alias ─────────────────────────────────
+    "/api/v2/services/dns_forwarder/host_override/alias": {
+        "parents": [
+            {
+                "path": "/api/v2/services/dns_forwarder/host_override",
+                "body": {
+                    "domain": "example.com",
+                    "host": "pft-dnsfwd-al",
+                    "ip": "10.99.99.2",
+                    "aliases": [],
+                    "descr": "Test host override for alias",
+                },
+                "inject": {"parent_id": "id"},
+            }
+        ],
+        "child_body": {
+            "host": "testalias",
+            "domain": "alias.example.com",
+        },
+        "update_field": None,
+    },
+    # ── DNS resolver access_list/network ──────────────────────────────────
+    "/api/v2/services/dns_resolver/access_list/network": {
+        "parents": [
+            {
+                "path": "/api/v2/services/dns_resolver/access_list",
+                "body": {
+                    "action": "allow",
+                    "name": "pft_dnsacl_nw",
+                    "networks": [],
+                },
+                "inject": {"parent_id": "id"},
+            }
+        ],
+        "child_body": {
+            "network": "10.1.0.0",
+            "mask": 16,
+        },
+        "update_field": None,
+    },
+    # ── DNS resolver host_override/alias ──────────────────────────────────
+    "/api/v2/services/dns_resolver/host_override/alias": {
+        "parents": [
+            {
+                "path": "/api/v2/services/dns_resolver/host_override",
+                "body": {
+                    "domain": "example.com",
+                    "host": "pft-dnsres-al",
+                    "ip": ["10.99.99.2"],
+                    "aliases": [],
+                    "descr": "Test host override for alias",
+                },
+                "inject": {"parent_id": "id"},
+            }
+        ],
+        "child_body": {
+            "host": "testalias",
+            "domain": "alias.example.com",
+        },
+        "update_field": None,
+    },
+    # ── WireGuard tunnel/address ──────────────────────────────────────────
+    "/api/v2/vpn/wireguard/tunnel/address": {
+        "parents": [
+            {
+                "path": "/api/v2/vpn/wireguard/tunnel",
+                "body": {
+                    "name": "pft_tun_addr",
+                    "listenport": "51822",
+                    "privatekey": "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY=",
+                    "addresses": [],
+                },
+                "inject": {"parent_id": "id"},
+            }
+        ],
+        "child_body": {
+            "address": "10.100.0.1",
+            "mask": 24,
+        },
+        "update_field": None,
+    },
+    # ── WireGuard peer/allowed_ip (2-level: tunnel → peer → allowed_ip) ──
+    "/api/v2/vpn/wireguard/peer/allowed_ip": {
+        "parents": [
+            {
+                "path": "/api/v2/vpn/wireguard/tunnel",
+                "body": {
+                    "name": "pft_tun_aip",
+                    "listenport": "51823",
+                    "privatekey": "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY=",
+                    "addresses": [],
+                },
+            },
+            {
+                "path": "/api/v2/vpn/wireguard/peer",
+                "body": {
+                    "tun": "pft_tun_aip",
+                    "publickey": "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY=",
+                    "descr": "Test WG peer for allowed_ip",
+                },
+                "inject": {"parent_id": "id"},
+            },
+        ],
+        "child_body": {
+            "address": "10.200.0.0",
+            "mask": 24,
+        },
+        "update_field": None,
+    },
+    # ── System CRL (needs CA) ────────────────────────────────────────────
+    "/api/v2/system/crl": {
+        "parents": [
+            {
+                "path": "/api/v2/system/certificate_authority",
+                "body": {
+                    "descr": "Test CA for CRL",
+                    "crt": "__CA_CERT_PEM__",
+                    "prv": "__CA_KEY_PEM__",
+                },
+                "inject": {"caref": "refid"},
+            }
+        ],
+        "child_body": {
+            "descr": "Test CRL",
+            "method": "internal",
+            "text": "",
+        },
+        "update_field": None,  # descr is not editable on CRL
+    },
 }
 
 
@@ -967,18 +1247,29 @@ CERT_PEM = "''' + _TEST_CERT_PEM + '''"
 CERT_KEY_PEM = "''' + _TEST_CERT_KEY_PEM + '''"
 
 
+class RetryClient(httpx.Client):
+    """httpx.Client that retries on 503 (dispatcher busy)."""
+    def request(self, method, url, **kwargs):
+        for attempt in range(4):
+            resp = super().request(method, url, **kwargs)
+            if resp.status_code != 503:
+                return resp
+            time.sleep(5 * (attempt + 1))
+        return resp
+
+
 @pytest.fixture(scope="session")
 def client() -> httpx.Client:
     """Authenticated httpx client for the test VM."""
     if API_KEY:
-        c = httpx.Client(
+        c = RetryClient(
             base_url=BASE_URL,
             headers={"X-API-Key": API_KEY},
             verify=False,
             timeout=30,
         )
     else:
-        c = httpx.Client(
+        c = RetryClient(
             base_url=BASE_URL,
             auth=(AUTH_USER, AUTH_PASS),
             verify=False,

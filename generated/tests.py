@@ -28,18 +28,29 @@ CERT_PEM = "-----BEGIN CERTIFICATE-----\nMIIDKzCCAhOgAwIBAgIUGjPhTAHBo+rI0jwF4dr
 CERT_KEY_PEM = "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCwUcvLowxjC1pX\nRJKv2cs4VtaUX1hl50g1BXwT/Pjbp0lwEIc8toSPx0juOA1meF3OhfnYUbfM2z5P\nDs0Ly5iMVELfaDLHadQufVP6XMJw9xT/CZKy2BZdJQ9RCRlJu5rYRMfsiooV5Uw3\nd8LP/V42ZdHQKOzXofszv6o54wcD+AwcJmG7IIQGyIXe6Brq2DY/TjwKtCmuaVxz\nLcRdwMQUtimkK/JydympXKd6LEtqVXdku1QtZ62i3c0zL/T1s2nAOvOvNuroGsQy\nenQA1Pw+kzX3BWjHBaZ2CRt5ST4iX1aKsQV1OD0hS4QXCitVsCSJpg2ohKzzkp1+\naCSk4z4HAgMBAAECggEABAZ3W23x/Z2H5vUgT4EZNBnmFTC7YRGEzae95kDrYixc\nBKxul0gSwlY03TIMuu763pj4FA8C3gY6p8MOkvsyFNtkRBsUtFu/UH5jo+lpNlCr\nEIrPPWOp2F+HuCcNMOiRB5NDvdaIgikgHSYP8v/1nif4lcLRbAzSd3h5MjrIxreM\nbc2wpu/tNgwnpcvGbhUqFBssMucvlXLeKxiP5pF7Un0+WjqC+tCJztOkryvmyE2g\njMEysclD1H7AYVqrusBmuxPW5AAb4Tv2vA4G2xm9n8BhpwpCGZdsa7ZYkb+s89Ec\nn0G/fCoRWk21p2U1N18C5QOMuxqxAFxb7YRYJszzCQKBgQDdSh6cpUgE9FeUbUkV\ntqbMjmSQKPpBEu2LF7u7x+OBPIEdFrCDMQuZHAc+MT0XFlO8jA4Pm1OoRFaI7RVZ\n8G9b/aORUg+xMKOl3o+bInY2FT/ddmp7J1J0dQDfMbU/f+jTCIzAhI094wJc3ScX\n336/nQkLRsoOdQB0gwBsodamKQKBgQDL+efd2FlP7/VJg4PGsJHGGRJ0vqtsj//c\nis1C0vCkoqtAfMtVP7wMT9SC1u+cjW13Bh6auWHL3MK31iLceymfB+73ZPBDuXz/\nlTv+hKqtYZbc1g7w9SJEqN41tFRsdMRnq18WcYAMCoQiY4R3B9lYJOqBiuvZt0mI\nvGRwYU9orwKBgQCpZSu5zewrnr/MJzxjGsbkn7vrfvLTDaI5b5mOTZ2iOKa9lbjZ\nNJokQoho21hga/79vlilKcoIbQexGYvWpW8ZhDfJ7n+ErC8Zsh1MLD1BeVLCPPuV\n+qvr6gUY1fxg95FKuqjEVrOoRDZyz/g1Fij4lUVvFGloV7hZeE7C2cBuwQKBgQCA\nZSWL4pSNmelXxf4cAqcwADY64I59fsM66vA7wRYTPAX6SNOhLMZNJa8KUQtxCyE9\ni8+V611g+uxi1dsJ2EkhvtewSIxoxQimxSSHmLDrBIP3LJMpH9TbTUTan1GJF5NO\nAnSPZxCIA9Ka5vPKDVnFfy9SLcU6PYJ/HL9IciiPJwKBgC93lXfdoyA5waYdBGYL\nVEaSfh3hxGd5sC+krUK7VXV/bCkGOX71AsiAY8Wo35yu3+24tnLaMVocgcFzjmXi\nhZu2Fa7IccV7iRh0wxoXD3BtjV37vzLq4C5yD5hgFgeNwF3LfrWVOWFAy2bjrA5+\nU1dtBhHADj/YuAIFAStvX2JE\n-----END PRIVATE KEY-----"
 
 
+class RetryClient(httpx.Client):
+    """httpx.Client that retries on 503 (dispatcher busy)."""
+    def request(self, method, url, **kwargs):
+        for attempt in range(4):
+            resp = super().request(method, url, **kwargs)
+            if resp.status_code != 503:
+                return resp
+            time.sleep(5 * (attempt + 1))
+        return resp
+
+
 @pytest.fixture(scope="session")
 def client() -> httpx.Client:
     """Authenticated httpx client for the test VM."""
     if API_KEY:
-        c = httpx.Client(
+        c = RetryClient(
             base_url=BASE_URL,
             headers={"X-API-Key": API_KEY},
             verify=False,
             timeout=30,
         )
     else:
-        c = httpx.Client(
+        c = RetryClient(
             base_url=BASE_URL,
             auth=(AUTH_USER, AUTH_PASS),
             verify=False,
@@ -68,7 +79,7 @@ def _delete_with_retry(client: httpx.Client, path: str, obj_id, params: dict | N
             break
         time.sleep(5)
     assert resp.status_code in (200, 404), f"Delete {path} id={obj_id} failed: {resp.text[:500]}"
-# Total generated tests: 140
+# Total generated tests: 152
 
 def test_crud_firewall_alias(client: httpx.Client):
     """CRUD lifecycle: /api/v2/firewall/alias"""
@@ -456,7 +467,50 @@ def test_crud_firewall_schedule(client: httpx.Client):
         assert del_resp.status_code in (200, 404), f"Delete failed: {del_resp.text[:500]}"
 
 
-# SKIP /api/v2/firewall/schedule/time_range: requires parent_id (needs parent resource first)
+def test_crud_firewall_schedule_time_range(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/firewall/schedule/time_range (needs: firewall/schedule)"""
+    # Setup: create parent firewall/schedule
+    p0_resp = client.post(
+        "/api/v2/firewall/schedule",
+        json={
+        "name": 'pft_sched_tr',
+        "timerange": [{'month': '1,2,3', 'day': '1,2,3', 'hour': '0:00-23:59', 'position': []}],
+        "descr": 'Test schedule for time_range',
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    try:
+        # CREATE
+        body = {
+                "month": [4, 5, 6],
+                "day": [10, 11, 12],
+                "hour": '8:00-17:00',
+            }
+        body["parent_id"] = p0["id"]
+        create_resp = client.post(
+            "/api/v2/firewall/schedule/time_range",
+            json=body,
+        )
+        data = _ok(create_resp)
+        obj_id = data.get("id")
+        assert obj_id is not None, f"No id in create response: {data}"
+
+        try:
+            # GET (singular)
+            get_resp = client.get(
+                "/api/v2/firewall/schedule/time_range",
+                params={"id": obj_id, "parent_id": p0["id"]},
+            )
+            _ok(get_resp)
+
+        finally:
+            _delete_with_retry(client, "/api/v2/firewall/schedule/time_range", obj_id, {"parent_id": p0["id"]})
+    finally:
+        _delete_with_retry(client, "/api/v2/firewall/schedule", p0_id)
+
 
 def test_crud_firewall_traffic_shaper(client: httpx.Client):
     """CRUD lifecycle: /api/v2/firewall/traffic_shaper"""
@@ -613,11 +667,162 @@ def test_crud_firewall_traffic_shaper_limiter(client: httpx.Client):
         assert del_resp.status_code in (200, 404), f"Delete failed: {del_resp.text[:500]}"
 
 
-# SKIP /api/v2/firewall/traffic_shaper/limiter/bandwidth: requires parent_id (needs parent resource first)
+def test_crud_firewall_traffic_shaper_limiter_bandwidth(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/firewall/traffic_shaper/limiter/bandwidth (needs: firewall/traffic_shaper/limiter)"""
+    # Setup: create parent firewall/traffic_shaper/limiter
+    p0_resp = client.post(
+        "/api/v2/firewall/traffic_shaper/limiter",
+        json={
+        "aqm": 'droptail',
+        "name": 'pft_lim_bw',
+        "sched": 'wf2q+',
+        "bandwidth": [{'bw': 100, 'bwscale': 'Mb', 'schedule': 'none'}],
+        "buckets": 16,
+        "ecn": False,
+        "enabled": False,
+        "mask": 'none',
+        "maskbits": 1,
+        "maskbitsv6": 1,
+        "queue": [],
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
 
-# SKIP /api/v2/firewall/traffic_shaper/limiter/queue: requires parent_id (needs parent resource first)
+    try:
+        # CREATE
+        body = {
+                "bw": 50,
+                "bwscale": 'Mb',
+            }
+        body["parent_id"] = p0["id"]
+        create_resp = client.post(
+            "/api/v2/firewall/traffic_shaper/limiter/bandwidth",
+            json=body,
+        )
+        data = _ok(create_resp)
+        obj_id = data.get("id")
+        assert obj_id is not None, f"No id in create response: {data}"
 
-# SKIP /api/v2/firewall/traffic_shaper/queue: requires parent_id (needs parent resource first)
+        try:
+            # GET (singular)
+            get_resp = client.get(
+                "/api/v2/firewall/traffic_shaper/limiter/bandwidth",
+                params={"id": obj_id, "parent_id": p0["id"]},
+            )
+            _ok(get_resp)
+
+        finally:
+            _delete_with_retry(client, "/api/v2/firewall/traffic_shaper/limiter/bandwidth", obj_id, {"parent_id": p0["id"]})
+    finally:
+        _delete_with_retry(client, "/api/v2/firewall/traffic_shaper/limiter", p0_id)
+
+
+def test_crud_firewall_traffic_shaper_limiter_queue(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/firewall/traffic_shaper/limiter/queue (needs: firewall/traffic_shaper/limiter)"""
+    # Setup: create parent firewall/traffic_shaper/limiter
+    p0_resp = client.post(
+        "/api/v2/firewall/traffic_shaper/limiter",
+        json={
+        "aqm": 'droptail',
+        "name": 'pft_lim_q',
+        "sched": 'wf2q+',
+        "bandwidth": [{'bw': 100, 'bwscale': 'Mb', 'schedule': 'none'}],
+        "buckets": 16,
+        "ecn": False,
+        "enabled": False,
+        "mask": 'none',
+        "maskbits": 1,
+        "maskbitsv6": 1,
+        "queue": [],
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    try:
+        # CREATE
+        body = {
+                "name": 'pft_limq',
+                "aqm": 'droptail',
+            }
+        body["parent_id"] = p0["id"]
+        create_resp = client.post(
+            "/api/v2/firewall/traffic_shaper/limiter/queue",
+            json=body,
+        )
+        data = _ok(create_resp)
+        obj_id = data.get("id")
+        assert obj_id is not None, f"No id in create response: {data}"
+
+        try:
+            # GET (singular)
+            get_resp = client.get(
+                "/api/v2/firewall/traffic_shaper/limiter/queue",
+                params={"id": obj_id, "parent_id": p0["id"]},
+            )
+            _ok(get_resp)
+
+        finally:
+            _delete_with_retry(client, "/api/v2/firewall/traffic_shaper/limiter/queue", obj_id, {"parent_id": p0["id"]})
+    finally:
+        _delete_with_retry(client, "/api/v2/firewall/traffic_shaper/limiter", p0_id)
+
+
+def test_crud_firewall_traffic_shaper_queue(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/firewall/traffic_shaper/queue (needs: firewall/traffic_shaper)"""
+    # Setup: create parent firewall/traffic_shaper
+    p0_resp = client.post(
+        "/api/v2/firewall/traffic_shaper",
+        json={
+        "bandwidth": 100,
+        "bandwidthtype": 'Mb',
+        "interface": 'wan',
+        "scheduler": 'HFSC',
+        "enabled": False,
+        "qlimit": 50,
+        "queue": [],
+        "tbrconfig": 1,
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    try:
+        # CREATE
+        body = {
+                "name": 'pft_tsq',
+                "qlimit": 50,
+                "bandwidth": 100,
+                "upperlimit_m2": '',
+                "realtime_m2": '',
+                "linkshare_m2": '10%',
+            }
+        body["parent_id"] = p0["id"]
+        create_resp = client.post(
+            "/api/v2/firewall/traffic_shaper/queue",
+            json=body,
+        )
+        data = _ok(create_resp)
+        obj_id = data.get("id")
+        assert obj_id is not None, f"No id in create response: {data}"
+
+        try:
+            # GET (singular)
+            get_resp = client.get(
+                "/api/v2/firewall/traffic_shaper/queue",
+                params={"id": obj_id, "parent_id": p0["id"]},
+            )
+            _ok(get_resp)
+
+        finally:
+            _delete_with_retry(client, "/api/v2/firewall/traffic_shaper/queue", obj_id, {"parent_id": p0["id"]})
+    finally:
+        _delete_with_retry(client, "/api/v2/firewall/traffic_shaper", p0_id)
+
 
 def test_crud_firewall_virtual_ip(client: httpx.Client):
     """CRUD lifecycle: /api/v2/firewall/virtual_ip"""
@@ -975,7 +1180,7 @@ def test_crud_routing_gateway_group(client: httpx.Client):
         _delete_with_retry(client, "/api/v2/routing/gateway", p0_id)
 
 
-# SKIP /api/v2/routing/gateway/group/priority: requires parent_id (needs parent resource first)
+# SKIP /api/v2/routing/gateway/group/priority: 3-level chain: needs gateway + group parents
 
 def test_crud_routing_static_route(client: httpx.Client):
     """CRUD lifecycle: /api/v2/routing/static_route (needs: routing/gateway)"""
@@ -1136,7 +1341,47 @@ def test_crud_services_bind_access_list(client: httpx.Client):
         assert del_resp.status_code in (200, 404), f"Delete failed: {del_resp.text[:500]}"
 
 
-# SKIP /api/v2/services/bind/access_list/entry: requires parent_id (needs parent resource first)
+def test_crud_services_bind_access_list_entry(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/services/bind/access_list/entry (needs: services/bind/access_list)"""
+    # Setup: create parent services/bind/access_list
+    p0_resp = client.post(
+        "/api/v2/services/bind/access_list",
+        json={
+        "entries": [{'value': '10.0.0.0/8', 'description': 'test entry'}],
+        "name": 'pft_bacl_en',
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    try:
+        # CREATE
+        body = {
+                "value": '10.1.0.0/16',
+            }
+        body["parent_id"] = p0["id"]
+        create_resp = client.post(
+            "/api/v2/services/bind/access_list/entry",
+            json=body,
+        )
+        data = _ok(create_resp)
+        obj_id = data.get("id")
+        assert obj_id is not None, f"No id in create response: {data}"
+
+        try:
+            # GET (singular)
+            get_resp = client.get(
+                "/api/v2/services/bind/access_list/entry",
+                params={"id": obj_id, "parent_id": p0["id"]},
+            )
+            _ok(get_resp)
+
+        finally:
+            _delete_with_retry(client, "/api/v2/services/bind/access_list/entry", obj_id, {"parent_id": p0["id"]})
+    finally:
+        _delete_with_retry(client, "/api/v2/services/bind/access_list", p0_id)
+
 
 def test_crud_services_bind_sync_remote_host(client: httpx.Client):
     """CRUD lifecycle: /api/v2/services/bind/sync/remote_host"""
@@ -1331,7 +1576,54 @@ def test_crud_services_bind_zone(client: httpx.Client):
         assert del_resp.status_code in (200, 404), f"Delete failed: {del_resp.text[:500]}"
 
 
-# SKIP /api/v2/services/bind/zone/record: requires parent_id (needs parent resource first)
+def test_crud_services_bind_zone_record(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/services/bind/zone/record (needs: services/bind/zone)"""
+    # Setup: create parent services/bind/zone
+    p0_resp = client.post(
+        "/api/v2/services/bind/zone",
+        json={
+        "name": 'pftzr.example.com',
+        "nameserver": 'ns1.example.com',
+        "mail": 'admin.example.com',
+        "serial": 2024010101,
+        "forwarders": [],
+        "baseip": '10.99.99.0',
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    try:
+        # CREATE
+        body = {
+                "name": 'testrec',
+                "type": 'A',
+                "rdata": '10.99.99.1',
+                "priority": 0,
+            }
+        body["parent_id"] = p0["id"]
+        create_resp = client.post(
+            "/api/v2/services/bind/zone/record",
+            json=body,
+        )
+        data = _ok(create_resp)
+        obj_id = data.get("id")
+        assert obj_id is not None, f"No id in create response: {data}"
+
+        try:
+            # GET (singular)
+            get_resp = client.get(
+                "/api/v2/services/bind/zone/record",
+                params={"id": obj_id, "parent_id": p0["id"]},
+            )
+            _ok(get_resp)
+
+        finally:
+            _delete_with_retry(client, "/api/v2/services/bind/zone/record", obj_id, {"parent_id": p0["id"]})
+    finally:
+        _delete_with_retry(client, "/api/v2/services/bind/zone", p0_id)
+
 
 def test_crud_services_cron_job(client: httpx.Client):
     """CRUD lifecycle: /api/v2/services/cron/job"""
@@ -1387,11 +1679,11 @@ def test_crud_services_cron_job(client: httpx.Client):
 
 # SKIP /api/v2/services/dhcp_server: per-interface singleton, POST not supported
 
-# SKIP /api/v2/services/dhcp_server/address_pool: requires parent_id (needs parent resource first)
+# SKIP /api/v2/services/dhcp_server/address_pool: requires LAN interface (VM has only WAN)
 
-# SKIP /api/v2/services/dhcp_server/custom_option: requires parent_id (needs parent resource first)
+# SKIP /api/v2/services/dhcp_server/custom_option: requires LAN interface (VM has only WAN)
 
-# SKIP /api/v2/services/dhcp_server/static_mapping: requires parent_id (needs parent resource first)
+# SKIP /api/v2/services/dhcp_server/static_mapping: requires LAN interface (VM has only WAN)
 
 def test_crud_services_dns_forwarder_host_override(client: httpx.Client):
     """CRUD lifecycle: /api/v2/services/dns_forwarder/host_override"""
@@ -1451,7 +1743,51 @@ def test_crud_services_dns_forwarder_host_override(client: httpx.Client):
         assert del_resp.status_code in (200, 404), f"Delete failed: {del_resp.text[:500]}"
 
 
-# SKIP /api/v2/services/dns_forwarder/host_override/alias: requires parent_id (needs parent resource first)
+def test_crud_services_dns_forwarder_host_override_alias(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/services/dns_forwarder/host_override/alias (needs: services/dns_forwarder/host_override)"""
+    # Setup: create parent services/dns_forwarder/host_override
+    p0_resp = client.post(
+        "/api/v2/services/dns_forwarder/host_override",
+        json={
+        "domain": 'example.com',
+        "host": 'pft-dnsfwd-al',
+        "ip": '10.99.99.2',
+        "aliases": [],
+        "descr": 'Test host override for alias',
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    try:
+        # CREATE
+        body = {
+                "host": 'testalias',
+                "domain": 'alias.example.com',
+            }
+        body["parent_id"] = p0["id"]
+        create_resp = client.post(
+            "/api/v2/services/dns_forwarder/host_override/alias",
+            json=body,
+        )
+        data = _ok(create_resp)
+        obj_id = data.get("id")
+        assert obj_id is not None, f"No id in create response: {data}"
+
+        try:
+            # GET (singular)
+            get_resp = client.get(
+                "/api/v2/services/dns_forwarder/host_override/alias",
+                params={"id": obj_id, "parent_id": p0["id"]},
+            )
+            _ok(get_resp)
+
+        finally:
+            _delete_with_retry(client, "/api/v2/services/dns_forwarder/host_override/alias", obj_id, {"parent_id": p0["id"]})
+    finally:
+        _delete_with_retry(client, "/api/v2/services/dns_forwarder/host_override", p0_id)
+
 
 def test_crud_services_dns_resolver_access_list(client: httpx.Client):
     """CRUD lifecycle: /api/v2/services/dns_resolver/access_list"""
@@ -1510,7 +1846,49 @@ def test_crud_services_dns_resolver_access_list(client: httpx.Client):
         assert del_resp.status_code in (200, 404), f"Delete failed: {del_resp.text[:500]}"
 
 
-# SKIP /api/v2/services/dns_resolver/access_list/network: requires parent_id (needs parent resource first)
+def test_crud_services_dns_resolver_access_list_network(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/services/dns_resolver/access_list/network (needs: services/dns_resolver/access_list)"""
+    # Setup: create parent services/dns_resolver/access_list
+    p0_resp = client.post(
+        "/api/v2/services/dns_resolver/access_list",
+        json={
+        "action": 'allow',
+        "name": 'pft_dnsacl_nw',
+        "networks": [],
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    try:
+        # CREATE
+        body = {
+                "network": '10.1.0.0',
+                "mask": 16,
+            }
+        body["parent_id"] = p0["id"]
+        create_resp = client.post(
+            "/api/v2/services/dns_resolver/access_list/network",
+            json=body,
+        )
+        data = _ok(create_resp)
+        obj_id = data.get("id")
+        assert obj_id is not None, f"No id in create response: {data}"
+
+        try:
+            # GET (singular)
+            get_resp = client.get(
+                "/api/v2/services/dns_resolver/access_list/network",
+                params={"id": obj_id, "parent_id": p0["id"]},
+            )
+            _ok(get_resp)
+
+        finally:
+            _delete_with_retry(client, "/api/v2/services/dns_resolver/access_list/network", obj_id, {"parent_id": p0["id"]})
+    finally:
+        _delete_with_retry(client, "/api/v2/services/dns_resolver/access_list", p0_id)
+
 
 def test_crud_services_dns_resolver_domain_override(client: httpx.Client):
     """CRUD lifecycle: /api/v2/services/dns_resolver/domain_override"""
@@ -1628,7 +2006,51 @@ def test_crud_services_dns_resolver_host_override(client: httpx.Client):
         assert del_resp.status_code in (200, 404), f"Delete failed: {del_resp.text[:500]}"
 
 
-# SKIP /api/v2/services/dns_resolver/host_override/alias: requires parent_id (needs parent resource first)
+def test_crud_services_dns_resolver_host_override_alias(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/services/dns_resolver/host_override/alias (needs: services/dns_resolver/host_override)"""
+    # Setup: create parent services/dns_resolver/host_override
+    p0_resp = client.post(
+        "/api/v2/services/dns_resolver/host_override",
+        json={
+        "domain": 'example.com',
+        "host": 'pft-dnsres-al',
+        "ip": ['10.99.99.2'],
+        "aliases": [],
+        "descr": 'Test host override for alias',
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    try:
+        # CREATE
+        body = {
+                "host": 'testalias',
+                "domain": 'alias.example.com',
+            }
+        body["parent_id"] = p0["id"]
+        create_resp = client.post(
+            "/api/v2/services/dns_resolver/host_override/alias",
+            json=body,
+        )
+        data = _ok(create_resp)
+        obj_id = data.get("id")
+        assert obj_id is not None, f"No id in create response: {data}"
+
+        try:
+            # GET (singular)
+            get_resp = client.get(
+                "/api/v2/services/dns_resolver/host_override/alias",
+                params={"id": obj_id, "parent_id": p0["id"]},
+            )
+            _ok(get_resp)
+
+        finally:
+            _delete_with_retry(client, "/api/v2/services/dns_resolver/host_override/alias", obj_id, {"parent_id": p0["id"]})
+    finally:
+        _delete_with_retry(client, "/api/v2/services/dns_resolver/host_override", p0_id)
+
 
 # SKIP /api/v2/services/freeradius/client: freeradius routes not registered
 
@@ -2086,7 +2508,7 @@ def test_crud_services_haproxy_frontend_address(client: httpx.Client):
         _delete_with_retry(client, "/api/v2/services/haproxy/backend", p0_id)
 
 
-# SKIP /api/v2/services/haproxy/frontend/certificate: requires parent_id (needs parent resource first)
+# SKIP /api/v2/services/haproxy/frontend/certificate: needs certref from system/certificate chain
 
 # SKIP /api/v2/services/haproxy/frontend/error_file: requires existing HAProxy file FK
 
@@ -2260,7 +2682,50 @@ def test_crud_system_certificate_authority(client: httpx.Client):
         _delete_with_retry(client, "/api/v2/system/certificate_authority", obj_id)
 
 
-# SKIP /api/v2/system/crl: requires caref (needs existing CA/cert)
+def test_crud_system_crl(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/system/crl (needs: system/certificate_authority)"""
+    # Setup: create parent system/certificate_authority
+    p0_resp = client.post(
+        "/api/v2/system/certificate_authority",
+        json={
+        "descr": 'Test CA for CRL',
+        "crt": CA_CERT_PEM,
+        "prv": CA_KEY_PEM,
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    try:
+        # CREATE
+        body = {
+                "descr": 'Test CRL',
+                "method": 'internal',
+                "text": '',
+            }
+        body["caref"] = p0["refid"]
+        create_resp = client.post(
+            "/api/v2/system/crl",
+            json=body,
+        )
+        data = _ok(create_resp)
+        obj_id = data.get("id")
+        assert obj_id is not None, f"No id in create response: {data}"
+
+        try:
+            # GET (singular)
+            get_resp = client.get(
+                "/api/v2/system/crl",
+                params={"id": obj_id},
+            )
+            _ok(get_resp)
+
+        finally:
+            _delete_with_retry(client, "/api/v2/system/crl", obj_id)
+    finally:
+        _delete_with_retry(client, "/api/v2/system/certificate_authority", p0_id)
+
 
 # SKIP /api/v2/system/crl/revoked_certificate: requires certref (needs existing CA/cert)
 
@@ -2650,7 +3115,66 @@ def test_crud_vpn_wireguard_peer(client: httpx.Client):
         _delete_with_retry(client, "/api/v2/vpn/wireguard/tunnel", p0_id)
 
 
-# SKIP /api/v2/vpn/wireguard/peer/allowed_ip: requires parent_id (needs parent resource first)
+def test_crud_vpn_wireguard_peer_allowed_ip(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/vpn/wireguard/peer/allowed_ip (needs: vpn/wireguard/tunnel, vpn/wireguard/peer)"""
+    # Setup: create parent vpn/wireguard/tunnel
+    p0_resp = client.post(
+        "/api/v2/vpn/wireguard/tunnel",
+        json={
+        "name": 'pft_tun_aip',
+        "listenport": '51823',
+        "privatekey": 'YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY=',
+        "addresses": [],
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    # Setup: create parent vpn/wireguard/peer
+    p1_resp = client.post(
+        "/api/v2/vpn/wireguard/peer",
+        json={
+        "tun": 'pft_tun_aip',
+        "publickey": 'YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY=',
+        "descr": 'Test WG peer for allowed_ip',
+    },
+    )
+    p1 = _ok(p1_resp)
+    p1_id = p1.get("id")
+    assert p1_id is not None, f"No id in parent response: {p1}"
+
+    try:
+        try:
+            # CREATE
+            body = {
+                    "address": '10.200.0.0',
+                    "mask": 24,
+                }
+            body["parent_id"] = p1["id"]
+            create_resp = client.post(
+                "/api/v2/vpn/wireguard/peer/allowed_ip",
+                json=body,
+            )
+            data = _ok(create_resp)
+            obj_id = data.get("id")
+            assert obj_id is not None, f"No id in create response: {data}"
+
+            try:
+                # GET (singular)
+                get_resp = client.get(
+                    "/api/v2/vpn/wireguard/peer/allowed_ip",
+                    params={"id": obj_id, "parent_id": p1["id"]},
+                )
+                _ok(get_resp)
+
+            finally:
+                _delete_with_retry(client, "/api/v2/vpn/wireguard/peer/allowed_ip", obj_id, {"parent_id": p1["id"]})
+        finally:
+            _delete_with_retry(client, "/api/v2/vpn/wireguard/peer", p1_id)
+    finally:
+        _delete_with_retry(client, "/api/v2/vpn/wireguard/tunnel", p0_id)
+
 
 def test_crud_vpn_wireguard_tunnel(client: httpx.Client):
     """CRUD lifecycle: /api/v2/vpn/wireguard/tunnel"""
@@ -2711,7 +3235,50 @@ def test_crud_vpn_wireguard_tunnel(client: httpx.Client):
         assert del_resp.status_code in (200, 404), f"Delete failed: {del_resp.text[:500]}"
 
 
-# SKIP /api/v2/vpn/wireguard/tunnel/address: requires parent_id (needs parent resource first)
+def test_crud_vpn_wireguard_tunnel_address(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/vpn/wireguard/tunnel/address (needs: vpn/wireguard/tunnel)"""
+    # Setup: create parent vpn/wireguard/tunnel
+    p0_resp = client.post(
+        "/api/v2/vpn/wireguard/tunnel",
+        json={
+        "name": 'pft_tun_addr',
+        "listenport": '51822',
+        "privatekey": 'YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY=',
+        "addresses": [],
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    try:
+        # CREATE
+        body = {
+                "address": '10.100.0.1',
+                "mask": 24,
+            }
+        body["parent_id"] = p0["id"]
+        create_resp = client.post(
+            "/api/v2/vpn/wireguard/tunnel/address",
+            json=body,
+        )
+        data = _ok(create_resp)
+        obj_id = data.get("id")
+        assert obj_id is not None, f"No id in create response: {data}"
+
+        try:
+            # GET (singular)
+            get_resp = client.get(
+                "/api/v2/vpn/wireguard/tunnel/address",
+                params={"id": obj_id, "parent_id": p0["id"]},
+            )
+            _ok(get_resp)
+
+        finally:
+            _delete_with_retry(client, "/api/v2/vpn/wireguard/tunnel/address", obj_id, {"parent_id": p0["id"]})
+    finally:
+        _delete_with_retry(client, "/api/v2/vpn/wireguard/tunnel", p0_id)
+
 
 def test_settings_firewall_advanced_settings(client: httpx.Client):
     """Settings read: /api/v2/firewall/advanced_settings"""
