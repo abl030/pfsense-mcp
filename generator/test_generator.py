@@ -310,32 +310,24 @@ _SKIP_CRUD_PATHS: dict[str, str] = {
     "/api/v2/interface/lagg": "requires multiple physical interfaces",
     "/api/v2/interface/gre": "requires specific tunnel config",
     "/api/v2/interface/gif": "requires specific tunnel config",
-    "/api/v2/vpn/ipsec/phase2": "requires existing phase1 with certs",
-    "/api/v2/vpn/openvpn/cso": "requires existing OpenVPN server",
-    "/api/v2/vpn/openvpn/client_export/config": "requires OpenVPN server configured",
+    "/api/v2/vpn/openvpn/client_export/config": "requires functioning OpenVPN server with client cert",
     "/api/v2/services/dhcp_server": "per-interface singleton, POST not supported",
     # FreeRADIUS routes return nginx 404 despite package installed
     "/api/v2/services/freeradius/client": "freeradius routes not registered",
     "/api/v2/services/freeradius/interface": "freeradius routes not registered",
     "/api/v2/services/freeradius/user": "freeradius routes not registered",
-    # ACME certificate requires existing ACME account key + DNS validation
-    "/api/v2/services/acme/certificate": "requires existing ACME account key and DNS setup",
-    # HAProxy sub-resources needing deep chains (action→acl FK, error_file→file FK)
-    "/api/v2/services/haproxy/backend/action": "requires valid action enum + context",
-    "/api/v2/services/haproxy/backend/error_file": "requires existing HAProxy file FK",
-    "/api/v2/services/haproxy/frontend/action": "requires existing ACL FK",
-    "/api/v2/services/haproxy/frontend/error_file": "requires existing HAProxy file FK",
+    # HAProxy action endpoints: 16 required context-dependent fields
+    "/api/v2/services/haproxy/backend/action": "16 required context-dependent fields",
+    "/api/v2/services/haproxy/frontend/action": "16 required context-dependent fields",
     # HAProxy settings sub-resources return 500 (requires parent model)
     "/api/v2/services/haproxy/settings/dns_resolver": "server error: requires parent model",
     "/api/v2/services/haproxy/settings/email_mailer": "server error: requires parent model",
-    # HAProxy frontend/certificate needs certref from system/certificate
-    "/api/v2/services/haproxy/frontend/certificate": "needs certref from system/certificate chain",
     # DHCP server sub-resources need LAN interface (VM has only WAN)
     "/api/v2/services/dhcp_server/address_pool": "requires LAN interface (VM has only WAN)",
     "/api/v2/services/dhcp_server/custom_option": "requires LAN interface (VM has only WAN)",
     "/api/v2/services/dhcp_server/static_mapping": "requires LAN interface (VM has only WAN)",
-    # 3-level chains deferred
-    "/api/v2/routing/gateway/group/priority": "3-level chain: needs gateway + group parents",
+    # CRL revoked_certificate: pfSense bug — cert serial is hex, CRL code expects INT
+    "/api/v2/system/crl/revoked_certificate": "pfSense bug: cert serial hex vs INT in X509_CRL.php",
 }
 
 # ── Pre-generated test PEM certificates ───────────────────────────────────────
@@ -973,6 +965,516 @@ _CHAINED_CRUD: dict[str, dict[str, Any]] = {
         },
         "update_field": None,  # descr is not editable on CRL
     },
+    # ── System CRL/revoked_certificate ──────────────────────────────────
+    # SKIPPED: pfSense server bug — cert serial number is hex but CRL code
+    # expects INT (500: "0x... is not INT" in openssl_x509_crl/X509_CRL.php).
+    # Uncomment when upstream fixes the CRL revocation endpoint.
+    # "/api/v2/system/crl/revoked_certificate": { ... },
+    #
+    # ── (placeholder to keep structure — remove above comment when fixed) ──
+    # ── Routing gateway/group/priority (3-level) ─────────────────────────
+    "/api/v2/routing/gateway/group/priority": {
+        "parents": [
+            {
+                "path": "/api/v2/routing/gateway",
+                "body_template": _GATEWAY_BODY,
+                "tag": "gp",
+            },
+            {
+                "path": "/api/v2/routing/gateway",
+                "body": {
+                    "name": "pft_gw_gp2",
+                    "gateway": "10.0.2.99",
+                    "interface": "wan",
+                    "ipprotocol": "inet",
+                    "descr": "Test GW 2 for priority",
+                },
+            },
+            {
+                "path": "/api/v2/routing/gateway/group",
+                "body": {
+                    "name": "pft_gw_grp_p",
+                    "descr": "Test group for priority",
+                    "priorities": [{"gateway": "pft_gw_gp", "tier": 1}],
+                },
+                "inject": {"parent_id": "id"},
+            },
+        ],
+        "child_body": {
+            "gateway": "pft_gw_gp2",
+            "tier": 2,
+        },
+        "update_field": None,
+    },
+    # ── HAProxy frontend/certificate ─────────────────────────────────────
+    "/api/v2/services/haproxy/frontend/certificate": {
+        "parents": [
+            {
+                "path": "/api/v2/services/haproxy/backend",
+                "body_template": _HAPROXY_BACKEND_BODY,
+                "tag": "fcrt",
+            },
+            {
+                "path": "/api/v2/services/haproxy/frontend",
+                "body": {"name": "pft_fe_crt", "type": "http"},
+                "inject": {"parent_id": "id"},
+            },
+        ],
+        "child_body": {},
+        "update_field": None,
+    },
+    # ── HAProxy backend/error_file (file + backend) ──────────────────────
+    "/api/v2/services/haproxy/backend/error_file": {
+        "parents": [
+            {
+                "path": "/api/v2/services/haproxy/file",
+                "body": {"name": "pft_ha_efb", "content": "PCFET0NUWVBFIGh0bWw+"},
+            },
+            {
+                "path": "/api/v2/services/haproxy/backend",
+                "body_template": _HAPROXY_BACKEND_BODY,
+                "tag": "bef",
+                "inject": {"parent_id": "id"},
+            },
+        ],
+        "child_body": {
+            "errorcode": 503,
+            "errorfile": "pft_ha_efb",
+        },
+        "update_field": None,
+    },
+    # ── HAProxy frontend/error_file (file + backend + frontend) ──────────
+    "/api/v2/services/haproxy/frontend/error_file": {
+        "parents": [
+            {
+                "path": "/api/v2/services/haproxy/file",
+                "body": {"name": "pft_ha_eff", "content": "PCFET0NUWVBFIGh0bWw+"},
+            },
+            {
+                "path": "/api/v2/services/haproxy/backend",
+                "body_template": _HAPROXY_BACKEND_BODY,
+                "tag": "fef",
+            },
+            {
+                "path": "/api/v2/services/haproxy/frontend",
+                "body": {"name": "pft_fe_ef", "type": "http"},
+                "inject": {"parent_id": "id"},
+            },
+        ],
+        "child_body": {
+            "errorcode": 503,
+            "errorfile": "pft_ha_eff",
+        },
+        "update_field": None,
+    },
+    # ── VPN IPsec phase1 (CA + cert → phase1) ────────────────────────────
+    "/api/v2/vpn/ipsec/phase1": {
+        "parents": [
+            {
+                "path": "/api/v2/system/certificate_authority",
+                "body": {
+                    "descr": "Test CA for IPsec",
+                    "crt": "__CA_CERT_PEM__",
+                    "prv": "__CA_KEY_PEM__",
+                },
+                "inject": {"caref": "refid"},
+            },
+            {
+                "path": "/api/v2/system/certificate",
+                "body": {
+                    "descr": "Test Cert for IPsec",
+                    "crt": "__CERT_PEM__",
+                    "prv": "__CERT_KEY_PEM__",
+                },
+                "receives_from": {0: {"caref": "refid"}},
+                "inject": {"certref": "refid"},
+            },
+        ],
+        "child_body": {
+            "iketype": "ikev2",
+            "mode": "main",
+            "protocol": "inet",
+            "interface": "wan",
+            "remote_gateway": "10.99.99.20",
+            "authentication_method": "pre_shared_key",
+            "myid_type": "myaddress",
+            "myid_data": "",
+            "peerid_type": "any",
+            "peerid_data": "",
+            "pre_shared_key": "TestPSK123456789012345",
+            "descr": "Test IPsec P1",
+            "encryption": [
+                {
+                    "encryption_algorithm_name": "aes",
+                    "encryption_algorithm_keylen": 256,
+                    "hash_algorithm": "sha256",
+                    "dhgroup": 14,
+                }
+            ],
+        },
+        "update_field": "descr",
+    },
+    # ── VPN IPsec phase1/encryption ──────────────────────────────────────
+    "/api/v2/vpn/ipsec/phase1/encryption": {
+        "parents": [
+            {
+                "path": "/api/v2/system/certificate_authority",
+                "body": {
+                    "descr": "Test CA for P1enc",
+                    "crt": "__CA_CERT_PEM__",
+                    "prv": "__CA_KEY_PEM__",
+                },
+            },
+            {
+                "path": "/api/v2/system/certificate",
+                "body": {
+                    "descr": "Test Cert for P1enc",
+                    "crt": "__CERT_PEM__",
+                    "prv": "__CERT_KEY_PEM__",
+                },
+                "receives_from": {0: {"caref": "refid"}},
+            },
+            {
+                "path": "/api/v2/vpn/ipsec/phase1",
+                "body": {
+                    "iketype": "ikev2",
+                    "mode": "main",
+                    "protocol": "inet",
+                    "interface": "wan",
+                    "remote_gateway": "10.99.99.21",
+                    "authentication_method": "pre_shared_key",
+                    "myid_type": "myaddress",
+                    "myid_data": "",
+                    "peerid_type": "any",
+                    "peerid_data": "",
+                    "pre_shared_key": "TestPSK123456789012345",
+                    "descr": "Test P1 for enc",
+                    "encryption": [
+                        {
+                            "encryption_algorithm_name": "aes",
+                            "encryption_algorithm_keylen": 256,
+                            "hash_algorithm": "sha256",
+                            "dhgroup": 14,
+                        }
+                    ],
+                },
+                "receives_from": {0: {"caref": "refid"}, 1: {"certref": "refid"}},
+                "inject": {"parent_id": "id"},
+            },
+        ],
+        "child_body": {
+            "encryption_algorithm_name": "aes128gcm",
+            "encryption_algorithm_keylen": 128,
+            "hash_algorithm": "sha256",
+            "dhgroup": 14,
+        },
+        "update_field": None,
+    },
+    # ── VPN IPsec phase2 (CA + cert → phase1 → phase2) ──────────────────
+    "/api/v2/vpn/ipsec/phase2": {
+        "parents": [
+            {
+                "path": "/api/v2/system/certificate_authority",
+                "body": {
+                    "descr": "Test CA for P2",
+                    "crt": "__CA_CERT_PEM__",
+                    "prv": "__CA_KEY_PEM__",
+                },
+            },
+            {
+                "path": "/api/v2/system/certificate",
+                "body": {
+                    "descr": "Test Cert for P2",
+                    "crt": "__CERT_PEM__",
+                    "prv": "__CERT_KEY_PEM__",
+                },
+                "receives_from": {0: {"caref": "refid"}},
+            },
+            {
+                "path": "/api/v2/vpn/ipsec/phase1",
+                "body": {
+                    "iketype": "ikev2",
+                    "mode": "main",
+                    "protocol": "inet",
+                    "interface": "wan",
+                    "remote_gateway": "10.99.99.22",
+                    "authentication_method": "pre_shared_key",
+                    "myid_type": "myaddress",
+                    "myid_data": "",
+                    "peerid_type": "any",
+                    "peerid_data": "",
+                    "pre_shared_key": "TestPSK123456789012345",
+                    "descr": "Test P1 for P2",
+                    "encryption": [
+                        {
+                            "encryption_algorithm_name": "aes",
+                            "encryption_algorithm_keylen": 256,
+                            "hash_algorithm": "sha256",
+                            "dhgroup": 14,
+                        }
+                    ],
+                },
+                "receives_from": {0: {"caref": "refid"}, 1: {"certref": "refid"}},
+                "inject": {"ikeid": "ikeid"},
+            },
+        ],
+        "child_body": {
+            "mode": "tunnel",
+            "localid_type": "network",
+            "localid_address": "10.0.0.0",
+            "localid_netbits": 24,
+            "natlocalid_address": "",
+            "natlocalid_netbits": 0,
+            "remoteid_type": "network",
+            "remoteid_address": "10.200.0.0",
+            "remoteid_netbits": 24,
+            "descr": "Test IPsec P2",
+            "encryption_algorithm_option": [{"name": "aes", "keylen": 256}],
+            "hash_algorithm_option": ["hmac_sha256"],
+        },
+        "update_field": "descr",
+    },
+    # ── VPN IPsec phase2/encryption ──────────────────────────────────────
+    "/api/v2/vpn/ipsec/phase2/encryption": {
+        "parents": [
+            {
+                "path": "/api/v2/system/certificate_authority",
+                "body": {
+                    "descr": "Test CA for P2enc",
+                    "crt": "__CA_CERT_PEM__",
+                    "prv": "__CA_KEY_PEM__",
+                },
+            },
+            {
+                "path": "/api/v2/system/certificate",
+                "body": {
+                    "descr": "Test Cert for P2enc",
+                    "crt": "__CERT_PEM__",
+                    "prv": "__CERT_KEY_PEM__",
+                },
+                "receives_from": {0: {"caref": "refid"}},
+            },
+            {
+                "path": "/api/v2/vpn/ipsec/phase1",
+                "body": {
+                    "iketype": "ikev2",
+                    "mode": "main",
+                    "protocol": "inet",
+                    "interface": "wan",
+                    "remote_gateway": "10.99.99.23",
+                    "authentication_method": "pre_shared_key",
+                    "myid_type": "myaddress",
+                    "myid_data": "",
+                    "peerid_type": "any",
+                    "peerid_data": "",
+                    "pre_shared_key": "TestPSK123456789012345",
+                    "descr": "Test P1 for P2enc",
+                    "encryption": [
+                        {
+                            "encryption_algorithm_name": "aes",
+                            "encryption_algorithm_keylen": 256,
+                            "hash_algorithm": "sha256",
+                            "dhgroup": 14,
+                        }
+                    ],
+                },
+                "receives_from": {0: {"caref": "refid"}, 1: {"certref": "refid"}},
+            },
+            {
+                "path": "/api/v2/vpn/ipsec/phase2",
+                "body": {
+                    "mode": "tunnel",
+                    "localid_type": "network",
+                    "localid_address": "10.0.0.0",
+                    "localid_netbits": 24,
+                    "natlocalid_address": "",
+                    "natlocalid_netbits": 0,
+                    "remoteid_type": "network",
+                    "remoteid_address": "10.200.0.0",
+                    "remoteid_netbits": 24,
+                    "descr": "Test P2 for enc",
+                    "encryption_algorithm_option": [{"name": "aes", "keylen": 256}],
+                    "hash_algorithm_option": ["hmac_sha256"],
+                },
+                "receives_from": {2: {"ikeid": "ikeid"}},
+                "inject": {"parent_id": "id"},
+            },
+        ],
+        "child_body": {
+            "name": "aes128gcm",
+            "keylen": 128,
+        },
+        "update_field": None,
+    },
+    # ── VPN OpenVPN server (CA + cert → server) ──────────────────────────
+    "/api/v2/vpn/openvpn/server": {
+        "parents": [
+            {
+                "path": "/api/v2/system/certificate_authority",
+                "body": {
+                    "descr": "Test CA for OVPN srv",
+                    "crt": "__CA_CERT_PEM__",
+                    "prv": "__CA_KEY_PEM__",
+                },
+                "inject": {"caref": "refid"},
+            },
+            {
+                "path": "/api/v2/system/certificate",
+                "body": {
+                    "descr": "Test Cert for OVPN srv",
+                    "crt": "__CERT_PEM__",
+                    "prv": "__CERT_KEY_PEM__",
+                },
+                "receives_from": {0: {"caref": "refid"}},
+                "inject": {"certref": "refid"},
+            },
+        ],
+        "child_body": {
+            "mode": "p2p_tls",
+            "dev_mode": "tun",
+            "protocol": "UDP4",
+            "interface": "wan",
+            "tls_type": "auth",
+            "dh_length": "2048",
+            "ecdh_curve": "prime256v1",
+            "data_ciphers": ["AES-256-GCM"],
+            "data_ciphers_fallback": "AES-256-GCM",
+            "digest": "SHA256",
+            "description": "Test OVPN server",
+            "serverbridge_interface": "",
+            "serverbridge_dhcp_start": "",
+            "serverbridge_dhcp_end": "",
+        },
+        "update_field": "description",
+    },
+    # ── VPN OpenVPN client (CA → client) ─────────────────────────────────
+    "/api/v2/vpn/openvpn/client": {
+        "parents": [
+            {
+                "path": "/api/v2/system/certificate_authority",
+                "body": {
+                    "descr": "Test CA for OVPN cli",
+                    "crt": "__CA_CERT_PEM__",
+                    "prv": "__CA_KEY_PEM__",
+                },
+                "inject": {"caref": "refid"},
+            },
+        ],
+        "child_body": {
+            "mode": "p2p_tls",
+            "dev_mode": "tun",
+            "protocol": "UDP4",
+            "interface": "wan",
+            "server_addr": "10.99.99.30",
+            "server_port": "1194",
+            "proxy_user": "",
+            "proxy_passwd": "",
+            "tls_type": "auth",
+            "data_ciphers": ["AES-256-GCM"],
+            "data_ciphers_fallback": "AES-256-GCM",
+            "digest": "SHA256",
+            "description": "Test OVPN client",
+        },
+        "update_field": "description",
+    },
+    # ── VPN OpenVPN CSO ──────────────────────────────────────────────────
+    "/api/v2/vpn/openvpn/cso": {
+        "parents": [],
+        "child_body": {
+            "common_name": "pft_ovpn_cso",
+            "description": "Test CSO",
+        },
+        "update_field": "description",
+    },
+    # ── ACME certificate (needs account key) ─────────────────────────────
+    "/api/v2/services/acme/certificate": {
+        "parents": [
+            {
+                "path": "/api/v2/services/acme/account_key",
+                "body": {
+                    "name": "pft_acme_crt",
+                    "descr": "Test ACME key for cert",
+                    "email": "test@example.com",
+                    "acmeserver": "letsencrypt-staging-2",
+                },
+                "inject": {"acmeaccount": "name"},
+            },
+        ],
+        "child_body": {
+            "name": "pft_acme_cert",
+            "descr": "Test ACME cert",
+            "keypaste": "__CERT_KEY_PEM__",
+            "a_domainlist": [
+                {"name": "test.example.com", "method": "standalone", "status": "enable"}
+            ],
+        },
+        "update_field": "descr",
+    },
+    # ── ACME certificate/domain ──────────────────────────────────────────
+    "/api/v2/services/acme/certificate/domain": {
+        "parents": [
+            {
+                "path": "/api/v2/services/acme/account_key",
+                "body": {
+                    "name": "pft_acme_dom",
+                    "descr": "Test ACME key for domain",
+                    "email": "test@example.com",
+                    "acmeserver": "letsencrypt-staging-2",
+                },
+            },
+            {
+                "path": "/api/v2/services/acme/certificate",
+                "body": {
+                    "name": "pft_acme_cd",
+                    "descr": "Test ACME cert for domain",
+                    "keypaste": "__CERT_KEY_PEM__",
+                    "a_domainlist": [
+                        {"name": "test1.example.com", "method": "standalone", "status": "enable"}
+                    ],
+                },
+                "receives_from": {0: {"acmeaccount": "name"}},
+                "inject": {"parent_id": "id"},
+            },
+        ],
+        "child_body": {
+            "name": "test2.example.com",
+            "method": "standalone",
+            "status": "enable",
+        },
+        "update_field": None,
+    },
+    # ── ACME certificate/action ──────────────────────────────────────────
+    "/api/v2/services/acme/certificate/action": {
+        "parents": [
+            {
+                "path": "/api/v2/services/acme/account_key",
+                "body": {
+                    "name": "pft_acme_act",
+                    "descr": "Test ACME key for action",
+                    "email": "test@example.com",
+                    "acmeserver": "letsencrypt-staging-2",
+                },
+            },
+            {
+                "path": "/api/v2/services/acme/certificate",
+                "body": {
+                    "name": "pft_acme_ca",
+                    "descr": "Test ACME cert for action",
+                    "keypaste": "__CERT_KEY_PEM__",
+                    "a_domainlist": [
+                        {"name": "test3.example.com", "method": "standalone", "status": "enable"}
+                    ],
+                },
+                "receives_from": {0: {"acmeaccount": "name"}},
+                "inject": {"parent_id": "id"},
+            },
+        ],
+        "child_body": {
+            "command": "echo test",
+            "method": "shellcommand",
+        },
+        "update_field": None,
+    },
 }
 
 
@@ -1250,11 +1752,11 @@ CERT_KEY_PEM = "''' + _TEST_CERT_KEY_PEM + '''"
 class RetryClient(httpx.Client):
     """httpx.Client that retries on 503 (dispatcher busy)."""
     def request(self, method, url, **kwargs):
-        for attempt in range(4):
+        for attempt in range(6):
             resp = super().request(method, url, **kwargs)
             if resp.status_code != 503:
                 return resp
-            time.sleep(5 * (attempt + 1))
+            time.sleep(10 * (attempt + 1))
         return resp
 
 
@@ -1568,11 +2070,22 @@ def _gen_chained_crud_test(group: EndpointGroup) -> str:
         parent_vars.append(var)
         parent_body = _resolve_parent_body(parent)
         body_code = _body_to_code(parent_body)
+        receives = parent.get("receives_from", {})
         lines.append(f"    # Setup: create parent {parent['path'].split('/api/v2/')[-1]}")
-        lines.append(f"    {var}_resp = client.post(")
-        lines.append(f'        "{parent["path"]}",')
-        lines.append(f"        json={body_code},")
-        lines.append(f"    )")
+        if receives:
+            lines.append(f"    {var}_body = {body_code}")
+            for src_idx, field_map in sorted(receives.items()):
+                for local_field, src_field in field_map.items():
+                    lines.append(f'    {var}_body["{local_field}"] = p{src_idx}["{src_field}"]')
+            lines.append(f"    {var}_resp = client.post(")
+            lines.append(f'        "{parent["path"]}",')
+            lines.append(f"        json={var}_body,")
+            lines.append(f"    )")
+        else:
+            lines.append(f"    {var}_resp = client.post(")
+            lines.append(f'        "{parent["path"]}",')
+            lines.append(f"        json={body_code},")
+            lines.append(f"    )")
         lines.append(f"    {var} = _ok({var}_resp)")
         lines.append(f'    {var}_id = {var}.get("id")')
         lines.append(f'    assert {var}_id is not None, f"No id in parent response: {{{var}}}"')

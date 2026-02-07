@@ -249,6 +249,59 @@ Exclude from generation or add extra warnings:
 
 ---
 
+## Phase 2 Status: Test Coverage
+
+**Current: 165 tests, 163 passing (2 transient 503s from dispatcher rate limiting)**
+
+The test generator (`generator/test_generator.py`) produces `generated/tests.py` against the live VM. Tests cover CRUD lifecycles, settings roundtrips, read-only GETs, apply endpoints, and plural list endpoints.
+
+### Test infrastructure
+
+- `RetryClient` wraps httpx.Client with automatic retry on 503 (dispatcher busy), up to 4 attempts with backoff
+- `_CHAINED_CRUD` supports multi-parent dependency chains with `receives_from` for inter-parent field injection (e.g., cert needs CA's refid)
+- PEM certificates embedded in test constants for CA/cert-dependent endpoints (IPsec, OpenVPN, CRL, HAProxy frontend/certificate)
+
+### Permanently skipped endpoints (17) — with reasons
+
+**Hardware/VM limitations (5):**
+- `interface` — requires available physical interface (VM has only 1 NIC assigned to WAN)
+- `interface/lagg` — requires multiple physical interfaces
+- `interface/gre` — requires specific tunnel config between interfaces
+- `interface/gif` — requires specific tunnel config between interfaces
+- `vpn/openvpn/client_export/config` — requires functioning OpenVPN server with connected client cert
+
+**pfSense singleton design (1):**
+- `services/dhcp_server` — per-interface singleton, POST not supported
+
+**No LAN interface in VM (3):**
+- `services/dhcp_server/address_pool` — requires LAN interface
+- `services/dhcp_server/custom_option` — requires LAN interface
+- `services/dhcp_server/static_mapping` — requires LAN interface
+
+**pfSense server bugs (4):**
+- `services/freeradius/client` — routes return nginx 404 despite package installed
+- `services/freeradius/interface` — routes return nginx 404
+- `services/freeradius/user` — routes return nginx 404
+- `system/crl/revoked_certificate` — pfSense bug: cert serial number is hex but CRL X509_CRL.php code expects INT (500 error)
+
+**Impractical test payloads (4):**
+- `services/haproxy/backend/action` — 16 required context-dependent fields
+- `services/haproxy/frontend/action` — 16 required context-dependent fields
+- `services/haproxy/settings/dns_resolver` — server 500 error, requires parent model
+- `services/haproxy/settings/email_mailer` — server 500 error, requires parent model
+
+### Phantom plural routes (42)
+
+Routes present in the OpenAPI spec but return nginx 404 on the real server. These are sub-resource plural endpoints whose singular forms require `parent_id`. The pfSense REST API simply doesn't register these routes. All are tested via their singular CRUD endpoints instead.
+
+### Key test patterns
+
+- **IPsec encryption**: Use `aes` (AES-CBC) with `keylen=256`, NOT `aes256gcm` (GCM keylen field is not the key size)
+- **Gateway group priority**: Need a second gateway as parent — the priority's `gateway` field must reference an existing gateway by name
+- **CRL `descr` field**: Not editable via PATCH — set `update_field=None` for CRL chains
+
+---
+
 ## Nix Packaging
 
 `flake.nix` wraps the generated server:

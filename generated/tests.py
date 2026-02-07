@@ -31,11 +31,11 @@ CERT_KEY_PEM = "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKg
 class RetryClient(httpx.Client):
     """httpx.Client that retries on 503 (dispatcher busy)."""
     def request(self, method, url, **kwargs):
-        for attempt in range(4):
+        for attempt in range(6):
             resp = super().request(method, url, **kwargs)
             if resp.status_code != 503:
                 return resp
-            time.sleep(5 * (attempt + 1))
+            time.sleep(10 * (attempt + 1))
         return resp
 
 
@@ -79,7 +79,7 @@ def _delete_with_retry(client: httpx.Client, path: str, obj_id, params: dict | N
             break
         time.sleep(5)
     assert resp.status_code in (200, 404), f"Delete {path} id={obj_id} failed: {resp.text[:500]}"
-# Total generated tests: 152
+# Total generated tests: 166
 
 def test_crud_firewall_alias(client: httpx.Client):
     """CRUD lifecycle: /api/v2/firewall/alias"""
@@ -1180,7 +1180,93 @@ def test_crud_routing_gateway_group(client: httpx.Client):
         _delete_with_retry(client, "/api/v2/routing/gateway", p0_id)
 
 
-# SKIP /api/v2/routing/gateway/group/priority: 3-level chain: needs gateway + group parents
+def test_crud_routing_gateway_group_priority(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/routing/gateway/group/priority (needs: routing/gateway, routing/gateway, routing/gateway/group)"""
+    # Setup: create parent routing/gateway
+    p0_resp = client.post(
+        "/api/v2/routing/gateway",
+        json={
+        "name": 'pft_gw_gp',
+        "gateway": '10.0.2.1',
+        "interface": 'wan',
+        "ipprotocol": 'inet',
+        "descr": 'Test gateway for gp',
+        "latencylow": 200,
+        "latencyhigh": 500,
+        "losslow": 10,
+        "losshigh": 20,
+        "loss_interval": 2000,
+        "time_period": 60000,
+        "interval": 500,
+        "alert_interval": 1000,
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    # Setup: create parent routing/gateway
+    p1_resp = client.post(
+        "/api/v2/routing/gateway",
+        json={
+        "name": 'pft_gw_gp2',
+        "gateway": '10.0.2.99',
+        "interface": 'wan',
+        "ipprotocol": 'inet',
+        "descr": 'Test GW 2 for priority',
+    },
+    )
+    p1 = _ok(p1_resp)
+    p1_id = p1.get("id")
+    assert p1_id is not None, f"No id in parent response: {p1}"
+
+    # Setup: create parent routing/gateway/group
+    p2_resp = client.post(
+        "/api/v2/routing/gateway/group",
+        json={
+        "name": 'pft_gw_grp_p',
+        "descr": 'Test group for priority',
+        "priorities": [{'gateway': 'pft_gw_gp', 'tier': 1}],
+    },
+    )
+    p2 = _ok(p2_resp)
+    p2_id = p2.get("id")
+    assert p2_id is not None, f"No id in parent response: {p2}"
+
+    try:
+        try:
+            try:
+                # CREATE
+                body = {
+                        "gateway": 'pft_gw_gp2',
+                        "tier": 2,
+                    }
+                body["parent_id"] = p2["id"]
+                create_resp = client.post(
+                    "/api/v2/routing/gateway/group/priority",
+                    json=body,
+                )
+                data = _ok(create_resp)
+                obj_id = data.get("id")
+                assert obj_id is not None, f"No id in create response: {data}"
+
+                try:
+                    # GET (singular)
+                    get_resp = client.get(
+                        "/api/v2/routing/gateway/group/priority",
+                        params={"id": obj_id, "parent_id": p2["id"]},
+                    )
+                    _ok(get_resp)
+
+                finally:
+                    _delete_with_retry(client, "/api/v2/routing/gateway/group/priority", obj_id, {"parent_id": p2["id"]})
+            finally:
+                _delete_with_retry(client, "/api/v2/routing/gateway/group", p2_id)
+        finally:
+            _delete_with_retry(client, "/api/v2/routing/gateway", p1_id)
+    finally:
+        _delete_with_retry(client, "/api/v2/routing/gateway", p0_id)
+
 
 def test_crud_routing_static_route(client: httpx.Client):
     """CRUD lifecycle: /api/v2/routing/static_route (needs: routing/gateway)"""
@@ -1279,11 +1365,188 @@ def test_crud_services_acme_account_key(client: httpx.Client):
         _delete_with_retry(client, "/api/v2/services/acme/account_key", obj_id)
 
 
-# SKIP /api/v2/services/acme/certificate: requires existing ACME account key and DNS setup
+def test_crud_services_acme_certificate(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/services/acme/certificate (needs: services/acme/account_key)"""
+    # Setup: create parent services/acme/account_key
+    p0_resp = client.post(
+        "/api/v2/services/acme/account_key",
+        json={
+        "name": 'pft_acme_crt',
+        "descr": 'Test ACME key for cert',
+        "email": 'test@example.com',
+        "acmeserver": 'letsencrypt-staging-2',
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
 
-# SKIP /api/v2/services/acme/certificate/action: requires parent_id (needs parent resource first)
+    try:
+        # CREATE
+        body = {
+                "name": 'pft_acme_cert',
+                "descr": 'Test ACME cert',
+                "keypaste": CERT_KEY_PEM,
+                "a_domainlist": [{'name': 'test.example.com', 'method': 'standalone', 'status': 'enable'}],
+            }
+        body["acmeaccount"] = p0["name"]
+        create_resp = client.post(
+            "/api/v2/services/acme/certificate",
+            json=body,
+        )
+        data = _ok(create_resp)
+        obj_id = data.get("id")
+        assert obj_id is not None, f"No id in create response: {data}"
 
-# SKIP /api/v2/services/acme/certificate/domain: requires parent_id (needs parent resource first)
+        try:
+            # GET (singular)
+            get_resp = client.get(
+                "/api/v2/services/acme/certificate",
+                params={"id": obj_id},
+            )
+            _ok(get_resp)
+
+            # UPDATE
+            update_resp = client.patch(
+                "/api/v2/services/acme/certificate",
+                json={"id": obj_id, "descr": "Updated by test"},
+            )
+            _ok(update_resp)
+
+        finally:
+            _delete_with_retry(client, "/api/v2/services/acme/certificate", obj_id)
+    finally:
+        _delete_with_retry(client, "/api/v2/services/acme/account_key", p0_id)
+
+
+def test_crud_services_acme_certificate_action(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/services/acme/certificate/action (needs: services/acme/account_key, services/acme/certificate)"""
+    # Setup: create parent services/acme/account_key
+    p0_resp = client.post(
+        "/api/v2/services/acme/account_key",
+        json={
+        "name": 'pft_acme_act',
+        "descr": 'Test ACME key for action',
+        "email": 'test@example.com',
+        "acmeserver": 'letsencrypt-staging-2',
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    # Setup: create parent services/acme/certificate
+    p1_body = {
+        "name": 'pft_acme_ca',
+        "descr": 'Test ACME cert for action',
+        "keypaste": CERT_KEY_PEM,
+        "a_domainlist": [{'name': 'test3.example.com', 'method': 'standalone', 'status': 'enable'}],
+    }
+    p1_body["acmeaccount"] = p0["name"]
+    p1_resp = client.post(
+        "/api/v2/services/acme/certificate",
+        json=p1_body,
+    )
+    p1 = _ok(p1_resp)
+    p1_id = p1.get("id")
+    assert p1_id is not None, f"No id in parent response: {p1}"
+
+    try:
+        try:
+            # CREATE
+            body = {
+                    "command": 'echo test',
+                    "method": 'shellcommand',
+                }
+            body["parent_id"] = p1["id"]
+            create_resp = client.post(
+                "/api/v2/services/acme/certificate/action",
+                json=body,
+            )
+            data = _ok(create_resp)
+            obj_id = data.get("id")
+            assert obj_id is not None, f"No id in create response: {data}"
+
+            try:
+                # GET (singular)
+                get_resp = client.get(
+                    "/api/v2/services/acme/certificate/action",
+                    params={"id": obj_id, "parent_id": p1["id"]},
+                )
+                _ok(get_resp)
+
+            finally:
+                _delete_with_retry(client, "/api/v2/services/acme/certificate/action", obj_id, {"parent_id": p1["id"]})
+        finally:
+            _delete_with_retry(client, "/api/v2/services/acme/certificate", p1_id)
+    finally:
+        _delete_with_retry(client, "/api/v2/services/acme/account_key", p0_id)
+
+
+def test_crud_services_acme_certificate_domain(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/services/acme/certificate/domain (needs: services/acme/account_key, services/acme/certificate)"""
+    # Setup: create parent services/acme/account_key
+    p0_resp = client.post(
+        "/api/v2/services/acme/account_key",
+        json={
+        "name": 'pft_acme_dom',
+        "descr": 'Test ACME key for domain',
+        "email": 'test@example.com',
+        "acmeserver": 'letsencrypt-staging-2',
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    # Setup: create parent services/acme/certificate
+    p1_body = {
+        "name": 'pft_acme_cd',
+        "descr": 'Test ACME cert for domain',
+        "keypaste": CERT_KEY_PEM,
+        "a_domainlist": [{'name': 'test1.example.com', 'method': 'standalone', 'status': 'enable'}],
+    }
+    p1_body["acmeaccount"] = p0["name"]
+    p1_resp = client.post(
+        "/api/v2/services/acme/certificate",
+        json=p1_body,
+    )
+    p1 = _ok(p1_resp)
+    p1_id = p1.get("id")
+    assert p1_id is not None, f"No id in parent response: {p1}"
+
+    try:
+        try:
+            # CREATE
+            body = {
+                    "name": 'test2.example.com',
+                    "method": 'standalone',
+                    "status": 'enable',
+                }
+            body["parent_id"] = p1["id"]
+            create_resp = client.post(
+                "/api/v2/services/acme/certificate/domain",
+                json=body,
+            )
+            data = _ok(create_resp)
+            obj_id = data.get("id")
+            assert obj_id is not None, f"No id in create response: {data}"
+
+            try:
+                # GET (singular)
+                get_resp = client.get(
+                    "/api/v2/services/acme/certificate/domain",
+                    params={"id": obj_id, "parent_id": p1["id"]},
+                )
+                _ok(get_resp)
+
+            finally:
+                _delete_with_retry(client, "/api/v2/services/acme/certificate/domain", obj_id, {"parent_id": p1["id"]})
+        finally:
+            _delete_with_retry(client, "/api/v2/services/acme/certificate", p1_id)
+    finally:
+        _delete_with_retry(client, "/api/v2/services/acme/account_key", p0_id)
+
 
 def test_crud_services_bind_access_list(client: httpx.Client):
     """CRUD lifecycle: /api/v2/services/bind/access_list"""
@@ -2221,9 +2484,67 @@ def test_crud_services_haproxy_backend_acl(client: httpx.Client):
         _delete_with_retry(client, "/api/v2/services/haproxy/backend", p0_id)
 
 
-# SKIP /api/v2/services/haproxy/backend/action: requires valid action enum + context
+# SKIP /api/v2/services/haproxy/backend/action: 16 required context-dependent fields
 
-# SKIP /api/v2/services/haproxy/backend/error_file: requires existing HAProxy file FK
+def test_crud_services_haproxy_backend_error_file(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/services/haproxy/backend/error_file (needs: services/haproxy/file, services/haproxy/backend)"""
+    # Setup: create parent services/haproxy/file
+    p0_resp = client.post(
+        "/api/v2/services/haproxy/file",
+        json={
+        "name": 'pft_ha_efb',
+        "content": 'PCFET0NUWVBFIGh0bWw+',
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    # Setup: create parent services/haproxy/backend
+    p1_resp = client.post(
+        "/api/v2/services/haproxy/backend",
+        json={
+        "name": 'pft_be_bef',
+        "agent_port": '0',
+        "persist_cookie_name": 'SRVID',
+        "descr": 'Test backend for bef',
+    },
+    )
+    p1 = _ok(p1_resp)
+    p1_id = p1.get("id")
+    assert p1_id is not None, f"No id in parent response: {p1}"
+
+    try:
+        try:
+            # CREATE
+            body = {
+                    "errorcode": 503,
+                    "errorfile": 'pft_ha_efb',
+                }
+            body["parent_id"] = p1["id"]
+            create_resp = client.post(
+                "/api/v2/services/haproxy/backend/error_file",
+                json=body,
+            )
+            data = _ok(create_resp)
+            obj_id = data.get("id")
+            assert obj_id is not None, f"No id in create response: {data}"
+
+            try:
+                # GET (singular)
+                get_resp = client.get(
+                    "/api/v2/services/haproxy/backend/error_file",
+                    params={"id": obj_id, "parent_id": p1["id"]},
+                )
+                _ok(get_resp)
+
+            finally:
+                _delete_with_retry(client, "/api/v2/services/haproxy/backend/error_file", obj_id, {"parent_id": p1["id"]})
+        finally:
+            _delete_with_retry(client, "/api/v2/services/haproxy/backend", p1_id)
+    finally:
+        _delete_with_retry(client, "/api/v2/services/haproxy/file", p0_id)
+
 
 def test_crud_services_haproxy_backend_server(client: httpx.Client):
     """CRUD lifecycle: /api/v2/services/haproxy/backend/server (needs: services/haproxy/backend)"""
@@ -2446,7 +2767,7 @@ def test_crud_services_haproxy_frontend_acl(client: httpx.Client):
         _delete_with_retry(client, "/api/v2/services/haproxy/backend", p0_id)
 
 
-# SKIP /api/v2/services/haproxy/frontend/action: requires existing ACL FK
+# SKIP /api/v2/services/haproxy/frontend/action: 16 required context-dependent fields
 
 def test_crud_services_haproxy_frontend_address(client: httpx.Client):
     """CRUD lifecycle: /api/v2/services/haproxy/frontend/address (needs: services/haproxy/backend, services/haproxy/frontend)"""
@@ -2508,9 +2829,82 @@ def test_crud_services_haproxy_frontend_address(client: httpx.Client):
         _delete_with_retry(client, "/api/v2/services/haproxy/backend", p0_id)
 
 
-# SKIP /api/v2/services/haproxy/frontend/certificate: needs certref from system/certificate chain
+# SKIP /api/v2/services/haproxy/frontend/certificate: chained test missing child_body
 
-# SKIP /api/v2/services/haproxy/frontend/error_file: requires existing HAProxy file FK
+def test_crud_services_haproxy_frontend_error_file(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/services/haproxy/frontend/error_file (needs: services/haproxy/file, services/haproxy/backend, services/haproxy/frontend)"""
+    # Setup: create parent services/haproxy/file
+    p0_resp = client.post(
+        "/api/v2/services/haproxy/file",
+        json={
+        "name": 'pft_ha_eff',
+        "content": 'PCFET0NUWVBFIGh0bWw+',
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    # Setup: create parent services/haproxy/backend
+    p1_resp = client.post(
+        "/api/v2/services/haproxy/backend",
+        json={
+        "name": 'pft_be_fef',
+        "agent_port": '0',
+        "persist_cookie_name": 'SRVID',
+        "descr": 'Test backend for fef',
+    },
+    )
+    p1 = _ok(p1_resp)
+    p1_id = p1.get("id")
+    assert p1_id is not None, f"No id in parent response: {p1}"
+
+    # Setup: create parent services/haproxy/frontend
+    p2_resp = client.post(
+        "/api/v2/services/haproxy/frontend",
+        json={
+        "name": 'pft_fe_ef',
+        "type": 'http',
+    },
+    )
+    p2 = _ok(p2_resp)
+    p2_id = p2.get("id")
+    assert p2_id is not None, f"No id in parent response: {p2}"
+
+    try:
+        try:
+            try:
+                # CREATE
+                body = {
+                        "errorcode": 503,
+                        "errorfile": 'pft_ha_eff',
+                    }
+                body["parent_id"] = p2["id"]
+                create_resp = client.post(
+                    "/api/v2/services/haproxy/frontend/error_file",
+                    json=body,
+                )
+                data = _ok(create_resp)
+                obj_id = data.get("id")
+                assert obj_id is not None, f"No id in create response: {data}"
+
+                try:
+                    # GET (singular)
+                    get_resp = client.get(
+                        "/api/v2/services/haproxy/frontend/error_file",
+                        params={"id": obj_id, "parent_id": p2["id"]},
+                    )
+                    _ok(get_resp)
+
+                finally:
+                    _delete_with_retry(client, "/api/v2/services/haproxy/frontend/error_file", obj_id, {"parent_id": p2["id"]})
+            finally:
+                _delete_with_retry(client, "/api/v2/services/haproxy/frontend", p2_id)
+        finally:
+            _delete_with_retry(client, "/api/v2/services/haproxy/backend", p1_id)
+    finally:
+        _delete_with_retry(client, "/api/v2/services/haproxy/file", p0_id)
+
 
 # SKIP /api/v2/services/haproxy/settings/dns_resolver: server error: requires parent model
 
@@ -2727,7 +3121,7 @@ def test_crud_system_crl(client: httpx.Client):
         _delete_with_retry(client, "/api/v2/system/certificate_authority", p0_id)
 
 
-# SKIP /api/v2/system/crl/revoked_certificate: requires certref (needs existing CA/cert)
+# SKIP /api/v2/system/crl/revoked_certificate: pfSense bug: cert serial hex vs INT in X509_CRL.php
 
 def test_crud_system_restapi_access_list_entry(client: httpx.Client):
     """CRUD lifecycle: /api/v2/system/restapi/access_list/entry"""
@@ -3047,21 +3441,585 @@ def test_crud_user_group(client: httpx.Client):
         assert del_resp.status_code in (200, 404), f"Delete failed: {del_resp.text[:500]}"
 
 
-# SKIP /api/v2/vpn/ipsec/phase1: requires caref (needs existing CA/cert)
+def test_crud_vpn_ipsec_phase1(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/vpn/ipsec/phase1 (needs: system/certificate_authority, system/certificate)"""
+    # Setup: create parent system/certificate_authority
+    p0_resp = client.post(
+        "/api/v2/system/certificate_authority",
+        json={
+        "descr": 'Test CA for IPsec',
+        "crt": CA_CERT_PEM,
+        "prv": CA_KEY_PEM,
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
 
-# SKIP /api/v2/vpn/ipsec/phase1/encryption: requires parent_id (needs parent resource first)
+    # Setup: create parent system/certificate
+    p1_body = {
+        "descr": 'Test Cert for IPsec',
+        "crt": CERT_PEM,
+        "prv": CERT_KEY_PEM,
+    }
+    p1_body["caref"] = p0["refid"]
+    p1_resp = client.post(
+        "/api/v2/system/certificate",
+        json=p1_body,
+    )
+    p1 = _ok(p1_resp)
+    p1_id = p1.get("id")
+    assert p1_id is not None, f"No id in parent response: {p1}"
 
-# SKIP /api/v2/vpn/ipsec/phase2: requires existing phase1 with certs
+    try:
+        try:
+            # CREATE
+            body = {
+                    "iketype": 'ikev2',
+                    "mode": 'main',
+                    "protocol": 'inet',
+                    "interface": 'wan',
+                    "remote_gateway": '10.99.99.20',
+                    "authentication_method": 'pre_shared_key',
+                    "myid_type": 'myaddress',
+                    "myid_data": '',
+                    "peerid_type": 'any',
+                    "peerid_data": '',
+                    "pre_shared_key": 'TestPSK123456789012345',
+                    "descr": 'Test IPsec P1',
+                    "encryption": [{'encryption_algorithm_name': 'aes', 'encryption_algorithm_keylen': 256, 'hash_algorithm': 'sha256', 'dhgroup': 14}],
+                }
+            body["caref"] = p0["refid"]
+            body["certref"] = p1["refid"]
+            create_resp = client.post(
+                "/api/v2/vpn/ipsec/phase1",
+                json=body,
+            )
+            data = _ok(create_resp)
+            obj_id = data.get("id")
+            assert obj_id is not None, f"No id in create response: {data}"
 
-# SKIP /api/v2/vpn/ipsec/phase2/encryption: requires parent_id (needs parent resource first)
+            try:
+                # GET (singular)
+                get_resp = client.get(
+                    "/api/v2/vpn/ipsec/phase1",
+                    params={"id": obj_id},
+                )
+                _ok(get_resp)
 
-# SKIP /api/v2/vpn/openvpn/client: requires caref (needs existing CA/cert)
+                # UPDATE
+                update_resp = client.patch(
+                    "/api/v2/vpn/ipsec/phase1",
+                    json={"id": obj_id, "descr": "Updated by test"},
+                )
+                _ok(update_resp)
 
-# SKIP /api/v2/vpn/openvpn/client_export/config: requires OpenVPN server configured
+            finally:
+                _delete_with_retry(client, "/api/v2/vpn/ipsec/phase1", obj_id)
+        finally:
+            _delete_with_retry(client, "/api/v2/system/certificate", p1_id)
+    finally:
+        _delete_with_retry(client, "/api/v2/system/certificate_authority", p0_id)
 
-# SKIP /api/v2/vpn/openvpn/cso: requires existing OpenVPN server
 
-# SKIP /api/v2/vpn/openvpn/server: requires caref (needs existing CA/cert)
+def test_crud_vpn_ipsec_phase1_encryption(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/vpn/ipsec/phase1/encryption (needs: system/certificate_authority, system/certificate, vpn/ipsec/phase1)"""
+    # Setup: create parent system/certificate_authority
+    p0_resp = client.post(
+        "/api/v2/system/certificate_authority",
+        json={
+        "descr": 'Test CA for P1enc',
+        "crt": CA_CERT_PEM,
+        "prv": CA_KEY_PEM,
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    # Setup: create parent system/certificate
+    p1_body = {
+        "descr": 'Test Cert for P1enc',
+        "crt": CERT_PEM,
+        "prv": CERT_KEY_PEM,
+    }
+    p1_body["caref"] = p0["refid"]
+    p1_resp = client.post(
+        "/api/v2/system/certificate",
+        json=p1_body,
+    )
+    p1 = _ok(p1_resp)
+    p1_id = p1.get("id")
+    assert p1_id is not None, f"No id in parent response: {p1}"
+
+    # Setup: create parent vpn/ipsec/phase1
+    p2_body = {
+        "iketype": 'ikev2',
+        "mode": 'main',
+        "protocol": 'inet',
+        "interface": 'wan',
+        "remote_gateway": '10.99.99.21',
+        "authentication_method": 'pre_shared_key',
+        "myid_type": 'myaddress',
+        "myid_data": '',
+        "peerid_type": 'any',
+        "peerid_data": '',
+        "pre_shared_key": 'TestPSK123456789012345',
+        "descr": 'Test P1 for enc',
+        "encryption": [{'encryption_algorithm_name': 'aes', 'encryption_algorithm_keylen': 256, 'hash_algorithm': 'sha256', 'dhgroup': 14}],
+    }
+    p2_body["caref"] = p0["refid"]
+    p2_body["certref"] = p1["refid"]
+    p2_resp = client.post(
+        "/api/v2/vpn/ipsec/phase1",
+        json=p2_body,
+    )
+    p2 = _ok(p2_resp)
+    p2_id = p2.get("id")
+    assert p2_id is not None, f"No id in parent response: {p2}"
+
+    try:
+        try:
+            try:
+                # CREATE
+                body = {
+                        "encryption_algorithm_name": 'aes128gcm',
+                        "encryption_algorithm_keylen": 128,
+                        "hash_algorithm": 'sha256',
+                        "dhgroup": 14,
+                    }
+                body["parent_id"] = p2["id"]
+                create_resp = client.post(
+                    "/api/v2/vpn/ipsec/phase1/encryption",
+                    json=body,
+                )
+                data = _ok(create_resp)
+                obj_id = data.get("id")
+                assert obj_id is not None, f"No id in create response: {data}"
+
+                try:
+                    # GET (singular)
+                    get_resp = client.get(
+                        "/api/v2/vpn/ipsec/phase1/encryption",
+                        params={"id": obj_id, "parent_id": p2["id"]},
+                    )
+                    _ok(get_resp)
+
+                finally:
+                    _delete_with_retry(client, "/api/v2/vpn/ipsec/phase1/encryption", obj_id, {"parent_id": p2["id"]})
+            finally:
+                _delete_with_retry(client, "/api/v2/vpn/ipsec/phase1", p2_id)
+        finally:
+            _delete_with_retry(client, "/api/v2/system/certificate", p1_id)
+    finally:
+        _delete_with_retry(client, "/api/v2/system/certificate_authority", p0_id)
+
+
+def test_crud_vpn_ipsec_phase2(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/vpn/ipsec/phase2 (needs: system/certificate_authority, system/certificate, vpn/ipsec/phase1)"""
+    # Setup: create parent system/certificate_authority
+    p0_resp = client.post(
+        "/api/v2/system/certificate_authority",
+        json={
+        "descr": 'Test CA for P2',
+        "crt": CA_CERT_PEM,
+        "prv": CA_KEY_PEM,
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    # Setup: create parent system/certificate
+    p1_body = {
+        "descr": 'Test Cert for P2',
+        "crt": CERT_PEM,
+        "prv": CERT_KEY_PEM,
+    }
+    p1_body["caref"] = p0["refid"]
+    p1_resp = client.post(
+        "/api/v2/system/certificate",
+        json=p1_body,
+    )
+    p1 = _ok(p1_resp)
+    p1_id = p1.get("id")
+    assert p1_id is not None, f"No id in parent response: {p1}"
+
+    # Setup: create parent vpn/ipsec/phase1
+    p2_body = {
+        "iketype": 'ikev2',
+        "mode": 'main',
+        "protocol": 'inet',
+        "interface": 'wan',
+        "remote_gateway": '10.99.99.22',
+        "authentication_method": 'pre_shared_key',
+        "myid_type": 'myaddress',
+        "myid_data": '',
+        "peerid_type": 'any',
+        "peerid_data": '',
+        "pre_shared_key": 'TestPSK123456789012345',
+        "descr": 'Test P1 for P2',
+        "encryption": [{'encryption_algorithm_name': 'aes', 'encryption_algorithm_keylen': 256, 'hash_algorithm': 'sha256', 'dhgroup': 14}],
+    }
+    p2_body["caref"] = p0["refid"]
+    p2_body["certref"] = p1["refid"]
+    p2_resp = client.post(
+        "/api/v2/vpn/ipsec/phase1",
+        json=p2_body,
+    )
+    p2 = _ok(p2_resp)
+    p2_id = p2.get("id")
+    assert p2_id is not None, f"No id in parent response: {p2}"
+
+    try:
+        try:
+            try:
+                # CREATE
+                body = {
+                        "mode": 'tunnel',
+                        "localid_type": 'network',
+                        "localid_address": '10.0.0.0',
+                        "localid_netbits": 24,
+                        "natlocalid_address": '',
+                        "natlocalid_netbits": 0,
+                        "remoteid_type": 'network',
+                        "remoteid_address": '10.200.0.0',
+                        "remoteid_netbits": 24,
+                        "descr": 'Test IPsec P2',
+                        "encryption_algorithm_option": [{'name': 'aes', 'keylen': 256}],
+                        "hash_algorithm_option": ['hmac_sha256'],
+                    }
+                body["ikeid"] = p2["ikeid"]
+                create_resp = client.post(
+                    "/api/v2/vpn/ipsec/phase2",
+                    json=body,
+                )
+                data = _ok(create_resp)
+                obj_id = data.get("id")
+                assert obj_id is not None, f"No id in create response: {data}"
+
+                try:
+                    # GET (singular)
+                    get_resp = client.get(
+                        "/api/v2/vpn/ipsec/phase2",
+                        params={"id": obj_id},
+                    )
+                    _ok(get_resp)
+
+                    # UPDATE
+                    update_resp = client.patch(
+                        "/api/v2/vpn/ipsec/phase2",
+                        json={"id": obj_id, "descr": "Updated by test"},
+                    )
+                    _ok(update_resp)
+
+                finally:
+                    _delete_with_retry(client, "/api/v2/vpn/ipsec/phase2", obj_id)
+            finally:
+                _delete_with_retry(client, "/api/v2/vpn/ipsec/phase1", p2_id)
+        finally:
+            _delete_with_retry(client, "/api/v2/system/certificate", p1_id)
+    finally:
+        _delete_with_retry(client, "/api/v2/system/certificate_authority", p0_id)
+
+
+def test_crud_vpn_ipsec_phase2_encryption(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/vpn/ipsec/phase2/encryption (needs: system/certificate_authority, system/certificate, vpn/ipsec/phase1, vpn/ipsec/phase2)"""
+    # Setup: create parent system/certificate_authority
+    p0_resp = client.post(
+        "/api/v2/system/certificate_authority",
+        json={
+        "descr": 'Test CA for P2enc',
+        "crt": CA_CERT_PEM,
+        "prv": CA_KEY_PEM,
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    # Setup: create parent system/certificate
+    p1_body = {
+        "descr": 'Test Cert for P2enc',
+        "crt": CERT_PEM,
+        "prv": CERT_KEY_PEM,
+    }
+    p1_body["caref"] = p0["refid"]
+    p1_resp = client.post(
+        "/api/v2/system/certificate",
+        json=p1_body,
+    )
+    p1 = _ok(p1_resp)
+    p1_id = p1.get("id")
+    assert p1_id is not None, f"No id in parent response: {p1}"
+
+    # Setup: create parent vpn/ipsec/phase1
+    p2_body = {
+        "iketype": 'ikev2',
+        "mode": 'main',
+        "protocol": 'inet',
+        "interface": 'wan',
+        "remote_gateway": '10.99.99.23',
+        "authentication_method": 'pre_shared_key',
+        "myid_type": 'myaddress',
+        "myid_data": '',
+        "peerid_type": 'any',
+        "peerid_data": '',
+        "pre_shared_key": 'TestPSK123456789012345',
+        "descr": 'Test P1 for P2enc',
+        "encryption": [{'encryption_algorithm_name': 'aes', 'encryption_algorithm_keylen': 256, 'hash_algorithm': 'sha256', 'dhgroup': 14}],
+    }
+    p2_body["caref"] = p0["refid"]
+    p2_body["certref"] = p1["refid"]
+    p2_resp = client.post(
+        "/api/v2/vpn/ipsec/phase1",
+        json=p2_body,
+    )
+    p2 = _ok(p2_resp)
+    p2_id = p2.get("id")
+    assert p2_id is not None, f"No id in parent response: {p2}"
+
+    # Setup: create parent vpn/ipsec/phase2
+    p3_body = {
+        "mode": 'tunnel',
+        "localid_type": 'network',
+        "localid_address": '10.0.0.0',
+        "localid_netbits": 24,
+        "natlocalid_address": '',
+        "natlocalid_netbits": 0,
+        "remoteid_type": 'network',
+        "remoteid_address": '10.200.0.0',
+        "remoteid_netbits": 24,
+        "descr": 'Test P2 for enc',
+        "encryption_algorithm_option": [{'name': 'aes', 'keylen': 256}],
+        "hash_algorithm_option": ['hmac_sha256'],
+    }
+    p3_body["ikeid"] = p2["ikeid"]
+    p3_resp = client.post(
+        "/api/v2/vpn/ipsec/phase2",
+        json=p3_body,
+    )
+    p3 = _ok(p3_resp)
+    p3_id = p3.get("id")
+    assert p3_id is not None, f"No id in parent response: {p3}"
+
+    try:
+        try:
+            try:
+                try:
+                    # CREATE
+                    body = {
+                            "name": 'aes128gcm',
+                            "keylen": 128,
+                        }
+                    body["parent_id"] = p3["id"]
+                    create_resp = client.post(
+                        "/api/v2/vpn/ipsec/phase2/encryption",
+                        json=body,
+                    )
+                    data = _ok(create_resp)
+                    obj_id = data.get("id")
+                    assert obj_id is not None, f"No id in create response: {data}"
+
+                    try:
+                        # GET (singular)
+                        get_resp = client.get(
+                            "/api/v2/vpn/ipsec/phase2/encryption",
+                            params={"id": obj_id, "parent_id": p3["id"]},
+                        )
+                        _ok(get_resp)
+
+                    finally:
+                        _delete_with_retry(client, "/api/v2/vpn/ipsec/phase2/encryption", obj_id, {"parent_id": p3["id"]})
+                finally:
+                    _delete_with_retry(client, "/api/v2/vpn/ipsec/phase2", p3_id)
+            finally:
+                _delete_with_retry(client, "/api/v2/vpn/ipsec/phase1", p2_id)
+        finally:
+            _delete_with_retry(client, "/api/v2/system/certificate", p1_id)
+    finally:
+        _delete_with_retry(client, "/api/v2/system/certificate_authority", p0_id)
+
+
+def test_crud_vpn_openvpn_client(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/vpn/openvpn/client (needs: system/certificate_authority)"""
+    # Setup: create parent system/certificate_authority
+    p0_resp = client.post(
+        "/api/v2/system/certificate_authority",
+        json={
+        "descr": 'Test CA for OVPN cli',
+        "crt": CA_CERT_PEM,
+        "prv": CA_KEY_PEM,
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    try:
+        # CREATE
+        body = {
+                "mode": 'p2p_tls',
+                "dev_mode": 'tun',
+                "protocol": 'UDP4',
+                "interface": 'wan',
+                "server_addr": '10.99.99.30',
+                "server_port": '1194',
+                "proxy_user": '',
+                "proxy_passwd": '',
+                "tls_type": 'auth',
+                "data_ciphers": ['AES-256-GCM'],
+                "data_ciphers_fallback": 'AES-256-GCM',
+                "digest": 'SHA256',
+                "description": 'Test OVPN client',
+            }
+        body["caref"] = p0["refid"]
+        create_resp = client.post(
+            "/api/v2/vpn/openvpn/client",
+            json=body,
+        )
+        data = _ok(create_resp)
+        obj_id = data.get("id")
+        assert obj_id is not None, f"No id in create response: {data}"
+
+        try:
+            # GET (singular)
+            get_resp = client.get(
+                "/api/v2/vpn/openvpn/client",
+                params={"id": obj_id},
+            )
+            _ok(get_resp)
+
+            # UPDATE
+            update_resp = client.patch(
+                "/api/v2/vpn/openvpn/client",
+                json={"id": obj_id, "description": "Updated by test"},
+            )
+            _ok(update_resp)
+
+        finally:
+            _delete_with_retry(client, "/api/v2/vpn/openvpn/client", obj_id)
+    finally:
+        _delete_with_retry(client, "/api/v2/system/certificate_authority", p0_id)
+
+
+# SKIP /api/v2/vpn/openvpn/client_export/config: requires functioning OpenVPN server with client cert
+
+def test_crud_vpn_openvpn_cso(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/vpn/openvpn/cso (chained)"""
+    # CREATE
+    body = {
+            "common_name": 'pft_ovpn_cso',
+            "description": 'Test CSO',
+        }
+    create_resp = client.post(
+        "/api/v2/vpn/openvpn/cso",
+        json=body,
+    )
+    data = _ok(create_resp)
+    obj_id = data.get("id")
+    assert obj_id is not None, f"No id in create response: {data}"
+
+    try:
+        # GET (singular)
+        get_resp = client.get(
+            "/api/v2/vpn/openvpn/cso",
+            params={"id": obj_id},
+        )
+        _ok(get_resp)
+
+        # UPDATE
+        update_resp = client.patch(
+            "/api/v2/vpn/openvpn/cso",
+            json={"id": obj_id, "description": "Updated by test"},
+        )
+        _ok(update_resp)
+
+    finally:
+        _delete_with_retry(client, "/api/v2/vpn/openvpn/cso", obj_id)
+
+
+def test_crud_vpn_openvpn_server(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/vpn/openvpn/server (needs: system/certificate_authority, system/certificate)"""
+    # Setup: create parent system/certificate_authority
+    p0_resp = client.post(
+        "/api/v2/system/certificate_authority",
+        json={
+        "descr": 'Test CA for OVPN srv',
+        "crt": CA_CERT_PEM,
+        "prv": CA_KEY_PEM,
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    # Setup: create parent system/certificate
+    p1_body = {
+        "descr": 'Test Cert for OVPN srv',
+        "crt": CERT_PEM,
+        "prv": CERT_KEY_PEM,
+    }
+    p1_body["caref"] = p0["refid"]
+    p1_resp = client.post(
+        "/api/v2/system/certificate",
+        json=p1_body,
+    )
+    p1 = _ok(p1_resp)
+    p1_id = p1.get("id")
+    assert p1_id is not None, f"No id in parent response: {p1}"
+
+    try:
+        try:
+            # CREATE
+            body = {
+                    "mode": 'p2p_tls',
+                    "dev_mode": 'tun',
+                    "protocol": 'UDP4',
+                    "interface": 'wan',
+                    "tls_type": 'auth',
+                    "dh_length": '2048',
+                    "ecdh_curve": 'prime256v1',
+                    "data_ciphers": ['AES-256-GCM'],
+                    "data_ciphers_fallback": 'AES-256-GCM',
+                    "digest": 'SHA256',
+                    "description": 'Test OVPN server',
+                    "serverbridge_interface": '',
+                    "serverbridge_dhcp_start": '',
+                    "serverbridge_dhcp_end": '',
+                }
+            body["caref"] = p0["refid"]
+            body["certref"] = p1["refid"]
+            create_resp = client.post(
+                "/api/v2/vpn/openvpn/server",
+                json=body,
+            )
+            data = _ok(create_resp)
+            obj_id = data.get("id")
+            assert obj_id is not None, f"No id in create response: {data}"
+
+            try:
+                # GET (singular)
+                get_resp = client.get(
+                    "/api/v2/vpn/openvpn/server",
+                    params={"id": obj_id},
+                )
+                _ok(get_resp)
+
+                # UPDATE
+                update_resp = client.patch(
+                    "/api/v2/vpn/openvpn/server",
+                    json={"id": obj_id, "description": "Updated by test"},
+                )
+                _ok(update_resp)
+
+            finally:
+                _delete_with_retry(client, "/api/v2/vpn/openvpn/server", obj_id)
+        finally:
+            _delete_with_retry(client, "/api/v2/system/certificate", p1_id)
+    finally:
+        _delete_with_retry(client, "/api/v2/system/certificate_authority", p0_id)
+
 
 def test_crud_vpn_wireguard_peer(client: httpx.Client):
     """CRUD lifecycle: /api/v2/vpn/wireguard/peer (needs: vpn/wireguard/tunnel)"""
