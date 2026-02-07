@@ -297,13 +297,16 @@ REST API v2.4.3 is the latest version that supports pfSense CE 2.7.2. v2.6.8+ on
 - VM uses 3 e1000 NICs (em0=WAN, em1=LAN, em2=spare for LAGG), VirtIO RNG, 2GB RAM
 - REST API v2.4.3 (only version with pfSense CE 2.7.2 package; v2.6.8+ requires pfSense 2.8+)
 
-### Unaccounted gaps (6 paths — bookkeeping only)
+### Untested gaps (6 paths — need real tests, not skip comments)
 
-These paths have no test AND no formal skip entry. All are explainable — they just need `# SKIP` comments added:
+These paths have no test. The goal is 100% real coverage — find a way to test each one:
 
-- `diagnostics/command_prompt`, `diagnostics/halt_system`, `diagnostics/reboot`, `graphql` — dangerous endpoints excluded via `_DANGEROUS_ENDPOINTS` in `context_builder.py` but not in test skip lists
-- `system/timezone` — nginx 404 on v2.4.3, noted in a comment but not in `_SKIP_SINGLETON`
-- `system/package` — install/uninstall can destabilize VM, not in `_SKIP_CRUD_PATHS`
+- `diagnostics/command_prompt` — run a harmless command (e.g., `echo test`), verify output
+- `diagnostics/halt_system` — test last (kills VM), verify 200 response before VM dies
+- `diagnostics/reboot` — test last (kills VM), verify 200 response before VM reboots
+- `graphql` — send a simple introspection or read-only query
+- `system/timezone` — nginx 404 on v2.4.3; needs creative workaround or direct config.xml verification
+- `system/package` — install a small utility (e.g., `iftop`), verify via GET, uninstall
 
 ### Permanently skipped endpoints — with reasons
 
@@ -343,14 +346,15 @@ Every skip is documented in `_SKIP_CRUD_PATHS`, `_SKIP_ACTION`, `_SKIP_SINGLETON
 
 Routes present in the OpenAPI spec but return nginx 404 on the real server. These are sub-resource plural endpoints whose singular forms require `parent_id`. The pfSense REST API simply doesn't register these routes. All are tested via their singular CRUD endpoints instead.
 
-### Potential future improvements (not blocked, just not prioritized)
+### Backlog — endpoints to unblock next
 
-These could add tests without needing upstream pfSense fixes:
+These are currently skipped but should have real tests. Ordered by approachability:
 
 1. **HAProxy actions** (+2 tests) — retry with non-empty `acl` field or create ACL as sibling in chain
 2. **HAProxy frontend/certificate** (+1 test) — needs `certref` injection from parent cert chain
 3. **OpenVPN client_export** (+2 tests) — build 5-step chain: CA → cert → OVPN server → user cert → export
-4. **system/package** (+1 test) — install/uninstall a small utility like `iftop`
+4. **CRL revoked_certificate** (+1 test) — workaround the PHP INT bug (generate cert with small serial?)
+5. **Cert generation** (+6 tests) — server 500 on v2.4.3; may need to find the right parameter combination or workaround
 
 ### Known stale entries to clean up
 
