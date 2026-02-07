@@ -275,7 +275,9 @@ Exclude from generation or add extra warnings:
 
 ## Phase 2 Status: Test Coverage
 
-**Current: 206 tests, 206 passing**
+**Current: 185 tests, 185 passing**
+
+Note: test count decreased from previous estimate (206) after discovering that REST API v2.6.8+ only supports pfSense 2.8+ — v2.4.3 is the latest for pfSense CE 2.7.2. Endpoints that need v2.6+ (FreeRADIUS, timezone, cert generation) remain skipped.
 
 The test generator (`generator/test_generator.py`) produces `generated/tests.py` against the live VM. Tests cover CRUD lifecycles, settings roundtrips, read-only GETs, apply endpoints, and plural list endpoints.
 
@@ -286,7 +288,7 @@ The test generator (`generator/test_generator.py`) produces `generated/tests.py`
 - `_CHAINED_CRUD` supports `static_parent_id` for sub-resources with a fixed parent (e.g., DHCP sub-resources always use `parent_id: "lan"`)
 - PEM certificates embedded in test constants for CA/cert-dependent endpoints (IPsec, OpenVPN, CRL, HAProxy frontend/certificate)
 - VM uses 3 e1000 NICs (em0=WAN, em1=LAN, em2=spare for LAGG), VirtIO RNG, 2GB RAM
-- REST API v2.6.8 (upgraded from v2.4.3 for FreeRADIUS, timezone, cert generation fixes)
+- REST API v2.4.3 (only version with pfSense CE 2.7.2 package; v2.6.8+ requires pfSense 2.8+)
 
 ### Permanently skipped endpoints — with reasons
 
@@ -299,8 +301,17 @@ Every skip is documented in `_SKIP_CRUD_PATHS`, `_SKIP_ACTION`, `_SKIP_SINGLETON
 **pfSense singleton design (1):**
 - `services/dhcp_server` — per-interface singleton, POST not supported
 
-**Phantom action routes (1):**
+**REST API v2.4.3 bugs (14):**
+- `services/freeradius/client`, `interface`, `user` — nginx 404 (needs REST API v2.6+ / pfSense 2.8+)
+- `system/certificate_authority/generate`, `renew` — 500 "failed for unknown reason"
+- `system/certificate/generate`, `renew`, `pkcs12/export`, `signing_request/sign` — depends on CA generate (broken)
+- `system/crl/revoked_certificate` — cert serial hex → PHP INT overflow (500)
+- `services/haproxy/settings/dns_resolver`, `email_mailer` — 500 parent model construction bug
+- `services/haproxy/backend/action`, `frontend/action` — acl field cannot be empty (needs ACL sibling chain)
+
+**Phantom action routes (2):**
 - `diagnostics/ping` — version-gated to REST API v2.7.0+, not available on CE 2.7.2
+- `system/timezone` — nginx 404 (needs REST API v2.6+ / pfSense 2.8+)
 
 **Requires BasicAuth (not API key auth):**
 - `auth/key` and `auth/jwt` — tested with dedicated BasicAuth client
@@ -312,7 +323,7 @@ Every skip is documented in `_SKIP_CRUD_PATHS`, `_SKIP_ACTION`, `_SKIP_SINGLETON
 - `services/wake_on_lan/send` — needs real MAC address on LAN
 - `system/restapi/settings/sync` — HA sync endpoint times out without peer
 
-### Phantom plural routes (36)
+### Phantom plural routes (39)
 
 Routes present in the OpenAPI spec but return nginx 404 on the real server. These are sub-resource plural endpoints whose singular forms require `parent_id`. The pfSense REST API simply doesn't register these routes. All are tested via their singular CRUD endpoints instead.
 
@@ -337,7 +348,7 @@ packages.x86_64-linux.default = writeShellApplication {
 };
 ```
 
-The dev shell includes jinja2 and pytest for generator development.
+The dev shell includes jinja2, pytest, qemu, and curl for generator development and VM testing.
 
 ## Rules
 
