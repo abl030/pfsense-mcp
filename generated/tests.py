@@ -79,7 +79,7 @@ def _delete_with_retry(client: httpx.Client, path: str, obj_id, params: dict | N
             break
         time.sleep(5)
     assert resp.status_code in (200, 404), f"Delete {path} id={obj_id} failed: {resp.text[:500]}"
-# Total generated tests: 166
+# Total generated tests: 180
 
 def test_crud_firewall_alias(client: httpx.Client):
     """CRUD lifecycle: /api/v2/firewall/alias"""
@@ -1845,7 +1845,7 @@ def test_crud_services_bind_zone_record(client: httpx.Client):
     p0_resp = client.post(
         "/api/v2/services/bind/zone",
         json={
-        "name": 'pftzr.example.com',
+        "name": 'pftzrec.example.com',
         "nameserver": 'ns1.example.com',
         "mail": 'admin.example.com',
         "serial": 2024010101,
@@ -5013,3 +5013,350 @@ def test_apply_vpn_wireguard_apply(client: httpx.Client):
     data = _ok(resp)
     assert isinstance(data, dict)
 
+
+def test_singleton_firewall_nat_outbound_mode(client: httpx.Client):
+    """Singleton roundtrip: /api/v2/firewall/nat/outbound/mode"""
+    # GET current value
+    resp = client.get("/api/v2/firewall/nat/outbound/mode")
+    original = _ok(resp)
+    assert isinstance(original, dict)
+    original_value = original.get("mode")
+
+    # PATCH with test value
+    patch_resp = client.patch(
+        "/api/v2/firewall/nat/outbound/mode",
+        json={'mode': 'hybrid'},
+    )
+    patched = _ok(patch_resp)
+    assert patched.get("mode") == 'hybrid'
+
+    # GET to verify persistence
+    verify_resp = client.get("/api/v2/firewall/nat/outbound/mode")
+    verify = _ok(verify_resp)
+    assert verify.get("mode") == 'hybrid'
+
+    # Restore original value
+    if original_value is not None:
+        client.patch("/api/v2/firewall/nat/outbound/mode", json={"mode": original_value})
+
+
+def test_singleton_firewall_states_size(client: httpx.Client):
+    """Singleton roundtrip: /api/v2/firewall/states/size"""
+    # GET current value
+    resp = client.get("/api/v2/firewall/states/size")
+    original = _ok(resp)
+    assert isinstance(original, dict)
+    original_value = original.get("maximumstates")
+
+    # PATCH with test value
+    patch_resp = client.patch(
+        "/api/v2/firewall/states/size",
+        json={'maximumstates': 500000},
+    )
+    patched = _ok(patch_resp)
+    assert patched.get("maximumstates") == 500000
+
+    # GET to verify persistence
+    verify_resp = client.get("/api/v2/firewall/states/size")
+    verify = _ok(verify_resp)
+    assert verify.get("maximumstates") == 500000
+
+    # Restore original value
+    if original_value is not None:
+        client.patch("/api/v2/firewall/states/size", json={"maximumstates": original_value})
+
+
+def test_singleton_routing_gateway_default(client: httpx.Client):
+    """Singleton roundtrip: /api/v2/routing/gateway/default"""
+    # GET current value
+    resp = client.get("/api/v2/routing/gateway/default")
+    original = _ok(resp)
+    assert isinstance(original, dict)
+    original_value = original.get("defaultgw4")
+
+    # PATCH with test value
+    patch_resp = client.patch(
+        "/api/v2/routing/gateway/default",
+        json={'defaultgw4': ''},
+    )
+    patched = _ok(patch_resp)
+    assert patched.get("defaultgw4") == ''
+
+    # GET to verify persistence
+    verify_resp = client.get("/api/v2/routing/gateway/default")
+    verify = _ok(verify_resp)
+    assert verify.get("defaultgw4") == ''
+
+    # Restore original value
+    if original_value is not None:
+        client.patch("/api/v2/routing/gateway/default", json={"defaultgw4": original_value})
+
+
+def test_singleton_services_dhcp_relay(client: httpx.Client):
+    """Singleton roundtrip: /api/v2/services/dhcp_relay"""
+    # GET current value
+    resp = client.get("/api/v2/services/dhcp_relay")
+    original = _ok(resp)
+    assert isinstance(original, dict)
+    original_value = original.get("enable")
+
+    # PATCH with test value
+    patch_resp = client.patch(
+        "/api/v2/services/dhcp_relay",
+        json={'enable': False, 'server': ['10.0.2.1']},
+    )
+    patched = _ok(patch_resp)
+    assert patched.get("enable") == False
+
+    # GET to verify persistence
+    verify_resp = client.get("/api/v2/services/dhcp_relay")
+    verify = _ok(verify_resp)
+    assert verify.get("enable") == False
+
+    # Restore original value
+    if original_value is not None:
+        client.patch("/api/v2/services/dhcp_relay", json={"enable": original_value, "server": ['10.0.2.1']})
+
+
+def test_singleton_services_dhcp_server_backend(client: httpx.Client):
+    """Singleton roundtrip: /api/v2/services/dhcp_server/backend"""
+    # PATCH with test value
+    patch_resp = client.patch(
+        "/api/v2/services/dhcp_server/backend",
+        json={'dhcpbackend': 'kea'},
+    )
+    patched = _ok(patch_resp)
+    assert patched.get("dhcpbackend") == 'kea'
+
+    # Restore original value
+    client.patch(
+        "/api/v2/services/dhcp_server/backend",
+        json={'dhcpbackend': 'isc'},
+    )
+
+
+def test_singleton_services_ssh(client: httpx.Client):
+    """Singleton roundtrip: /api/v2/services/ssh"""
+    # GET current value
+    resp = client.get("/api/v2/services/ssh")
+    original = _ok(resp)
+    assert isinstance(original, dict)
+    original_value = original.get("port")
+
+    # PATCH with test value
+    patch_resp = client.patch(
+        "/api/v2/services/ssh",
+        json={'port': '2222'},
+    )
+    patched = _ok(patch_resp)
+    assert patched.get("port") == '2222'
+
+    # GET to verify persistence
+    verify_resp = client.get("/api/v2/services/ssh")
+    verify = _ok(verify_resp)
+    assert verify.get("port") == '2222'
+
+    # Restore original value
+    if original_value is not None:
+        client.patch("/api/v2/services/ssh", json={"port": original_value})
+
+
+def test_singleton_status_carp(client: httpx.Client):
+    """Singleton roundtrip: /api/v2/status/carp"""
+    # GET current value
+    resp = client.get("/api/v2/status/carp")
+    original = _ok(resp)
+    assert isinstance(original, dict)
+    original_value = original.get("maintenance_mode")
+
+    # PATCH with test value
+    patch_resp = client.patch(
+        "/api/v2/status/carp",
+        json={'maintenance_mode': True, 'enable': True},
+    )
+    patched = _ok(patch_resp)
+    assert patched.get("maintenance_mode") == True
+
+    # GET to verify persistence
+    verify_resp = client.get("/api/v2/status/carp")
+    verify = _ok(verify_resp)
+    assert verify.get("maintenance_mode") == True
+
+    # Restore original value
+    client.patch(
+        "/api/v2/status/carp",
+        json={'maintenance_mode': False, 'enable': True},
+    )
+
+
+def test_singleton_system_console(client: httpx.Client):
+    """Singleton roundtrip: /api/v2/system/console"""
+    # GET current value
+    resp = client.get("/api/v2/system/console")
+    original = _ok(resp)
+    assert isinstance(original, dict)
+    original_value = original.get("passwd_protect_console")
+
+    # PATCH with test value
+    patch_resp = client.patch(
+        "/api/v2/system/console",
+        json={'passwd_protect_console': True},
+    )
+    patched = _ok(patch_resp)
+    assert patched.get("passwd_protect_console") == True
+
+    # GET to verify persistence
+    verify_resp = client.get("/api/v2/system/console")
+    verify = _ok(verify_resp)
+    assert verify.get("passwd_protect_console") == True
+
+    # Restore original value
+    if original_value is not None:
+        client.patch("/api/v2/system/console", json={"passwd_protect_console": original_value})
+
+
+def test_singleton_system_dns(client: httpx.Client):
+    """Singleton roundtrip: /api/v2/system/dns"""
+    # GET current value
+    resp = client.get("/api/v2/system/dns")
+    original = _ok(resp)
+    assert isinstance(original, dict)
+    original_value = original.get("dnsallowoverride")
+
+    # PATCH with test value
+    patch_resp = client.patch(
+        "/api/v2/system/dns",
+        json={'dnsallowoverride': False},
+    )
+    patched = _ok(patch_resp)
+    assert patched.get("dnsallowoverride") == False
+
+    # GET to verify persistence
+    verify_resp = client.get("/api/v2/system/dns")
+    verify = _ok(verify_resp)
+    assert verify.get("dnsallowoverride") == False
+
+    # Restore original value
+    if original_value is not None:
+        client.patch("/api/v2/system/dns", json={"dnsallowoverride": original_value})
+
+
+def test_singleton_system_hostname(client: httpx.Client):
+    """Singleton roundtrip: /api/v2/system/hostname"""
+    # GET current value
+    resp = client.get("/api/v2/system/hostname")
+    original = _ok(resp)
+    assert isinstance(original, dict)
+    original_value = original.get("hostname")
+
+    # PATCH with test value
+    patch_resp = client.patch(
+        "/api/v2/system/hostname",
+        json={'hostname': 'pfttest', 'domain': 'home.arpa'},
+    )
+    patched = _ok(patch_resp)
+    assert patched.get("hostname") == 'pfttest'
+
+    # GET to verify persistence
+    verify_resp = client.get("/api/v2/system/hostname")
+    verify = _ok(verify_resp)
+    assert verify.get("hostname") == 'pfttest'
+
+    # Restore original value
+    if original_value is not None:
+        client.patch("/api/v2/system/hostname", json={"hostname": original_value, "domain": 'home.arpa'})
+
+
+def test_singleton_system_notifications_email_settings(client: httpx.Client):
+    """Singleton roundtrip: /api/v2/system/notifications/email_settings"""
+    # GET current value
+    resp = client.get("/api/v2/system/notifications/email_settings")
+    original = _ok(resp)
+    assert isinstance(original, dict)
+    original_value = original.get("ipaddress")
+
+    # PATCH with test value
+    patch_resp = client.patch(
+        "/api/v2/system/notifications/email_settings",
+        json={'ipaddress': '127.0.0.1', 'username': 'test', 'password': 'test'},
+    )
+    patched = _ok(patch_resp)
+    assert patched.get("ipaddress") == '127.0.0.1'
+
+    # GET to verify persistence
+    verify_resp = client.get("/api/v2/system/notifications/email_settings")
+    verify = _ok(verify_resp)
+    assert verify.get("ipaddress") == '127.0.0.1'
+
+    # Restore original value
+    if original_value is not None:
+        client.patch("/api/v2/system/notifications/email_settings", json={"ipaddress": original_value, "username": 'test', "password": 'test'})
+
+
+# SKIP /api/v2/system/restapi/version: PATCH triggers API version change (destructive)
+
+def test_action_auth_jwt(client: httpx.Client):
+    """Action: POST /api/v2/auth/jwt"""
+    # Auth endpoints require BasicAuth, not API key
+    ba_client = httpx.Client(
+        base_url=BASE_URL,
+        verify=False,
+        auth=(AUTH_USER, AUTH_PASS),
+        timeout=30,
+    )
+    resp = ba_client.post("/api/v2/auth/jwt", json={})
+    data = _ok(resp)
+    assert data is not None
+
+
+def test_action_auth_key(client: httpx.Client):
+    """Action: POST /api/v2/auth/key"""
+    # Auth endpoints require BasicAuth, not API key
+    ba_client = httpx.Client(
+        base_url=BASE_URL,
+        verify=False,
+        auth=(AUTH_USER, AUTH_PASS),
+        timeout=30,
+    )
+    resp = ba_client.post("/api/v2/auth/key", json={'descr': 'Test API key from tests', 'length_bytes': 16})
+    data = _ok(resp)
+    assert data is not None
+
+
+# SKIP /api/v2/diagnostics/ping: phantom route (nginx 404)
+
+# SKIP /api/v2/services/acme/account_key/register: needs real ACME server for registration
+
+# SKIP /api/v2/services/acme/certificate/issue: requires real ACME server
+
+# SKIP /api/v2/services/acme/certificate/renew: requires real ACME server
+
+# SKIP /api/v2/services/wake_on_lan/send: requires real MAC address on LAN
+
+# SKIP /api/v2/status/service: service restart can destabilize test VM
+
+# SKIP /api/v2/system/certificate/generate: depends on CA generate (broken)
+
+# SKIP /api/v2/system/certificate/pkcs12/export: depends on generated cert (CA generate broken)
+
+# SKIP /api/v2/system/certificate/renew: depends on CA generate (broken)
+
+def test_action_system_certificate_signing_request(client: httpx.Client):
+    """Action: POST /api/v2/system/certificate/signing_request"""
+    resp = client.post("/api/v2/system/certificate/signing_request", json={'descr': 'Test CSR', 'keytype': 'RSA', 'keylen': 2048, 'digest_alg': 'sha256', 'dn_commonname': 'test-csr.example.com'})
+    data = _ok(resp)
+    assert data is not None
+    data = resp.json().get('data', {})
+    if data.get('id') is not None:
+        client.delete("/api/v2/system/certificate", params={"id": data["id"]})
+
+
+# SKIP /api/v2/system/certificate/signing_request/sign: depends on CA generate (broken)
+
+# SKIP /api/v2/system/certificate_authority/generate: pfSense bug: generate returns 500
+
+# SKIP /api/v2/system/certificate_authority/renew: depends on CA generate (broken)
+
+# SKIP /api/v2/system/restapi/settings/sync: HA sync endpoint times out without peer
+
+# SKIP /api/v2/vpn/openvpn/client_export: requires functioning OpenVPN server

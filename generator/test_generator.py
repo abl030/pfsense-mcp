@@ -330,6 +330,113 @@ _SKIP_CRUD_PATHS: dict[str, str] = {
     "/api/v2/system/crl/revoked_certificate": "pfSense bug: cert serial hex vs INT in X509_CRL.php",
 }
 
+# ── Singleton GET/PATCH endpoints (settings-like but not auto-detected) ───────
+# These are GET/PATCH endpoints whose path doesn't end in /settings.
+# Each entry maps path → {"field": <patchable field>, "value": <test value>}.
+# Tests: GET → PATCH with test value → GET verify → PATCH restore original.
+_SINGLETON_TESTS: dict[str, dict[str, Any]] = {
+    "/api/v2/firewall/nat/outbound/mode": {
+        "field": "mode",
+        "value": "hybrid",
+    },
+    "/api/v2/firewall/states/size": {
+        "field": "maximumstates",
+        "value": 500000,
+    },
+    "/api/v2/routing/gateway/default": {
+        "field": "defaultgw4",
+        "value": "",
+    },
+    "/api/v2/services/dhcp_relay": {
+        "field": "enable",
+        "value": False,
+        "extra_fields": {"server": ["10.0.2.1"]},
+    },
+    "/api/v2/services/ssh": {
+        "field": "port",
+        "value": "2222",
+    },
+    "/api/v2/status/carp": {
+        "field": "maintenance_mode",
+        "value": True,
+        "restore": False,
+        "extra_fields": {"enable": True},
+    },
+    "/api/v2/system/console": {
+        "field": "passwd_protect_console",
+        "value": True,
+    },
+    "/api/v2/system/dns": {
+        "field": "dnsallowoverride",
+        "value": False,
+    },
+    "/api/v2/system/hostname": {
+        "field": "hostname",
+        "value": "pfttest",
+        "extra_fields": {"domain": "home.arpa"},
+    },
+    "/api/v2/system/notifications/email_settings": {
+        "field": "ipaddress",
+        "value": "127.0.0.1",
+        "extra_fields": {"username": "test", "password": "test"},
+    },
+    # system/timezone: phantom route (nginx 404, not registered on server)
+    "/api/v2/services/dhcp_server/backend": {
+        "field": "dhcpbackend",
+        "value": "kea",
+        "restore": "isc",
+        "patch_only": True,
+    },
+}
+
+# Singleton endpoints to skip
+_SKIP_SINGLETON: dict[str, str] = {
+    "/api/v2/system/restapi/version": "PATCH triggers API version change (destructive)",
+}
+
+# ── Action POST endpoints ─────────────────────────────────────────────────────
+# POST-only endpoints safe to test. Each entry maps path → test config.
+# "body" = request body, "chain" = optional parent setup, "status" = expected HTTP status.
+_ACTION_TESTS: dict[str, dict[str, Any]] = {
+    "/api/v2/auth/key": {
+        "body": {"descr": "Test API key from tests", "length_bytes": 16},
+        "needs_basic_auth": True,
+    },
+    "/api/v2/auth/jwt": {
+        "body": {},
+        "needs_basic_auth": True,
+    },
+    "/api/v2/system/certificate/signing_request": {
+        "body": {
+            "descr": "Test CSR",
+            "keytype": "RSA",
+            "keylen": 2048,
+            "digest_alg": "sha256",
+            "dn_commonname": "test-csr.example.com",
+        },
+        "cleanup_path": "/api/v2/system/certificate",
+    },
+}
+
+# Action endpoints to skip
+_SKIP_ACTION: dict[str, str] = {
+    "/api/v2/diagnostics/ping": "phantom route (nginx 404)",
+    "/api/v2/services/wake_on_lan/send": "requires real MAC address on LAN",
+    "/api/v2/services/acme/account_key/register": "needs real ACME server for registration",
+    "/api/v2/services/acme/certificate/issue": "requires real ACME server",
+    "/api/v2/services/acme/certificate/renew": "requires real ACME server",
+    "/api/v2/vpn/openvpn/client_export": "requires functioning OpenVPN server",
+    "/api/v2/status/service": "service restart can destabilize test VM",
+    "/api/v2/system/restapi/settings/sync": "HA sync endpoint times out without peer",
+    # CA/cert generate endpoints: server returns 500 "failed for unknown reason"
+    "/api/v2/system/certificate_authority/generate": "pfSense bug: generate returns 500",
+    "/api/v2/system/certificate_authority/renew": "depends on CA generate (broken)",
+    "/api/v2/system/certificate/generate": "depends on CA generate (broken)",
+    "/api/v2/system/certificate/renew": "depends on CA generate (broken)",
+    "/api/v2/system/certificate/pkcs12/export": "depends on generated cert (CA generate broken)",
+    "/api/v2/system/certificate/signing_request/sign": "depends on CA generate (broken)",
+}
+
 # ── Pre-generated test PEM certificates ───────────────────────────────────────
 # Self-signed CA and server cert for testing certificate endpoints.
 # Generated with: openssl req -x509 -newkey rsa:2048 ...
@@ -818,7 +925,7 @@ _CHAINED_CRUD: dict[str, dict[str, Any]] = {
             {
                 "path": "/api/v2/services/bind/zone",
                 "body": {
-                    "name": "pftzr.example.com",
+                    "name": "pftzrec.example.com",
                     "nameserver": "ns1.example.com",
                     "mail": "admin.example.com",
                     "serial": 2024010101,
@@ -1710,6 +1817,32 @@ def generate_tests(contexts: list[ToolContext]) -> str:
             lines.append("")
             test_count += 1
 
+    # Singleton GET/PATCH tests (settings-like endpoints not auto-detected)
+    for group in groups:
+        if group.category == "other" and group.base_path in _SINGLETON_TESTS:
+            config = _SINGLETON_TESTS[group.base_path]
+            lines.append(_gen_singleton_test(group.base_path, config))
+            lines.append("")
+            test_count += 1
+        elif group.category == "other" and group.base_path in _SKIP_SINGLETON:
+            lines.append(f"# SKIP {group.base_path}: {_SKIP_SINGLETON[group.base_path]}")
+            lines.append("")
+
+    # Action POST tests
+    for group in groups:
+        if group.category == "action" and group.base_path in _ACTION_TESTS:
+            config = _ACTION_TESTS[group.base_path]
+            if _is_dangerous(group.create):
+                lines.append(f"# SKIP {group.base_path}: dangerous endpoint")
+                lines.append("")
+                continue
+            lines.append(_gen_action_test(group.base_path, config))
+            lines.append("")
+            test_count += 1
+        elif group.category == "action" and group.base_path in _SKIP_ACTION:
+            lines.append(f"# SKIP {group.base_path}: {_SKIP_ACTION[group.base_path]}")
+            lines.append("")
+
     # Add a summary comment at the top
     header_line = f"# Total generated tests: {test_count}"
     lines.insert(1, header_line)
@@ -1996,6 +2129,203 @@ def _gen_apply_test(group: EndpointGroup) -> str:
     lines.append(f"    assert isinstance(data, dict)")
     lines.append(f"")
 
+    return "\n".join(lines)
+
+
+def _gen_singleton_test(path: str, config: dict[str, Any]) -> str:
+    """Generate a singleton GET/PATCH roundtrip test."""
+    test_name = path.replace("/api/v2/", "").replace("/", "_")
+    field = config["field"]
+    value = config["value"]
+    extra_fields = config.get("extra_fields", {})
+    restore = config.get("restore")  # explicit restore value, or None to use original
+    patch_only = config.get("patch_only", False)
+
+    lines = []
+    lines.append(f"def test_singleton_{test_name}(client: httpx.Client):")
+    lines.append(f'    """Singleton roundtrip: {path}"""')
+
+    if not patch_only:
+        lines.append(f"    # GET current value")
+        lines.append(f'    resp = client.get("{path}")')
+        lines.append(f"    original = _ok(resp)")
+        lines.append(f"    assert isinstance(original, dict)")
+        lines.append(f'    original_value = original.get("{field}")')
+        lines.append(f"")
+
+    # Build PATCH body
+    patch_body: dict[str, Any] = {field: value}
+    patch_body.update(extra_fields)
+    lines.append(f"    # PATCH with test value")
+    lines.append(f"    patch_resp = client.patch(")
+    lines.append(f'        "{path}",')
+    lines.append(f"        json={patch_body!r},")
+    lines.append(f"    )")
+    lines.append(f"    patched = _ok(patch_resp)")
+    lines.append(f'    assert patched.get("{field}") == {value!r}')
+    lines.append(f"")
+
+    if not patch_only:
+        lines.append(f"    # GET to verify persistence")
+        lines.append(f'    verify_resp = client.get("{path}")')
+        lines.append(f"    verify = _ok(verify_resp)")
+        lines.append(f'    assert verify.get("{field}") == {value!r}')
+        lines.append(f"")
+
+    # Restore original value
+    if restore is not None:
+        restore_body: dict[str, Any] = {field: restore}
+        restore_body.update(extra_fields)
+        lines.append(f"    # Restore original value")
+        lines.append(f"    client.patch(")
+        lines.append(f'        "{path}",')
+        lines.append(f"        json={restore_body!r},")
+        lines.append(f"    )")
+    elif not patch_only:
+        lines.append(f"    # Restore original value")
+        lines.append(f"    if original_value is not None:")
+        restore_extra = "".join(
+            f', "{k}": {v!r}' for k, v in extra_fields.items()
+        )
+        lines.append(
+            f'        client.patch("{path}", '
+            f'json={{"{field}": original_value{restore_extra}}})'
+        )
+    lines.append(f"")
+
+    return "\n".join(lines)
+
+
+def _gen_action_test(path: str, config: dict[str, Any]) -> str:
+    """Generate an action endpoint test (POST)."""
+    test_name = path.replace("/api/v2/", "").replace("/", "_")
+    body = config.get("body", {})
+    expect_status = config.get("expect_status", [200])
+    if isinstance(expect_status, int):
+        expect_status = [expect_status]
+    cleanup_path = config.get("cleanup_path")
+    needs_ca = config.get("needs_ca", False)
+    needs_generated_ca = config.get("needs_generated_ca", False)
+    needs_generated_cert = config.get("needs_generated_cert", False)
+    needs_ca_and_csr = config.get("needs_ca_and_csr", False)
+
+    lines = []
+    lines.append(f"def test_action_{test_name}(client: httpx.Client):")
+    lines.append(f'    """Action: POST {path}"""')
+
+    # Complex multi-step actions
+    if needs_generated_ca:
+        lines.append(f"    # Generate a CA first")
+        lines.append(f'    ca_resp = client.post("/api/v2/system/certificate_authority/generate", json={{')
+        lines.append(f'        "descr": "CA for renew test", "keytype": "RSA", "keylen": 2048,')
+        lines.append(f'        "digest_alg": "sha256", "dn_commonname": "Renew Test CA", "lifetime": 3650,')
+        lines.append(f"    }})")
+        lines.append(f"    ca = _ok(ca_resp)")
+        lines.append(f"    try:")
+        lines.append(f'        resp = client.post("{path}", json={{"caref": ca["refid"]}})')
+        lines.append(f"        _ok(resp)")
+        lines.append(f"    finally:")
+        lines.append(f'        client.delete("/api/v2/system/certificate_authority", params={{"id": ca["id"]}})')
+        lines.append(f"")
+        return "\n".join(lines)
+
+    if needs_generated_cert:
+        lines.append(f"    # Generate a CA and cert first")
+        lines.append(f'    ca_resp = client.post("/api/v2/system/certificate_authority/generate", json={{')
+        lines.append(f'        "descr": "CA for cert action", "keytype": "RSA", "keylen": 2048,')
+        lines.append(f'        "digest_alg": "sha256", "dn_commonname": "Cert Action CA", "lifetime": 3650,')
+        lines.append(f"    }})")
+        lines.append(f"    ca = _ok(ca_resp)")
+        lines.append(f'    cert_resp = client.post("/api/v2/system/certificate/generate", json={{')
+        lines.append(f'        "descr": "Cert for action", "caref": ca["refid"], "keytype": "RSA",')
+        lines.append(f'        "keylen": 2048, "digest_alg": "sha256", "dn_commonname": "action.test",')
+        lines.append(f'        "lifetime": 365, "type": "server",')
+        lines.append(f"    }})")
+        lines.append(f"    cert = _ok(cert_resp)")
+        lines.append(f"    try:")
+        body_fields = ", ".join(f'"{k}": {v!r}' for k, v in body.items()) if body else ""
+        extra = f", {body_fields}" if body_fields else ""
+        lines.append(f'        resp = client.post("{path}", json={{"certref": cert["refid"]{extra}}})')
+        lines.append(f"        _ok(resp)")
+        lines.append(f"    finally:")
+        lines.append(f'        client.delete("/api/v2/system/certificate", params={{"id": cert["id"]}})')
+        lines.append(f'        client.delete("/api/v2/system/certificate_authority", params={{"id": ca["id"]}})')
+        lines.append(f"")
+        return "\n".join(lines)
+
+    if needs_ca_and_csr:
+        lines.append(f"    # Generate CA, create CSR, then sign it")
+        lines.append(f'    ca_resp = client.post("/api/v2/system/certificate_authority/generate", json={{')
+        lines.append(f'        "descr": "CA for CSR sign", "keytype": "RSA", "keylen": 2048,')
+        lines.append(f'        "digest_alg": "sha256", "dn_commonname": "CSR Sign CA", "lifetime": 3650,')
+        lines.append(f"    }})")
+        lines.append(f"    ca = _ok(ca_resp)")
+        lines.append(f'    csr_resp = client.post("/api/v2/system/certificate/signing_request", json={{')
+        lines.append(f'        "descr": "Test CSR to sign", "keytype": "RSA", "keylen": 2048,')
+        lines.append(f'        "digest_alg": "sha256", "dn_commonname": "csr-sign.test",')
+        lines.append(f"    }})")
+        lines.append(f"    csr_data = _ok(csr_resp)")
+        lines.append(f"    try:")
+        lines.append(f'        resp = client.post("{path}", json={{')
+        lines.append(f'            "descr": "Signed from CSR", "caref": ca["refid"],')
+        lines.append(f'            "csr": csr_data["csr"], "digest_alg": "sha256",')
+        lines.append(f"        }})")
+        lines.append(f"        signed = _ok(resp)")
+        lines.append(f"    finally:")
+        lines.append(f'        client.delete("/api/v2/system/certificate", params={{"id": csr_data["id"]}})')
+        lines.append(f'        client.delete("/api/v2/system/certificate_authority", params={{"id": ca["id"]}})')
+        lines.append(f"")
+        return "\n".join(lines)
+
+    # Simple action or action needing CA parent
+    if needs_ca:
+        lines.append(f"    # Generate a CA first")
+        lines.append(f'    ca_resp = client.post("/api/v2/system/certificate_authority/generate", json={{')
+        lines.append(f'        "descr": "CA for cert gen", "keytype": "RSA", "keylen": 2048,')
+        lines.append(f'        "digest_alg": "sha256", "dn_commonname": "Cert Gen CA", "lifetime": 3650,')
+        lines.append(f"    }})")
+        lines.append(f"    ca = _ok(ca_resp)")
+        body_with_ca = dict(body)
+        body_repr = repr(body_with_ca)
+        lines.append(f"    body = {body_repr}")
+        lines.append(f'    body["caref"] = ca["refid"]')
+        lines.append(f"    try:")
+        lines.append(f'        resp = client.post("{path}", json=body)')
+        lines.append(f"        data = _ok(resp)")
+        if cleanup_path:
+            lines.append(f'        client.delete("{cleanup_path}", params={{"id": data["id"]}})')
+        lines.append(f"    finally:")
+        lines.append(f'        client.delete("/api/v2/system/certificate_authority", params={{"id": ca["id"]}})')
+        lines.append(f"")
+        return "\n".join(lines)
+
+    # Simple POST action
+    needs_basic_auth = config.get("needs_basic_auth", False)
+    if needs_basic_auth:
+        lines.append(f"    # Auth endpoints require BasicAuth, not API key")
+        lines.append(f"    ba_client = httpx.Client(")
+        lines.append(f"        base_url=BASE_URL,")
+        lines.append(f"        verify=False,")
+        lines.append(f"        auth=(AUTH_USER, AUTH_PASS),")
+        lines.append(f"        timeout=30,")
+        lines.append(f"    )")
+        client_var = "ba_client"
+    else:
+        client_var = "client"
+
+    lines.append(f'    resp = {client_var}.post("{path}", json={body!r})')
+    if expect_status == [200]:
+        lines.append(f"    data = _ok(resp)")
+        lines.append(f"    assert data is not None")
+    else:
+        lines.append(f"    assert resp.status_code in {expect_status!r}, f\"Unexpected: {{resp.status_code}}: {{resp.text[:500]}}\"")
+
+    if cleanup_path:
+        lines.append(f"    data = resp.json().get('data', {{}})")
+        lines.append(f"    if data.get('id') is not None:")
+        lines.append(f'        client.delete("{cleanup_path}", params={{"id": data["id"]}})')
+
+    lines.append(f"")
     return "\n".join(lines)
 
 

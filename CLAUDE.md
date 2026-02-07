@@ -251,7 +251,7 @@ Exclude from generation or add extra warnings:
 
 ## Phase 2 Status: Test Coverage
 
-**Current: 165 tests, 163 passing (2 transient 503s from dispatcher rate limiting)**
+**Current: 179 tests, 179 passing**
 
 The test generator (`generator/test_generator.py`) produces `generated/tests.py` against the live VM. Tests cover CRUD lifecycles, settings roundtrips, read-only GETs, apply endpoints, and plural list endpoints.
 
@@ -261,7 +261,9 @@ The test generator (`generator/test_generator.py`) produces `generated/tests.py`
 - `_CHAINED_CRUD` supports multi-parent dependency chains with `receives_from` for inter-parent field injection (e.g., cert needs CA's refid)
 - PEM certificates embedded in test constants for CA/cert-dependent endpoints (IPsec, OpenVPN, CRL, HAProxy frontend/certificate)
 
-### Permanently skipped endpoints (17) — with reasons
+### Permanently skipped endpoints — with reasons
+
+Every skip is documented in `_SKIP_CRUD_PATHS`, `_SKIP_ACTION`, `_SKIP_SINGLETON`, or `_PHANTOM_PLURAL_ROUTES` in `test_generator.py`.
 
 **Hardware/VM limitations (5):**
 - `interface` — requires available physical interface (VM has only 1 NIC assigned to WAN)
@@ -278,17 +280,40 @@ The test generator (`generator/test_generator.py`) produces `generated/tests.py`
 - `services/dhcp_server/custom_option` — requires LAN interface
 - `services/dhcp_server/static_mapping` — requires LAN interface
 
-**pfSense server bugs (4):**
+**pfSense server bugs (10):**
 - `services/freeradius/client` — routes return nginx 404 despite package installed
 - `services/freeradius/interface` — routes return nginx 404
 - `services/freeradius/user` — routes return nginx 404
-- `system/crl/revoked_certificate` — pfSense bug: cert serial number is hex but CRL X509_CRL.php code expects INT (500 error)
+- `system/crl/revoked_certificate` — cert serial number is hex but CRL X509_CRL.php expects INT (500)
+- `system/certificate_authority/generate` — returns 500 "failed for unknown reason" with any params
+- `system/certificate_authority/renew` — depends on CA generate (broken)
+- `system/certificate/generate` — depends on CA generate (broken)
+- `system/certificate/renew` — depends on CA generate (broken)
+- `system/certificate/pkcs12/export` — depends on generated cert (CA generate broken)
+- `system/certificate/signing_request/sign` — depends on CA generate (broken)
+
+**Phantom singleton/action routes (2):**
+- `system/timezone` — nginx 404 (not registered on server)
+- `diagnostics/ping` — nginx 404 (not registered on server)
+
+**Requires BasicAuth (not API key auth):**
+- `auth/key` and `auth/jwt` — tested with dedicated BasicAuth client
 
 **Impractical test payloads (4):**
 - `services/haproxy/backend/action` — 16 required context-dependent fields
 - `services/haproxy/frontend/action` — 16 required context-dependent fields
-- `services/haproxy/settings/dns_resolver` — server 500 error, requires parent model
-- `services/haproxy/settings/email_mailer` — server 500 error, requires parent model
+- `services/haproxy/settings/dns_resolver` — server 500, requires parent model
+- `services/haproxy/settings/email_mailer` — server 500, requires parent model
+
+**External dependencies (5):**
+- `services/acme/account_key/register` — needs real ACME server
+- `services/acme/certificate/issue` — needs real ACME server
+- `services/acme/certificate/renew` — needs real ACME server
+- `services/wake_on_lan/send` — needs real MAC address on LAN
+- `system/restapi/settings/sync` — HA sync endpoint times out without peer
+
+**Service stability risk (1):**
+- `status/service` — service restart can destabilize test VM mid-suite
 
 ### Phantom plural routes (42)
 
@@ -299,6 +324,7 @@ Routes present in the OpenAPI spec but return nginx 404 on the real server. Thes
 - **IPsec encryption**: Use `aes` (AES-CBC) with `keylen=256`, NOT `aes256gcm` (GCM keylen field is not the key size)
 - **Gateway group priority**: Need a second gateway as parent — the priority's `gateway` field must reference an existing gateway by name
 - **CRL `descr` field**: Not editable via PATCH — set `update_field=None` for CRL chains
+- **Auth endpoints**: `auth/key` and `auth/jwt` require BasicAuth, not API key. Tests use a dedicated httpx.Client with `auth=(user, pass)`
 
 ---
 
@@ -322,6 +348,23 @@ The dev shell includes jinja2 and pytest for generator development.
 2. **`openapi-spec.json` is the single source of truth**. All type information, parameter names, and endpoint structure come from the spec.
 3. **Test against the VM, not production**. The golden image exists for this purpose.
 4. **Expect scripts are fragile but working**. Do not change timing, patterns, or shortcuts unless something breaks. See gotchas above.
+5. **Every skipped endpoint must be documented with a reason** — in `_SKIP_CRUD_PATHS`, `_SKIP_ACTION`, `_SKIP_SINGLETON`, or `_PHANTOM_PLURAL_ROUTES` in `test_generator.py`, AND in the "Permanently skipped endpoints" section of this file. No silent skips.
+
+## Test Development Workflow
+
+Each full test run takes ~5-8 minutes. To avoid wasting time:
+
+1. **Regenerate**: `nix develop -c python -m generator`
+2. **Test only new/changed tests first** using `-k` filter:
+   ```bash
+   nix develop -c bash vm/run-tests.sh -v -k "singleton_ or action_"
+   ```
+3. **Iterate on failures** — keep using `-k` to re-run only failing tests until all pass
+4. **Final full suite run** — only after new tests all pass individually:
+   ```bash
+   nix develop -c bash vm/run-tests.sh -v
+   ```
+5. **Commit** only after full suite passes
 
 ## Integration
 
