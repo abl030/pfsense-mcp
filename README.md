@@ -296,6 +296,37 @@ Each test run copies the golden image, boots a fresh VM, runs tests against the 
 
 The golden image build is fully automated: download pfSense installer, install via expect scripts, configure the REST API, upgrade from 2.7.2 to 2.8.1, and snapshot. All driven by `vm/setup.sh`.
 
+### Coverage
+
+| Metric | Count | % |
+|--------|-------|---|
+| Paths with active tests | 203 | 78.7% |
+| Paths with documented skip | 16 | 6.2% |
+| Phantom plural routes (spec-only, 404 on server) | 39 | 15.1% |
+| **Total accounted** | **258** | **100%** |
+
+Every untested path has a documented reason. Zero silent skips.
+
+### Skipped endpoints
+
+| Endpoint | Reason |
+|----------|--------|
+| `services/haproxy/settings/dns_resolver` | REST API bug: 500 "parent Model not constructed" |
+| `services/haproxy/settings/email_mailer` | REST API bug: 500 "parent Model not constructed" |
+| `system/certificate/pkcs12/export` | REST API bug: 406 no binary content handler |
+| `system/package` (POST/DELETE) | nginx 504 gateway timeout via QEMU NAT; GET tested |
+| `interface` (CRUD) | Can destabilize VM networking |
+| `vpn/openvpn/client_export/config` | Complex 5-step dependency chain (deferred) |
+| `vpn/openvpn/client_export` | Requires functioning OpenVPN server |
+| `services/dhcp_server` (POST) | Per-interface singleton, POST not supported by pfSense |
+| `services/acme/*/register\|issue\|renew` | Requires real ACME server |
+| `system/restapi/settings/sync` | Requires HA peer |
+| `system/restapi/version` (PATCH) | Destructive: changes API version |
+
+### Phantom plural routes (39 paths)
+
+The OpenAPI spec includes 39 plural sub-resource endpoints (e.g., `/api/v2/firewall/schedule/time_ranges`) that return nginx 404 on the real server. These are spec-only artifacts — pfSense doesn't register them. Their singular CRUD counterparts all work and are fully tested. These phantom routes are excluded from the test count but documented in the generator source.
+
 ## This Project is 100% AI-Generated
 
 Every file in this repository was written by Claude (Anthropic). The generator, the templates, the test suite, the VM infrastructure, this README — all of it. No human wrote any code.
