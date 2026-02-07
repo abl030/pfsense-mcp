@@ -22,10 +22,10 @@ AUTH_USER = os.environ.get("PFSENSE_TEST_USER", "admin")
 AUTH_PASS = os.environ.get("PFSENSE_TEST_PASS", "pfsense")
 
 # Pre-generated test certificates (self-signed, 10-year validity)
-CA_CERT_PEM = "-----BEGIN CERTIFICATE-----\nMIIDMzCCAhugAwIBAgIUbtFPoQ0zYg1ScUJ7+FnklDgHgh8wDQYJKoZIhvcNAQEL\nBQAwKTEQMA4GA1UEAwwHVGVzdCBDQTEVMBMGA1UECgwMcGZTZW5zZSBUZXN0MB4X\nDTI2MDIwNzAxMjYyMloXDTM2MDIwNTAxMjYyMlowKTEQMA4GA1UEAwwHVGVzdCBD\nQTEVMBMGA1UECgwMcGZTZW5zZSBUZXN0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A\nMIIBCgKCAQEAs3inegnOteSWo/iRAV5YUZ7tx1pDni+cdDcNkDgPubrM9baB/EVP\nA1CqpV1F20YcHu9o2H/BS308cCwOxNFuarjsTzHgrH7WG9gwUvXfDPkJ08ivvWxS\n4WXsVqP6OQ7iOgJpDTx0ALyBLq2isW2/nn5Eubs9SL65pk8FBMe6cZ/JVRQ2KUwo\nHwKq+HR6qBhrLFeAFVBHB/NXjQHWT7Kkym9nPA8RMwvkXyQZj8vXL8gWwqFEY7dk\nx8hpJ10vnRjWz3afNeP9qRLBlIxdz0NlrbaZ/Xh/h+2pQX3i8S4cyTYDF56Cw98X\nPjWoOi45TlZ33cbh7YsgyODZcmr1WOeRSQIDAQABo1MwUTAdBgNVHQ4EFgQUNKKH\nIC1T0pAoUUXO2+TT488p45AwHwYDVR0jBBgwFoAUNKKHIC1T0pAoUUXO2+TT488p\n45AwDwYDVR0TAQH/BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEAonF1YEnW+vSp\njRxq+vB3foaHUkiEDP4ipDdknZgu19JKW+NSEvz9mAKU1zVnN621I1JURuDELBTN\nBa5oa1BnAQ3kzEtGr/yJZh477i15L/FBUvTjUQlnftKSJF22BD0YamALSsdHyJaS\nl6a8YdaFV2muzjk0aDFutMk1kESiUh02FY5dU8MTPcarGSqUFBxT9TqGYlf7TcEI\nA35EDCIbEzkqUofzzp70rXN1Z9TdR/rf74waSn4/tPhF5/Eosf0+hC/IRz1V+3+6\nbCIx8M+jzQZU8u92iAnZkp9rGgBZZnonZ6phI0WAR67UBSvD5939DGlqDiQjMsuX\nz+e3gqRxKQ==\n-----END CERTIFICATE-----"
-CA_KEY_PEM = "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCzeKd6Cc615Jaj\n+JEBXlhRnu3HWkOeL5x0Nw2QOA+5usz1toH8RU8DUKqlXUXbRhwe72jYf8FLfTxw\nLA7E0W5quOxPMeCsftYb2DBS9d8M+QnTyK+9bFLhZexWo/o5DuI6AmkNPHQAvIEu\nraKxbb+efkS5uz1IvrmmTwUEx7pxn8lVFDYpTCgfAqr4dHqoGGssV4AVUEcH81eN\nAdZPsqTKb2c8DxEzC+RfJBmPy9cvyBbCoURjt2THyGknXS+dGNbPdp814/2pEsGU\njF3PQ2Wttpn9eH+H7alBfeLxLhzJNgMXnoLD3xc+Nag6LjlOVnfdxuHtiyDI4Nly\navVY55FJAgMBAAECggEAAWVrDsjRv1oqY9cqBZ6JcFpx/hmGf3izrmHD7L8gPDEm\n/rMEmtpNLY5B7ZcRVTiGknpepe8vKUUC+dprOP5qGKbHS9cW/jCJvjNgg4dfIgIz\n9d5Qo61v4vSrMddaZHmS//bcgK+w3//sv1i2ycuRReHfQKn4uulPl2rI9AsRDmji\nRWry7Dz5of17vvKe63N/sdmsDNo0RphucTBVnLw/MsDI5WXjMYqCILC/CBNhM3Ey\nemPUaZucUGc6AY+BMzF7XrYNaHL3IkN06dC8Iyn7h2v/gSSuknTa2zfUw5nBSlja\nm+wmFswXWf7OSsT1SV2o+ebs95nKdHQSIJJVMHAFaQKBgQD5P2hac7ivzr669lGk\nCdf+6d7ERpwInEOJBqahuUFfsZSVgxjPBVXSSb2CAF+4cVGn4Tbj5h3ZuIfUct7D\nf0wUfBG4dTdciAQ5+F4EWnVVeS1aHTyMy1VP+cvwHek4T0sxwFJLze99iiPv7IJl\nPy3N2pL0bzWI9kgIJal8YFCcRQKBgQC4VVSm+dUlUB+VExufxEljTBQw9SgAwoi0\nsE/sf2pbcRHk9mneYBLLmkat6Rig4j+S/WFFPWZdnD7JCG1NjgRhJr54iRXzR2yB\ncq5qPplTtJB7zxF+gk01LJHnuqfIOOc9vrCM2eTQTs/hhgjcWVUudWbgFxoQNcDy\nc8YyCSNLNQKBgQDGU8IBV1t56RSzSBSmZn7Mg+OSYmz+HPlQK06kGPj/4BnO7kXr\nVN95ONvmec2wwdqrrvUyWoUeHUtXrR+8h6pOEns3P24R3tkeF5cX97KtlIKV1fW8\nQn9b5/Ry2BofiFjY+aOCVhde2XDHFHadgaw8xNNyVJtQpEek0/MM2MbL0QKBgAyY\nWAZov7Wi+eV3vsV15gXQ5vhJaAhVQn4GJg/kzOGeojhg1e8J5X7f9cBgUvx7ORjU\nE1dl0J7I1ElsN/u6nnX87brSsxtCYBmgOmasDFH53n13MpzQTnI5r2aEDH7T1IkV\nhH67TLUnDXE9dVGJERbxkqvxKCi/Y4Wtf3dfxHeZAoGBAKivNGFeCgaoqwdvIP7I\nxr/D03OgdfPn2qlR1HqsZbBFncBcs8ZaqqJ8z4XtciwCJAXMqGbd2EGRB6qmLPYe\nfmXBZyQ+OJXbjaw1hYWo6UsNa4SnPSwYbZsoht3bgqM7YNoMur3xAgKTMpHK1LRv\nKExPKJsV0Kb6sQ6X2vFrnVBh\n-----END PRIVATE KEY-----"
-CERT_PEM = "-----BEGIN CERTIFICATE-----\nMIIDKzCCAhOgAwIBAgIUGjPhTAHBo+rI0jwF4drOD1h07/EwDQYJKoZIhvcNAQEL\nBQAwKTEQMA4GA1UEAwwHVGVzdCBDQTEVMBMGA1UECgwMcGZTZW5zZSBUZXN0MB4X\nDTI2MDIwNzAxMjYyOFoXDTM2MDIwNTAxMjYyOFowMjEZMBcGA1UEAwwQdGVzdC5l\neGFtcGxlLmNvbTEVMBMGA1UECgwMcGZTZW5zZSBUZXN0MIIBIjANBgkqhkiG9w0B\nAQEFAAOCAQ8AMIIBCgKCAQEAsFHLy6MMYwtaV0SSr9nLOFbWlF9YZedINQV8E/z4\n26dJcBCHPLaEj8dI7jgNZnhdzoX52FG3zNs+Tw7NC8uYjFRC32gyx2nULn1T+lzC\ncPcU/wmSstgWXSUPUQkZSbua2ETH7IqKFeVMN3fCz/1eNmXR0Cjs16H7M7+qOeMH\nA/gMHCZhuyCEBsiF3uga6tg2P048CrQprmlccy3EXcDEFLYppCvycncpqVyneixL\nalV3ZLtULWetot3NMy/09bNpwDrzrzbq6BrEMnp0ANT8PpM19wVoxwWmdgkbeUk+\nIl9WirEFdTg9IUuEFworVbAkiaYNqISs85KdfmgkpOM+BwIDAQABo0IwQDAdBgNV\nHQ4EFgQUPkeP0fa/AoRDCCIjEDRCUxLu6AowHwYDVR0jBBgwFoAUNKKHIC1T0pAo\nUUXO2+TT488p45AwDQYJKoZIhvcNAQELBQADggEBAH3zwwnB/RfzmNBKm9dYf3EE\ngS3fIdRu7vOTJpRAhAxhjg92po2OyxLCINuRHQImXP3A4+Dxpvm57Gupzc8Ct098\nXyscFNebR/XrVPI11ggRhy3giVH61dS8OpkrcwRyVuTF/S11312e+ptsqpiAWh0M\nJsXqUCVjwW39FdcxBim++9LAt2XeiyaxqlJln0jN5jyLmSF90CV4NnFMOOdIMkwn\nuFouKAgxbb1q1mL1VE9c4fD9BXxqfldnkZqOG56331TVfhJ99dsIxh7aO9rk1txW\nRKgTO+dSPffND5e5lENE+BDKx9cUm2Vtc05J3vD7V4cyK8bmBzA6tt6uI/8qvsA=\n-----END CERTIFICATE-----"
-CERT_KEY_PEM = "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCwUcvLowxjC1pX\nRJKv2cs4VtaUX1hl50g1BXwT/Pjbp0lwEIc8toSPx0juOA1meF3OhfnYUbfM2z5P\nDs0Ly5iMVELfaDLHadQufVP6XMJw9xT/CZKy2BZdJQ9RCRlJu5rYRMfsiooV5Uw3\nd8LP/V42ZdHQKOzXofszv6o54wcD+AwcJmG7IIQGyIXe6Brq2DY/TjwKtCmuaVxz\nLcRdwMQUtimkK/JydympXKd6LEtqVXdku1QtZ62i3c0zL/T1s2nAOvOvNuroGsQy\nenQA1Pw+kzX3BWjHBaZ2CRt5ST4iX1aKsQV1OD0hS4QXCitVsCSJpg2ohKzzkp1+\naCSk4z4HAgMBAAECggEABAZ3W23x/Z2H5vUgT4EZNBnmFTC7YRGEzae95kDrYixc\nBKxul0gSwlY03TIMuu763pj4FA8C3gY6p8MOkvsyFNtkRBsUtFu/UH5jo+lpNlCr\nEIrPPWOp2F+HuCcNMOiRB5NDvdaIgikgHSYP8v/1nif4lcLRbAzSd3h5MjrIxreM\nbc2wpu/tNgwnpcvGbhUqFBssMucvlXLeKxiP5pF7Un0+WjqC+tCJztOkryvmyE2g\njMEysclD1H7AYVqrusBmuxPW5AAb4Tv2vA4G2xm9n8BhpwpCGZdsa7ZYkb+s89Ec\nn0G/fCoRWk21p2U1N18C5QOMuxqxAFxb7YRYJszzCQKBgQDdSh6cpUgE9FeUbUkV\ntqbMjmSQKPpBEu2LF7u7x+OBPIEdFrCDMQuZHAc+MT0XFlO8jA4Pm1OoRFaI7RVZ\n8G9b/aORUg+xMKOl3o+bInY2FT/ddmp7J1J0dQDfMbU/f+jTCIzAhI094wJc3ScX\n336/nQkLRsoOdQB0gwBsodamKQKBgQDL+efd2FlP7/VJg4PGsJHGGRJ0vqtsj//c\nis1C0vCkoqtAfMtVP7wMT9SC1u+cjW13Bh6auWHL3MK31iLceymfB+73ZPBDuXz/\nlTv+hKqtYZbc1g7w9SJEqN41tFRsdMRnq18WcYAMCoQiY4R3B9lYJOqBiuvZt0mI\nvGRwYU9orwKBgQCpZSu5zewrnr/MJzxjGsbkn7vrfvLTDaI5b5mOTZ2iOKa9lbjZ\nNJokQoho21hga/79vlilKcoIbQexGYvWpW8ZhDfJ7n+ErC8Zsh1MLD1BeVLCPPuV\n+qvr6gUY1fxg95FKuqjEVrOoRDZyz/g1Fij4lUVvFGloV7hZeE7C2cBuwQKBgQCA\nZSWL4pSNmelXxf4cAqcwADY64I59fsM66vA7wRYTPAX6SNOhLMZNJa8KUQtxCyE9\ni8+V611g+uxi1dsJ2EkhvtewSIxoxQimxSSHmLDrBIP3LJMpH9TbTUTan1GJF5NO\nAnSPZxCIA9Ka5vPKDVnFfy9SLcU6PYJ/HL9IciiPJwKBgC93lXfdoyA5waYdBGYL\nVEaSfh3hxGd5sC+krUK7VXV/bCkGOX71AsiAY8Wo35yu3+24tnLaMVocgcFzjmXi\nhZu2Fa7IccV7iRh0wxoXD3BtjV37vzLq4C5yD5hgFgeNwF3LfrWVOWFAy2bjrA5+\nU1dtBhHADj/YuAIFAStvX2JE\n-----END PRIVATE KEY-----"
+CA_CERT_PEM = "-----BEGIN CERTIFICATE-----\nMIIDITCCAgmgAwIBAgICMDkwDQYJKoZIhvcNAQELBQAwKTEQMA4GA1UEAwwHVGVz\ndCBDQTEVMBMGA1UECgwMcGZTZW5zZSBUZXN0MB4XDTI2MDIwNzA4NDMwOFoXDTM2\nMDIwNTA4NDMwOFowKTEQMA4GA1UEAwwHVGVzdCBDQTEVMBMGA1UECgwMcGZTZW5z\nZSBUZXN0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsHyXY8NQRm6C\nOKfrDVjrVjWGePxOILQcpaU1GRGpbfXyjXQMbMOcHYDeXa853857iMhcH17bbBes\nyEIYb0uy/dr42bAxLthnk7waOVefm4xkcG51MEe6tDIzsKC6kDfAclHb0Hjb9kgT\nK20cW1yL6z9BHIghgas2kzwxJR9mM2ZirW5tVetdspDJi3755O6Q3j1nGK5KZBMC\nsxTxVMyvldhZpaEEw3Rnz216lUlchcNDW1DlDoPuif9x4XfGWlijhX5B+/KNwnVT\nJ3WeW/obh2RtOn7fwZsweB9R7ZNgNeZK2SZytqYyOET25+iSWEAtlUg4zmug0SYE\n/uErP4+yiwIDAQABo1MwUTAdBgNVHQ4EFgQUdNDSsN13N5F8L4E/zoSE/h+XN/Mw\nHwYDVR0jBBgwFoAUdNDSsN13N5F8L4E/zoSE/h+XN/MwDwYDVR0TAQH/BAUwAwEB\n/zANBgkqhkiG9w0BAQsFAAOCAQEAS+ML0N+Z2F6txyF/OUdV1Y9kf9DDQi9c48kJ\n5jkFxX/m7Ur8XmKUY3QgucVvcIg9gHY4aOkW226DfMBrv/gC7Ko3i+Kz4SfdaZg6\nXbNgJhWTdnGR/vYbuRoVw/UUA+Xs6aHMlA60pIYLacNVBigBsrEKznREjDceG+Bw\nBixkx+/UkmNf0J3dvzNYZTc1Hy27sm5wI2zsZlYAHOCgocU5fcXwICBqlVYbEejv\nERGkEIg2k3Sd+6Yh7gRxGkeQv9vMq7yZfEiTaQ9NMAD7FRjM5Mms1Fs2qkxG8JX3\nv2DrRM6dA1e+yXyHDGCOmQcLsYnYXBD932W+EF14SQaaIELJ1g==\n-----END CERTIFICATE-----"
+CA_KEY_PEM = "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCwfJdjw1BGboI4\np+sNWOtWNYZ4/E4gtBylpTUZEalt9fKNdAxsw5wdgN5drznfznuIyFwfXttsF6zI\nQhhvS7L92vjZsDEu2GeTvBo5V5+bjGRwbnUwR7q0MjOwoLqQN8ByUdvQeNv2SBMr\nbRxbXIvrP0EciCGBqzaTPDElH2YzZmKtbm1V612ykMmLfvnk7pDePWcYrkpkEwKz\nFPFUzK+V2FmloQTDdGfPbXqVSVyFw0NbUOUOg+6J/3Hhd8ZaWKOFfkH78o3CdVMn\ndZ5b+huHZG06ft/BmzB4H1Htk2A15krZJnK2pjI4RPbn6JJYQC2VSDjOa6DRJgT+\n4Ss/j7KLAgMBAAECggEAFsQbq0zYoB1FQxW2JoSf5wEElbrGQUW6pEuJa/BxULP3\nU/PyXl1lWBD1nlQqPQqfuOdPquRLncf4C+UqzcCQGFsU2s/1qDtWMSKEp3z8I86a\nbj5xc4btOK15KYGyT0RB2P1iQ6Qzi7OEdYefrtFjYzdHqOyOlfGGGrwbAtToFB0c\nFYT188F+R1i9K3CC3sX0I/A6xkRPBWNLkl6nDxKh9egHhrSCxecEzPcNTGoZo2Em\nE309RGwnpvafeVc6jZfESGtiutpCf+trxKU+S/qlcmvC6222ZjPa18k+o4KSHpGm\n9xBtbQxqYTVd16fKBLZF2OYcEAFezbhHsBeF6YGPYQKBgQDgl5sySL718A1AnWM0\nhjJZOXuv08LyHEEWvQiIOVU2Cac1FrdV2lakMU8+aN899H//uY8W5PImR2/+gm6i\nBFBFpfuEt/bytJ6/uyG1ztTq5YUjPENM7jD/p/KTyTlXd9SxaZ5cxMqKLIsINrKE\nmrBsxKAeIsf94VngfadXeV14cwKBgQDJKs8RXMUk7u+vUlmYsjoKKfv0ucXwPg9N\nuFPz7RWx2t0ZNfHQgrXgkTj+9d2NDNkdGC20rPK9zy3uULi3qTyTZ7oepMsNwUn1\nOv+yffnYHgzpuO3v2m6zhORq59AFrgbFzoNJUW5rAnfEBl+7HgeXLDqyvaTDPo6g\n49ivGjaPiQKBgQCyzgBw+BmQE515Y9QnbO+IuYsPYLhDqNrpD3ZLfdmpO+YzDfLI\nFxwDfH5qYXPaD14YadLRl1RxxU4UgiMyOdzulka4Uv34HHSGkKU16YT5veFRPBkY\nlknMQBmQLxPH308mL8A0ezgE6ZGG6IUXrU/oSGJxm589MLwtTdx8d9NCoQKBgQDG\nafLSrS3Fv+WohxDYCvI0FDTurE0PKCbwAV7MuIstYTGyLALWJhY96P7OerKK7KE4\nkSCDlBHYJQCojfWjMMkOmsB4eRHN/1dzCT4qTxaekwUpgb0tVcTaS7j/uKT09TC4\n6XeUWT0PTt/R+Hdzl6rk8Dr1ERfxe0IybojKLJCkAQKBgExKn6TG43y8gM9rxaSD\nzRA8kLMI96LniQImjhHH/mSrWtW3t8Z5zDMn5vuPoaScv84SAiAWGDl6bmInNKpA\nyA/IibZNOenOUHmFzS87uzoDrC7ch8eqEa43KhBcsryMYNqphwjw6CNL1gZkGVpT\n1IgDA7lYJ4B3TIjIFzk/Pknn\n-----END PRIVATE KEY-----"
+CERT_PEM = "-----BEGIN CERTIFICATE-----\nMIIDGjCCAgKgAwIBAgIDAQkyMA0GCSqGSIb3DQEBCwUAMCkxEDAOBgNVBAMMB1Rl\nc3QgQ0ExFTATBgNVBAoMDHBmU2Vuc2UgVGVzdDAeFw0yNjAyMDcwODQzMDhaFw0z\nNjAyMDUwODQzMDhaMDIxGTAXBgNVBAMMEHRlc3QuZXhhbXBsZS5jb20xFTATBgNV\nBAoMDHBmU2Vuc2UgVGVzdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB\nAMVJuOo0Uc/W/SmJ5VeWxbDmc4ERs1oYgN4iJfYbPTAyVOcncKcvRJfnn/7yzKBm\n+8VJ6vEW85w4l9i1TpZGJcjVztcxGWyShQset4dGCEO/dlN5Mdjk40SUJagjnqJx\nv5CiKRadBGonFC4q9OgzLTo49Pp67FTBLkJ2YOYfSKfff1jsRPWkVLh1DryhfhrG\nMnIkSqiwd8GcH1CvLQgJXl+gkwW+aj0bFN/p8tqFdhzkOXNBuhDNV1cm7s9koLda\nwRwEZC61kDBLD03F1BpTC3SCjwrffOSe9iaW6xu3Zd6thkWLk+qUbo7jVqssefEU\nirI2TwwdIcoEcj+IKn2XDJkCAwEAAaNCMEAwHQYDVR0OBBYEFLpeQt6fkePzG8Rv\nNVVxDg1TaFVSMB8GA1UdIwQYMBaAFHTQ0rDddzeRfC+BP86EhP4flzfzMA0GCSqG\nSIb3DQEBCwUAA4IBAQBvvfaGdkf69515YpbZL3l7RPJV5xs/SEd0hWS9NiX1ccv9\nL07Ldy0IbqYRochnWMZq/nZfTC6u2U2n1nMKeFlos5D351pZt7sNqSDBx28Uq2rN\nx8Yh7h9UR18jkDJhv/SvFRWy7n2uQ4GQEZLoHzzhQMSoiCW2xGXl/28NZuY7br5a\nFTnr7FQ+iqiVoX+mPocCYnhnD4gqtLQYlrkcnf9YAXtT1m01ICLWGImgIFp86kVY\nDfr8SxzwH1GAcFn0xB6I50yqxPCbGZBZqWvSAiynsxEK+TqWEk+cWN4Y+vkRWAbZ\nf/gVTMr8CvCVTVmE3UTbWPD/YjzuN1WuDgqjDRjD\n-----END CERTIFICATE-----"
+CERT_KEY_PEM = "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDFSbjqNFHP1v0p\nieVXlsWw5nOBEbNaGIDeIiX2Gz0wMlTnJ3CnL0SX55/+8sygZvvFSerxFvOcOJfY\ntU6WRiXI1c7XMRlskoULHreHRghDv3ZTeTHY5ONElCWoI56icb+QoikWnQRqJxQu\nKvToMy06OPT6euxUwS5CdmDmH0in339Y7ET1pFS4dQ68oX4axjJyJEqosHfBnB9Q\nry0ICV5foJMFvmo9GxTf6fLahXYc5DlzQboQzVdXJu7PZKC3WsEcBGQutZAwSw9N\nxdQaUwt0go8K33zknvYmlusbt2XerYZFi5PqlG6O41arLHnxFIqyNk8MHSHKBHI/\niCp9lwyZAgMBAAECggEAK4X6D2D/c3SgYRuUxt/yOPZ+IMlA4e1p8Jdj/IlB1HIm\nHOCsj5Vz8ncc6uexkOlnPbzy4cEIeTxa82n8LlbHWykf+oVQcI1aYHukTWl7xUZl\n2kBwaMMGCEkOjateAcRKWKQNoHl/UdPRNeYwJVG09pU+Jkwb+w6rH+pxshLQuofG\npD1BZWzs9EfuVXeuo1h4pk8T9JL0VsYQWBr97Le5EGMgGEkPEvVS3SgT8if0tAU+\nLd3kOv7GgGKeNjos3PMpCp82kHYsA+KXKpwQIrut/LRnBm3eSzOqjbh3QQF7UbxH\n1ah28lnTzwc5GUi3A9Aj0WupDTwimtSnV2evgDh/IQKBgQDnAsfLP/AxPsFIzld3\nDiydfD5jWWvCHwElBex7yDHxHXPdoywvRBueT+EoG8IhvTcroCUIWy82Af7TQ6WL\nm/WmjWlmsnZ8ah1r42gx4rObRc18q2yNnAPksDVbBLoSY4vp8o2o56vme321G02A\nr/I0lzqaYIX7lxJmDsscNgExLQKBgQDaoRP6vg4v2TsKJZGGO/Z4VUUWu9QLexzj\nTllWogMqZZ6flMQshhyBP7N/hiO1VbDE0aiuAsO/ZTbdPVXZ8pA8oM2cEfWNNDsc\nrvlm4vQrJ+awp2RnEQsniRizgxeYwzQjo1am7uv2udrYenwhgnNVDQEdlTlOzO8a\n9N9a2BH0nQKBgAM1KK0L0Dv+0RQ/uTsv+TKenQcoILTrVUq8UFJPr1HXxNoY/+4Q\nFgoWtdumtwVc6T0z1g/NpFQtpuosEEpl+f08DXCdncOQfaQX3kSDD1dimr3Wa4Vz\n2yH7yGHhKOxEcZboBUuJG/vxTweKv4K/7q8IQooOOQ4LRPgh0HQt08ppAoGBANki\ne5ZfpfVtuU5Vi5eW/C38+jYe6/VPG5zB1sbM93nnHUh+1uslczAG1T5FOjfB2GNR\nm0bfpgvz+S532UkxuIEOb8aeq5LHGiJdwYOmyjwGT/6I8ZXPfpWQesDm5Muqq6Dt\ne4Ul66LKaYjw9VHOnr8MwFviNd2Geb77Ds3JpOOdAoGBAMZ0cH7TID2qhOhbHNbq\n1oe1VMJ2wABJQ923jPwNa8UqzoZtE/NGkzaEPBZ91SpHSo88DmzcvY06C7tKi//H\nk4i7T0WIbj93UPzwEzamnI+KF1rrzsZpImoJ5vvEe7EnQMXUwcGwXsJZphNjFhUp\nwpkYG2WCI0nyfqoM9noi/oj1\n-----END PRIVATE KEY-----"
 
 
 class RetryClient(httpx.Client):
@@ -79,7 +79,7 @@ def _delete_with_retry(client: httpx.Client, path: str, obj_id, params: dict | N
             break
         time.sleep(5)
     assert resp.status_code in (200, 404), f"Delete {path} id={obj_id} failed: {resp.text[:500]}"
-# Total generated tests: 188
+# Total generated tests: 199
 
 def test_crud_firewall_alias(client: httpx.Client):
     """CRUD lifecycle: /api/v2/firewall/alias"""
@@ -2625,7 +2625,78 @@ def test_crud_services_haproxy_backend_acl(client: httpx.Client):
         _delete_with_retry(client, "/api/v2/services/haproxy/backend", p0_id)
 
 
-# SKIP /api/v2/services/haproxy/backend/action: acl field cannot be empty, requires ACL sibling chain
+def test_crud_services_haproxy_backend_action(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/services/haproxy/backend/action (needs: services/haproxy/backend)"""
+    # Setup: create parent services/haproxy/backend
+    p0_resp = client.post(
+        "/api/v2/services/haproxy/backend",
+        json={
+        "name": 'pft_be_bact',
+        "agent_port": '0',
+        "persist_cookie_name": 'SRVID',
+        "descr": 'Test backend for bact',
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    try:
+        # Setup: create sibling services/haproxy/backend/acl
+        sib0_body = {
+                "name": 'pft_acl_bact',
+                "expression": 'host_starts_with',
+                "value": 'test.example.com',
+            }
+        sib0_body["parent_id"] = p0["id"]
+        sib0_resp = client.post(
+            "/api/v2/services/haproxy/backend/acl",
+            json=sib0_body,
+        )
+        sib0 = _ok(sib0_resp)
+        sib0_id = sib0.get("id")
+
+        # CREATE
+        body = {
+                "action": 'http-request_deny',
+                "server": '',
+                "customaction": '',
+                "deny_status": '403',
+                "realm": '',
+                "rule": '',
+                "lua_function": '',
+                "name": '',
+                "fmt": '',
+                "find": '',
+                "replace": '',
+                "path": '',
+                "status": '',
+                "reason": 'Denied',
+            }
+        body["parent_id"] = p0["id"]
+        body["acl"] = sib0["name"]
+        create_resp = client.post(
+            "/api/v2/services/haproxy/backend/action",
+            json=body,
+        )
+        data = _ok(create_resp)
+        obj_id = data.get("id")
+        assert obj_id is not None, f"No id in create response: {data}"
+
+        try:
+            # GET (singular)
+            get_resp = client.get(
+                "/api/v2/services/haproxy/backend/action",
+                params={"id": obj_id, "parent_id": p0["id"]},
+            )
+            _ok(get_resp)
+
+        finally:
+            _delete_with_retry(client, "/api/v2/services/haproxy/backend/action", obj_id, {"parent_id": p0["id"]})
+            _delete_with_retry(client, "/api/v2/services/haproxy/backend/acl", sib0_id, {"parent_id": p0["id"]})
+    finally:
+        _delete_with_retry(client, "/api/v2/services/haproxy/backend", p0_id)
+
 
 def test_crud_services_haproxy_backend_error_file(client: httpx.Client):
     """CRUD lifecycle: /api/v2/services/haproxy/backend/error_file (needs: services/haproxy/file, services/haproxy/backend)"""
@@ -2908,7 +2979,93 @@ def test_crud_services_haproxy_frontend_acl(client: httpx.Client):
         _delete_with_retry(client, "/api/v2/services/haproxy/backend", p0_id)
 
 
-# SKIP /api/v2/services/haproxy/frontend/action: acl field cannot be empty, requires ACL sibling chain
+def test_crud_services_haproxy_frontend_action(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/services/haproxy/frontend/action (needs: services/haproxy/backend, services/haproxy/frontend)"""
+    # Setup: create parent services/haproxy/backend
+    p0_resp = client.post(
+        "/api/v2/services/haproxy/backend",
+        json={
+        "name": 'pft_be_fact',
+        "agent_port": '0',
+        "persist_cookie_name": 'SRVID',
+        "descr": 'Test backend for fact',
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    # Setup: create parent services/haproxy/frontend
+    p1_resp = client.post(
+        "/api/v2/services/haproxy/frontend",
+        json={
+        "name": 'pft_fe_act',
+        "type": 'http',
+    },
+    )
+    p1 = _ok(p1_resp)
+    p1_id = p1.get("id")
+    assert p1_id is not None, f"No id in parent response: {p1}"
+
+    try:
+        try:
+            # Setup: create sibling services/haproxy/frontend/acl
+            sib0_body = {
+                    "name": 'pft_acl_fact',
+                    "expression": 'host_starts_with',
+                    "value": 'test.example.com',
+                }
+            sib0_body["parent_id"] = p1["id"]
+            sib0_resp = client.post(
+                "/api/v2/services/haproxy/frontend/acl",
+                json=sib0_body,
+            )
+            sib0 = _ok(sib0_resp)
+            sib0_id = sib0.get("id")
+
+            # CREATE
+            body = {
+                    "action": 'http-request_deny',
+                    "server": '',
+                    "customaction": '',
+                    "deny_status": '403',
+                    "realm": '',
+                    "rule": '',
+                    "lua_function": '',
+                    "name": '',
+                    "fmt": '',
+                    "find": '',
+                    "replace": '',
+                    "path": '',
+                    "status": '',
+                    "reason": 'Denied',
+                }
+            body["parent_id"] = p1["id"]
+            body["acl"] = sib0["name"]
+            create_resp = client.post(
+                "/api/v2/services/haproxy/frontend/action",
+                json=body,
+            )
+            data = _ok(create_resp)
+            obj_id = data.get("id")
+            assert obj_id is not None, f"No id in create response: {data}"
+
+            try:
+                # GET (singular)
+                get_resp = client.get(
+                    "/api/v2/services/haproxy/frontend/action",
+                    params={"id": obj_id, "parent_id": p1["id"]},
+                )
+                _ok(get_resp)
+
+            finally:
+                _delete_with_retry(client, "/api/v2/services/haproxy/frontend/action", obj_id, {"parent_id": p1["id"]})
+                _delete_with_retry(client, "/api/v2/services/haproxy/frontend/acl", sib0_id, {"parent_id": p1["id"]})
+        finally:
+            _delete_with_retry(client, "/api/v2/services/haproxy/frontend", p1_id)
+    finally:
+        _delete_with_retry(client, "/api/v2/services/haproxy/backend", p0_id)
+
 
 def test_crud_services_haproxy_frontend_address(client: httpx.Client):
     """CRUD lifecycle: /api/v2/services/haproxy/frontend/address (needs: services/haproxy/backend, services/haproxy/frontend)"""
@@ -3262,7 +3419,87 @@ def test_crud_system_crl(client: httpx.Client):
         _delete_with_retry(client, "/api/v2/system/certificate_authority", p0_id)
 
 
-# SKIP /api/v2/system/crl/revoked_certificate: cert serial hex → PHP INT overflow (v2.4.3 bug, confirmed with imported PEM certs)
+def test_crud_system_crl_revoked_certificate(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/system/crl/revoked_certificate (needs: system/certificate_authority, system/certificate, system/crl)"""
+    # Setup: create parent system/certificate_authority
+    p0_resp = client.post(
+        "/api/v2/system/certificate_authority",
+        json={
+        "descr": 'CA for CRL revoke',
+        "crt": CA_CERT_PEM,
+        "prv": CA_KEY_PEM,
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    # Setup: create parent system/certificate
+    p1_body = {
+        "descr": 'Cert for CRL revoke',
+        "crt": CERT_PEM,
+        "prv": CERT_KEY_PEM,
+    }
+    p1_body["caref"] = p0["refid"]
+    p1_resp = client.post(
+        "/api/v2/system/certificate",
+        json=p1_body,
+    )
+    p1 = _ok(p1_resp)
+    p1_id = p1.get("id")
+    assert p1_id is not None, f"No id in parent response: {p1}"
+
+    # Setup: create parent system/crl
+    p2_body = {
+        "descr": 'CRL for revoke',
+        "method": 'internal',
+        "text": '',
+    }
+    p2_body["caref"] = p0["refid"]
+    p2_resp = client.post(
+        "/api/v2/system/crl",
+        json=p2_body,
+    )
+    p2 = _ok(p2_resp)
+    p2_id = p2.get("id")
+    assert p2_id is not None, f"No id in parent response: {p2}"
+
+    try:
+        try:
+            try:
+                # CREATE
+                body = {
+                        "revoke_time": 1700000000,
+                        "reason": 0,
+                    }
+                body["caref"] = p0["refid"]
+                body["certref"] = p1["refid"]
+                body["parent_id"] = p2["id"]
+                create_resp = client.post(
+                    "/api/v2/system/crl/revoked_certificate",
+                    json=body,
+                )
+                data = _ok(create_resp)
+                obj_id = data.get("id")
+                assert obj_id is not None, f"No id in create response: {data}"
+
+                try:
+                    # GET (singular)
+                    get_resp = client.get(
+                        "/api/v2/system/crl/revoked_certificate",
+                        params={"id": obj_id, "parent_id": p2["id"]},
+                    )
+                    _ok(get_resp)
+
+                finally:
+                    _delete_with_retry(client, "/api/v2/system/crl/revoked_certificate", obj_id, {"parent_id": p2["id"]})
+            finally:
+                _delete_with_retry(client, "/api/v2/system/crl", p2_id)
+        finally:
+            _delete_with_retry(client, "/api/v2/system/certificate", p1_id)
+    finally:
+        _delete_with_retry(client, "/api/v2/system/certificate_authority", p0_id)
+
 
 def test_crud_system_restapi_access_list_entry(client: httpx.Client):
     """CRUD lifecycle: /api/v2/system/restapi/access_list/entry"""
@@ -5489,7 +5726,12 @@ def test_action_graphql(client: httpx.Client):
 
 # SKIP /api/v2/services/acme/certificate/renew: requires real ACME server
 
-# SKIP /api/v2/services/wake_on_lan/send: requires real MAC address on LAN
+def test_action_services_wake_on_lan_send(client: httpx.Client):
+    """Action: POST /api/v2/services/wake_on_lan/send"""
+    resp = client.post("/api/v2/services/wake_on_lan/send", json={'interface': 'lan', 'mac_addr': '00:11:22:33:44:55'})
+    data = _ok(resp)
+    assert data is not None
+
 
 def test_action_status_service(client: httpx.Client):
     """Action: POST /api/v2/status/service"""
@@ -5498,11 +5740,49 @@ def test_action_status_service(client: httpx.Client):
     assert data is not None
 
 
-# SKIP /api/v2/system/certificate/generate: depends on CA generate (broken in v2.4.3)
+def test_action_system_certificate_generate(client: httpx.Client):
+    """Action: POST /api/v2/system/certificate/generate"""
+    # Generate a CA first
+    ca_resp = client.post("/api/v2/system/certificate_authority/generate", json={
+        "descr": "CA for cert gen", "keytype": "RSA", "keylen": 2048,
+        "digest_alg": "sha256", "dn_commonname": "Cert Gen CA", "lifetime": 3650,
+        "dn_country": "US", "dn_state": "California", "dn_city": "San Francisco", "dn_organization": "pfSense Test", "dn_organizationalunit": "Testing",
+    })
+    ca = _ok(ca_resp)
+    body = {'descr': 'Test Generated Cert', 'keytype': 'RSA', 'keylen': 2048, 'digest_alg': 'sha256', 'dn_commonname': 'gen-cert.test', 'lifetime': 365, 'type': 'server'}
+    body["caref"] = ca["refid"]
+    try:
+        resp = client.post("/api/v2/system/certificate/generate", json=body)
+        data = _ok(resp)
+        client.delete("/api/v2/system/certificate", params={"id": data["id"]})
+    finally:
+        client.delete("/api/v2/system/certificate_authority", params={"id": ca["id"]})
 
-# SKIP /api/v2/system/certificate/pkcs12/export: depends on generated cert (broken in v2.4.3)
 
-# SKIP /api/v2/system/certificate/renew: depends on cert generate (broken in v2.4.3)
+# SKIP /api/v2/system/certificate/pkcs12/export: no PKCS12 content handler in REST API v2.4.3 (406 Accept error)
+
+def test_action_system_certificate_renew(client: httpx.Client):
+    """Action: POST /api/v2/system/certificate/renew"""
+    # Generate a CA and cert first
+    ca_resp = client.post("/api/v2/system/certificate_authority/generate", json={
+        "descr": "CA for cert action", "keytype": "RSA", "keylen": 2048,
+        "digest_alg": "sha256", "dn_commonname": "Cert Action CA", "lifetime": 3650,
+        "dn_country": "US", "dn_state": "California", "dn_city": "San Francisco", "dn_organization": "pfSense Test", "dn_organizationalunit": "Testing",
+    })
+    ca = _ok(ca_resp)
+    cert_resp = client.post("/api/v2/system/certificate/generate", json={
+        "descr": "Cert for action", "caref": ca["refid"], "keytype": "RSA",
+        "keylen": 2048, "digest_alg": "sha256", "dn_commonname": "action.test",
+        "lifetime": 365, "type": "server",
+    })
+    cert = _ok(cert_resp)
+    try:
+        resp = client.post("/api/v2/system/certificate/renew", json={"certref": cert["refid"]})
+        _ok(resp)
+    finally:
+        client.delete("/api/v2/system/certificate", params={"id": cert["id"]})
+        client.delete("/api/v2/system/certificate_authority", params={"id": ca["id"]})
+
 
 def test_action_system_certificate_signing_request(client: httpx.Client):
     """Action: POST /api/v2/system/certificate/signing_request"""
@@ -5514,12 +5794,71 @@ def test_action_system_certificate_signing_request(client: httpx.Client):
         client.delete("/api/v2/system/certificate", params={"id": data["id"]})
 
 
-# SKIP /api/v2/system/certificate/signing_request/sign: depends on CA generate (broken in v2.4.3)
+def test_action_system_certificate_signing_request_sign(client: httpx.Client):
+    """Action: POST /api/v2/system/certificate/signing_request/sign"""
+    # Generate CA, create CSR, then sign it
+    ca_resp = client.post("/api/v2/system/certificate_authority/generate", json={
+        "descr": "CA for CSR sign", "keytype": "RSA", "keylen": 2048,
+        "digest_alg": "sha256", "dn_commonname": "CSR Sign CA", "lifetime": 3650,
+        "dn_country": "US", "dn_state": "California", "dn_city": "San Francisco", "dn_organization": "pfSense Test", "dn_organizationalunit": "Testing",
+    })
+    ca = _ok(ca_resp)
+    csr_resp = client.post("/api/v2/system/certificate/signing_request", json={
+        "descr": "Test CSR to sign", "keytype": "RSA", "keylen": 2048,
+        "digest_alg": "sha256", "dn_commonname": "csr-sign.test",
+    })
+    csr_data = _ok(csr_resp)
+    try:
+        resp = client.post("/api/v2/system/certificate/signing_request/sign", json={
+            "descr": "Signed from CSR", "caref": ca["refid"],
+            "csr": csr_data["csr"], "digest_alg": "sha256",
+        })
+        signed = _ok(resp)
+    finally:
+        client.delete("/api/v2/system/certificate", params={"id": csr_data["id"]})
+        client.delete("/api/v2/system/certificate_authority", params={"id": ca["id"]})
 
-# SKIP /api/v2/system/certificate_authority/generate: server 500: failed for unknown reason (REST API v2.4.3 bug)
 
-# SKIP /api/v2/system/certificate_authority/renew: depends on CA generate (broken in v2.4.3)
+def test_action_system_certificate_authority_generate(client: httpx.Client):
+    """Action: POST /api/v2/system/certificate_authority/generate"""
+    resp = client.post("/api/v2/system/certificate_authority/generate", json={'descr': 'Test Generated CA', 'keytype': 'RSA', 'keylen': 2048, 'digest_alg': 'sha256', 'dn_commonname': 'Test Gen CA', 'dn_country': 'US', 'dn_state': 'California', 'dn_city': 'San Francisco', 'dn_organization': 'pfSense Test', 'dn_organizationalunit': 'Testing', 'lifetime': 3650})
+    data = _ok(resp)
+    assert data is not None
+    data = resp.json().get('data', {})
+    if data.get('id') is not None:
+        client.delete("/api/v2/system/certificate_authority", params={"id": data["id"]})
+
+
+def test_action_system_certificate_authority_renew(client: httpx.Client):
+    """Action: POST /api/v2/system/certificate_authority/renew"""
+    # Generate a CA first
+    ca_resp = client.post("/api/v2/system/certificate_authority/generate", json={
+        "descr": "CA for renew test", "keytype": "RSA", "keylen": 2048,
+        "digest_alg": "sha256", "dn_commonname": "Renew Test CA", "lifetime": 3650,
+        "dn_country": "US", "dn_state": "California", "dn_city": "San Francisco", "dn_organization": "pfSense Test", "dn_organizationalunit": "Testing",
+    })
+    ca = _ok(ca_resp)
+    try:
+        resp = client.post("/api/v2/system/certificate_authority/renew", json={"caref": ca["refid"]})
+        _ok(resp)
+    finally:
+        client.delete("/api/v2/system/certificate_authority", params={"id": ca["id"]})
+
 
 # SKIP /api/v2/system/restapi/settings/sync: HA sync endpoint times out without peer
 
 # SKIP /api/v2/vpn/openvpn/client_export: requires functioning OpenVPN server
+
+def test_zz_action_diagnostics_reboot(client: httpx.Client):
+    """Action: POST /api/v2/diagnostics/reboot"""
+    resp = client.post("/api/v2/diagnostics/reboot", json={})
+    data = _ok(resp)
+    assert data is not None
+
+
+def test_zzz_action_diagnostics_halt_system(client: httpx.Client):
+    """Action: POST /api/v2/diagnostics/halt_system"""
+    resp = client.post("/api/v2/diagnostics/halt_system", json={})
+    data = _ok(resp)
+    assert data is not None
+

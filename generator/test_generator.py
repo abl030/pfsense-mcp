@@ -9,7 +9,7 @@ Test categories:
   - Apply: GET status returns 200
   - Plural: list returns array
 
-Skips dangerous endpoints (halt, reboot, command_prompt, etc).
+Halt/reboot tests run last (zz_/zzz_ prefix).
 """
 
 from __future__ import annotations
@@ -348,14 +348,9 @@ _SKIP_CRUD_PATHS: dict[str, str] = {
     "/api/v2/services/freeradius/client": "freeradius routes need REST API v2.6+ (pfSense 2.8+)",
     "/api/v2/services/freeradius/interface": "freeradius routes need REST API v2.6+ (pfSense 2.8+)",
     "/api/v2/services/freeradius/user": "freeradius routes need REST API v2.6+ (pfSense 2.8+)",
-    # HAProxy actions: acl field cannot be empty — needs ACL created as sibling dependency
-    "/api/v2/services/haproxy/backend/action": "acl field cannot be empty, requires ACL sibling chain",
-    "/api/v2/services/haproxy/frontend/action": "acl field cannot be empty, requires ACL sibling chain",
-    # HAProxy settings subs: server 500 "parent Model has been constructed" bug
+    # HAProxy settings subs: server 500 "parent Model has been constructed" bug (confirmed setup_patches don't help)
     "/api/v2/services/haproxy/settings/dns_resolver": "server 500: parent model construction bug in REST API v2.4.3",
     "/api/v2/services/haproxy/settings/email_mailer": "server 500: parent model construction bug in REST API v2.4.3",
-    # CRL revoked_certificate: cert serial hex → PHP INT overflow (confirmed with PEM certs too)
-    "/api/v2/system/crl/revoked_certificate": "cert serial hex → PHP INT overflow (v2.4.3 bug, confirmed with imported PEM certs)",
 }
 
 # ── Singleton GET/PATCH endpoints (settings-like but not auto-detected) ───────
@@ -451,6 +446,11 @@ _ACTION_TESTS: dict[str, dict[str, Any]] = {
             "keylen": 2048,
             "digest_alg": "sha256",
             "dn_commonname": "Test Gen CA",
+            "dn_country": "US",
+            "dn_state": "California",
+            "dn_city": "San Francisco",
+            "dn_organization": "pfSense Test",
+            "dn_organizationalunit": "Testing",
             "lifetime": 3650,
         },
         "cleanup_path": "/api/v2/system/certificate_authority",
@@ -470,7 +470,6 @@ _ACTION_TESTS: dict[str, dict[str, Any]] = {
         "cleanup_path": "/api/v2/system/certificate",
     },
     "/api/v2/system/certificate/renew": {"needs_generated_cert": True},
-    "/api/v2/system/certificate/pkcs12/export": {"needs_generated_cert": True, "expect_status": [200]},
     "/api/v2/system/certificate/signing_request/sign": {"needs_ca_and_csr": True},
     "/api/v2/status/service": {
         "body": {"id": 0, "action": "restart"},
@@ -482,25 +481,29 @@ _ACTION_TESTS: dict[str, dict[str, Any]] = {
         "body": {"query": "{ __schema { queryType { name } } }"},
         "raw_response": True,  # GraphQL returns raw {"data": ...} not standard envelope
     },
+    "/api/v2/services/wake_on_lan/send": {
+        "body": {"interface": "lan", "mac_addr": "00:11:22:33:44:55"},
+    },
+    "/api/v2/diagnostics/reboot": {
+        "body": {},
+        "test_prefix": "zz_",
+    },
+    "/api/v2/diagnostics/halt_system": {
+        "body": {},
+        "test_prefix": "zzz_",
+    },
 }
 
 # Action endpoints to skip
 _SKIP_ACTION: dict[str, str] = {
     "/api/v2/diagnostics/ping": "version-gated to REST API v2.7.0+, not available on CE 2.7.2",
-    "/api/v2/services/wake_on_lan/send": "requires real MAC address on LAN",
     "/api/v2/services/acme/account_key/register": "needs real ACME server for registration",
     "/api/v2/services/acme/certificate/issue": "requires real ACME server",
     "/api/v2/services/acme/certificate/renew": "requires real ACME server",
     "/api/v2/vpn/openvpn/client_export": "requires functioning OpenVPN server",
     # status/service: now tested (restart syslogd)
     "/api/v2/system/restapi/settings/sync": "HA sync endpoint times out without peer",
-    # CA/cert generate returns 500 "failed for unknown reason" on REST API v2.4.3 (pfSense CE 2.7.2)
-    "/api/v2/system/certificate_authority/generate": "server 500: failed for unknown reason (REST API v2.4.3 bug)",
-    "/api/v2/system/certificate_authority/renew": "depends on CA generate (broken in v2.4.3)",
-    "/api/v2/system/certificate/generate": "depends on CA generate (broken in v2.4.3)",
-    "/api/v2/system/certificate/renew": "depends on cert generate (broken in v2.4.3)",
-    "/api/v2/system/certificate/pkcs12/export": "depends on generated cert (broken in v2.4.3)",
-    "/api/v2/system/certificate/signing_request/sign": "depends on CA generate (broken in v2.4.3)",
+    "/api/v2/system/certificate/pkcs12/export": "no PKCS12 content handler in REST API v2.4.3 (406 Accept error)",
 }
 
 # ── Pre-generated test PEM certificates ───────────────────────────────────────
@@ -508,108 +511,107 @@ _SKIP_ACTION: dict[str, str] = {
 # Generated with: openssl req -x509 -newkey rsa:2048 ...
 _TEST_CA_CERT_PEM = (
     "-----BEGIN CERTIFICATE-----\\n"
-    "MIIDMzCCAhugAwIBAgIUbtFPoQ0zYg1ScUJ7+FnklDgHgh8wDQYJKoZIhvcNAQEL\\n"
-    "BQAwKTEQMA4GA1UEAwwHVGVzdCBDQTEVMBMGA1UECgwMcGZTZW5zZSBUZXN0MB4X\\n"
-    "DTI2MDIwNzAxMjYyMloXDTM2MDIwNTAxMjYyMlowKTEQMA4GA1UEAwwHVGVzdCBD\\n"
-    "QTEVMBMGA1UECgwMcGZTZW5zZSBUZXN0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A\\n"
-    "MIIBCgKCAQEAs3inegnOteSWo/iRAV5YUZ7tx1pDni+cdDcNkDgPubrM9baB/EVP\\n"
-    "A1CqpV1F20YcHu9o2H/BS308cCwOxNFuarjsTzHgrH7WG9gwUvXfDPkJ08ivvWxS\\n"
-    "4WXsVqP6OQ7iOgJpDTx0ALyBLq2isW2/nn5Eubs9SL65pk8FBMe6cZ/JVRQ2KUwo\\n"
-    "HwKq+HR6qBhrLFeAFVBHB/NXjQHWT7Kkym9nPA8RMwvkXyQZj8vXL8gWwqFEY7dk\\n"
-    "x8hpJ10vnRjWz3afNeP9qRLBlIxdz0NlrbaZ/Xh/h+2pQX3i8S4cyTYDF56Cw98X\\n"
-    "PjWoOi45TlZ33cbh7YsgyODZcmr1WOeRSQIDAQABo1MwUTAdBgNVHQ4EFgQUNKKH\\n"
-    "IC1T0pAoUUXO2+TT488p45AwHwYDVR0jBBgwFoAUNKKHIC1T0pAoUUXO2+TT488p\\n"
-    "45AwDwYDVR0TAQH/BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEAonF1YEnW+vSp\\n"
-    "jRxq+vB3foaHUkiEDP4ipDdknZgu19JKW+NSEvz9mAKU1zVnN621I1JURuDELBTN\\n"
-    "Ba5oa1BnAQ3kzEtGr/yJZh477i15L/FBUvTjUQlnftKSJF22BD0YamALSsdHyJaS\\n"
-    "l6a8YdaFV2muzjk0aDFutMk1kESiUh02FY5dU8MTPcarGSqUFBxT9TqGYlf7TcEI\\n"
-    "A35EDCIbEzkqUofzzp70rXN1Z9TdR/rf74waSn4/tPhF5/Eosf0+hC/IRz1V+3+6\\n"
-    "bCIx8M+jzQZU8u92iAnZkp9rGgBZZnonZ6phI0WAR67UBSvD5939DGlqDiQjMsuX\\n"
-    "z+e3gqRxKQ==\\n"
+    "MIIDITCCAgmgAwIBAgICMDkwDQYJKoZIhvcNAQELBQAwKTEQMA4GA1UEAwwHVGVz\\n"
+    "dCBDQTEVMBMGA1UECgwMcGZTZW5zZSBUZXN0MB4XDTI2MDIwNzA4NDMwOFoXDTM2\\n"
+    "MDIwNTA4NDMwOFowKTEQMA4GA1UEAwwHVGVzdCBDQTEVMBMGA1UECgwMcGZTZW5z\\n"
+    "ZSBUZXN0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsHyXY8NQRm6C\\n"
+    "OKfrDVjrVjWGePxOILQcpaU1GRGpbfXyjXQMbMOcHYDeXa853857iMhcH17bbBes\\n"
+    "yEIYb0uy/dr42bAxLthnk7waOVefm4xkcG51MEe6tDIzsKC6kDfAclHb0Hjb9kgT\\n"
+    "K20cW1yL6z9BHIghgas2kzwxJR9mM2ZirW5tVetdspDJi3755O6Q3j1nGK5KZBMC\\n"
+    "sxTxVMyvldhZpaEEw3Rnz216lUlchcNDW1DlDoPuif9x4XfGWlijhX5B+/KNwnVT\\n"
+    "J3WeW/obh2RtOn7fwZsweB9R7ZNgNeZK2SZytqYyOET25+iSWEAtlUg4zmug0SYE\\n"
+    "/uErP4+yiwIDAQABo1MwUTAdBgNVHQ4EFgQUdNDSsN13N5F8L4E/zoSE/h+XN/Mw\\n"
+    "HwYDVR0jBBgwFoAUdNDSsN13N5F8L4E/zoSE/h+XN/MwDwYDVR0TAQH/BAUwAwEB\\n"
+    "/zANBgkqhkiG9w0BAQsFAAOCAQEAS+ML0N+Z2F6txyF/OUdV1Y9kf9DDQi9c48kJ\\n"
+    "5jkFxX/m7Ur8XmKUY3QgucVvcIg9gHY4aOkW226DfMBrv/gC7Ko3i+Kz4SfdaZg6\\n"
+    "XbNgJhWTdnGR/vYbuRoVw/UUA+Xs6aHMlA60pIYLacNVBigBsrEKznREjDceG+Bw\\n"
+    "Bixkx+/UkmNf0J3dvzNYZTc1Hy27sm5wI2zsZlYAHOCgocU5fcXwICBqlVYbEejv\\n"
+    "ERGkEIg2k3Sd+6Yh7gRxGkeQv9vMq7yZfEiTaQ9NMAD7FRjM5Mms1Fs2qkxG8JX3\\n"
+    "v2DrRM6dA1e+yXyHDGCOmQcLsYnYXBD932W+EF14SQaaIELJ1g==\\n"
     "-----END CERTIFICATE-----"
 )
 
 _TEST_CA_KEY_PEM = (
     "-----BEGIN PRIVATE KEY-----\\n"
-    "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCzeKd6Cc615Jaj\\n"
-    "+JEBXlhRnu3HWkOeL5x0Nw2QOA+5usz1toH8RU8DUKqlXUXbRhwe72jYf8FLfTxw\\n"
-    "LA7E0W5quOxPMeCsftYb2DBS9d8M+QnTyK+9bFLhZexWo/o5DuI6AmkNPHQAvIEu\\n"
-    "raKxbb+efkS5uz1IvrmmTwUEx7pxn8lVFDYpTCgfAqr4dHqoGGssV4AVUEcH81eN\\n"
-    "AdZPsqTKb2c8DxEzC+RfJBmPy9cvyBbCoURjt2THyGknXS+dGNbPdp814/2pEsGU\\n"
-    "jF3PQ2Wttpn9eH+H7alBfeLxLhzJNgMXnoLD3xc+Nag6LjlOVnfdxuHtiyDI4Nly\\n"
-    "avVY55FJAgMBAAECggEAAWVrDsjRv1oqY9cqBZ6JcFpx/hmGf3izrmHD7L8gPDEm\\n"
-    "/rMEmtpNLY5B7ZcRVTiGknpepe8vKUUC+dprOP5qGKbHS9cW/jCJvjNgg4dfIgIz\\n"
-    "9d5Qo61v4vSrMddaZHmS//bcgK+w3//sv1i2ycuRReHfQKn4uulPl2rI9AsRDmji\\n"
-    "RWry7Dz5of17vvKe63N/sdmsDNo0RphucTBVnLw/MsDI5WXjMYqCILC/CBNhM3Ey\\n"
-    "emPUaZucUGc6AY+BMzF7XrYNaHL3IkN06dC8Iyn7h2v/gSSuknTa2zfUw5nBSlja\\n"
-    "m+wmFswXWf7OSsT1SV2o+ebs95nKdHQSIJJVMHAFaQKBgQD5P2hac7ivzr669lGk\\n"
-    "Cdf+6d7ERpwInEOJBqahuUFfsZSVgxjPBVXSSb2CAF+4cVGn4Tbj5h3ZuIfUct7D\\n"
-    "f0wUfBG4dTdciAQ5+F4EWnVVeS1aHTyMy1VP+cvwHek4T0sxwFJLze99iiPv7IJl\\n"
-    "Py3N2pL0bzWI9kgIJal8YFCcRQKBgQC4VVSm+dUlUB+VExufxEljTBQw9SgAwoi0\\n"
-    "sE/sf2pbcRHk9mneYBLLmkat6Rig4j+S/WFFPWZdnD7JCG1NjgRhJr54iRXzR2yB\\n"
-    "cq5qPplTtJB7zxF+gk01LJHnuqfIOOc9vrCM2eTQTs/hhgjcWVUudWbgFxoQNcDy\\n"
-    "c8YyCSNLNQKBgQDGU8IBV1t56RSzSBSmZn7Mg+OSYmz+HPlQK06kGPj/4BnO7kXr\\n"
-    "VN95ONvmec2wwdqrrvUyWoUeHUtXrR+8h6pOEns3P24R3tkeF5cX97KtlIKV1fW8\\n"
-    "Qn9b5/Ry2BofiFjY+aOCVhde2XDHFHadgaw8xNNyVJtQpEek0/MM2MbL0QKBgAyY\\n"
-    "WAZov7Wi+eV3vsV15gXQ5vhJaAhVQn4GJg/kzOGeojhg1e8J5X7f9cBgUvx7ORjU\\n"
-    "E1dl0J7I1ElsN/u6nnX87brSsxtCYBmgOmasDFH53n13MpzQTnI5r2aEDH7T1IkV\\n"
-    "hH67TLUnDXE9dVGJERbxkqvxKCi/Y4Wtf3dfxHeZAoGBAKivNGFeCgaoqwdvIP7I\\n"
-    "xr/D03OgdfPn2qlR1HqsZbBFncBcs8ZaqqJ8z4XtciwCJAXMqGbd2EGRB6qmLPYe\\n"
-    "fmXBZyQ+OJXbjaw1hYWo6UsNa4SnPSwYbZsoht3bgqM7YNoMur3xAgKTMpHK1LRv\\n"
-    "KExPKJsV0Kb6sQ6X2vFrnVBh\\n"
+    "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCwfJdjw1BGboI4\\n"
+    "p+sNWOtWNYZ4/E4gtBylpTUZEalt9fKNdAxsw5wdgN5drznfznuIyFwfXttsF6zI\\n"
+    "QhhvS7L92vjZsDEu2GeTvBo5V5+bjGRwbnUwR7q0MjOwoLqQN8ByUdvQeNv2SBMr\\n"
+    "bRxbXIvrP0EciCGBqzaTPDElH2YzZmKtbm1V612ykMmLfvnk7pDePWcYrkpkEwKz\\n"
+    "FPFUzK+V2FmloQTDdGfPbXqVSVyFw0NbUOUOg+6J/3Hhd8ZaWKOFfkH78o3CdVMn\\n"
+    "dZ5b+huHZG06ft/BmzB4H1Htk2A15krZJnK2pjI4RPbn6JJYQC2VSDjOa6DRJgT+\\n"
+    "4Ss/j7KLAgMBAAECggEAFsQbq0zYoB1FQxW2JoSf5wEElbrGQUW6pEuJa/BxULP3\\n"
+    "U/PyXl1lWBD1nlQqPQqfuOdPquRLncf4C+UqzcCQGFsU2s/1qDtWMSKEp3z8I86a\\n"
+    "bj5xc4btOK15KYGyT0RB2P1iQ6Qzi7OEdYefrtFjYzdHqOyOlfGGGrwbAtToFB0c\\n"
+    "FYT188F+R1i9K3CC3sX0I/A6xkRPBWNLkl6nDxKh9egHhrSCxecEzPcNTGoZo2Em\\n"
+    "E309RGwnpvafeVc6jZfESGtiutpCf+trxKU+S/qlcmvC6222ZjPa18k+o4KSHpGm\\n"
+    "9xBtbQxqYTVd16fKBLZF2OYcEAFezbhHsBeF6YGPYQKBgQDgl5sySL718A1AnWM0\\n"
+    "hjJZOXuv08LyHEEWvQiIOVU2Cac1FrdV2lakMU8+aN899H//uY8W5PImR2/+gm6i\\n"
+    "BFBFpfuEt/bytJ6/uyG1ztTq5YUjPENM7jD/p/KTyTlXd9SxaZ5cxMqKLIsINrKE\\n"
+    "mrBsxKAeIsf94VngfadXeV14cwKBgQDJKs8RXMUk7u+vUlmYsjoKKfv0ucXwPg9N\\n"
+    "uFPz7RWx2t0ZNfHQgrXgkTj+9d2NDNkdGC20rPK9zy3uULi3qTyTZ7oepMsNwUn1\\n"
+    "Ov+yffnYHgzpuO3v2m6zhORq59AFrgbFzoNJUW5rAnfEBl+7HgeXLDqyvaTDPo6g\\n"
+    "49ivGjaPiQKBgQCyzgBw+BmQE515Y9QnbO+IuYsPYLhDqNrpD3ZLfdmpO+YzDfLI\\n"
+    "FxwDfH5qYXPaD14YadLRl1RxxU4UgiMyOdzulka4Uv34HHSGkKU16YT5veFRPBkY\\n"
+    "lknMQBmQLxPH308mL8A0ezgE6ZGG6IUXrU/oSGJxm589MLwtTdx8d9NCoQKBgQDG\\n"
+    "afLSrS3Fv+WohxDYCvI0FDTurE0PKCbwAV7MuIstYTGyLALWJhY96P7OerKK7KE4\\n"
+    "kSCDlBHYJQCojfWjMMkOmsB4eRHN/1dzCT4qTxaekwUpgb0tVcTaS7j/uKT09TC4\\n"
+    "6XeUWT0PTt/R+Hdzl6rk8Dr1ERfxe0IybojKLJCkAQKBgExKn6TG43y8gM9rxaSD\\n"
+    "zRA8kLMI96LniQImjhHH/mSrWtW3t8Z5zDMn5vuPoaScv84SAiAWGDl6bmInNKpA\\n"
+    "yA/IibZNOenOUHmFzS87uzoDrC7ch8eqEa43KhBcsryMYNqphwjw6CNL1gZkGVpT\\n"
+    "1IgDA7lYJ4B3TIjIFzk/Pknn\\n"
     "-----END PRIVATE KEY-----"
 )
 
 _TEST_CERT_PEM = (
     "-----BEGIN CERTIFICATE-----\\n"
-    "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\\n"
+    "MIIDGjCCAgKgAwIBAgIDAQkyMA0GCSqGSIb3DQEBCwUAMCkxEDAOBgNVBAMMB1Rl\\n"
+    "c3QgQ0ExFTATBgNVBAoMDHBmU2Vuc2UgVGVzdDAeFw0yNjAyMDcwODQzMDhaFw0z\\n"
+    "NjAyMDUwODQzMDhaMDIxGTAXBgNVBAMMEHRlc3QuZXhhbXBsZS5jb20xFTATBgNV\\n"
+    "BAoMDHBmU2Vuc2UgVGVzdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB\\n"
+    "AMVJuOo0Uc/W/SmJ5VeWxbDmc4ERs1oYgN4iJfYbPTAyVOcncKcvRJfnn/7yzKBm\\n"
+    "+8VJ6vEW85w4l9i1TpZGJcjVztcxGWyShQset4dGCEO/dlN5Mdjk40SUJagjnqJx\\n"
+    "v5CiKRadBGonFC4q9OgzLTo49Pp67FTBLkJ2YOYfSKfff1jsRPWkVLh1DryhfhrG\\n"
+    "MnIkSqiwd8GcH1CvLQgJXl+gkwW+aj0bFN/p8tqFdhzkOXNBuhDNV1cm7s9koLda\\n"
+    "wRwEZC61kDBLD03F1BpTC3SCjwrffOSe9iaW6xu3Zd6thkWLk+qUbo7jVqssefEU\\n"
+    "irI2TwwdIcoEcj+IKn2XDJkCAwEAAaNCMEAwHQYDVR0OBBYEFLpeQt6fkePzG8Rv\\n"
+    "NVVxDg1TaFVSMB8GA1UdIwQYMBaAFHTQ0rDddzeRfC+BP86EhP4flzfzMA0GCSqG\\n"
+    "SIb3DQEBCwUAA4IBAQBvvfaGdkf69515YpbZL3l7RPJV5xs/SEd0hWS9NiX1ccv9\\n"
+    "L07Ldy0IbqYRochnWMZq/nZfTC6u2U2n1nMKeFlos5D351pZt7sNqSDBx28Uq2rN\\n"
+    "x8Yh7h9UR18jkDJhv/SvFRWy7n2uQ4GQEZLoHzzhQMSoiCW2xGXl/28NZuY7br5a\\n"
+    "FTnr7FQ+iqiVoX+mPocCYnhnD4gqtLQYlrkcnf9YAXtT1m01ICLWGImgIFp86kVY\\n"
+    "Dfr8SxzwH1GAcFn0xB6I50yqxPCbGZBZqWvSAiynsxEK+TqWEk+cWN4Y+vkRWAbZ\\n"
+    "f/gVTMr8CvCVTVmE3UTbWPD/YjzuN1WuDgqjDRjD\\n"
     "-----END CERTIFICATE-----"
 )
 
 _TEST_CERT_KEY_PEM = (
     "-----BEGIN PRIVATE KEY-----\\n"
-    "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCwUcvLowxjC1pX\\n"
-    "RJKv2cs4VtaUX1hl50g1BXwT/Pjbp0lwEIc8toSPx0juOA1meF3OhfnYUbfM2z5P\\n"
-    "Ds0Ly5iMVELfaDLHadQufVP6XMJw9xT/CZKy2BZdJQ9RCRlJu5rYRMfsiooV5Uw3\\n"
-    "d8LP/V42ZdHQKOzXofszv6o54wcD+AwcJmG7IIQGyIXe6Brq2DY/TjwKtCmuaVxz\\n"
-    "LcRdwMQUtimkK/JydympXKd6LEtqVXdku1QtZ62i3c0zL/T1s2nAOvOvNuroGsQy\\n"
-    "enQA1Pw+kzX3BWjHBaZ2CRt5ST4iX1aKsQV1OD0hS4QXCitVsCSJpg2ohKzzkp1+\\n"
-    "aCSk4z4HAgMBAAECggEABAZ3W23x/Z2H5vUgT4EZNBnmFTC7YRGEzae95kDrYixc\\n"
-    "BKxul0gSwlY03TIMuu763pj4FA8C3gY6p8MOkvsyFNtkRBsUtFu/UH5jo+lpNlCr\\n"
-    "EIrPPWOp2F+HuCcNMOiRB5NDvdaIgikgHSYP8v/1nif4lcLRbAzSd3h5MjrIxreM\\n"
-    "bc2wpu/tNgwnpcvGbhUqFBssMucvlXLeKxiP5pF7Un0+WjqC+tCJztOkryvmyE2g\\n"
-    "jMEysclD1H7AYVqrusBmuxPW5AAb4Tv2vA4G2xm9n8BhpwpCGZdsa7ZYkb+s89Ec\\n"
-    "n0G/fCoRWk21p2U1N18C5QOMuxqxAFxb7YRYJszzCQKBgQDdSh6cpUgE9FeUbUkV\\n"
-    "tqbMjmSQKPpBEu2LF7u7x+OBPIEdFrCDMQuZHAc+MT0XFlO8jA4Pm1OoRFaI7RVZ\\n"
-    "8G9b/aORUg+xMKOl3o+bInY2FT/ddmp7J1J0dQDfMbU/f+jTCIzAhI094wJc3ScX\\n"
-    "336/nQkLRsoOdQB0gwBsodamKQKBgQDL+efd2FlP7/VJg4PGsJHGGRJ0vqtsj//c\\n"
-    "is1C0vCkoqtAfMtVP7wMT9SC1u+cjW13Bh6auWHL3MK31iLceymfB+73ZPBDuXz/\\n"
-    "lTv+hKqtYZbc1g7w9SJEqN41tFRsdMRnq18WcYAMCoQiY4R3B9lYJOqBiuvZt0mI\\n"
-    "vGRwYU9orwKBgQCpZSu5zewrnr/MJzxjGsbkn7vrfvLTDaI5b5mOTZ2iOKa9lbjZ\\n"
-    "NJokQoho21hga/79vlilKcoIbQexGYvWpW8ZhDfJ7n+ErC8Zsh1MLD1BeVLCPPuV\\n"
-    "+qvr6gUY1fxg95FKuqjEVrOoRDZyz/g1Fij4lUVvFGloV7hZeE7C2cBuwQKBgQCA\\n"
-    "ZSWL4pSNmelXxf4cAqcwADY64I59fsM66vA7wRYTPAX6SNOhLMZNJa8KUQtxCyE9\\n"
-    "i8+V611g+uxi1dsJ2EkhvtewSIxoxQimxSSHmLDrBIP3LJMpH9TbTUTan1GJF5NO\\n"
-    "AnSPZxCIA9Ka5vPKDVnFfy9SLcU6PYJ/HL9IciiPJwKBgC93lXfdoyA5waYdBGYL\\n"
-    "VEaSfh3hxGd5sC+krUK7VXV/bCkGOX71AsiAY8Wo35yu3+24tnLaMVocgcFzjmXi\\n"
-    "hZu2Fa7IccV7iRh0wxoXD3BtjV37vzLq4C5yD5hgFgeNwF3LfrWVOWFAy2bjrA5+\\n"
-    "U1dtBhHADj/YuAIFAStvX2JE\\n"
+    "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDFSbjqNFHP1v0p\\n"
+    "ieVXlsWw5nOBEbNaGIDeIiX2Gz0wMlTnJ3CnL0SX55/+8sygZvvFSerxFvOcOJfY\\n"
+    "tU6WRiXI1c7XMRlskoULHreHRghDv3ZTeTHY5ONElCWoI56icb+QoikWnQRqJxQu\\n"
+    "KvToMy06OPT6euxUwS5CdmDmH0in339Y7ET1pFS4dQ68oX4axjJyJEqosHfBnB9Q\\n"
+    "ry0ICV5foJMFvmo9GxTf6fLahXYc5DlzQboQzVdXJu7PZKC3WsEcBGQutZAwSw9N\\n"
+    "xdQaUwt0go8K33zknvYmlusbt2XerYZFi5PqlG6O41arLHnxFIqyNk8MHSHKBHI/\\n"
+    "iCp9lwyZAgMBAAECggEAK4X6D2D/c3SgYRuUxt/yOPZ+IMlA4e1p8Jdj/IlB1HIm\\n"
+    "HOCsj5Vz8ncc6uexkOlnPbzy4cEIeTxa82n8LlbHWykf+oVQcI1aYHukTWl7xUZl\\n"
+    "2kBwaMMGCEkOjateAcRKWKQNoHl/UdPRNeYwJVG09pU+Jkwb+w6rH+pxshLQuofG\\n"
+    "pD1BZWzs9EfuVXeuo1h4pk8T9JL0VsYQWBr97Le5EGMgGEkPEvVS3SgT8if0tAU+\\n"
+    "Ld3kOv7GgGKeNjos3PMpCp82kHYsA+KXKpwQIrut/LRnBm3eSzOqjbh3QQF7UbxH\\n"
+    "1ah28lnTzwc5GUi3A9Aj0WupDTwimtSnV2evgDh/IQKBgQDnAsfLP/AxPsFIzld3\\n"
+    "DiydfD5jWWvCHwElBex7yDHxHXPdoywvRBueT+EoG8IhvTcroCUIWy82Af7TQ6WL\\n"
+    "m/WmjWlmsnZ8ah1r42gx4rObRc18q2yNnAPksDVbBLoSY4vp8o2o56vme321G02A\\n"
+    "r/I0lzqaYIX7lxJmDsscNgExLQKBgQDaoRP6vg4v2TsKJZGGO/Z4VUUWu9QLexzj\\n"
+    "TllWogMqZZ6flMQshhyBP7N/hiO1VbDE0aiuAsO/ZTbdPVXZ8pA8oM2cEfWNNDsc\\n"
+    "rvlm4vQrJ+awp2RnEQsniRizgxeYwzQjo1am7uv2udrYenwhgnNVDQEdlTlOzO8a\\n"
+    "9N9a2BH0nQKBgAM1KK0L0Dv+0RQ/uTsv+TKenQcoILTrVUq8UFJPr1HXxNoY/+4Q\\n"
+    "FgoWtdumtwVc6T0z1g/NpFQtpuosEEpl+f08DXCdncOQfaQX3kSDD1dimr3Wa4Vz\\n"
+    "2yH7yGHhKOxEcZboBUuJG/vxTweKv4K/7q8IQooOOQ4LRPgh0HQt08ppAoGBANki\\n"
+    "e5ZfpfVtuU5Vi5eW/C38+jYe6/VPG5zB1sbM93nnHUh+1uslczAG1T5FOjfB2GNR\\n"
+    "m0bfpgvz+S532UkxuIEOb8aeq5LHGiJdwYOmyjwGT/6I8ZXPfpWQesDm5Muqq6Dt\\n"
+    "e4Ul66LKaYjw9VHOnr8MwFviNd2Geb77Ds3JpOOdAoGBAMZ0cH7TID2qhOhbHNbq\\n"
+    "1oe1VMJ2wABJQ923jPwNa8UqzoZtE/NGkzaEPBZ91SpHSo88DmzcvY06C7tKi//H\\n"
+    "k4i7T0WIbj93UPzwEzamnI+KF1rrzsZpImoJ5vvEe7EnQMXUwcGwXsJZphNjFhUp\\n"
+    "wpkYG2WCI0nyfqoM9noi/oj1\\n"
     "-----END PRIVATE KEY-----"
 )
 
@@ -1681,7 +1683,7 @@ _CHAINED_CRUD: dict[str, dict[str, Any]] = {
         "static_parent_id": "lan",
         "update_field": "descr",
     },
-    # ── HAProxy backend/action (needs backend parent) ─────────────────────
+    # ── HAProxy backend/action (needs backend parent + ACL sibling) ──────
     "/api/v2/services/haproxy/backend/action": {
         "parents": [
             {
@@ -1691,9 +1693,19 @@ _CHAINED_CRUD: dict[str, dict[str, Any]] = {
                 "inject": {"parent_id": "id"},
             }
         ],
+        "siblings": [
+            {
+                "path": "/api/v2/services/haproxy/backend/acl",
+                "body": {
+                    "name": "pft_acl_bact",
+                    "expression": "host_starts_with",
+                    "value": "test.example.com",
+                },
+                "inject": {"acl": "name"},
+            }
+        ],
         "child_body": {
             "action": "http-request_deny",
-            "acl": "",
             "server": "",
             "customaction": "",
             "deny_status": "403",
@@ -1710,7 +1722,7 @@ _CHAINED_CRUD: dict[str, dict[str, Any]] = {
         },
         "update_field": None,
     },
-    # ── HAProxy frontend/action (needs backend + frontend parents) ────────
+    # ── HAProxy frontend/action (needs backend + frontend parents + ACL sibling) ─
     "/api/v2/services/haproxy/frontend/action": {
         "parents": [
             {
@@ -1727,9 +1739,19 @@ _CHAINED_CRUD: dict[str, dict[str, Any]] = {
                 "inject": {"parent_id": "id"},
             },
         ],
+        "siblings": [
+            {
+                "path": "/api/v2/services/haproxy/frontend/acl",
+                "body": {
+                    "name": "pft_acl_fact",
+                    "expression": "host_starts_with",
+                    "value": "test.example.com",
+                },
+                "inject": {"acl": "name"},
+            }
+        ],
         "child_body": {
             "action": "http-request_deny",
-            "acl": "",
             "server": "",
             "customaction": "",
             "deny_status": "403",
@@ -2031,16 +2053,26 @@ def generate_tests(contexts: list[ToolContext]) -> str:
             lines.append(f"# SKIP {group.base_path}: {_SKIP_SINGLETON[group.base_path]}")
             lines.append("")
 
-    # Action POST tests
+    # Action POST tests (deferred tests with test_prefix run at end, sorted by prefix)
+    deferred_actions: list[tuple[str, str, dict[str, Any]]] = []
     for group in groups:
         if group.category == "action" and group.base_path in _SKIP_ACTION:
             lines.append(f"# SKIP {group.base_path}: {_SKIP_ACTION[group.base_path]}")
             lines.append("")
         elif group.category == "action" and group.base_path in _ACTION_TESTS:
             config = _ACTION_TESTS[group.base_path]
-            lines.append(_gen_action_test(group.base_path, config))
-            lines.append("")
-            test_count += 1
+            if config.get("test_prefix"):
+                deferred_actions.append((config["test_prefix"], group.base_path, config))
+            else:
+                lines.append(_gen_action_test(group.base_path, config))
+                lines.append("")
+                test_count += 1
+
+    # Emit deferred action tests last, sorted by prefix (zz_ before zzz_)
+    for _prefix, action_path, config in sorted(deferred_actions, key=lambda x: x[0]):
+        lines.append(_gen_action_test(action_path, config))
+        lines.append("")
+        test_count += 1
 
     # Add a summary comment at the top
     header_line = f"# Total generated tests: {test_count}"
@@ -2398,6 +2430,7 @@ def _gen_singleton_test(path: str, config: dict[str, Any]) -> str:
 def _gen_action_test(path: str, config: dict[str, Any]) -> str:
     """Generate an action endpoint test (POST)."""
     test_name = path.replace("/api/v2/", "").replace("/", "_")
+    test_prefix = config.get("test_prefix", "")
     body = config.get("body", {})
     expect_status = config.get("expect_status", [200])
     if isinstance(expect_status, int):
@@ -2409,8 +2442,15 @@ def _gen_action_test(path: str, config: dict[str, Any]) -> str:
     needs_ca_and_csr = config.get("needs_ca_and_csr", False)
 
     lines = []
-    lines.append(f"def test_action_{test_name}(client: httpx.Client):")
+    lines.append(f"def test_{test_prefix}action_{test_name}(client: httpx.Client):")
     lines.append(f'    """Action: POST {path}"""')
+
+    # DN fields required for CA generate on REST API v2.4.3
+    dn_fields = (
+        '"dn_country": "US", "dn_state": "California", '
+        '"dn_city": "San Francisco", "dn_organization": "pfSense Test", '
+        '"dn_organizationalunit": "Testing"'
+    )
 
     # Complex multi-step actions
     if needs_generated_ca:
@@ -2418,6 +2458,7 @@ def _gen_action_test(path: str, config: dict[str, Any]) -> str:
         lines.append(f'    ca_resp = client.post("/api/v2/system/certificate_authority/generate", json={{')
         lines.append(f'        "descr": "CA for renew test", "keytype": "RSA", "keylen": 2048,')
         lines.append(f'        "digest_alg": "sha256", "dn_commonname": "Renew Test CA", "lifetime": 3650,')
+        lines.append(f'        {dn_fields},')
         lines.append(f"    }})")
         lines.append(f"    ca = _ok(ca_resp)")
         lines.append(f"    try:")
@@ -2433,6 +2474,7 @@ def _gen_action_test(path: str, config: dict[str, Any]) -> str:
         lines.append(f'    ca_resp = client.post("/api/v2/system/certificate_authority/generate", json={{')
         lines.append(f'        "descr": "CA for cert action", "keytype": "RSA", "keylen": 2048,')
         lines.append(f'        "digest_alg": "sha256", "dn_commonname": "Cert Action CA", "lifetime": 3650,')
+        lines.append(f'        {dn_fields},')
         lines.append(f"    }})")
         lines.append(f"    ca = _ok(ca_resp)")
         lines.append(f'    cert_resp = client.post("/api/v2/system/certificate/generate", json={{')
@@ -2457,6 +2499,7 @@ def _gen_action_test(path: str, config: dict[str, Any]) -> str:
         lines.append(f'    ca_resp = client.post("/api/v2/system/certificate_authority/generate", json={{')
         lines.append(f'        "descr": "CA for CSR sign", "keytype": "RSA", "keylen": 2048,')
         lines.append(f'        "digest_alg": "sha256", "dn_commonname": "CSR Sign CA", "lifetime": 3650,')
+        lines.append(f'        {dn_fields},')
         lines.append(f"    }})")
         lines.append(f"    ca = _ok(ca_resp)")
         lines.append(f'    csr_resp = client.post("/api/v2/system/certificate/signing_request", json={{')
@@ -2482,6 +2525,7 @@ def _gen_action_test(path: str, config: dict[str, Any]) -> str:
         lines.append(f'    ca_resp = client.post("/api/v2/system/certificate_authority/generate", json={{')
         lines.append(f'        "descr": "CA for cert gen", "keytype": "RSA", "keylen": 2048,')
         lines.append(f'        "digest_alg": "sha256", "dn_commonname": "Cert Gen CA", "lifetime": 3650,')
+        lines.append(f'        {dn_fields},')
         lines.append(f"    }})")
         lines.append(f"    ca = _ok(ca_resp)")
         body_with_ca = dict(body)
@@ -2585,6 +2629,8 @@ def _gen_chained_crud_test(group: EndpointGroup) -> str:
     chain = _CHAINED_CRUD[path]
     test_name = path.replace("/api/v2/", "").replace("/", "_")
     parents = chain.get("parents", [])
+    siblings = chain.get("siblings", [])
+    setup_patches = chain.get("setup_patches", [])
     child_body = chain.get("child_body")
     update_field = chain.get("update_field", "descr")
     update_value = chain.get("update_value", '"Updated by test"')
@@ -2596,6 +2642,16 @@ def _gen_chained_crud_test(group: EndpointGroup) -> str:
         lines.append(f'    """CRUD lifecycle: {path} (needs: {parent_paths})"""')
     else:
         lines.append(f'    """CRUD lifecycle: {path} (chained)"""')
+
+    # ── Setup patches (idempotent PATCH requests, no cleanup) ────────────
+    for sp in setup_patches:
+        sp_body = _body_to_code(sp["body"])
+        lines.append(f"    # Setup: patch {sp['path'].split('/api/v2/')[-1]}")
+        lines.append(f"    client.patch(")
+        lines.append(f'        "{sp["path"]}",')
+        lines.append(f"        json={sp_body},")
+        lines.append(f"    )")
+        lines.append(f"")
 
     # ── Create parent resources ───────────────────────────────────────────
     parent_vars: list[str] = []
@@ -2650,6 +2706,32 @@ def _gen_chained_crud_test(group: EndpointGroup) -> str:
     else:
         base_indent = "    "
 
+    # ── Create sibling resources (same parent_id as child) ───────────────
+    sibling_vars: list[str] = []
+    sibling_injections: list[tuple[str, str, str]] = []  # (child_field, sib_var, sib_field)
+    for j, sib in enumerate(siblings):
+        svar = f"sib{j}"
+        sibling_vars.append(svar)
+        sib_body = dict(sib["body"])
+        sib_body_code = _body_to_code(sib_body, indent=len(base_indent) + 8)
+        lines.append(f"{base_indent}# Setup: create sibling {sib['path'].split('/api/v2/')[-1]}")
+        lines.append(f"{base_indent}{svar}_body = {sib_body_code}")
+        # Siblings use the same parent_id as the child will
+        for child_field, pvar, pfield in injections:
+            if child_field == "parent_id":
+                lines.append(f'{base_indent}{svar}_body["parent_id"] = {pvar}["{pfield}"]')
+                break
+        lines.append(f"{base_indent}{svar}_resp = client.post(")
+        lines.append(f'{base_indent}    "{sib["path"]}",')
+        lines.append(f"{base_indent}    json={svar}_body,")
+        lines.append(f"{base_indent})")
+        lines.append(f"{base_indent}{svar} = _ok({svar}_resp)")
+        lines.append(f'{base_indent}{svar}_id = {svar}.get("id")')
+        lines.append(f"")
+        # Collect sibling injections
+        for child_field, sib_field in sib.get("inject", {}).items():
+            sibling_injections.append((child_field, svar, sib_field))
+
     # CREATE
     lines.append(f"{base_indent}# CREATE")
     body_code = _body_to_code(final_body, indent=len(base_indent) + 8)
@@ -2658,6 +2740,10 @@ def _gen_chained_crud_test(group: EndpointGroup) -> str:
     # Apply dynamic injections from parents
     for child_field, pvar, pfield in injections:
         lines.append(f'{base_indent}body["{child_field}"] = {pvar}["{pfield}"]')
+
+    # Apply dynamic injections from siblings
+    for child_field, svar, sfield in sibling_injections:
+        lines.append(f'{base_indent}body["{child_field}"] = {svar}["{sfield}"]')
 
     lines.append(f"{base_indent}create_resp = client.post(")
     lines.append(f'{base_indent}    "{path}",')
@@ -2738,6 +2824,21 @@ def _gen_chained_crud_test(group: EndpointGroup) -> str:
         )
     else:
         lines.append(f'{base_indent}    _delete_with_retry(client, "{path}", obj_id)')
+
+    # ── Cleanup siblings (after child, before parents) ───────────────────
+    for j in range(len(siblings) - 1, -1, -1):
+        svar = sibling_vars[j]
+        sib = siblings[j]
+        if parent_id_injection:
+            pvar, pfield = parent_id_injection
+            lines.append(
+                f'{base_indent}    _delete_with_retry(client, "{sib["path"]}", {svar}_id, '
+                f'{{"parent_id": {pvar}["{pfield}"]}})'
+            )
+        else:
+            lines.append(
+                f'{base_indent}    _delete_with_retry(client, "{sib["path"]}", {svar}_id)'
+            )
 
     # ── Cleanup parents in reverse order ──────────────────────────────────
     if parents:
