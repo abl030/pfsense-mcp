@@ -90,12 +90,24 @@ Ignore the mismatch and continue? [y/N]:
 
 This prompt repeats for every subsequent pkg command, eating all input. The exploration run got stuck here — every command sent after was interpreted as a response to `[y/N]`.
 
-#### After those three steps
+#### Step 4: Swap the `.default` file
+
+```sh
+rm -f /usr/local/etc/pfSense/pkg/repos/pfSense-repo-2.7.2.default
+touch /usr/local/etc/pfSense/pkg/repos/pfSense-repo-2_8_1.default
+```
+
+**This was the missing piece.** Without it, `pfSense-repo-setup` (called by `pfSense-upgrade`) runs `get_default_repo()` which finds `pfSense-repo-2.7.2.default`, then `validate_repo_conf()` resets the symlink to 2.7.2.conf, and `abi_setup()` writes `FreeBSD:14:amd64` back into `pkg.conf`. The upgrade then sees all packages as "up to date" since the ABI matches the installed version. Swapping the `.default` file makes `get_default_repo()` return 2_8_1 instead, so the entire chain resolves correctly.
+
+#### After those four steps
 
 ```sh
 pkg-static clean -ay
 pkg-static update -f         # fetches 2.8.1 package catalogs
 pkg-static install -fy pkg pfSense-repo pfSense-upgrade  # updates the upgrade toolchain
+# Re-override pkg.conf + symlink (belt-and-suspenders — toolchain install may reset them)
+printf 'ABI=FreeBSD:15:amd64\nALTABI=freebsd:15:x86:64\n' > /usr/local/etc/pkg.conf
+ln -sf /usr/local/etc/pfSense/pkg/repos/pfSense-repo-2_8_1.conf /usr/local/etc/pkg/repos/pfSense.conf
 pfSense-upgrade -U -y        # -U skips pfSense-repoc-static
 ```
 
@@ -161,7 +173,7 @@ Then: pkg_upgrade() → check_upgrade → compare_pkg_version → "up to date" o
 /usr/local/etc/pkg.conf             → "ABI=FreeBSD:14:amd64\nALTABI=freebsd:14:x86:64"
 ```
 
-Note: 2_8_1 has NO `.default` file. The `.default` file marks which repo is the fallback.
+Note: 2_8_1 has NO `.default` file on stock install. The `.default` file marks which repo is the fallback. **Must swap it** (delete 2.7.2.default, create 2_8_1.default) for the upgrade to work.
 
 ## Shell Gotchas
 
@@ -174,7 +186,15 @@ Note: 2_8_1 has NO `.default` file. The `.default` file marks which repo is the 
 ## Timing
 
 - Install from memstick: ~3-5 min
-- First boot + REST API install: ~2-3 min
+- First boot + REST API v2.4.3 install: ~2-3 min
 - Post-firstboot snapshot save: ~30 sec
-- Upgrade (download + install + reboot): ~15 min (estimated, not yet completed)
+- Upgrade (download + install + reboot): ~15 min (confirmed via `upgrade-2.8.exp`)
+- REST API v2.7.1 install post-upgrade: ~1 min
 - Boot to API-ready after upgrade: ~60-90 sec
+- Total golden image build: ~25 min
+
+## Automated in `vm/upgrade-2.8.exp`
+
+The proven sequence above is fully automated in `vm/upgrade-2.8.exp` (10 phases).
+Build flow: `install.exp` → `firstboot.exp` (v2.4.3) → `upgrade-2.8.exp` (→ v2.8.1 + REST API v2.7.1) → `setup.sh` step 4.
+Verified: `"version":"2.8.1-RELEASE"` returned from `/api/v2/system/version` on first attempt.

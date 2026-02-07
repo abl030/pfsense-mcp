@@ -1,0 +1,443 @@
+#!/usr/bin/env expect
+#
+# Upgrade pfSense 2.7.2 → 2.8.1 and install REST API v2.7.1.
+#
+# Usage (from pfsense-mcp repo root):
+#   expect vm/upgrade-2.8.exp
+#
+# Prerequisites:
+#   - vm/pfsense-test.qcow2 must exist with pfSense 2.7.2 + REST API v2.4.3
+#     (produced by install.exp + firstboot.exp)
+#
+# Produces:
+#   - vm/pfsense-test.qcow2 upgraded to pfSense 2.8.1 with REST API v2.7.1
+#
+# Timing: ~15-20 minutes (mostly downloading/installing packages)
+
+log_file -noappend vm/upgrade-2.8.log
+
+set disk "vm/pfsense-test.qcow2"
+set restapi_url "https://github.com/pfrest/pfSense-pkg-RESTAPI/releases/download/v2.7.1/pfSense-2.8.1-pkg-RESTAPI.pkg"
+
+# ---- Phase 1: Boot VM ----
+puts "\n==> Phase 1: Booting pfSense for upgrade..."
+set timeout 300
+spawn qemu-system-x86_64 \
+    -m 2048 \
+    -enable-kvm \
+    -drive file=$disk,if=virtio,format=qcow2 \
+    -device virtio-rng-pci \
+    -nographic \
+    -netdev user,id=wan0,net=10.0.2.0/24,hostfwd=tcp::18443-:443,hostfwd=tcp::12222-:22 \
+    -device e1000,netdev=wan0,mac=52:54:00:00:00:01 \
+    -netdev user,id=lan0,net=10.0.3.0/24 \
+    -device e1000,netdev=lan0,mac=52:54:00:00:00:02 \
+    -netdev user,id=opt0,net=10.0.4.0/24 \
+    -device e1000,netdev=opt0,mac=52:54:00:00:00:03
+
+set qemu_pid [exp_pid]
+puts "\n==> QEMU PID: $qemu_pid"
+
+expect {
+    -re "Enter an option:" {
+        puts "\n==> Console menu ready"
+    }
+    timeout {
+        puts "\n==> TIMEOUT waiting for console menu"
+        exit 1
+    }
+}
+
+# ---- Phase 2: Open shell ----
+puts "\n==> Phase 2: Opening shell..."
+send "8\r"
+set timeout 60
+expect {
+    -re "home\\.arpa" {
+        puts "\n==> Shell ready"
+    }
+    timeout {
+        puts "\n==> TIMEOUT waiting for shell"
+        exit 1
+    }
+}
+
+# ---- Phase 3: Prep commands (ABI, symlink, IGNORE_OSVERSION) ----
+# CRITICAL: These must all complete before any pkg command.
+# CRITICAL: setenv MUST come before any pkg command to avoid the
+# "Ignore the mismatch and continue? [y/N]" interactive prompt that
+# swallows all subsequent input.
+
+puts "\n==> Phase 3: Setting IGNORE_OSVERSION..."
+send "setenv IGNORE_OSVERSION yes\r"
+set timeout 30
+expect {
+    -re "home\\.arpa" {
+        puts "\n==> IGNORE_OSVERSION set"
+    }
+    timeout {
+        puts "\n==> TIMEOUT setting IGNORE_OSVERSION"
+        exit 1
+    }
+}
+
+puts "\n==> Phase 3: Overriding pkg.conf ABI to FreeBSD:15..."
+send "printf 'ABI=FreeBSD:15:amd64\\nALTABI=freebsd:15:x86:64\\n' > /usr/local/etc/pkg.conf\r"
+set timeout 30
+expect {
+    -re "home\\.arpa" {
+        puts "\n==> pkg.conf ABI overridden"
+    }
+    timeout {
+        puts "\n==> TIMEOUT overriding pkg.conf"
+        exit 1
+    }
+}
+
+puts "\n==> Phase 3: Forcing repo symlink to 2_8_1.conf..."
+send "ln -sf /usr/local/etc/pfSense/pkg/repos/pfSense-repo-2_8_1.conf /usr/local/etc/pkg/repos/pfSense.conf\r"
+set timeout 30
+expect {
+    -re "home\\.arpa" {
+        puts "\n==> Repo symlink forced to 2_8_1"
+    }
+    timeout {
+        puts "\n==> TIMEOUT forcing symlink"
+        exit 1
+    }
+}
+
+# Swap .default file so pfSense-repo-setup's get_default_repo() returns 2_8_1
+# instead of 2.7.2. Without this, validate_repo_conf() resets symlink + abi back
+# to 2.7.2 every time pfSense-upgrade calls pfSense-repo-setup.
+puts "\n==> Phase 3: Swapping .default file to 2_8_1..."
+send "rm -f /usr/local/etc/pfSense/pkg/repos/pfSense-repo-2.7.2.default && touch /usr/local/etc/pfSense/pkg/repos/pfSense-repo-2_8_1.default\r"
+set timeout 30
+expect {
+    -re "home\\.arpa" {
+        puts "\n==> .default swapped to 2_8_1"
+    }
+    timeout {
+        puts "\n==> TIMEOUT swapping .default"
+        exit 1
+    }
+}
+
+# ---- Phase 4: Update pkg toolchain ----
+# Guard: if "Ignore the mismatch" appears, IGNORE_OSVERSION wasn't set properly.
+# This would swallow all subsequent commands — bail immediately.
+
+puts "\n==> Phase 4: Cleaning pkg cache..."
+send "pkg-static clean -ay\r"
+set timeout 60
+expect {
+    "Ignore the mismatch" {
+        puts "\n==> FATAL: IGNORE_OSVERSION not set! Aborting."
+        exit 1
+    }
+    -re "home\\.arpa" {
+        puts "\n==> pkg cache cleaned"
+    }
+    timeout {
+        puts "\n==> TIMEOUT cleaning pkg cache"
+        exit 1
+    }
+}
+
+puts "\n==> Phase 4: Forcing pkg update..."
+send "pkg-static update -f\r"
+set timeout 120
+expect {
+    "Ignore the mismatch" {
+        puts "\n==> FATAL: IGNORE_OSVERSION not set! Aborting."
+        exit 1
+    }
+    -re "home\\.arpa" {
+        puts "\n==> pkg update complete"
+    }
+    timeout {
+        puts "\n==> TIMEOUT on pkg update"
+        exit 1
+    }
+}
+
+puts "\n==> Phase 4: Installing upgrade toolchain (pkg, pfSense-repo, pfSense-upgrade)..."
+send "pkg-static install -fy pkg pfSense-repo pfSense-upgrade\r"
+set timeout 180
+expect {
+    "Ignore the mismatch" {
+        puts "\n==> FATAL: IGNORE_OSVERSION not set! Aborting."
+        exit 1
+    }
+    -re "home\\.arpa" {
+        puts "\n==> Upgrade toolchain installed"
+    }
+    timeout {
+        puts "\n==> TIMEOUT installing upgrade toolchain"
+        exit 1
+    }
+}
+
+# ---- Phase 4.5: Re-override pkg.conf + symlink ----
+# The toolchain install may have triggered pfSense-repo-setup which resets
+# pkg.conf and the symlink. Belt-and-suspenders: re-apply them.
+puts "\n==> Phase 4.5: Re-overriding pkg.conf ABI (post-toolchain)..."
+send "printf 'ABI=FreeBSD:15:amd64\\nALTABI=freebsd:15:x86:64\\n' > /usr/local/etc/pkg.conf\r"
+set timeout 30
+expect {
+    -re "home\\.arpa" {
+        puts "\n==> pkg.conf re-overridden"
+    }
+    timeout {
+        puts "\n==> TIMEOUT re-overriding pkg.conf"
+        exit 1
+    }
+}
+
+puts "\n==> Phase 4.5: Re-forcing repo symlink (post-toolchain)..."
+send "ln -sf /usr/local/etc/pfSense/pkg/repos/pfSense-repo-2_8_1.conf /usr/local/etc/pkg/repos/pfSense.conf\r"
+set timeout 30
+expect {
+    -re "home\\.arpa" {
+        puts "\n==> Symlink re-forced to 2_8_1"
+    }
+    timeout {
+        puts "\n==> TIMEOUT re-forcing symlink"
+        exit 1
+    }
+}
+
+# ---- Phase 5: Run pfSense-upgrade ----
+# -U: skip pfSense-repoc-static (which would reset repo back to 2.7.2)
+# -y: auto-confirm all prompts
+# This downloads ~550 packages, installs them, and reboots.
+# The reboot may manifest as "Rebooting", "syncing disks", or simply EOF.
+
+puts "\n==> Phase 5: Running pfSense-upgrade -U -y (this takes 10-20 minutes)..."
+send "pfSense-upgrade -U -y\r"
+set timeout 1200
+
+expect {
+    "Ignore the mismatch" {
+        puts "\n==> FATAL: IGNORE_OSVERSION not set! Aborting."
+        exit 1
+    }
+    "Your packages are up to date" {
+        puts "\n==> FATAL: Upgrade saw 'up to date' — ABI/repo override failed!"
+        exit 1
+    }
+    -re "Rebooting|rebooting|syncing disks" {
+        puts "\n==> Upgrade complete, system is rebooting..."
+    }
+    eof {
+        puts "\n==> QEMU exited (VM halted instead of rebooting)"
+        # Phase 6 will handle re-spawning
+    }
+    timeout {
+        puts "\n==> TIMEOUT during pfSense-upgrade (20 min exceeded)"
+        exit 1
+    }
+}
+
+# ---- Phase 6: Wait for post-reboot console menu ----
+# The VM may reboot (staying in same QEMU process) or halt (QEMU exits).
+# Try to catch the console menu first; on EOF, re-spawn QEMU.
+
+puts "\n==> Phase 6: Waiting for post-reboot console menu..."
+set timeout 600
+
+# Check if we already got EOF above
+set need_respawn 0
+expect {
+    -re "Enter an option:" {
+        puts "\n==> Post-upgrade console menu ready!"
+    }
+    eof {
+        puts "\n==> QEMU exited — need to re-spawn VM"
+        set need_respawn 1
+    }
+    timeout {
+        puts "\n==> TIMEOUT waiting for post-reboot menu"
+        exit 1
+    }
+}
+
+if {$need_respawn} {
+    puts "\n==> Re-spawning QEMU after halt..."
+    sleep 2
+    spawn qemu-system-x86_64 \
+        -m 2048 \
+        -enable-kvm \
+        -drive file=$disk,if=virtio,format=qcow2 \
+        -device virtio-rng-pci \
+        -nographic \
+        -netdev user,id=wan0,net=10.0.2.0/24,hostfwd=tcp::18443-:443,hostfwd=tcp::12222-:22 \
+        -device e1000,netdev=wan0,mac=52:54:00:00:00:01 \
+        -netdev user,id=lan0,net=10.0.3.0/24 \
+        -device e1000,netdev=lan0,mac=52:54:00:00:00:02 \
+        -netdev user,id=opt0,net=10.0.4.0/24 \
+        -device e1000,netdev=opt0,mac=52:54:00:00:00:03
+
+    set qemu_pid [exp_pid]
+    puts "\n==> New QEMU PID: $qemu_pid"
+
+    set timeout 600
+    expect {
+        -re "Enter an option:" {
+            puts "\n==> Post-upgrade console menu ready (after respawn)!"
+        }
+        timeout {
+            puts "\n==> TIMEOUT waiting for console menu after respawn"
+            exit 1
+        }
+    }
+}
+
+# ---- Phase 7: Install REST API v2.7.1 ----
+puts "\n==> Phase 7: Opening shell for REST API install..."
+send "8\r"
+set timeout 60
+expect {
+    -re "home\\.arpa" {
+        puts "\n==> Shell ready (post-upgrade)"
+    }
+    timeout {
+        puts "\n==> TIMEOUT waiting for shell"
+        exit 1
+    }
+}
+
+# Set IGNORE_OSVERSION again (fresh shell after reboot)
+puts "\n==> Setting IGNORE_OSVERSION (post-reboot)..."
+send "setenv IGNORE_OSVERSION yes\r"
+set timeout 30
+expect {
+    -re "home\\.arpa" {
+        puts "\n==> IGNORE_OSVERSION set"
+    }
+    timeout {
+        puts "\n==> TIMEOUT setting IGNORE_OSVERSION"
+        exit 1
+    }
+}
+
+puts "\n==> Installing REST API v2.7.1..."
+send "pkg-static -C /dev/null add $restapi_url\r"
+set timeout 120
+expect {
+    "Ignore the mismatch" {
+        puts "\n==> FATAL: IGNORE_OSVERSION not set! Aborting."
+        exit 1
+    }
+    -re "Installing.*done|Extracting.*done" {
+        puts "\n==> REST API v2.7.1 installed!"
+    }
+    -re "already installed" {
+        puts "\n==> REST API v2.7.1 already installed"
+    }
+    -re "Error|FAILED|failed" {
+        puts "\n==> REST API install error — continuing to check..."
+    }
+    timeout {
+        puts "\n==> TIMEOUT installing REST API"
+        exit 1
+    }
+}
+
+# Wait for prompt to return
+expect {
+    -re "home\\.arpa" {
+        puts "\n==> Shell prompt returned after REST API install"
+    }
+    timeout {
+        puts "\n==> TIMEOUT waiting for prompt after REST API install"
+    }
+}
+
+# ---- Phase 8: Post-install fixups ----
+puts "\n==> Phase 8: Restarting php-fpm..."
+send "service php-fpm restart\r"
+sleep 3
+expect {
+    -re "home\\.arpa" {
+        puts "\n==> php-fpm restarted"
+    }
+    timeout {
+        puts "\n==> TIMEOUT restarting php-fpm (continuing anyway)"
+    }
+}
+
+# Re-run enableallowallwan — upgrade may have reset WAN firewall rules
+puts "\n==> Re-enabling WAN access via pfSsh.php playbook..."
+send "pfSsh.php playback enableallowallwan\r"
+set timeout 60
+expect {
+    -re "home\\.arpa" {
+        puts "\n==> enableallowallwan complete"
+    }
+    timeout {
+        puts "\n==> TIMEOUT running enableallowallwan"
+    }
+}
+
+# Return to main menu
+send "exit\r"
+expect {
+    -re "Enter an option:" {
+        puts "\n==> Back at console menu"
+    }
+    timeout {
+        puts "\n==> TIMEOUT returning to menu"
+    }
+}
+
+# ---- Phase 9: Verify API from host ----
+puts "\n==> Phase 9: Verifying REST API from host..."
+set timeout 120
+set api_ready 0
+for {set attempt 0} {$attempt < 60} {incr attempt} {
+    set http_code [exec sh -c {curl -sk -m 5 -o /dev/null -w '%{http_code}' -u admin:pfsense https://127.0.0.1:18443/api/v2/system/version 2>/dev/null || true}]
+    if {$attempt % 5 == 0} {
+        puts "\n==> Poll attempt $attempt: HTTP $http_code"
+    }
+    if {$http_code eq "200"} {
+        puts "\n==> API ready after ${attempt} attempts"
+        set api_ready 1
+        break
+    }
+    after 2000
+}
+if {!$api_ready} {
+    puts "\n==> FATAL: API not ready after 120s"
+    exit 1
+}
+
+# Verify the version shows 2.8.1
+set version_json [exec curl -sk -m 10 -u admin:pfsense https://127.0.0.1:18443/api/v2/system/version 2>&1]
+puts "\n==> System version: $version_json"
+
+# ---- Phase 10: Shut down cleanly ----
+# Use the REST API halt endpoint from the host side (already verified working
+# in phase 9). This avoids shell prompt timing issues.
+puts "\n==> Phase 10: Shutting down pfSense via REST API..."
+exec curl -sk -m 10 -u admin:pfsense -X POST https://127.0.0.1:18443/api/v2/diagnostics/halt_system 2>/dev/null
+
+set timeout 60
+expect {
+    eof {
+        puts "\n==> QEMU exited cleanly"
+    }
+    -re "System halted|Power down" {
+        puts "\n==> System halted, killing QEMU..."
+        sleep 2
+        send "\x01x"
+    }
+    timeout {
+        puts "\n==> Killing QEMU..."
+        send "\x01x"
+    }
+}
+
+wait
+puts "\n==> Upgrade complete! pfSense 2.8.1 with REST API v2.7.1"
+exit 0

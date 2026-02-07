@@ -32,7 +32,7 @@ api-samples/
 *.env
 !*.env.example
 
-# VM test artifacts (large binary files)
+# VM test artifacts (large binary files — includes pfsense-pre-upgrade.qcow2 backup)
 vm/*.iso
 vm/*.iso.gz
 vm/*.qcow2
@@ -45,3 +45,6 @@ vm/*.log
 # VM API key (contains test credentials)
 vm/api-key.json
 vm/api-key.txt
+
+# VM upgrade sentinel
+vm/upgrade-done

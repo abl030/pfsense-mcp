@@ -91,6 +91,18 @@ else
     log "First boot complete."
 fi
 
+# --- Step 3.5: Upgrade to pfSense 2.8.1 ---
+UPGRADE_SENTINEL="vm/upgrade-done"
+if [[ -f "$UPGRADE_SENTINEL" ]]; then
+    log "Upgrade already done, skipping. Delete $UPGRADE_SENTINEL to re-run."
+else
+    log "Upgrading pfSense 2.7.2 → 2.8.1..."
+    expect vm/upgrade-2.8.exp
+    [[ $? -eq 0 ]] || die "upgrade-2.8.exp failed"
+    touch "$UPGRADE_SENTINEL"
+    log "Upgrade complete."
+fi
+
 # --- Step 4: Configure golden image ---
 # Boot the VM, fix auth_methods, install packages, then shut down cleanly.
 log "Configuring golden image (auth_methods + packages)..."

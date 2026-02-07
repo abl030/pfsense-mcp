@@ -13,7 +13,7 @@ Complete these phases in order. Phase 1 gives you a working test target. Phase 2
 Build `vm/setup.sh` — a single script that produces a golden pfSense QCOW2 with the REST API installed and configured. Then build a test harness so each test copies the golden image, boots it, runs tests, and destroys it.
 
 **Deliverables:**
-- `vm/setup.sh` — downloads pfSense serial memstick, runs `install.exp`, runs `firstboot.exp`, fixes `auth_methods`, produces `vm/golden.qcow2`
+- `vm/setup.sh` — downloads pfSense serial memstick, runs `install.exp`, runs `firstboot.exp`, runs `upgrade-2.8.exp`, fixes `auth_methods`, produces `vm/golden.qcow2`
 - Test harness script or Python wrapper that: copies golden → boots QEMU → waits for API ready → runs tests → kills QEMU → deletes copy
 - Smoke test that creates a firewall alias via the API and reads it back
 
@@ -68,19 +68,60 @@ Requirements: KVM, 2048 MB RAM, 4 GB disk. VirtIO RNG for entropy (critical for 
 
 ### VM Build Optimization
 
-The install step (`install.exp`) takes ~3-5 minutes and produces a pristine installed disk. When iterating on `firstboot.exp`, you can skip reinstalling by keeping the installed disk and only deleting `vm/api-key.json`:
+The install step (`install.exp`) takes ~3-5 minutes and produces a pristine installed disk. When iterating on `firstboot.exp` or `upgrade-2.8.exp`, you can skip completed steps by keeping their sentinel files:
 
 ```bash
-# Full rebuild (install + firstboot + golden):
-rm -f vm/pfsense-test.qcow2 vm/api-key.json vm/golden.qcow2
+# Full rebuild (install + firstboot + upgrade + golden):
+rm -f vm/pfsense-test.qcow2 vm/api-key.json vm/api-key.txt vm/upgrade-done vm/golden.qcow2
 bash vm/setup.sh
 
 # Firstboot-only rebuild (skip install):
-rm -f vm/api-key.json vm/golden.qcow2
+rm -f vm/api-key.json vm/api-key.txt vm/upgrade-done vm/golden.qcow2
+bash vm/setup.sh
+
+# Upgrade-only rebuild (skip install + firstboot, ~20 min):
+rm -f vm/upgrade-done vm/golden.qcow2
 bash vm/setup.sh
 ```
 
-However, if firstboot fails partway through, the work disk may have corrupt state (REST API partially installed, wrong firewall rules, etc.). In that case, delete `vm/pfsense-test.qcow2` too and do a full rebuild. Signs of corrupt state: "already installed" messages when you expect a fresh install, unexpected firewall behavior, wrong NIC assignments.
+However, if firstboot or upgrade fails partway through, the work disk may have corrupt state (REST API partially installed, wrong firewall rules, etc.). In that case, delete `vm/pfsense-test.qcow2` too and do a full rebuild. Signs of corrupt state: "already installed" messages when you expect a fresh install, unexpected firewall behavior, wrong NIC assignments.
+
+### Upgrade Iteration Workflow (disk names)
+
+When iterating on `upgrade-2.8.exp`, use a backup disk so you never have to re-run install+firstboot (~7 min):
+
+| Disk | Purpose |
+|------|---------|
+| `vm/pfsense-test.qcow2` | Work disk — install.exp and firstboot.exp write here. upgrade-2.8.exp runs on this. |
+| `vm/pfsense-pre-upgrade.qcow2` | Backup of pfsense-test.qcow2 taken AFTER firstboot, BEFORE upgrade. Restore from this on upgrade failure. |
+| `vm/golden.qcow2` | Final golden image — copy of pfsense-test.qcow2 after ALL steps succeed (install + firstboot + upgrade + step 4). |
+
+```bash
+# One-time: build pre-upgrade baseline (~7 min)
+rm -f vm/pfsense-test.qcow2 vm/api-key.json vm/api-key.txt vm/upgrade-done vm/golden.qcow2
+expect vm/install.exp && expect vm/firstboot.exp
+cp vm/pfsense-test.qcow2 vm/pfsense-pre-upgrade.qcow2
+```
+
+**Fast iteration loop (< 1 min to detect failure):**
+
+```bash
+# 1. Restore clean state + delete stale log
+cp vm/pfsense-pre-upgrade.qcow2 vm/pfsense-test.qcow2
+rm -f vm/upgrade-2.8.log
+
+# 2. Run upgrade in BACKGROUND
+expect vm/upgrade-2.8.exp &
+
+# 3. Tail the log — watch for failures or progress
+#    Check every 30-60s. Kill immediately on "up to date", "TIMEOUT", etc.
+tail -f vm/upgrade-2.8.log
+
+# 4. On failure: kill %1, fix upgrade-2.8.exp, go to step 1
+# 5. On success: touch vm/upgrade-done, continue with setup.sh step 4
+```
+
+**Key principle:** NEVER wait blindly on a long task. Always tail the log and kill early on failure. Each iteration costs only the copy time (~2s) + time to first failure, NOT 20 minutes.
 
 ### Expect Script Gotchas (CRITICAL)
 
@@ -149,9 +190,10 @@ Auth for tests: use BasicAuth (`admin:pfsense`) or the API key created by firstb
 ### Timing
 
 - Install from memstick: ~3-5 minutes
-- First boot + REST API install: ~2-3 minutes
+- First boot + REST API v2.4.3 install: ~2-3 minutes
+- Upgrade 2.7.2 → 2.8.1 + REST API v2.7.1: ~15-20 minutes
 - Boot to API-ready: ~45-75 seconds
-- Total golden image build: ~8 minutes (one-time)
+- Total golden image build: ~25 minutes (one-time)
 
 ---
 
