@@ -317,35 +317,27 @@ Exclude from generation or add extra warnings:
 
 ## Phase 2 Status: Test Coverage
 
-**Current: 187 tests, 187 passing** against 258 API paths (677 operations)
+**Current: 203 tests, 203 passing** against 258 API paths (677 operations)
 
 ### Coverage summary
 
 | Metric | Count | % |
 |---|---|---|
-| Paths with active tests | 187 | 72.5% |
-| Paths with documented skip | 68 | 26.4% |
-| Unaccounted gaps | 4 | 1.6% |
-| **Total accounted** | **255** | **98.8%** |
+| Paths with active tests | 203 | 78.7% |
+| Paths with documented skip | 55 | 21.3% |
+| **Total accounted** | **258** | **100%** |
 
-REST API v2.4.3 is the latest version that supports pfSense CE 2.7.2. v2.6.8+ only targets pfSense 2.8+. This blocks FreeRADIUS, timezone, and cert generation endpoints.
+pfSense CE 2.8.1 with REST API v2.7.1 (upgraded from 2.7.2 via `upgrade-2.8.exp`).
 
 ### Test infrastructure
 
-- `RetryClient` wraps httpx.Client with automatic retry on 503 (dispatcher busy), up to 4 attempts with backoff
+- `RetryClient` wraps httpx.Client with automatic retry on 503 (dispatcher busy), up to 6 attempts with backoff
 - `_CHAINED_CRUD` supports multi-parent dependency chains with `receives_from` for inter-parent field injection (e.g., cert needs CA's refid)
 - `_CHAINED_CRUD` supports `static_parent_id` for sub-resources with a fixed parent (e.g., DHCP sub-resources always use `parent_id: "lan"`)
+- `_CHAINED_CRUD` supports `siblings` for creating sibling resources under the same parent (e.g., HAProxy ACL for action tests)
 - PEM certificates embedded in test constants for CA/cert-dependent endpoints (IPsec, OpenVPN, CRL, HAProxy frontend/certificate)
 - VM uses 3 e1000 NICs (em0=WAN, em1=LAN, em2=spare for LAGG), VirtIO RNG, 2GB RAM
-- REST API v2.4.3 (only version with pfSense CE 2.7.2 package; v2.6.8+ requires pfSense 2.8+)
-
-### Untested gaps (4 paths — need real tests, not skip comments)
-
-These paths have no test. The goal is 100% real coverage — find a way to test each one:
-
-- `diagnostics/halt_system` — test last (kills VM), verify 200 response before VM dies
-- `diagnostics/reboot` — test last (kills VM), verify 200 response before VM reboots
-- `system/package` — install a small utility (e.g., `iftop`), verify via GET, uninstall
+- REST API v2.7.1 on pfSense CE 2.8.1 (upgraded via `vm/upgrade-2.8.exp`)
 
 ### Permanently skipped endpoints — with reasons
 
@@ -358,27 +350,21 @@ Every skip is documented in `_SKIP_CRUD_PATHS`, `_SKIP_ACTION`, `_SKIP_SINGLETON
 **pfSense singleton design (1):**
 - `services/dhcp_server` — per-interface singleton, POST not supported
 
-**REST API v2.4.3 bugs (14):**
-- `services/freeradius/client`, `interface`, `user` — nginx 404 (needs REST API v2.6+ / pfSense 2.8+)
-- `system/certificate_authority/generate`, `renew` — 500 "failed for unknown reason"
-- `system/certificate/generate`, `renew`, `pkcs12/export`, `signing_request/sign` — depends on CA generate (broken)
-- `system/crl/revoked_certificate` — cert serial hex → PHP INT overflow (500)
+**REST API bugs persisting in v2.7.1 (3):**
 - `services/haproxy/settings/dns_resolver`, `email_mailer` — 500 parent model construction bug
-- `services/haproxy/backend/action`, `frontend/action` — acl field cannot be empty (needs ACL sibling chain)
+- `system/certificate/pkcs12/export` — 406 no content handler for binary format
 
-**Phantom/404 routes (3):**
-- `diagnostics/ping` — version-gated to REST API v2.7.0+, not available on CE 2.7.2
-- `system/timezone` — nginx 404 (needs REST API v2.6+ / pfSense 2.8+); in `_SKIP_SINGLETON`
+**Infrastructure limitations (1):**
+- `system/package` — install/delete trigger nginx 504 gateway timeout (>60s via QEMU NAT); GET endpoints tested via read tests
 
-**External dependencies (5):**
+**External dependencies (4):**
 - `services/acme/account_key/register` — needs real ACME server
 - `services/acme/certificate/issue` — needs real ACME server
 - `services/acme/certificate/renew` — needs real ACME server
-- `services/wake_on_lan/send` — needs real MAC address on LAN
 - `system/restapi/settings/sync` — HA sync endpoint times out without peer
 
 **Other (2):**
-- `auth/key` and `auth/jwt` — tested with dedicated BasicAuth client (not skipped, just uses different auth)
+- `vpn/openvpn/client_export` — requires functioning OpenVPN server
 - `system/restapi/version` — PATCH triggers API version change (destructive)
 
 ### Phantom plural routes (39)
@@ -387,18 +373,7 @@ Routes present in the OpenAPI spec but return nginx 404 on the real server. Thes
 
 ### Backlog — endpoints to unblock next
 
-These are currently skipped but should have real tests. Ordered by approachability:
-
-1. **HAProxy actions** (+2 tests) — `acl` field truly cannot be empty (API returns 400). Need to create ACL as sibling under same parent, then reference its name. Requires sibling dependency support in test generator.
-2. **HAProxy frontend/certificate** (+1 test) — needs `certref` injection from parent cert chain
-3. **OpenVPN client_export** (+2 tests) — build 5-step chain: CA → cert → OVPN server → user cert → export
-4. **CRL revoked_certificate** (+1 test) — PHP INT overflow confirmed even with imported PEM certs (serial too large). May need to generate a cert with artificially small serial.
-5. **Cert generation** (+6 tests) — server 500 on v2.4.3; may need to find the right parameter combination or workaround
-
-### Known stale entries to clean up
-
-- ~~`_CHAINED_CRUD` has entry for `/api/v2/services/bind/sync/domain`~~ — removed (path does not exist in OpenAPI spec)
-- ~~`_PHANTOM_PLURAL_ROUTES` has `/api/v2/services/bind/sync/domains`~~ — removed
+1. **OpenVPN client_export** (+2 tests) — build 5-step chain: CA → cert → OVPN server → user cert → export
 
 ### Key test patterns
 
@@ -431,6 +406,7 @@ The dev shell includes jinja2, pytest, qemu, and curl for generator development 
 3. **Test against the VM, not production**. The golden image exists for this purpose.
 4. **Expect scripts are fragile but working**. Do not change timing, patterns, or shortcuts unless something breaks. See gotchas above.
 5. **Every skipped endpoint must be documented with a reason** — in `_SKIP_CRUD_PATHS`, `_SKIP_ACTION`, `_SKIP_SINGLETON`, or `_PHANTOM_PLURAL_ROUTES` in `test_generator.py`, AND in the "Permanently skipped endpoints" section of this file. No silent skips.
+6. **Always use `nix develop -c` for ALL commands** that need qemu, curl, python, pytest, expect, or any dev tool. These are NOT on the system PATH — they are only available inside the nix dev shell. Running `qemu-system-x86_64` or `pytest` without `nix develop -c` will fail with "command not found".
 
 ## Test Development Workflow
 

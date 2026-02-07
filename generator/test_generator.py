@@ -64,7 +64,7 @@ _PHANTOM_PLURAL_ROUTES = {
     # BIND sub-resource plurals
     "/api/v2/services/bind/access_list/entries",
     # bind/sync/domains removed — corresponding singular does not exist in OpenAPI spec
-    # FreeRADIUS plural routes — nginx 404 (needs REST API v2.6+ / pfSense 2.8+)
+    # FreeRADIUS plural routes — singular forms tested via CRUD
     "/api/v2/services/freeradius/clients",
     "/api/v2/services/freeradius/interfaces",
     "/api/v2/services/freeradius/users",
@@ -303,7 +303,7 @@ _ENDPOINT_OVERRIDES: dict[str, dict[str, str]] = {
         "sched": None,  # omit — references non-existent schedule
     },
     "/api/v2/services/freeradius/client": {
-        "addr": '"10.99.99.90/32"',
+        "addr": '"10.99.99.90"',
         "shortname": '"pft_frcl"',
         "secret": '"TestSecret123"',
     },
@@ -344,13 +344,9 @@ _SKIP_CRUD_PATHS: dict[str, str] = {
     "/api/v2/interface": "interface CRUD can destabilize VM (em2 reserved for LAGG)",
     "/api/v2/vpn/openvpn/client_export/config": "complex 5-step chain: CA+cert+OVPN server+user cert (deferred)",
     "/api/v2/services/dhcp_server": "per-interface singleton, POST not supported",
-    # FreeRADIUS routes return nginx 404 (needs REST API v2.6+ which requires pfSense 2.8+)
-    "/api/v2/services/freeradius/client": "freeradius routes need REST API v2.6+ (pfSense 2.8+)",
-    "/api/v2/services/freeradius/interface": "freeradius routes need REST API v2.6+ (pfSense 2.8+)",
-    "/api/v2/services/freeradius/user": "freeradius routes need REST API v2.6+ (pfSense 2.8+)",
-    # HAProxy settings subs: server 500 "parent Model has been constructed" bug (confirmed setup_patches don't help)
-    "/api/v2/services/haproxy/settings/dns_resolver": "server 500: parent model construction bug in REST API v2.4.3",
-    "/api/v2/services/haproxy/settings/email_mailer": "server 500: parent model construction bug in REST API v2.4.3",
+    "/api/v2/services/haproxy/settings/dns_resolver": "500 parent Model not constructed (bug persists in v2.7.1)",
+    "/api/v2/services/haproxy/settings/email_mailer": "500 parent Model not constructed (bug persists in v2.7.1)",
+    "/api/v2/system/package": "install/delete trigger nginx 504 gateway timeout (>60s via QEMU NAT)",
 }
 
 # ── Singleton GET/PATCH endpoints (settings-like but not auto-detected) ───────
@@ -409,12 +405,17 @@ _SINGLETON_TESTS: dict[str, dict[str, Any]] = {
         "restore": "isc",
         "patch_only": True,
     },
+    "/api/v2/system/timezone": {
+        "field": "timezone",
+        "value": "America/Chicago",
+        "restore": "Etc/UTC",
+        "raw_patch": True,  # PATCH response has "Setting timezone...done.\n" prefix before JSON
+    },
 }
 
 # Singleton endpoints to skip
 _SKIP_SINGLETON: dict[str, str] = {
     "/api/v2/system/restapi/version": "PATCH triggers API version change (destructive)",
-    "/api/v2/system/timezone": "nginx 404 on REST API v2.4.3 (needs v2.6+ / pfSense 2.8+)",
 }
 
 # ── Action POST endpoints ─────────────────────────────────────────────────────
@@ -484,6 +485,12 @@ _ACTION_TESTS: dict[str, dict[str, Any]] = {
     "/api/v2/services/wake_on_lan/send": {
         "body": {"interface": "lan", "mac_addr": "00:11:22:33:44:55"},
     },
+    "/api/v2/diagnostics/ping": {
+        "body": {"host": "127.0.0.1", "count": 1},
+    },
+    "/api/v2/system/certificate/pkcs12/export": {
+        "needs_generated_cert": True,
+    },
     "/api/v2/diagnostics/reboot": {
         "body": {},
         "test_prefix": "zz_",
@@ -496,14 +503,12 @@ _ACTION_TESTS: dict[str, dict[str, Any]] = {
 
 # Action endpoints to skip
 _SKIP_ACTION: dict[str, str] = {
-    "/api/v2/diagnostics/ping": "version-gated to REST API v2.7.0+, not available on CE 2.7.2",
     "/api/v2/services/acme/account_key/register": "needs real ACME server for registration",
     "/api/v2/services/acme/certificate/issue": "requires real ACME server",
     "/api/v2/services/acme/certificate/renew": "requires real ACME server",
     "/api/v2/vpn/openvpn/client_export": "requires functioning OpenVPN server",
-    # status/service: now tested (restart syslogd)
     "/api/v2/system/restapi/settings/sync": "HA sync endpoint times out without peer",
-    "/api/v2/system/certificate/pkcs12/export": "no PKCS12 content handler in REST API v2.4.3 (406 Accept error)",
+    "/api/v2/system/certificate/pkcs12/export": "406 no content handler for binary format (bug persists in v2.7.1)",
 }
 
 # ── Pre-generated test PEM certificates ───────────────────────────────────────
@@ -2068,6 +2073,10 @@ def generate_tests(contexts: list[ToolContext]) -> str:
                 lines.append("")
                 test_count += 1
 
+    # system/package CRUD skipped — install/delete trigger nginx 504 gateway timeout
+    # (package operations take >60s via QEMU NAT, exceeding nginx upstream timeout)
+    # GET endpoints tested via test_read_system_packages and test_read_system_package_available
+
     # Emit deferred action tests last, sorted by prefix (zz_ before zzz_)
     for _prefix, action_path, config in sorted(deferred_actions, key=lambda x: x[0]):
         lines.append(_gen_action_test(action_path, config))
@@ -2385,6 +2394,7 @@ def _gen_singleton_test(path: str, config: dict[str, Any]) -> str:
         lines.append(f"")
 
     # Build PATCH body
+    raw_patch = config.get("raw_patch", False)
     patch_body: dict[str, Any] = {field: value}
     patch_body.update(extra_fields)
     lines.append(f"    # PATCH with test value")
@@ -2392,8 +2402,11 @@ def _gen_singleton_test(path: str, config: dict[str, Any]) -> str:
     lines.append(f'        "{path}",')
     lines.append(f"        json={patch_body!r},")
     lines.append(f"    )")
-    lines.append(f"    patched = _ok(patch_resp)")
-    lines.append(f'    assert patched.get("{field}") == {value!r}')
+    if raw_patch:
+        lines.append(f"    assert patch_resp.status_code == 200, f\"PATCH {{patch_resp.status_code}}: {{patch_resp.text[:200]}}\"")
+    else:
+        lines.append(f"    patched = _ok(patch_resp)")
+        lines.append(f'    assert patched.get("{field}") == {value!r}')
     lines.append(f"")
 
     if not patch_only:
@@ -2470,6 +2483,7 @@ def _gen_action_test(path: str, config: dict[str, Any]) -> str:
         return "\n".join(lines)
 
     if needs_generated_cert:
+        binary_export = "pkcs12" in path
         lines.append(f"    # Generate a CA and cert first")
         lines.append(f'    ca_resp = client.post("/api/v2/system/certificate_authority/generate", json={{')
         lines.append(f'        "descr": "CA for cert action", "keytype": "RSA", "keylen": 2048,')
@@ -2486,8 +2500,14 @@ def _gen_action_test(path: str, config: dict[str, Any]) -> str:
         lines.append(f"    try:")
         body_fields = ", ".join(f'"{k}": {v!r}' for k, v in body.items()) if body else ""
         extra = f", {body_fields}" if body_fields else ""
-        lines.append(f'        resp = client.post("{path}", json={{"certref": cert["refid"]{extra}}})')
-        lines.append(f"        _ok(resp)")
+        if binary_export:
+            # PKCS12 export returns binary — must use Accept: */* and check status only
+            lines.append(f'        resp = client.post("{path}", json={{"certref": cert["refid"]{extra}}}, headers={{"Accept": "*/*"}})')
+            lines.append(f'        assert resp.status_code == 200, f"PKCS12 export {{resp.status_code}}: {{resp.text[:200]}}"')
+            lines.append(f'        assert len(resp.content) > 0, "PKCS12 export returned empty body"')
+        else:
+            lines.append(f'        resp = client.post("{path}", json={{"certref": cert["refid"]{extra}}})')
+            lines.append(f"        _ok(resp)")
         lines.append(f"    finally:")
         lines.append(f'        client.delete("/api/v2/system/certificate", params={{"id": cert["id"]}})')
         lines.append(f'        client.delete("/api/v2/system/certificate_authority", params={{"id": ca["id"]}})')

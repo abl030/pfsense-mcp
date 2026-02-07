@@ -79,7 +79,7 @@ def _delete_with_retry(client: httpx.Client, path: str, obj_id, params: dict | N
             break
         time.sleep(5)
     assert resp.status_code in (200, 404), f"Delete {path} id={obj_id} failed: {resp.text[:500]}"
-# Total generated tests: 199
+# Total generated tests: 204
 
 def test_crud_firewall_alias(client: httpx.Client):
     """CRUD lifecycle: /api/v2/firewall/alias"""
@@ -2456,11 +2456,161 @@ def test_crud_services_dns_resolver_host_override_alias(client: httpx.Client):
         _delete_with_retry(client, "/api/v2/services/dns_resolver/host_override", p0_id)
 
 
-# SKIP /api/v2/services/freeradius/client: freeradius routes need REST API v2.6+ (pfSense 2.8+)
+def test_crud_services_freeradius_client(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/services/freeradius/client"""
+    # CREATE
+    create_resp = client.post(
+        "/api/v2/services/freeradius/client",
+        json={
+        "addr": "10.99.99.90",
+        "secret": "TestSecret123",
+        "shortname": "pft_frcl",
+        "description": "test_services_freeradius_client",
+        "ip_version": 'ipaddr',
+        "maxconn": 1,
+        "msgauth": False,
+        "naslogin": "test_services_freeradius_client",
+        "naspassword": "test_services_freeradius_client",
+        "nastype": 'cisco',
+        "proto": 'udp',
+    },
+    )
+    data = _ok(create_resp)
+    obj_id = data.get("id")
+    assert obj_id is not None, f"No id in create response: {data}"
 
-# SKIP /api/v2/services/freeradius/interface: freeradius routes need REST API v2.6+ (pfSense 2.8+)
+    try:
+        # GET (singular)
+        get_resp = client.get(
+            "/api/v2/services/freeradius/client",
+            params={"id": obj_id},
+        )
+        get_data = _ok(get_resp)
+        assert get_data.get("id") == obj_id
 
-# SKIP /api/v2/services/freeradius/user: freeradius routes need REST API v2.6+ (pfSense 2.8+)
+        # UPDATE
+        update_resp = client.patch(
+            "/api/v2/services/freeradius/client",
+            json={"id": obj_id, "description": "Updated by test"},
+        )
+        update_data = _ok(update_resp)
+        assert update_data.get("description") == "Updated by test"
+
+    finally:
+        # DELETE (cleanup, with retry for 503)
+        for _attempt in range(3):
+            del_resp = client.delete(
+                "/api/v2/services/freeradius/client",
+                params={"id": obj_id},
+            )
+            if del_resp.status_code != 503:
+                break
+            time.sleep(5)
+        # 200 = deleted, 404 = already gone (acceptable)
+        assert del_resp.status_code in (200, 404), f"Delete failed: {del_resp.text[:500]}"
+
+
+def test_crud_services_freeradius_interface(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/services/freeradius/interface"""
+    # CREATE
+    create_resp = client.post(
+        "/api/v2/services/freeradius/interface",
+        json={
+        "addr": "127.0.0.1",
+        "ip_version": "ipaddr",
+        "description": "test_services_freeradius_interface",
+        "port": "443",
+        "type": 'auth',
+    },
+    )
+    data = _ok(create_resp)
+    obj_id = data.get("id")
+    assert obj_id is not None, f"No id in create response: {data}"
+
+    try:
+        # GET (singular)
+        get_resp = client.get(
+            "/api/v2/services/freeradius/interface",
+            params={"id": obj_id},
+        )
+        get_data = _ok(get_resp)
+        assert get_data.get("id") == obj_id
+
+        # UPDATE
+        update_resp = client.patch(
+            "/api/v2/services/freeradius/interface",
+            json={"id": obj_id, "description": "Updated by test"},
+        )
+        update_data = _ok(update_resp)
+        assert update_data.get("description") == "Updated by test"
+
+    finally:
+        # DELETE (cleanup, with retry for 503)
+        for _attempt in range(3):
+            del_resp = client.delete(
+                "/api/v2/services/freeradius/interface",
+                params={"id": obj_id},
+            )
+            if del_resp.status_code != 503:
+                break
+            time.sleep(5)
+        # 200 = deleted, 404 = already gone (acceptable)
+        assert del_resp.status_code in (200, 404), f"Delete failed: {del_resp.text[:500]}"
+
+
+def test_crud_services_freeradius_user(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/services/freeradius/user"""
+    # CREATE
+    create_resp = client.post(
+        "/api/v2/services/freeradius/user",
+        json={
+        "motp_pin": "",
+        "motp_secret": "",
+        "password": "TestPass123",
+        "username": "pft_fruser",
+        "description": "test_services_freeradius_user",
+        "framed_ip_address": "10.99.99.99",
+        "framed_ip_netmask": "10.99.99.99",
+        "motp_authmethod": 'motp',
+        "motp_enable": False,
+        "motp_offset": 1,
+        "password_encryption": 'Cleartext-Password',
+    },
+    )
+    data = _ok(create_resp)
+    obj_id = data.get("id")
+    assert obj_id is not None, f"No id in create response: {data}"
+
+    try:
+        # GET (singular)
+        get_resp = client.get(
+            "/api/v2/services/freeradius/user",
+            params={"id": obj_id},
+        )
+        get_data = _ok(get_resp)
+        assert get_data.get("id") == obj_id
+
+        # UPDATE
+        update_resp = client.patch(
+            "/api/v2/services/freeradius/user",
+            json={"id": obj_id, "description": "Updated by test"},
+        )
+        update_data = _ok(update_resp)
+        assert update_data.get("description") == "Updated by test"
+
+    finally:
+        # DELETE (cleanup, with retry for 503)
+        for _attempt in range(3):
+            del_resp = client.delete(
+                "/api/v2/services/freeradius/user",
+                params={"id": obj_id},
+            )
+            if del_resp.status_code != 503:
+                break
+            time.sleep(5)
+        # 200 = deleted, 404 = already gone (acceptable)
+        assert del_resp.status_code in (200, 404), f"Delete failed: {del_resp.text[:500]}"
+
 
 def test_crud_services_haproxy_backend(client: httpx.Client):
     """CRUD lifecycle: /api/v2/services/haproxy/backend"""
@@ -3204,9 +3354,9 @@ def test_crud_services_haproxy_frontend_error_file(client: httpx.Client):
         _delete_with_retry(client, "/api/v2/services/haproxy/file", p0_id)
 
 
-# SKIP /api/v2/services/haproxy/settings/dns_resolver: server 500: parent model construction bug in REST API v2.4.3
+# SKIP /api/v2/services/haproxy/settings/dns_resolver: 500 parent Model not constructed (bug persists in v2.7.1)
 
-# SKIP /api/v2/services/haproxy/settings/email_mailer: server 500: parent model construction bug in REST API v2.4.3
+# SKIP /api/v2/services/haproxy/settings/email_mailer: 500 parent Model not constructed (bug persists in v2.7.1)
 
 def test_crud_services_ntp_time_server(client: httpx.Client):
     """CRUD lifecycle: /api/v2/services/ntp/time_server"""
@@ -5673,7 +5823,32 @@ def test_singleton_system_notifications_email_settings(client: httpx.Client):
 
 # SKIP /api/v2/system/restapi/version: PATCH triggers API version change (destructive)
 
-# SKIP /api/v2/system/timezone: nginx 404 on REST API v2.4.3 (needs v2.6+ / pfSense 2.8+)
+def test_singleton_system_timezone(client: httpx.Client):
+    """Singleton roundtrip: /api/v2/system/timezone"""
+    # GET current value
+    resp = client.get("/api/v2/system/timezone")
+    original = _ok(resp)
+    assert isinstance(original, dict)
+    original_value = original.get("timezone")
+
+    # PATCH with test value
+    patch_resp = client.patch(
+        "/api/v2/system/timezone",
+        json={'timezone': 'America/Chicago'},
+    )
+    assert patch_resp.status_code == 200, f"PATCH {patch_resp.status_code}: {patch_resp.text[:200]}"
+
+    # GET to verify persistence
+    verify_resp = client.get("/api/v2/system/timezone")
+    verify = _ok(verify_resp)
+    assert verify.get("timezone") == 'America/Chicago'
+
+    # Restore original value
+    client.patch(
+        "/api/v2/system/timezone",
+        json={'timezone': 'Etc/UTC'},
+    )
+
 
 def test_action_auth_jwt(client: httpx.Client):
     """Action: POST /api/v2/auth/jwt"""
@@ -5710,7 +5885,12 @@ def test_action_diagnostics_command_prompt(client: httpx.Client):
     assert data is not None
 
 
-# SKIP /api/v2/diagnostics/ping: version-gated to REST API v2.7.0+, not available on CE 2.7.2
+def test_action_diagnostics_ping(client: httpx.Client):
+    """Action: POST /api/v2/diagnostics/ping"""
+    resp = client.post("/api/v2/diagnostics/ping", json={'host': '127.0.0.1', 'count': 1})
+    data = _ok(resp)
+    assert data is not None
+
 
 def test_action_graphql(client: httpx.Client):
     """Action: POST /api/v2/graphql"""
@@ -5759,7 +5939,7 @@ def test_action_system_certificate_generate(client: httpx.Client):
         client.delete("/api/v2/system/certificate_authority", params={"id": ca["id"]})
 
 
-# SKIP /api/v2/system/certificate/pkcs12/export: no PKCS12 content handler in REST API v2.4.3 (406 Accept error)
+# SKIP /api/v2/system/certificate/pkcs12/export: 406 no content handler for binary format (bug persists in v2.7.1)
 
 def test_action_system_certificate_renew(client: httpx.Client):
     """Action: POST /api/v2/system/certificate/renew"""
