@@ -371,9 +371,10 @@ Every skip is documented in `_SKIP_CRUD_PATHS`, `_SKIP_ACTION`, `_SKIP_SINGLETON
 
 Routes present in the OpenAPI spec but return nginx 404 on the real server. These are sub-resource plural endpoints whose singular forms require `parent_id`. The pfSense REST API simply doesn't register these routes. All are tested via their singular CRUD endpoints instead.
 
-### Backlog — endpoints to unblock next
+### Backlog
 
-1. **OpenVPN client_export** (+2 tests) — build 5-step chain: CA → cert → OVPN server → user cert → export
+1. **Remove phantom plural routes from MCP server** — The 39 phantom plural routes (listed above) exist in the OpenAPI spec but return nginx 404 on the real pfSense server. They are currently generated into `generated/server.py` as tools, which means an LLM agent could call them and always get 404 errors. Add an exclusion list to the server generator (`generator/codegen.py` or `context_builder.py`) using the same `_PHANTOM_PLURAL_ROUTES` set from `test_generator.py`. After removing, update the tool count in `README.md` and `flake.nix`.
+2. **OpenVPN client_export** (+2 tests) — build 5-step chain: CA → cert → OVPN server → user cert → export
 
 ### Key test patterns
 
