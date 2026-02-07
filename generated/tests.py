@@ -21,6 +21,12 @@ API_KEY = os.environ.get("PFSENSE_TEST_API_KEY", "")
 AUTH_USER = os.environ.get("PFSENSE_TEST_USER", "admin")
 AUTH_PASS = os.environ.get("PFSENSE_TEST_PASS", "pfsense")
 
+# Pre-generated test certificates (self-signed, 10-year validity)
+CA_CERT_PEM = "-----BEGIN CERTIFICATE-----\nMIIDMzCCAhugAwIBAgIUbtFPoQ0zYg1ScUJ7+FnklDgHgh8wDQYJKoZIhvcNAQEL\nBQAwKTEQMA4GA1UEAwwHVGVzdCBDQTEVMBMGA1UECgwMcGZTZW5zZSBUZXN0MB4X\nDTI2MDIwNzAxMjYyMloXDTM2MDIwNTAxMjYyMlowKTEQMA4GA1UEAwwHVGVzdCBD\nQTEVMBMGA1UECgwMcGZTZW5zZSBUZXN0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A\nMIIBCgKCAQEAs3inegnOteSWo/iRAV5YUZ7tx1pDni+cdDcNkDgPubrM9baB/EVP\nA1CqpV1F20YcHu9o2H/BS308cCwOxNFuarjsTzHgrH7WG9gwUvXfDPkJ08ivvWxS\n4WXsVqP6OQ7iOgJpDTx0ALyBLq2isW2/nn5Eubs9SL65pk8FBMe6cZ/JVRQ2KUwo\nHwKq+HR6qBhrLFeAFVBHB/NXjQHWT7Kkym9nPA8RMwvkXyQZj8vXL8gWwqFEY7dk\nx8hpJ10vnRjWz3afNeP9qRLBlIxdz0NlrbaZ/Xh/h+2pQX3i8S4cyTYDF56Cw98X\nPjWoOi45TlZ33cbh7YsgyODZcmr1WOeRSQIDAQABo1MwUTAdBgNVHQ4EFgQUNKKH\nIC1T0pAoUUXO2+TT488p45AwHwYDVR0jBBgwFoAUNKKHIC1T0pAoUUXO2+TT488p\n45AwDwYDVR0TAQH/BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEAonF1YEnW+vSp\njRxq+vB3foaHUkiEDP4ipDdknZgu19JKW+NSEvz9mAKU1zVnN621I1JURuDELBTN\nBa5oa1BnAQ3kzEtGr/yJZh477i15L/FBUvTjUQlnftKSJF22BD0YamALSsdHyJaS\nl6a8YdaFV2muzjk0aDFutMk1kESiUh02FY5dU8MTPcarGSqUFBxT9TqGYlf7TcEI\nA35EDCIbEzkqUofzzp70rXN1Z9TdR/rf74waSn4/tPhF5/Eosf0+hC/IRz1V+3+6\nbCIx8M+jzQZU8u92iAnZkp9rGgBZZnonZ6phI0WAR67UBSvD5939DGlqDiQjMsuX\nz+e3gqRxKQ==\n-----END CERTIFICATE-----"
+CA_KEY_PEM = "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCzeKd6Cc615Jaj\n+JEBXlhRnu3HWkOeL5x0Nw2QOA+5usz1toH8RU8DUKqlXUXbRhwe72jYf8FLfTxw\nLA7E0W5quOxPMeCsftYb2DBS9d8M+QnTyK+9bFLhZexWo/o5DuI6AmkNPHQAvIEu\nraKxbb+efkS5uz1IvrmmTwUEx7pxn8lVFDYpTCgfAqr4dHqoGGssV4AVUEcH81eN\nAdZPsqTKb2c8DxEzC+RfJBmPy9cvyBbCoURjt2THyGknXS+dGNbPdp814/2pEsGU\njF3PQ2Wttpn9eH+H7alBfeLxLhzJNgMXnoLD3xc+Nag6LjlOVnfdxuHtiyDI4Nly\navVY55FJAgMBAAECggEAAWVrDsjRv1oqY9cqBZ6JcFpx/hmGf3izrmHD7L8gPDEm\n/rMEmtpNLY5B7ZcRVTiGknpepe8vKUUC+dprOP5qGKbHS9cW/jCJvjNgg4dfIgIz\n9d5Qo61v4vSrMddaZHmS//bcgK+w3//sv1i2ycuRReHfQKn4uulPl2rI9AsRDmji\nRWry7Dz5of17vvKe63N/sdmsDNo0RphucTBVnLw/MsDI5WXjMYqCILC/CBNhM3Ey\nemPUaZucUGc6AY+BMzF7XrYNaHL3IkN06dC8Iyn7h2v/gSSuknTa2zfUw5nBSlja\nm+wmFswXWf7OSsT1SV2o+ebs95nKdHQSIJJVMHAFaQKBgQD5P2hac7ivzr669lGk\nCdf+6d7ERpwInEOJBqahuUFfsZSVgxjPBVXSSb2CAF+4cVGn4Tbj5h3ZuIfUct7D\nf0wUfBG4dTdciAQ5+F4EWnVVeS1aHTyMy1VP+cvwHek4T0sxwFJLze99iiPv7IJl\nPy3N2pL0bzWI9kgIJal8YFCcRQKBgQC4VVSm+dUlUB+VExufxEljTBQw9SgAwoi0\nsE/sf2pbcRHk9mneYBLLmkat6Rig4j+S/WFFPWZdnD7JCG1NjgRhJr54iRXzR2yB\ncq5qPplTtJB7zxF+gk01LJHnuqfIOOc9vrCM2eTQTs/hhgjcWVUudWbgFxoQNcDy\nc8YyCSNLNQKBgQDGU8IBV1t56RSzSBSmZn7Mg+OSYmz+HPlQK06kGPj/4BnO7kXr\nVN95ONvmec2wwdqrrvUyWoUeHUtXrR+8h6pOEns3P24R3tkeF5cX97KtlIKV1fW8\nQn9b5/Ry2BofiFjY+aOCVhde2XDHFHadgaw8xNNyVJtQpEek0/MM2MbL0QKBgAyY\nWAZov7Wi+eV3vsV15gXQ5vhJaAhVQn4GJg/kzOGeojhg1e8J5X7f9cBgUvx7ORjU\nE1dl0J7I1ElsN/u6nnX87brSsxtCYBmgOmasDFH53n13MpzQTnI5r2aEDH7T1IkV\nhH67TLUnDXE9dVGJERbxkqvxKCi/Y4Wtf3dfxHeZAoGBAKivNGFeCgaoqwdvIP7I\nxr/D03OgdfPn2qlR1HqsZbBFncBcs8ZaqqJ8z4XtciwCJAXMqGbd2EGRB6qmLPYe\nfmXBZyQ+OJXbjaw1hYWo6UsNa4SnPSwYbZsoht3bgqM7YNoMur3xAgKTMpHK1LRv\nKExPKJsV0Kb6sQ6X2vFrnVBh\n-----END PRIVATE KEY-----"
+CERT_PEM = "-----BEGIN CERTIFICATE-----\nMIIDKzCCAhOgAwIBAgIUGjPhTAHBo+rI0jwF4drOD1h07/EwDQYJKoZIhvcNAQEL\nBQAwKTEQMA4GA1UEAwwHVGVzdCBDQTEVMBMGA1UECgwMcGZTZW5zZSBUZXN0MB4X\nDTI2MDIwNzAxMjYyOFoXDTM2MDIwNTAxMjYyOFowMjEZMBcGA1UEAwwQdGVzdC5l\neGFtcGxlLmNvbTEVMBMGA1UECgwMcGZTZW5zZSBUZXN0MIIBIjANBgkqhkiG9w0B\nAQEFAAOCAQ8AMIIBCgKCAQEAsFHLy6MMYwtaV0SSr9nLOFbWlF9YZedINQV8E/z4\n26dJcBCHPLaEj8dI7jgNZnhdzoX52FG3zNs+Tw7NC8uYjFRC32gyx2nULn1T+lzC\ncPcU/wmSstgWXSUPUQkZSbua2ETH7IqKFeVMN3fCz/1eNmXR0Cjs16H7M7+qOeMH\nA/gMHCZhuyCEBsiF3uga6tg2P048CrQprmlccy3EXcDEFLYppCvycncpqVyneixL\nalV3ZLtULWetot3NMy/09bNpwDrzrzbq6BrEMnp0ANT8PpM19wVoxwWmdgkbeUk+\nIl9WirEFdTg9IUuEFworVbAkiaYNqISs85KdfmgkpOM+BwIDAQABo0IwQDAdBgNV\nHQ4EFgQUPkeP0fa/AoRDCCIjEDRCUxLu6AowHwYDVR0jBBgwFoAUNKKHIC1T0pAo\nUUXO2+TT488p45AwDQYJKoZIhvcNAQELBQADggEBAH3zwwnB/RfzmNBKm9dYf3EE\ngS3fIdRu7vOTJpRAhAxhjg92po2OyxLCINuRHQImXP3A4+Dxpvm57Gupzc8Ct098\nXyscFNebR/XrVPI11ggRhy3giVH61dS8OpkrcwRyVuTF/S11312e+ptsqpiAWh0M\nJsXqUCVjwW39FdcxBim++9LAt2XeiyaxqlJln0jN5jyLmSF90CV4NnFMOOdIMkwn\nuFouKAgxbb1q1mL1VE9c4fD9BXxqfldnkZqOG56331TVfhJ99dsIxh7aO9rk1txW\nRKgTO+dSPffND5e5lENE+BDKx9cUm2Vtc05J3vD7V4cyK8bmBzA6tt6uI/8qvsA=\n-----END CERTIFICATE-----"
+CERT_KEY_PEM = "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCwUcvLowxjC1pX\nRJKv2cs4VtaUX1hl50g1BXwT/Pjbp0lwEIc8toSPx0juOA1meF3OhfnYUbfM2z5P\nDs0Ly5iMVELfaDLHadQufVP6XMJw9xT/CZKy2BZdJQ9RCRlJu5rYRMfsiooV5Uw3\nd8LP/V42ZdHQKOzXofszv6o54wcD+AwcJmG7IIQGyIXe6Brq2DY/TjwKtCmuaVxz\nLcRdwMQUtimkK/JydympXKd6LEtqVXdku1QtZ62i3c0zL/T1s2nAOvOvNuroGsQy\nenQA1Pw+kzX3BWjHBaZ2CRt5ST4iX1aKsQV1OD0hS4QXCitVsCSJpg2ohKzzkp1+\naCSk4z4HAgMBAAECggEABAZ3W23x/Z2H5vUgT4EZNBnmFTC7YRGEzae95kDrYixc\nBKxul0gSwlY03TIMuu763pj4FA8C3gY6p8MOkvsyFNtkRBsUtFu/UH5jo+lpNlCr\nEIrPPWOp2F+HuCcNMOiRB5NDvdaIgikgHSYP8v/1nif4lcLRbAzSd3h5MjrIxreM\nbc2wpu/tNgwnpcvGbhUqFBssMucvlXLeKxiP5pF7Un0+WjqC+tCJztOkryvmyE2g\njMEysclD1H7AYVqrusBmuxPW5AAb4Tv2vA4G2xm9n8BhpwpCGZdsa7ZYkb+s89Ec\nn0G/fCoRWk21p2U1N18C5QOMuxqxAFxb7YRYJszzCQKBgQDdSh6cpUgE9FeUbUkV\ntqbMjmSQKPpBEu2LF7u7x+OBPIEdFrCDMQuZHAc+MT0XFlO8jA4Pm1OoRFaI7RVZ\n8G9b/aORUg+xMKOl3o+bInY2FT/ddmp7J1J0dQDfMbU/f+jTCIzAhI094wJc3ScX\n336/nQkLRsoOdQB0gwBsodamKQKBgQDL+efd2FlP7/VJg4PGsJHGGRJ0vqtsj//c\nis1C0vCkoqtAfMtVP7wMT9SC1u+cjW13Bh6auWHL3MK31iLceymfB+73ZPBDuXz/\nlTv+hKqtYZbc1g7w9SJEqN41tFRsdMRnq18WcYAMCoQiY4R3B9lYJOqBiuvZt0mI\nvGRwYU9orwKBgQCpZSu5zewrnr/MJzxjGsbkn7vrfvLTDaI5b5mOTZ2iOKa9lbjZ\nNJokQoho21hga/79vlilKcoIbQexGYvWpW8ZhDfJ7n+ErC8Zsh1MLD1BeVLCPPuV\n+qvr6gUY1fxg95FKuqjEVrOoRDZyz/g1Fij4lUVvFGloV7hZeE7C2cBuwQKBgQCA\nZSWL4pSNmelXxf4cAqcwADY64I59fsM66vA7wRYTPAX6SNOhLMZNJa8KUQtxCyE9\ni8+V611g+uxi1dsJ2EkhvtewSIxoxQimxSSHmLDrBIP3LJMpH9TbTUTan1GJF5NO\nAnSPZxCIA9Ka5vPKDVnFfy9SLcU6PYJ/HL9IciiPJwKBgC93lXfdoyA5waYdBGYL\nVEaSfh3hxGd5sC+krUK7VXV/bCkGOX71AsiAY8Wo35yu3+24tnLaMVocgcFzjmXi\nhZu2Fa7IccV7iRh0wxoXD3BtjV37vzLq4C5yD5hgFgeNwF3LfrWVOWFAy2bjrA5+\nU1dtBhHADj/YuAIFAStvX2JE\n-----END PRIVATE KEY-----"
+
 
 @pytest.fixture(scope="session")
 def client() -> httpx.Client:
@@ -49,7 +55,20 @@ def _ok(resp: httpx.Response) -> dict:
     body = resp.json()
     assert body.get("code") == 200, f"API error: {body}"
     return body.get("data", body)
-# Total generated tests: 128
+
+
+def _delete_with_retry(client: httpx.Client, path: str, obj_id, params: dict | None = None) -> None:
+    """Delete a resource with retry for 503 (busy) and accept 404 (already gone)."""
+    p = {"id": obj_id}
+    if params:
+        p.update(params)
+    for _attempt in range(3):
+        resp = client.delete(path, params=p)
+        if resp.status_code != 503:
+            break
+        time.sleep(5)
+    assert resp.status_code in (200, 404), f"Delete {path} id={obj_id} failed: {resp.text[:500]}"
+# Total generated tests: 140
 
 def test_crud_firewall_alias(client: httpx.Client):
     """CRUD lifecycle: /api/v2/firewall/alias"""
@@ -783,7 +802,41 @@ def test_crud_interface_group(client: httpx.Client):
 
 # SKIP /api/v2/interface/lagg: requires multiple physical interfaces
 
-# SKIP /api/v2/interface/vlan: requires valid parent interface
+def test_crud_interface_vlan(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/interface/vlan (chained)"""
+    # CREATE
+    body = {
+            "if": 'vtnet0',
+            "tag": 100,
+            "pcp": 0,
+            "descr": 'Test VLAN',
+        }
+    create_resp = client.post(
+        "/api/v2/interface/vlan",
+        json=body,
+    )
+    data = _ok(create_resp)
+    obj_id = data.get("id")
+    assert obj_id is not None, f"No id in create response: {data}"
+
+    try:
+        # GET (singular)
+        get_resp = client.get(
+            "/api/v2/interface/vlan",
+            params={"id": obj_id},
+        )
+        _ok(get_resp)
+
+        # UPDATE
+        update_resp = client.patch(
+            "/api/v2/interface/vlan",
+            json={"id": obj_id, "descr": "Updated by test"},
+        )
+        _ok(update_resp)
+
+    finally:
+        _delete_with_retry(client, "/api/v2/interface/vlan", obj_id)
+
 
 def test_crud_routing_gateway(client: httpx.Client):
     """CRUD lifecycle: /api/v2/routing/gateway"""
@@ -861,15 +914,167 @@ def test_crud_routing_gateway(client: httpx.Client):
         assert del_resp.status_code in (200, 404), f"Delete failed: {del_resp.text[:500]}"
 
 
-# SKIP /api/v2/routing/gateway/group: requires existing gateways with valid tiers
+def test_crud_routing_gateway_group(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/routing/gateway/group (needs: routing/gateway)"""
+    # Setup: create parent routing/gateway
+    p0_resp = client.post(
+        "/api/v2/routing/gateway",
+        json={
+        "name": 'pft_gw_gg',
+        "gateway": '10.0.2.1',
+        "interface": 'wan',
+        "ipprotocol": 'inet',
+        "descr": 'Test gateway for gg',
+        "latencylow": 200,
+        "latencyhigh": 500,
+        "losslow": 10,
+        "losshigh": 20,
+        "loss_interval": 2000,
+        "time_period": 60000,
+        "interval": 500,
+        "alert_interval": 1000,
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    try:
+        # CREATE
+        body = {
+                "name": 'pft_gw_group',
+                "descr": 'Test gateway group',
+                "priorities": [{'gateway': 'pft_gw_gg', 'tier': 1}],
+            }
+        create_resp = client.post(
+            "/api/v2/routing/gateway/group",
+            json=body,
+        )
+        data = _ok(create_resp)
+        obj_id = data.get("id")
+        assert obj_id is not None, f"No id in create response: {data}"
+
+        try:
+            # GET (singular)
+            get_resp = client.get(
+                "/api/v2/routing/gateway/group",
+                params={"id": obj_id},
+            )
+            _ok(get_resp)
+
+            # UPDATE
+            update_resp = client.patch(
+                "/api/v2/routing/gateway/group",
+                json={"id": obj_id, "descr": "Updated by test"},
+            )
+            _ok(update_resp)
+
+        finally:
+            _delete_with_retry(client, "/api/v2/routing/gateway/group", obj_id)
+    finally:
+        _delete_with_retry(client, "/api/v2/routing/gateway", p0_id)
+
 
 # SKIP /api/v2/routing/gateway/group/priority: requires parent_id (needs parent resource first)
 
-# SKIP /api/v2/routing/static_route: requires existing gateway object
+def test_crud_routing_static_route(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/routing/static_route (needs: routing/gateway)"""
+    # Setup: create parent routing/gateway
+    p0_resp = client.post(
+        "/api/v2/routing/gateway",
+        json={
+        "name": 'pft_gw_sr',
+        "gateway": '10.0.2.1',
+        "interface": 'wan',
+        "ipprotocol": 'inet',
+        "descr": 'Test gateway for sr',
+        "latencylow": 200,
+        "latencyhigh": 500,
+        "losslow": 10,
+        "losshigh": 20,
+        "loss_interval": 2000,
+        "time_period": 60000,
+        "interval": 500,
+        "alert_interval": 1000,
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
 
-# SKIP /api/v2/services/acme/account_key: requires valid X509 private key
+    try:
+        # CREATE
+        body = {
+                "network": '10.200.0.0/24',
+                "descr": 'Test static route',
+            }
+        body["gateway"] = p0["name"]
+        create_resp = client.post(
+            "/api/v2/routing/static_route",
+            json=body,
+        )
+        data = _ok(create_resp)
+        obj_id = data.get("id")
+        assert obj_id is not None, f"No id in create response: {data}"
 
-# SKIP /api/v2/services/acme/certificate: requires existing ACME account key
+        try:
+            # GET (singular)
+            get_resp = client.get(
+                "/api/v2/routing/static_route",
+                params={"id": obj_id},
+            )
+            _ok(get_resp)
+
+            # UPDATE
+            update_resp = client.patch(
+                "/api/v2/routing/static_route",
+                json={"id": obj_id, "descr": "Updated by test"},
+            )
+            _ok(update_resp)
+
+        finally:
+            _delete_with_retry(client, "/api/v2/routing/static_route", obj_id)
+    finally:
+        _delete_with_retry(client, "/api/v2/routing/gateway", p0_id)
+
+
+def test_crud_services_acme_account_key(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/services/acme/account_key (chained)"""
+    # CREATE
+    body = {
+            "name": 'pft_acme_key',
+            "descr": 'Test ACME key',
+            "email": 'test@example.com',
+            "acmeserver": 'letsencrypt-staging-2',
+        }
+    create_resp = client.post(
+        "/api/v2/services/acme/account_key",
+        json=body,
+    )
+    data = _ok(create_resp)
+    obj_id = data.get("id")
+    assert obj_id is not None, f"No id in create response: {data}"
+
+    try:
+        # GET (singular)
+        get_resp = client.get(
+            "/api/v2/services/acme/account_key",
+            params={"id": obj_id},
+        )
+        _ok(get_resp)
+
+        # UPDATE
+        update_resp = client.patch(
+            "/api/v2/services/acme/account_key",
+            json={"id": obj_id, "descr": "Updated by test"},
+        )
+        _ok(update_resp)
+
+    finally:
+        _delete_with_retry(client, "/api/v2/services/acme/account_key", obj_id)
+
+
+# SKIP /api/v2/services/acme/certificate: requires existing ACME account key and DNS setup
 
 # SKIP /api/v2/services/acme/certificate/action: requires parent_id (needs parent resource first)
 
@@ -1541,13 +1746,115 @@ def test_crud_services_haproxy_backend(client: httpx.Client):
         assert del_resp.status_code in (200, 404), f"Delete failed: {del_resp.text[:500]}"
 
 
-# SKIP /api/v2/services/haproxy/backend/acl: requires existing backend parent
+def test_crud_services_haproxy_backend_acl(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/services/haproxy/backend/acl (needs: services/haproxy/backend)"""
+    # Setup: create parent services/haproxy/backend
+    p0_resp = client.post(
+        "/api/v2/services/haproxy/backend",
+        json={
+        "name": 'pft_be_bacl',
+        "agent_port": '0',
+        "persist_cookie_name": 'SRVID',
+        "descr": 'Test backend for bacl',
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
 
-# SKIP /api/v2/services/haproxy/backend/action: requires existing backend parent
+    try:
+        # CREATE
+        body = {
+                "name": 'pft_bacl',
+                "expression": 'host_starts_with',
+                "value": 'test.example.com',
+            }
+        body["parent_id"] = p0["id"]
+        create_resp = client.post(
+            "/api/v2/services/haproxy/backend/acl",
+            json=body,
+        )
+        data = _ok(create_resp)
+        obj_id = data.get("id")
+        assert obj_id is not None, f"No id in create response: {data}"
 
-# SKIP /api/v2/services/haproxy/backend/error_file: requires existing backend parent
+        try:
+            # GET (singular)
+            get_resp = client.get(
+                "/api/v2/services/haproxy/backend/acl",
+                params={"id": obj_id, "parent_id": p0["id"]},
+            )
+            _ok(get_resp)
 
-# SKIP /api/v2/services/haproxy/backend/server: requires existing backend parent
+            # UPDATE
+            update_resp = client.patch(
+                "/api/v2/services/haproxy/backend/acl",
+                json={"id": obj_id, "parent_id": p0["id"], "value": "updated.example.com"},
+            )
+            _ok(update_resp)
+
+        finally:
+            _delete_with_retry(client, "/api/v2/services/haproxy/backend/acl", obj_id, {"parent_id": p0["id"]})
+    finally:
+        _delete_with_retry(client, "/api/v2/services/haproxy/backend", p0_id)
+
+
+# SKIP /api/v2/services/haproxy/backend/action: requires valid action enum + context
+
+# SKIP /api/v2/services/haproxy/backend/error_file: requires existing HAProxy file FK
+
+def test_crud_services_haproxy_backend_server(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/services/haproxy/backend/server (needs: services/haproxy/backend)"""
+    # Setup: create parent services/haproxy/backend
+    p0_resp = client.post(
+        "/api/v2/services/haproxy/backend",
+        json={
+        "name": 'pft_be_bsrv',
+        "agent_port": '0',
+        "persist_cookie_name": 'SRVID',
+        "descr": 'Test backend for bsrv',
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    try:
+        # CREATE
+        body = {
+                "name": 'pft_bsrv',
+                "address": '10.99.99.50',
+                "port": '8080',
+            }
+        body["parent_id"] = p0["id"]
+        create_resp = client.post(
+            "/api/v2/services/haproxy/backend/server",
+            json=body,
+        )
+        data = _ok(create_resp)
+        obj_id = data.get("id")
+        assert obj_id is not None, f"No id in create response: {data}"
+
+        try:
+            # GET (singular)
+            get_resp = client.get(
+                "/api/v2/services/haproxy/backend/server",
+                params={"id": obj_id, "parent_id": p0["id"]},
+            )
+            _ok(get_resp)
+
+            # UPDATE
+            update_resp = client.patch(
+                "/api/v2/services/haproxy/backend/server",
+                json={"id": obj_id, "parent_id": p0["id"], "address": "10.99.99.51"},
+            )
+            _ok(update_resp)
+
+        finally:
+            _delete_with_retry(client, "/api/v2/services/haproxy/backend/server", obj_id, {"parent_id": p0["id"]})
+    finally:
+        _delete_with_retry(client, "/api/v2/services/haproxy/backend", p0_id)
+
 
 def test_crud_services_haproxy_file(client: httpx.Client):
     """CRUD lifecycle: /api/v2/services/haproxy/file"""
@@ -1597,17 +1904,191 @@ def test_crud_services_haproxy_file(client: httpx.Client):
         assert del_resp.status_code in (200, 404), f"Delete failed: {del_resp.text[:500]}"
 
 
-# SKIP /api/v2/services/haproxy/frontend: requires existing backend
+def test_crud_services_haproxy_frontend(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/services/haproxy/frontend (needs: services/haproxy/backend)"""
+    # Setup: create parent services/haproxy/backend
+    p0_resp = client.post(
+        "/api/v2/services/haproxy/backend",
+        json={
+        "name": 'pft_be_fe',
+        "agent_port": '0',
+        "persist_cookie_name": 'SRVID',
+        "descr": 'Test backend for fe',
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
 
-# SKIP /api/v2/services/haproxy/frontend/acl: requires existing frontend parent
+    try:
+        # CREATE
+        body = {
+                "name": 'pft_fe_chain',
+                "type": 'http',
+                "descr": 'Test frontend',
+            }
+        create_resp = client.post(
+            "/api/v2/services/haproxy/frontend",
+            json=body,
+        )
+        data = _ok(create_resp)
+        obj_id = data.get("id")
+        assert obj_id is not None, f"No id in create response: {data}"
 
-# SKIP /api/v2/services/haproxy/frontend/action: requires existing frontend parent
+        try:
+            # GET (singular)
+            get_resp = client.get(
+                "/api/v2/services/haproxy/frontend",
+                params={"id": obj_id},
+            )
+            _ok(get_resp)
 
-# SKIP /api/v2/services/haproxy/frontend/address: requires existing frontend parent
+            # UPDATE
+            update_resp = client.patch(
+                "/api/v2/services/haproxy/frontend",
+                json={"id": obj_id, "descr": "Updated by test"},
+            )
+            _ok(update_resp)
 
-# SKIP /api/v2/services/haproxy/frontend/certificate: requires existing frontend parent
+        finally:
+            _delete_with_retry(client, "/api/v2/services/haproxy/frontend", obj_id)
+    finally:
+        _delete_with_retry(client, "/api/v2/services/haproxy/backend", p0_id)
 
-# SKIP /api/v2/services/haproxy/frontend/error_file: requires existing frontend parent
+
+def test_crud_services_haproxy_frontend_acl(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/services/haproxy/frontend/acl (needs: services/haproxy/backend, services/haproxy/frontend)"""
+    # Setup: create parent services/haproxy/backend
+    p0_resp = client.post(
+        "/api/v2/services/haproxy/backend",
+        json={
+        "name": 'pft_be_facl',
+        "agent_port": '0',
+        "persist_cookie_name": 'SRVID',
+        "descr": 'Test backend for facl',
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    # Setup: create parent services/haproxy/frontend
+    p1_resp = client.post(
+        "/api/v2/services/haproxy/frontend",
+        json={
+        "name": 'pft_fe_acl',
+        "type": 'http',
+    },
+    )
+    p1 = _ok(p1_resp)
+    p1_id = p1.get("id")
+    assert p1_id is not None, f"No id in parent response: {p1}"
+
+    try:
+        try:
+            # CREATE
+            body = {
+                    "name": 'pft_facl',
+                    "expression": 'host_starts_with',
+                    "value": 'test.example.com',
+                }
+            body["parent_id"] = p1["id"]
+            create_resp = client.post(
+                "/api/v2/services/haproxy/frontend/acl",
+                json=body,
+            )
+            data = _ok(create_resp)
+            obj_id = data.get("id")
+            assert obj_id is not None, f"No id in create response: {data}"
+
+            try:
+                # GET (singular)
+                get_resp = client.get(
+                    "/api/v2/services/haproxy/frontend/acl",
+                    params={"id": obj_id, "parent_id": p1["id"]},
+                )
+                _ok(get_resp)
+
+                # UPDATE
+                update_resp = client.patch(
+                    "/api/v2/services/haproxy/frontend/acl",
+                    json={"id": obj_id, "parent_id": p1["id"], "value": "updated.example.com"},
+                )
+                _ok(update_resp)
+
+            finally:
+                _delete_with_retry(client, "/api/v2/services/haproxy/frontend/acl", obj_id, {"parent_id": p1["id"]})
+        finally:
+            _delete_with_retry(client, "/api/v2/services/haproxy/frontend", p1_id)
+    finally:
+        _delete_with_retry(client, "/api/v2/services/haproxy/backend", p0_id)
+
+
+# SKIP /api/v2/services/haproxy/frontend/action: requires existing ACL FK
+
+def test_crud_services_haproxy_frontend_address(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/services/haproxy/frontend/address (needs: services/haproxy/backend, services/haproxy/frontend)"""
+    # Setup: create parent services/haproxy/backend
+    p0_resp = client.post(
+        "/api/v2/services/haproxy/backend",
+        json={
+        "name": 'pft_be_faddr',
+        "agent_port": '0',
+        "persist_cookie_name": 'SRVID',
+        "descr": 'Test backend for faddr',
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    # Setup: create parent services/haproxy/frontend
+    p1_resp = client.post(
+        "/api/v2/services/haproxy/frontend",
+        json={
+        "name": 'pft_fe_addr',
+        "type": 'http',
+    },
+    )
+    p1 = _ok(p1_resp)
+    p1_id = p1.get("id")
+    assert p1_id is not None, f"No id in parent response: {p1}"
+
+    try:
+        try:
+            # CREATE
+            body = {
+                    "extaddr": 'custom',
+                    "extaddr_custom": '10.99.99.80:80',
+                }
+            body["parent_id"] = p1["id"]
+            create_resp = client.post(
+                "/api/v2/services/haproxy/frontend/address",
+                json=body,
+            )
+            data = _ok(create_resp)
+            obj_id = data.get("id")
+            assert obj_id is not None, f"No id in create response: {data}"
+
+            try:
+                # GET (singular)
+                get_resp = client.get(
+                    "/api/v2/services/haproxy/frontend/address",
+                    params={"id": obj_id, "parent_id": p1["id"]},
+                )
+                _ok(get_resp)
+
+            finally:
+                _delete_with_retry(client, "/api/v2/services/haproxy/frontend/address", obj_id, {"parent_id": p1["id"]})
+        finally:
+            _delete_with_retry(client, "/api/v2/services/haproxy/frontend", p1_id)
+    finally:
+        _delete_with_retry(client, "/api/v2/services/haproxy/backend", p0_id)
+
+
+# SKIP /api/v2/services/haproxy/frontend/certificate: requires parent_id (needs parent resource first)
+
+# SKIP /api/v2/services/haproxy/frontend/error_file: requires existing HAProxy file FK
 
 # SKIP /api/v2/services/haproxy/settings/dns_resolver: server error: requires parent model
 
@@ -1709,9 +2190,75 @@ def test_crud_services_service_watchdog(client: httpx.Client):
         assert del_resp.status_code in (200, 404), f"Delete failed: {del_resp.text[:500]}"
 
 
-# SKIP /api/v2/system/certificate: requires valid PEM certificate data
+def test_crud_system_certificate(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/system/certificate (chained)"""
+    # CREATE
+    body = {
+            "descr": 'Test Cert',
+            "crt": CERT_PEM,
+            "prv": CERT_KEY_PEM,
+        }
+    create_resp = client.post(
+        "/api/v2/system/certificate",
+        json=body,
+    )
+    data = _ok(create_resp)
+    obj_id = data.get("id")
+    assert obj_id is not None, f"No id in create response: {data}"
 
-# SKIP /api/v2/system/certificate_authority: requires valid PEM CA data
+    try:
+        # GET (singular)
+        get_resp = client.get(
+            "/api/v2/system/certificate",
+            params={"id": obj_id},
+        )
+        _ok(get_resp)
+
+        # UPDATE
+        update_resp = client.patch(
+            "/api/v2/system/certificate",
+            json={"id": obj_id, "descr": "Updated by test"},
+        )
+        _ok(update_resp)
+
+    finally:
+        _delete_with_retry(client, "/api/v2/system/certificate", obj_id)
+
+
+def test_crud_system_certificate_authority(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/system/certificate_authority (chained)"""
+    # CREATE
+    body = {
+            "descr": 'Test CA',
+            "crt": CA_CERT_PEM,
+            "prv": CA_KEY_PEM,
+        }
+    create_resp = client.post(
+        "/api/v2/system/certificate_authority",
+        json=body,
+    )
+    data = _ok(create_resp)
+    obj_id = data.get("id")
+    assert obj_id is not None, f"No id in create response: {data}"
+
+    try:
+        # GET (singular)
+        get_resp = client.get(
+            "/api/v2/system/certificate_authority",
+            params={"id": obj_id},
+        )
+        _ok(get_resp)
+
+        # UPDATE
+        update_resp = client.patch(
+            "/api/v2/system/certificate_authority",
+            json={"id": obj_id, "descr": "Updated by test"},
+        )
+        _ok(update_resp)
+
+    finally:
+        _delete_with_retry(client, "/api/v2/system/certificate_authority", obj_id)
+
 
 # SKIP /api/v2/system/crl: requires caref (needs existing CA/cert)
 
@@ -2039,7 +2586,7 @@ def test_crud_user_group(client: httpx.Client):
 
 # SKIP /api/v2/vpn/ipsec/phase1/encryption: requires parent_id (needs parent resource first)
 
-# SKIP /api/v2/vpn/ipsec/phase2: requires existing phase1
+# SKIP /api/v2/vpn/ipsec/phase2: requires existing phase1 with certs
 
 # SKIP /api/v2/vpn/ipsec/phase2/encryption: requires parent_id (needs parent resource first)
 
@@ -2051,7 +2598,57 @@ def test_crud_user_group(client: httpx.Client):
 
 # SKIP /api/v2/vpn/openvpn/server: requires caref (needs existing CA/cert)
 
-# SKIP /api/v2/vpn/wireguard/peer: requires existing WireGuard tunnel
+def test_crud_vpn_wireguard_peer(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/vpn/wireguard/peer (needs: vpn/wireguard/tunnel)"""
+    # Setup: create parent vpn/wireguard/tunnel
+    p0_resp = client.post(
+        "/api/v2/vpn/wireguard/tunnel",
+        json={
+        "name": 'pft_tun_peer',
+        "listenport": '51821',
+        "privatekey": 'YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY=',
+        "addresses": [],
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    try:
+        # CREATE
+        body = {
+                "publickey": 'YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY=',
+                "descr": 'Test WG peer',
+            }
+        body["tun"] = p0["name"]
+        create_resp = client.post(
+            "/api/v2/vpn/wireguard/peer",
+            json=body,
+        )
+        data = _ok(create_resp)
+        obj_id = data.get("id")
+        assert obj_id is not None, f"No id in create response: {data}"
+
+        try:
+            # GET (singular)
+            get_resp = client.get(
+                "/api/v2/vpn/wireguard/peer",
+                params={"id": obj_id},
+            )
+            _ok(get_resp)
+
+            # UPDATE
+            update_resp = client.patch(
+                "/api/v2/vpn/wireguard/peer",
+                json={"id": obj_id, "descr": "Updated by test"},
+            )
+            _ok(update_resp)
+
+        finally:
+            _delete_with_retry(client, "/api/v2/vpn/wireguard/peer", obj_id)
+    finally:
+        _delete_with_retry(client, "/api/v2/vpn/wireguard/tunnel", p0_id)
+
 
 # SKIP /api/v2/vpn/wireguard/peer/allowed_ip: requires parent_id (needs parent resource first)
 

@@ -308,42 +308,391 @@ _ENDPOINT_OVERRIDES: dict[str, dict[str, str]] = {
 _SKIP_CRUD_PATHS: dict[str, str] = {
     "/api/v2/interface": "requires available physical interface",
     "/api/v2/interface/lagg": "requires multiple physical interfaces",
-    "/api/v2/interface/vlan": "requires valid parent interface",
     "/api/v2/interface/gre": "requires specific tunnel config",
     "/api/v2/interface/gif": "requires specific tunnel config",
-    "/api/v2/routing/static_route": "requires existing gateway object",
-    "/api/v2/routing/gateway/group": "requires existing gateways with valid tiers",
-    "/api/v2/vpn/ipsec/phase2": "requires existing phase1",
+    "/api/v2/vpn/ipsec/phase2": "requires existing phase1 with certs",
     "/api/v2/vpn/openvpn/cso": "requires existing OpenVPN server",
     "/api/v2/vpn/openvpn/client_export/config": "requires OpenVPN server configured",
     "/api/v2/services/dhcp_server": "per-interface singleton, POST not supported",
-    "/api/v2/vpn/wireguard/peer": "requires existing WireGuard tunnel",
-    "/api/v2/system/certificate": "requires valid PEM certificate data",
-    "/api/v2/system/certificate_authority": "requires valid PEM CA data",
     # FreeRADIUS routes return nginx 404 despite package installed
     "/api/v2/services/freeradius/client": "freeradius routes not registered",
     "/api/v2/services/freeradius/interface": "freeradius routes not registered",
     "/api/v2/services/freeradius/user": "freeradius routes not registered",
-    # ACME requires valid X509 private key
-    "/api/v2/services/acme/account_key": "requires valid X509 private key",
-    "/api/v2/services/acme/certificate": "requires existing ACME account key",
-    # HAProxy frontend requires existing backend
-    "/api/v2/services/haproxy/frontend": "requires existing backend",
-    # HAProxy sub-resources require parent_id
-    "/api/v2/services/haproxy/backend/acl": "requires existing backend parent",
-    "/api/v2/services/haproxy/backend/action": "requires existing backend parent",
-    "/api/v2/services/haproxy/backend/error_file": "requires existing backend parent",
-    "/api/v2/services/haproxy/backend/server": "requires existing backend parent",
-    "/api/v2/services/haproxy/frontend/acl": "requires existing frontend parent",
-    "/api/v2/services/haproxy/frontend/action": "requires existing frontend parent",
-    "/api/v2/services/haproxy/frontend/address": "requires existing frontend parent",
-    "/api/v2/services/haproxy/frontend/certificate": "requires existing frontend parent",
-    "/api/v2/services/haproxy/frontend/error_file": "requires existing frontend parent",
-    # BIND sub-resources
-    "/api/v2/services/bind/sync/domain": "requires existing BIND zone",
+    # ACME certificate requires existing ACME account key + DNS validation
+    "/api/v2/services/acme/certificate": "requires existing ACME account key and DNS setup",
+    # HAProxy sub-resources needing deep chains (action→acl FK, error_file→file FK)
+    "/api/v2/services/haproxy/backend/action": "requires valid action enum + context",
+    "/api/v2/services/haproxy/backend/error_file": "requires existing HAProxy file FK",
+    "/api/v2/services/haproxy/frontend/action": "requires existing ACL FK",
+    "/api/v2/services/haproxy/frontend/error_file": "requires existing HAProxy file FK",
     # HAProxy settings sub-resources return 500 (requires parent model)
     "/api/v2/services/haproxy/settings/dns_resolver": "server error: requires parent model",
     "/api/v2/services/haproxy/settings/email_mailer": "server error: requires parent model",
+}
+
+# ── Pre-generated test PEM certificates ───────────────────────────────────────
+# Self-signed CA and server cert for testing certificate endpoints.
+# Generated with: openssl req -x509 -newkey rsa:2048 ...
+_TEST_CA_CERT_PEM = (
+    "-----BEGIN CERTIFICATE-----\\n"
+    "MIIDMzCCAhugAwIBAgIUbtFPoQ0zYg1ScUJ7+FnklDgHgh8wDQYJKoZIhvcNAQEL\\n"
+    "BQAwKTEQMA4GA1UEAwwHVGVzdCBDQTEVMBMGA1UECgwMcGZTZW5zZSBUZXN0MB4X\\n"
+    "DTI2MDIwNzAxMjYyMloXDTM2MDIwNTAxMjYyMlowKTEQMA4GA1UEAwwHVGVzdCBD\\n"
+    "QTEVMBMGA1UECgwMcGZTZW5zZSBUZXN0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A\\n"
+    "MIIBCgKCAQEAs3inegnOteSWo/iRAV5YUZ7tx1pDni+cdDcNkDgPubrM9baB/EVP\\n"
+    "A1CqpV1F20YcHu9o2H/BS308cCwOxNFuarjsTzHgrH7WG9gwUvXfDPkJ08ivvWxS\\n"
+    "4WXsVqP6OQ7iOgJpDTx0ALyBLq2isW2/nn5Eubs9SL65pk8FBMe6cZ/JVRQ2KUwo\\n"
+    "HwKq+HR6qBhrLFeAFVBHB/NXjQHWT7Kkym9nPA8RMwvkXyQZj8vXL8gWwqFEY7dk\\n"
+    "x8hpJ10vnRjWz3afNeP9qRLBlIxdz0NlrbaZ/Xh/h+2pQX3i8S4cyTYDF56Cw98X\\n"
+    "PjWoOi45TlZ33cbh7YsgyODZcmr1WOeRSQIDAQABo1MwUTAdBgNVHQ4EFgQUNKKH\\n"
+    "IC1T0pAoUUXO2+TT488p45AwHwYDVR0jBBgwFoAUNKKHIC1T0pAoUUXO2+TT488p\\n"
+    "45AwDwYDVR0TAQH/BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEAonF1YEnW+vSp\\n"
+    "jRxq+vB3foaHUkiEDP4ipDdknZgu19JKW+NSEvz9mAKU1zVnN621I1JURuDELBTN\\n"
+    "Ba5oa1BnAQ3kzEtGr/yJZh477i15L/FBUvTjUQlnftKSJF22BD0YamALSsdHyJaS\\n"
+    "l6a8YdaFV2muzjk0aDFutMk1kESiUh02FY5dU8MTPcarGSqUFBxT9TqGYlf7TcEI\\n"
+    "A35EDCIbEzkqUofzzp70rXN1Z9TdR/rf74waSn4/tPhF5/Eosf0+hC/IRz1V+3+6\\n"
+    "bCIx8M+jzQZU8u92iAnZkp9rGgBZZnonZ6phI0WAR67UBSvD5939DGlqDiQjMsuX\\n"
+    "z+e3gqRxKQ==\\n"
+    "-----END CERTIFICATE-----"
+)
+
+_TEST_CA_KEY_PEM = (
+    "-----BEGIN PRIVATE KEY-----\\n"
+    "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCzeKd6Cc615Jaj\\n"
+    "+JEBXlhRnu3HWkOeL5x0Nw2QOA+5usz1toH8RU8DUKqlXUXbRhwe72jYf8FLfTxw\\n"
+    "LA7E0W5quOxPMeCsftYb2DBS9d8M+QnTyK+9bFLhZexWo/o5DuI6AmkNPHQAvIEu\\n"
+    "raKxbb+efkS5uz1IvrmmTwUEx7pxn8lVFDYpTCgfAqr4dHqoGGssV4AVUEcH81eN\\n"
+    "AdZPsqTKb2c8DxEzC+RfJBmPy9cvyBbCoURjt2THyGknXS+dGNbPdp814/2pEsGU\\n"
+    "jF3PQ2Wttpn9eH+H7alBfeLxLhzJNgMXnoLD3xc+Nag6LjlOVnfdxuHtiyDI4Nly\\n"
+    "avVY55FJAgMBAAECggEAAWVrDsjRv1oqY9cqBZ6JcFpx/hmGf3izrmHD7L8gPDEm\\n"
+    "/rMEmtpNLY5B7ZcRVTiGknpepe8vKUUC+dprOP5qGKbHS9cW/jCJvjNgg4dfIgIz\\n"
+    "9d5Qo61v4vSrMddaZHmS//bcgK+w3//sv1i2ycuRReHfQKn4uulPl2rI9AsRDmji\\n"
+    "RWry7Dz5of17vvKe63N/sdmsDNo0RphucTBVnLw/MsDI5WXjMYqCILC/CBNhM3Ey\\n"
+    "emPUaZucUGc6AY+BMzF7XrYNaHL3IkN06dC8Iyn7h2v/gSSuknTa2zfUw5nBSlja\\n"
+    "m+wmFswXWf7OSsT1SV2o+ebs95nKdHQSIJJVMHAFaQKBgQD5P2hac7ivzr669lGk\\n"
+    "Cdf+6d7ERpwInEOJBqahuUFfsZSVgxjPBVXSSb2CAF+4cVGn4Tbj5h3ZuIfUct7D\\n"
+    "f0wUfBG4dTdciAQ5+F4EWnVVeS1aHTyMy1VP+cvwHek4T0sxwFJLze99iiPv7IJl\\n"
+    "Py3N2pL0bzWI9kgIJal8YFCcRQKBgQC4VVSm+dUlUB+VExufxEljTBQw9SgAwoi0\\n"
+    "sE/sf2pbcRHk9mneYBLLmkat6Rig4j+S/WFFPWZdnD7JCG1NjgRhJr54iRXzR2yB\\n"
+    "cq5qPplTtJB7zxF+gk01LJHnuqfIOOc9vrCM2eTQTs/hhgjcWVUudWbgFxoQNcDy\\n"
+    "c8YyCSNLNQKBgQDGU8IBV1t56RSzSBSmZn7Mg+OSYmz+HPlQK06kGPj/4BnO7kXr\\n"
+    "VN95ONvmec2wwdqrrvUyWoUeHUtXrR+8h6pOEns3P24R3tkeF5cX97KtlIKV1fW8\\n"
+    "Qn9b5/Ry2BofiFjY+aOCVhde2XDHFHadgaw8xNNyVJtQpEek0/MM2MbL0QKBgAyY\\n"
+    "WAZov7Wi+eV3vsV15gXQ5vhJaAhVQn4GJg/kzOGeojhg1e8J5X7f9cBgUvx7ORjU\\n"
+    "E1dl0J7I1ElsN/u6nnX87brSsxtCYBmgOmasDFH53n13MpzQTnI5r2aEDH7T1IkV\\n"
+    "hH67TLUnDXE9dVGJERbxkqvxKCi/Y4Wtf3dfxHeZAoGBAKivNGFeCgaoqwdvIP7I\\n"
+    "xr/D03OgdfPn2qlR1HqsZbBFncBcs8ZaqqJ8z4XtciwCJAXMqGbd2EGRB6qmLPYe\\n"
+    "fmXBZyQ+OJXbjaw1hYWo6UsNa4SnPSwYbZsoht3bgqM7YNoMur3xAgKTMpHK1LRv\\n"
+    "KExPKJsV0Kb6sQ6X2vFrnVBh\\n"
+    "-----END PRIVATE KEY-----"
+)
+
+_TEST_CERT_PEM = (
+    "-----BEGIN CERTIFICATE-----\\n"
+    "MIIDKzCCAhOgAwIBAgIUGjPhTAHBo+rI0jwF4drOD1h07/EwDQYJKoZIhvcNAQEL\\n"
+    "BQAwKTEQMA4GA1UEAwwHVGVzdCBDQTEVMBMGA1UECgwMcGZTZW5zZSBUZXN0MB4X\\n"
+    "DTI2MDIwNzAxMjYyOFoXDTM2MDIwNTAxMjYyOFowMjEZMBcGA1UEAwwQdGVzdC5l\\n"
+    "eGFtcGxlLmNvbTEVMBMGA1UECgwMcGZTZW5zZSBUZXN0MIIBIjANBgkqhkiG9w0B\\n"
+    "AQEFAAOCAQ8AMIIBCgKCAQEAsFHLy6MMYwtaV0SSr9nLOFbWlF9YZedINQV8E/z4\\n"
+    "26dJcBCHPLaEj8dI7jgNZnhdzoX52FG3zNs+Tw7NC8uYjFRC32gyx2nULn1T+lzC\\n"
+    "cPcU/wmSstgWXSUPUQkZSbua2ETH7IqKFeVMN3fCz/1eNmXR0Cjs16H7M7+qOeMH\\n"
+    "A/gMHCZhuyCEBsiF3uga6tg2P048CrQprmlccy3EXcDEFLYppCvycncpqVyneixL\\n"
+    "alV3ZLtULWetot3NMy/09bNpwDrzrzbq6BrEMnp0ANT8PpM19wVoxwWmdgkbeUk+\\n"
+    "Il9WirEFdTg9IUuEFworVbAkiaYNqISs85KdfmgkpOM+BwIDAQABo0IwQDAdBgNV\\n"
+    "HQ4EFgQUPkeP0fa/AoRDCCIjEDRCUxLu6AowHwYDVR0jBBgwFoAUNKKHIC1T0pAo\\n"
+    "UUXO2+TT488p45AwDQYJKoZIhvcNAQELBQADggEBAH3zwwnB/RfzmNBKm9dYf3EE\\n"
+    "gS3fIdRu7vOTJpRAhAxhjg92po2OyxLCINuRHQImXP3A4+Dxpvm57Gupzc8Ct098\\n"
+    "XyscFNebR/XrVPI11ggRhy3giVH61dS8OpkrcwRyVuTF/S11312e+ptsqpiAWh0M\\n"
+    "JsXqUCVjwW39FdcxBim++9LAt2XeiyaxqlJln0jN5jyLmSF90CV4NnFMOOdIMkwn\\n"
+    "uFouKAgxbb1q1mL1VE9c4fD9BXxqfldnkZqOG56331TVfhJ99dsIxh7aO9rk1txW\\n"
+    "RKgTO+dSPffND5e5lENE+BDKx9cUm2Vtc05J3vD7V4cyK8bmBzA6tt6uI/8qvsA=\\n"
+    "-----END CERTIFICATE-----"
+)
+
+_TEST_CERT_KEY_PEM = (
+    "-----BEGIN PRIVATE KEY-----\\n"
+    "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCwUcvLowxjC1pX\\n"
+    "RJKv2cs4VtaUX1hl50g1BXwT/Pjbp0lwEIc8toSPx0juOA1meF3OhfnYUbfM2z5P\\n"
+    "Ds0Ly5iMVELfaDLHadQufVP6XMJw9xT/CZKy2BZdJQ9RCRlJu5rYRMfsiooV5Uw3\\n"
+    "d8LP/V42ZdHQKOzXofszv6o54wcD+AwcJmG7IIQGyIXe6Brq2DY/TjwKtCmuaVxz\\n"
+    "LcRdwMQUtimkK/JydympXKd6LEtqVXdku1QtZ62i3c0zL/T1s2nAOvOvNuroGsQy\\n"
+    "enQA1Pw+kzX3BWjHBaZ2CRt5ST4iX1aKsQV1OD0hS4QXCitVsCSJpg2ohKzzkp1+\\n"
+    "aCSk4z4HAgMBAAECggEABAZ3W23x/Z2H5vUgT4EZNBnmFTC7YRGEzae95kDrYixc\\n"
+    "BKxul0gSwlY03TIMuu763pj4FA8C3gY6p8MOkvsyFNtkRBsUtFu/UH5jo+lpNlCr\\n"
+    "EIrPPWOp2F+HuCcNMOiRB5NDvdaIgikgHSYP8v/1nif4lcLRbAzSd3h5MjrIxreM\\n"
+    "bc2wpu/tNgwnpcvGbhUqFBssMucvlXLeKxiP5pF7Un0+WjqC+tCJztOkryvmyE2g\\n"
+    "jMEysclD1H7AYVqrusBmuxPW5AAb4Tv2vA4G2xm9n8BhpwpCGZdsa7ZYkb+s89Ec\\n"
+    "n0G/fCoRWk21p2U1N18C5QOMuxqxAFxb7YRYJszzCQKBgQDdSh6cpUgE9FeUbUkV\\n"
+    "tqbMjmSQKPpBEu2LF7u7x+OBPIEdFrCDMQuZHAc+MT0XFlO8jA4Pm1OoRFaI7RVZ\\n"
+    "8G9b/aORUg+xMKOl3o+bInY2FT/ddmp7J1J0dQDfMbU/f+jTCIzAhI094wJc3ScX\\n"
+    "336/nQkLRsoOdQB0gwBsodamKQKBgQDL+efd2FlP7/VJg4PGsJHGGRJ0vqtsj//c\\n"
+    "is1C0vCkoqtAfMtVP7wMT9SC1u+cjW13Bh6auWHL3MK31iLceymfB+73ZPBDuXz/\\n"
+    "lTv+hKqtYZbc1g7w9SJEqN41tFRsdMRnq18WcYAMCoQiY4R3B9lYJOqBiuvZt0mI\\n"
+    "vGRwYU9orwKBgQCpZSu5zewrnr/MJzxjGsbkn7vrfvLTDaI5b5mOTZ2iOKa9lbjZ\\n"
+    "NJokQoho21hga/79vlilKcoIbQexGYvWpW8ZhDfJ7n+ErC8Zsh1MLD1BeVLCPPuV\\n"
+    "+qvr6gUY1fxg95FKuqjEVrOoRDZyz/g1Fij4lUVvFGloV7hZeE7C2cBuwQKBgQCA\\n"
+    "ZSWL4pSNmelXxf4cAqcwADY64I59fsM66vA7wRYTPAX6SNOhLMZNJa8KUQtxCyE9\\n"
+    "i8+V611g+uxi1dsJ2EkhvtewSIxoxQimxSSHmLDrBIP3LJMpH9TbTUTan1GJF5NO\\n"
+    "AnSPZxCIA9Ka5vPKDVnFfy9SLcU6PYJ/HL9IciiPJwKBgC93lXfdoyA5waYdBGYL\\n"
+    "VEaSfh3hxGd5sC+krUK7VXV/bCkGOX71AsiAY8Wo35yu3+24tnLaMVocgcFzjmXi\\n"
+    "hZu2Fa7IccV7iRh0wxoXD3BtjV37vzLq4C5yD5hgFgeNwF3LfrWVOWFAy2bjrA5+\\n"
+    "U1dtBhHADj/YuAIFAStvX2JE\\n"
+    "-----END PRIVATE KEY-----"
+)
+
+# ── Chained CRUD definitions ─────────────────────────────────────────────────
+# Maps child endpoint path → chain definition for dependency-chained tests.
+# Each chain defines parent resources to create first, their bodies, and how
+# to inject parent data into the child's request body.
+#
+# Structure:
+#   "parents": list of parent resources to create (in order)
+#     - "path": parent API endpoint
+#     - "body": JSON body for POST
+#     - "inject": {child_field: parent_response_field} — optional field injection
+#   "child_body": explicit child body (if None, generated from schema)
+#   "child_overrides": override specific fields in generated child body
+#   "update_field": field to test PATCH with (default: "descr")
+
+_HAPROXY_BACKEND_BODY: dict[str, Any] = {
+    "name": "pft_be_{tag}",
+    "agent_port": "0",
+    "persist_cookie_name": "SRVID",
+    "descr": "Test backend for {tag}",
+}
+
+_GATEWAY_BODY: dict[str, Any] = {
+    "name": "pft_gw_{tag}",
+    "gateway": "10.0.2.1",
+    "interface": "wan",
+    "ipprotocol": "inet",
+    "descr": "Test gateway for {tag}",
+    "latencylow": 200,
+    "latencyhigh": 500,
+    "losslow": 10,
+    "losshigh": 20,
+    "loss_interval": 2000,
+    "time_period": 60000,
+    "interval": 500,
+    "alert_interval": 1000,
+}
+
+_CHAINED_CRUD: dict[str, dict[str, Any]] = {
+    # ── Interface VLAN ────────────────────────────────────────────────────
+    "/api/v2/interface/vlan": {
+        "parents": [],
+        "child_body": {
+            "if": "vtnet0",
+            "tag": 100,
+            "pcp": 0,
+            "descr": "Test VLAN",
+        },
+        "update_field": "descr",
+    },
+    # ── Routing: static_route needs gateway ───────────────────────────────
+    "/api/v2/routing/static_route": {
+        "parents": [
+            {
+                "path": "/api/v2/routing/gateway",
+                "body_template": _GATEWAY_BODY,
+                "tag": "sr",
+                "inject": {"gateway": "name"},
+            }
+        ],
+        "child_body": {
+            "network": "10.200.0.0/24",
+            "descr": "Test static route",
+        },
+        "update_field": "descr",
+    },
+    # ── Routing: gateway/group needs gateways ─────────────────────────────
+    "/api/v2/routing/gateway/group": {
+        "parents": [
+            {
+                "path": "/api/v2/routing/gateway",
+                "body_template": _GATEWAY_BODY,
+                "tag": "gg",
+            }
+        ],
+        "child_body": {
+            "name": "pft_gw_group",
+            "descr": "Test gateway group",
+            "priorities": [{"gateway": "pft_gw_gg", "tier": 1}],
+        },
+        "update_field": "descr",
+    },
+    # ── VPN: wireguard/peer needs tunnel ──────────────────────────────────
+    "/api/v2/vpn/wireguard/peer": {
+        "parents": [
+            {
+                "path": "/api/v2/vpn/wireguard/tunnel",
+                "body": {
+                    "name": "pft_tun_peer",
+                    "listenport": "51821",
+                    "privatekey": "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY=",
+                    "addresses": [],
+                },
+                "inject": {"tun": "name"},
+            }
+        ],
+        "child_body": {
+            "publickey": "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY=",
+            "descr": "Test WG peer",
+        },
+        "update_field": "descr",
+    },
+    # ── HAProxy: frontend needs backend ───────────────────────────────────
+    "/api/v2/services/haproxy/frontend": {
+        "parents": [
+            {
+                "path": "/api/v2/services/haproxy/backend",
+                "body_template": _HAPROXY_BACKEND_BODY,
+                "tag": "fe",
+            }
+        ],
+        "child_body": {
+            "name": "pft_fe_chain",
+            "type": "http",
+            "descr": "Test frontend",
+        },
+        "update_field": "descr",
+    },
+    # ── HAProxy backend sub-resources (parent_id injection) ───────────────
+    "/api/v2/services/haproxy/backend/acl": {
+        "parents": [
+            {
+                "path": "/api/v2/services/haproxy/backend",
+                "body_template": _HAPROXY_BACKEND_BODY,
+                "tag": "bacl",
+                "inject": {"parent_id": "id"},
+            }
+        ],
+        "child_body": {
+            "name": "pft_bacl",
+            "expression": "host_starts_with",
+            "value": "test.example.com",
+        },
+        "update_field": "value",
+        "update_value": '"updated.example.com"',
+    },
+    "/api/v2/services/haproxy/backend/server": {
+        "parents": [
+            {
+                "path": "/api/v2/services/haproxy/backend",
+                "body_template": _HAPROXY_BACKEND_BODY,
+                "tag": "bsrv",
+                "inject": {"parent_id": "id"},
+            }
+        ],
+        "child_body": {
+            "name": "pft_bsrv",
+            "address": "10.99.99.50",
+            "port": "8080",
+        },
+        "update_field": "address",
+        "update_value": '"10.99.99.51"',
+    },
+    # ── HAProxy frontend sub-resources (2-level: backend → frontend → child)
+    "/api/v2/services/haproxy/frontend/acl": {
+        "parents": [
+            {
+                "path": "/api/v2/services/haproxy/backend",
+                "body_template": _HAPROXY_BACKEND_BODY,
+                "tag": "facl",
+            },
+            {
+                "path": "/api/v2/services/haproxy/frontend",
+                "body": {
+                    "name": "pft_fe_acl",
+                    "type": "http",
+                },
+                "inject": {"parent_id": "id"},
+            },
+        ],
+        "child_body": {
+            "name": "pft_facl",
+            "expression": "host_starts_with",
+            "value": "test.example.com",
+        },
+        "update_field": "value",
+        "update_value": '"updated.example.com"',
+    },
+    "/api/v2/services/haproxy/frontend/address": {
+        "parents": [
+            {
+                "path": "/api/v2/services/haproxy/backend",
+                "body_template": _HAPROXY_BACKEND_BODY,
+                "tag": "faddr",
+            },
+            {
+                "path": "/api/v2/services/haproxy/frontend",
+                "body": {
+                    "name": "pft_fe_addr",
+                    "type": "http",
+                },
+                "inject": {"parent_id": "id"},
+            },
+        ],
+        "child_body": {
+            "extaddr": "custom",
+            "extaddr_custom": "10.99.99.80:80",
+        },
+        "update_field": None,
+    },
+    # ── BIND: sync/domain needs zone ──────────────────────────────────────
+    "/api/v2/services/bind/sync/domain": {
+        "parents": [
+            {
+                "path": "/api/v2/services/bind/zone",
+                "body": {
+                    "name": "chain.example.com",
+                    "nameserver": "ns1.example.com",
+                    "mail": "admin.example.com",
+                    "serial": 2024010101,
+                    "forwarders": [],
+                    "baseip": "10.99.99.0",
+                },
+                "inject": {"parent_id": "id"},
+            }
+        ],
+        "child_body": {
+            "dstdomainport": "53",
+            "synctype": "master",
+            "targetip": "10.99.99.100",
+        },
+        "update_field": None,
+    },
+    # ── Certificate Authority (PEM data) ──────────────────────────────────
+    "/api/v2/system/certificate_authority": {
+        "parents": [],
+        "child_body": {
+            "descr": "Test CA",
+            "crt": "__CA_CERT_PEM__",
+            "prv": "__CA_KEY_PEM__",
+        },
+        "update_field": "descr",
+    },
+    # ── Certificate (PEM data) ────────────────────────────────────────────
+    "/api/v2/system/certificate": {
+        "parents": [],
+        "child_body": {
+            "descr": "Test Cert",
+            "crt": "__CERT_PEM__",
+            "prv": "__CERT_KEY_PEM__",
+        },
+        "update_field": "descr",
+    },
+    # ── ACME account key ──────────────────────────────────────────────────
+    "/api/v2/services/acme/account_key": {
+        "parents": [],
+        "child_body": {
+            "name": "pft_acme_key",
+            "descr": "Test ACME key",
+            "email": "test@example.com",
+            "acmeserver": "letsencrypt-staging-2",
+        },
+        "update_field": "descr",
+    },
 }
 
 
@@ -499,6 +848,10 @@ def _should_skip_crud(group: EndpointGroup) -> tuple[bool, str]:
     if not group.create:
         return True, "no create endpoint"
 
+    # Chained tests handle their own dependencies — don't skip them
+    if group.base_path in _CHAINED_CRUD:
+        return False, ""
+
     # Check path-based skip list
     if group.base_path in _SKIP_CRUD_PATHS:
         return True, _SKIP_CRUD_PATHS[group.base_path]
@@ -523,7 +876,7 @@ def generate_tests(contexts: list[ToolContext]) -> str:
 
     test_count = 0
 
-    # CRUD lifecycle tests
+    # CRUD lifecycle tests (regular + chained)
     for group in groups:
         if group.category == "crud":
             skip, reason = _should_skip_crud(group)
@@ -535,7 +888,12 @@ def generate_tests(contexts: list[ToolContext]) -> str:
                 lines.append(f"# SKIP {group.base_path}: dangerous endpoint")
                 lines.append("")
                 continue
-            code = _gen_crud_test(group)
+
+            # Use chained generator if this endpoint has dependencies
+            if group.base_path in _CHAINED_CRUD:
+                code = _gen_chained_crud_test(group)
+            else:
+                code = _gen_crud_test(group)
             if code:
                 lines.append(code)
                 lines.append("")
@@ -602,6 +960,12 @@ API_KEY = os.environ.get("PFSENSE_TEST_API_KEY", "")
 AUTH_USER = os.environ.get("PFSENSE_TEST_USER", "admin")
 AUTH_PASS = os.environ.get("PFSENSE_TEST_PASS", "pfsense")
 
+# Pre-generated test certificates (self-signed, 10-year validity)
+CA_CERT_PEM = "''' + _TEST_CA_CERT_PEM + '''"
+CA_KEY_PEM = "''' + _TEST_CA_KEY_PEM + '''"
+CERT_PEM = "''' + _TEST_CERT_PEM + '''"
+CERT_KEY_PEM = "''' + _TEST_CERT_KEY_PEM + '''"
+
 
 @pytest.fixture(scope="session")
 def client() -> httpx.Client:
@@ -629,7 +993,20 @@ def _ok(resp: httpx.Response) -> dict:
     assert resp.status_code == 200, f"{resp.request.method} {resp.request.url} -> {resp.status_code}: {resp.text[:500]}"
     body = resp.json()
     assert body.get("code") == 200, f"API error: {body}"
-    return body.get("data", body)'''
+    return body.get("data", body)
+
+
+def _delete_with_retry(client: httpx.Client, path: str, obj_id, params: dict | None = None) -> None:
+    """Delete a resource with retry for 503 (busy) and accept 404 (already gone)."""
+    p = {"id": obj_id}
+    if params:
+        p.update(params)
+    for _attempt in range(3):
+        resp = client.delete(path, params=p)
+        if resp.status_code != 503:
+            break
+        time.sleep(5)
+    assert resp.status_code in (200, 404), f"Delete {path} id={obj_id} failed: {resp.text[:500]}"'''
 
 
 def _gen_crud_test(group: EndpointGroup) -> str:
@@ -826,4 +1203,196 @@ def _gen_apply_test(group: EndpointGroup) -> str:
     lines.append(f"    assert isinstance(data, dict)")
     lines.append(f"")
 
+    return "\n".join(lines)
+
+
+def _resolve_parent_body(parent_def: dict[str, Any]) -> dict[str, Any]:
+    """Resolve a parent's body from either 'body' or 'body_template' + 'tag'."""
+    if "body" in parent_def:
+        return dict(parent_def["body"])
+    template = parent_def["body_template"]
+    tag = parent_def.get("tag", "x")
+    body = {}
+    for k, v in template.items():
+        if isinstance(v, str) and "{tag}" in v:
+            body[k] = v.replace("{tag}", tag)
+        else:
+            body[k] = v
+    return body
+
+
+def _body_to_code(body: dict[str, Any], indent: int = 8) -> str:
+    """Convert a dict to Python code string for a JSON body."""
+    pad = " " * indent
+    result = "{\n"
+    for k, v in body.items():
+        if isinstance(v, str):
+            # Check for PEM placeholders
+            if v == "__CA_CERT_PEM__":
+                result += f'{pad}"{k}": CA_CERT_PEM,\n'
+            elif v == "__CA_KEY_PEM__":
+                result += f'{pad}"{k}": CA_KEY_PEM,\n'
+            elif v == "__CERT_PEM__":
+                result += f'{pad}"{k}": CERT_PEM,\n'
+            elif v == "__CERT_KEY_PEM__":
+                result += f'{pad}"{k}": CERT_KEY_PEM,\n'
+            else:
+                result += f'{pad}"{k}": {v!r},\n'
+        elif isinstance(v, bool):
+            result += f'{pad}"{k}": {v},\n'
+        elif isinstance(v, (int, float)):
+            result += f'{pad}"{k}": {v},\n'
+        elif isinstance(v, list):
+            result += f'{pad}"{k}": {v!r},\n'
+        elif isinstance(v, dict):
+            result += f'{pad}"{k}": {v!r},\n'
+        else:
+            result += f'{pad}"{k}": {v!r},\n'
+    result += " " * (indent - 4) + "}"
+    return result
+
+
+def _gen_chained_crud_test(group: EndpointGroup) -> str:
+    """Generate a CRUD test with parent resource setup/teardown."""
+    path = group.base_path
+    chain = _CHAINED_CRUD[path]
+    test_name = path.replace("/api/v2/", "").replace("/", "_")
+    parents = chain.get("parents", [])
+    child_body = chain.get("child_body")
+    update_field = chain.get("update_field", "descr")
+    update_value = chain.get("update_value", '"Updated by test"')
+
+    lines: list[str] = []
+    lines.append(f"def test_crud_{test_name}(client: httpx.Client):")
+    parent_paths = ", ".join(p["path"].split("/api/v2/")[-1] for p in parents)
+    if parents:
+        lines.append(f'    """CRUD lifecycle: {path} (needs: {parent_paths})"""')
+    else:
+        lines.append(f'    """CRUD lifecycle: {path} (chained)"""')
+
+    # ── Create parent resources ───────────────────────────────────────────
+    parent_vars: list[str] = []
+    for i, parent in enumerate(parents):
+        var = f"p{i}"
+        parent_vars.append(var)
+        parent_body = _resolve_parent_body(parent)
+        body_code = _body_to_code(parent_body)
+        lines.append(f"    # Setup: create parent {parent['path'].split('/api/v2/')[-1]}")
+        lines.append(f"    {var}_resp = client.post(")
+        lines.append(f'        "{parent["path"]}",')
+        lines.append(f"        json={body_code},")
+        lines.append(f"    )")
+        lines.append(f"    {var} = _ok({var}_resp)")
+        lines.append(f'    {var}_id = {var}.get("id")')
+        lines.append(f'    assert {var}_id is not None, f"No id in parent response: {{{var}}}"')
+        lines.append(f"")
+
+    # ── Build child body ──────────────────────────────────────────────────
+    if child_body:
+        # Use explicit child body
+        final_body = dict(child_body)
+    else:
+        # This shouldn't happen for chained tests — they all have child_body
+        return f"# SKIP {path}: chained test missing child_body"
+
+    # Apply parent injections
+    injections: list[tuple[str, str, str]] = []  # (child_field, parent_var, parent_field)
+    for i, parent in enumerate(parents):
+        inject = parent.get("inject", {})
+        for child_field, parent_field in inject.items():
+            injections.append((child_field, f"p{i}", parent_field))
+
+    # ── Indentation for nesting ───────────────────────────────────────────
+    if parents:
+        # Wrap in try/finally for each parent (nested)
+        base_indent = "    "
+        for i in range(len(parents)):
+            lines.append(f"{base_indent}try:")
+            base_indent += "    "
+    else:
+        base_indent = "    "
+
+    # CREATE
+    lines.append(f"{base_indent}# CREATE")
+    body_code = _body_to_code(final_body, indent=len(base_indent) + 8)
+    lines.append(f"{base_indent}body = {body_code}")
+
+    # Apply dynamic injections from parents
+    for child_field, pvar, pfield in injections:
+        lines.append(f'{base_indent}body["{child_field}"] = {pvar}["{pfield}"]')
+
+    lines.append(f"{base_indent}create_resp = client.post(")
+    lines.append(f'{base_indent}    "{path}",')
+    lines.append(f"{base_indent}    json=body,")
+    lines.append(f"{base_indent})")
+    lines.append(f"{base_indent}data = _ok(create_resp)")
+    lines.append(f'{base_indent}obj_id = data.get("id")')
+    lines.append(f'{base_indent}assert obj_id is not None, f"No id in create response: {{data}}"')
+    lines.append(f"")
+
+    lines.append(f"{base_indent}try:")
+    inner = base_indent + "    "
+
+    # Determine if sub-resource GET/DELETE also need parent_id
+    parent_id_injection = None
+    for child_field, pvar, pfield in injections:
+        if child_field == "parent_id":
+            parent_id_injection = (pvar, pfield)
+            break
+
+    # GET
+    lines.append(f"{inner}# GET (singular)")
+    if parent_id_injection:
+        pvar, pfield = parent_id_injection
+        lines.append(f"{inner}get_resp = client.get(")
+        lines.append(f'{inner}    "{path}",')
+        lines.append(f'{inner}    params={{"id": obj_id, "parent_id": {pvar}["{pfield}"]}},')
+        lines.append(f"{inner})")
+    else:
+        lines.append(f"{inner}get_resp = client.get(")
+        lines.append(f'{inner}    "{path}",')
+        lines.append(f'{inner}    params={{"id": obj_id}},')
+        lines.append(f"{inner})")
+    lines.append(f"{inner}_ok(get_resp)")
+    lines.append(f"")
+
+    # UPDATE
+    if update_field:
+        lines.append(f"{inner}# UPDATE")
+        if parent_id_injection:
+            pvar, pfield = parent_id_injection
+            lines.append(f"{inner}update_resp = client.patch(")
+            lines.append(f'{inner}    "{path}",')
+            lines.append(f'{inner}    json={{"id": obj_id, "parent_id": {pvar}["{pfield}"], "{update_field}": {update_value}}},')
+            lines.append(f"{inner})")
+        else:
+            lines.append(f"{inner}update_resp = client.patch(")
+            lines.append(f'{inner}    "{path}",')
+            lines.append(f'{inner}    json={{"id": obj_id, "{update_field}": {update_value}}},')
+            lines.append(f"{inner})")
+        lines.append(f"{inner}_ok(update_resp)")
+        lines.append(f"")
+
+    # DELETE child (finally)
+    lines.append(f"{base_indent}finally:")
+    if parent_id_injection:
+        pvar, pfield = parent_id_injection
+        lines.append(
+            f'{base_indent}    _delete_with_retry(client, "{path}", obj_id, '
+            f'{{"parent_id": {pvar}["{pfield}"]}})'
+        )
+    else:
+        lines.append(f'{base_indent}    _delete_with_retry(client, "{path}", obj_id)')
+
+    # ── Cleanup parents in reverse order ──────────────────────────────────
+    if parents:
+        for i in range(len(parents) - 1, -1, -1):
+            # Close the try block
+            close_indent = "    " * (i + 1)
+            lines.append(f"{close_indent}finally:")
+            lines.append(
+                f'{close_indent}    _delete_with_retry(client, "{parents[i]["path"]}", p{i}_id)'
+            )
+
+    lines.append(f"")
     return "\n".join(lines)
