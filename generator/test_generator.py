@@ -39,9 +39,7 @@ _PHANTOM_PLURAL_ROUTES = {
     "/api/v2/vpn/ipsec/phase1/encryptions",
     "/api/v2/vpn/ipsec/phase2/encryptions",
     "/api/v2/vpn/openvpn/client_export/configs",
-    "/api/v2/services/dhcp_server/address_pools",
-    "/api/v2/services/dhcp_server/custom_options",
-    "/api/v2/services/dhcp_server/static_mappings",
+    # DHCP sub-resource plurals: now tested via chained CRUD with LAN interface
     "/api/v2/status/openvpn/server/connections",
     "/api/v2/status/openvpn/server/routes",
     "/api/v2/status/ipsec/child_sas",
@@ -63,8 +61,7 @@ _PHANTOM_PLURAL_ROUTES = {
     # BIND sub-resource plurals
     "/api/v2/services/bind/access_list/entries",
     "/api/v2/services/bind/sync/domains",
-    # FreeRADIUS - all endpoints return nginx 404 despite package installed
-    # (possibly needs service restart or different package version)
+    # FreeRADIUS plural routes — nginx 404 (needs REST API v2.6+ / pfSense 2.8+)
     "/api/v2/services/freeradius/clients",
     "/api/v2/services/freeradius/interfaces",
     "/api/v2/services/freeradius/users",
@@ -78,7 +75,7 @@ _PHANTOM_PLURAL_ROUTES = {
 _TEST_VALUES: dict[str, str] = {
     # Network - IP addresses
     "interface": '"wan"',
-    "if_": '"vtnet0"',
+    "if_": '"em0"',
     "ipaddr": '"static"',
     "ipaddrv6": '"none"',
     "subnet": '"24"',
@@ -302,32 +299,53 @@ _ENDPOINT_OVERRIDES: dict[str, dict[str, str]] = {
         "pdnpipe": None,  # omit — references non-existent limiter
         "sched": None,  # omit — references non-existent schedule
     },
+    "/api/v2/services/freeradius/client": {
+        "addr": '"10.99.99.90/32"',
+        "shortname": '"pft_frcl"',
+        "secret": '"TestSecret123"',
+    },
+    "/api/v2/services/freeradius/interface": {
+        "addr": '"127.0.0.1"',
+        "ip_version": '"ipaddr"',
+    },
+    "/api/v2/services/freeradius/user": {
+        "username": '"pft_fruser"',
+        "password": '"TestPass123"',
+        "motp_secret": '""',
+        "motp_pin": '""',
+    },
+    "/api/v2/interface/gre": {
+        "if": '"wan"',
+        "remote_addr": '"198.51.100.1"',
+        "tunnel_remote_addr": '"10.255.0.2"',
+        "tunnel_remote_addr6": '""',
+    },
+    "/api/v2/interface/lagg": {
+        "members": '["em2"]',
+        "proto": '"none"',
+        "descr": '"Test LAGG"',
+    },
+    "/api/v2/services/haproxy/settings/dns_resolver": {
+        "name": '"pft_hadns"',
+        "server": '"8.8.8.8"',
+    },
+    "/api/v2/services/haproxy/settings/email_mailer": {
+        "name": '"pft_haml"',
+        "mailserver": '"10.99.99.90"',
+    },
 }
 
 # Endpoints that should be completely skipped for CRUD tests
 _SKIP_CRUD_PATHS: dict[str, str] = {
-    "/api/v2/interface": "requires available physical interface",
-    "/api/v2/interface/lagg": "requires multiple physical interfaces",
-    "/api/v2/interface/gre": "requires specific tunnel config",
-    "/api/v2/interface/gif": "requires specific tunnel config",
-    "/api/v2/vpn/openvpn/client_export/config": "requires functioning OpenVPN server with client cert",
+    "/api/v2/interface": "interface CRUD can destabilize VM (em2 reserved for LAGG)",
+    "/api/v2/vpn/openvpn/client_export/config": "complex 5-step chain: CA+cert+OVPN server+user cert (deferred)",
     "/api/v2/services/dhcp_server": "per-interface singleton, POST not supported",
-    # FreeRADIUS routes return nginx 404 despite package installed
-    "/api/v2/services/freeradius/client": "freeradius routes not registered",
-    "/api/v2/services/freeradius/interface": "freeradius routes not registered",
-    "/api/v2/services/freeradius/user": "freeradius routes not registered",
-    # HAProxy action endpoints: 16 required context-dependent fields
-    "/api/v2/services/haproxy/backend/action": "16 required context-dependent fields",
-    "/api/v2/services/haproxy/frontend/action": "16 required context-dependent fields",
-    # HAProxy settings sub-resources return 500 (requires parent model)
-    "/api/v2/services/haproxy/settings/dns_resolver": "server error: requires parent model",
-    "/api/v2/services/haproxy/settings/email_mailer": "server error: requires parent model",
-    # DHCP server sub-resources need LAN interface (VM has only WAN)
-    "/api/v2/services/dhcp_server/address_pool": "requires LAN interface (VM has only WAN)",
-    "/api/v2/services/dhcp_server/custom_option": "requires LAN interface (VM has only WAN)",
-    "/api/v2/services/dhcp_server/static_mapping": "requires LAN interface (VM has only WAN)",
-    # CRL revoked_certificate: pfSense bug — cert serial is hex, CRL code expects INT
-    "/api/v2/system/crl/revoked_certificate": "pfSense bug: cert serial hex vs INT in X509_CRL.php",
+    # FreeRADIUS routes return nginx 404 (needs REST API v2.6+ which requires pfSense 2.8+)
+    "/api/v2/services/freeradius/client": "freeradius routes need REST API v2.6+ (pfSense 2.8+)",
+    "/api/v2/services/freeradius/interface": "freeradius routes need REST API v2.6+ (pfSense 2.8+)",
+    "/api/v2/services/freeradius/user": "freeradius routes need REST API v2.6+ (pfSense 2.8+)",
+    # HAProxy actions + DHCP sub-resources + HAProxy settings subs: now tested via chained CRUD
+    # CRL revoked_certificate: now tested via chained CRUD
 }
 
 # ── Singleton GET/PATCH endpoints (settings-like but not auto-detected) ───────
@@ -380,7 +398,7 @@ _SINGLETON_TESTS: dict[str, dict[str, Any]] = {
         "value": "127.0.0.1",
         "extra_fields": {"username": "test", "password": "test"},
     },
-    # system/timezone: phantom route (nginx 404, not registered on server)
+    # system/timezone: nginx 404 on REST API v2.4.3 (needs v2.6+ / pfSense 2.8+)
     "/api/v2/services/dhcp_server/backend": {
         "field": "dhcpbackend",
         "value": "kea",
@@ -416,25 +434,50 @@ _ACTION_TESTS: dict[str, dict[str, Any]] = {
         },
         "cleanup_path": "/api/v2/system/certificate",
     },
+    "/api/v2/system/certificate_authority/generate": {
+        "body": {
+            "descr": "Test Generated CA",
+            "keytype": "RSA",
+            "keylen": 2048,
+            "digest_alg": "sha256",
+            "dn_commonname": "Test Gen CA",
+            "lifetime": 3650,
+        },
+        "cleanup_path": "/api/v2/system/certificate_authority",
+    },
+    "/api/v2/system/certificate_authority/renew": {"needs_generated_ca": True},
+    "/api/v2/system/certificate/generate": {
+        "needs_ca": True,
+        "body": {
+            "descr": "Test Generated Cert",
+            "keytype": "RSA",
+            "keylen": 2048,
+            "digest_alg": "sha256",
+            "dn_commonname": "gen-cert.test",
+            "lifetime": 365,
+            "type": "server",
+        },
+        "cleanup_path": "/api/v2/system/certificate",
+    },
+    "/api/v2/system/certificate/renew": {"needs_generated_cert": True},
+    "/api/v2/system/certificate/pkcs12/export": {"needs_generated_cert": True, "expect_status": [200]},
+    "/api/v2/system/certificate/signing_request/sign": {"needs_ca_and_csr": True},
+    "/api/v2/status/service": {
+        "body": {"id": 0, "action": "restart"},
+    },
 }
 
 # Action endpoints to skip
 _SKIP_ACTION: dict[str, str] = {
-    "/api/v2/diagnostics/ping": "phantom route (nginx 404)",
+    "/api/v2/diagnostics/ping": "version-gated to REST API v2.7.0+, not available on CE 2.7.2",
     "/api/v2/services/wake_on_lan/send": "requires real MAC address on LAN",
     "/api/v2/services/acme/account_key/register": "needs real ACME server for registration",
     "/api/v2/services/acme/certificate/issue": "requires real ACME server",
     "/api/v2/services/acme/certificate/renew": "requires real ACME server",
     "/api/v2/vpn/openvpn/client_export": "requires functioning OpenVPN server",
-    "/api/v2/status/service": "service restart can destabilize test VM",
+    # status/service: now tested (restart syslogd)
     "/api/v2/system/restapi/settings/sync": "HA sync endpoint times out without peer",
-    # CA/cert generate endpoints: server returns 500 "failed for unknown reason"
-    "/api/v2/system/certificate_authority/generate": "pfSense bug: generate returns 500",
-    "/api/v2/system/certificate_authority/renew": "depends on CA generate (broken)",
-    "/api/v2/system/certificate/generate": "depends on CA generate (broken)",
-    "/api/v2/system/certificate/renew": "depends on CA generate (broken)",
-    "/api/v2/system/certificate/pkcs12/export": "depends on generated cert (CA generate broken)",
-    "/api/v2/system/certificate/signing_request/sign": "depends on CA generate (broken)",
+    # CA/cert generate endpoints: testing with VirtIO RNG (entropy was the issue, not API version)
 }
 
 # ── Pre-generated test PEM certificates ───────────────────────────────────────
@@ -589,7 +632,7 @@ _CHAINED_CRUD: dict[str, dict[str, Any]] = {
     "/api/v2/interface/vlan": {
         "parents": [],
         "child_body": {
-            "if": "vtnet0",
+            "if": "em0",
             "tag": 100,
             "pcp": 0,
             "descr": "Test VLAN",
@@ -1582,6 +1625,164 @@ _CHAINED_CRUD: dict[str, dict[str, Any]] = {
         },
         "update_field": None,
     },
+    # ── Interface GRE tunnel ──────────────────────────────────────────────
+    "/api/v2/interface/gre": {
+        "parents": [],
+        "child_body": {
+            "if": "wan",
+            "remote_addr": "198.51.100.1",
+            "tunnel_remote_addr": "10.255.0.2",
+            "tunnel_remote_addr6": "",
+        },
+        "update_field": None,
+    },
+    # ── Interface LAGG ────────────────────────────────────────────────────
+    "/api/v2/interface/lagg": {
+        "parents": [],
+        "child_body": {
+            "members": ["em2"],
+            "proto": "none",
+            "descr": "Test LAGG",
+        },
+        "update_field": None,
+    },
+    # ── DHCP server sub-resources (static parent_id = "lan") ─────────────
+    "/api/v2/services/dhcp_server/address_pool": {
+        "parents": [],
+        "child_body": {
+            "parent_id": "lan",
+            "range_from": "192.168.1.210",
+            "range_to": "192.168.1.220",
+        },
+        "static_parent_id": "lan",
+        "update_field": None,
+    },
+    "/api/v2/services/dhcp_server/custom_option": {
+        "parents": [],
+        "child_body": {
+            "parent_id": "lan",
+            "number": 252,
+            "type": "text",
+            "value": "http://wpad.example.com/wpad.dat",
+        },
+        "static_parent_id": "lan",
+        "update_field": None,
+    },
+    "/api/v2/services/dhcp_server/static_mapping": {
+        "parents": [],
+        "child_body": {
+            "parent_id": "lan",
+            "mac": "00:11:22:33:44:55",
+            "ipaddr": "192.168.1.250",
+            "descr": "Test static map",
+        },
+        "static_parent_id": "lan",
+        "update_field": "descr",
+    },
+    # ── HAProxy backend/action (needs backend parent) ─────────────────────
+    "/api/v2/services/haproxy/backend/action": {
+        "parents": [
+            {
+                "path": "/api/v2/services/haproxy/backend",
+                "body_template": _HAPROXY_BACKEND_BODY,
+                "tag": "bact",
+                "inject": {"parent_id": "id"},
+            }
+        ],
+        "child_body": {
+            "action": "http-request_deny",
+            "acl": "",
+            "server": "",
+            "customaction": "",
+            "deny_status": "403",
+            "realm": "",
+            "rule": "",
+            "lua_function": "",
+            "name": "",
+            "fmt": "",
+            "find": "",
+            "replace": "",
+            "path": "",
+            "status": "",
+            "reason": "Denied",
+        },
+        "update_field": None,
+    },
+    # ── HAProxy frontend/action (needs backend + frontend parents) ────────
+    "/api/v2/services/haproxy/frontend/action": {
+        "parents": [
+            {
+                "path": "/api/v2/services/haproxy/backend",
+                "body_template": _HAPROXY_BACKEND_BODY,
+                "tag": "fact",
+            },
+            {
+                "path": "/api/v2/services/haproxy/frontend",
+                "body": {
+                    "name": "pft_fe_act",
+                    "type": "http",
+                },
+                "inject": {"parent_id": "id"},
+            },
+        ],
+        "child_body": {
+            "action": "http-request_deny",
+            "acl": "",
+            "server": "",
+            "customaction": "",
+            "deny_status": "403",
+            "realm": "",
+            "rule": "",
+            "lua_function": "",
+            "name": "",
+            "fmt": "",
+            "find": "",
+            "replace": "",
+            "path": "",
+            "status": "",
+            "reason": "Denied",
+        },
+        "update_field": None,
+    },
+    # ── System CRL/revoked_certificate ────────────────────────────────────
+    "/api/v2/system/crl/revoked_certificate": {
+        "parents": [
+            {
+                "path": "/api/v2/system/certificate_authority",
+                "body": {
+                    "descr": "CA for CRL revoke",
+                    "crt": "__CA_CERT_PEM__",
+                    "prv": "__CA_KEY_PEM__",
+                },
+                "inject": {"caref": "refid"},
+            },
+            {
+                "path": "/api/v2/system/certificate",
+                "body": {
+                    "descr": "Cert for CRL revoke",
+                    "crt": "__CERT_PEM__",
+                    "prv": "__CERT_KEY_PEM__",
+                },
+                "receives_from": {0: {"caref": "refid"}},
+                "inject": {"certref": "refid"},
+            },
+            {
+                "path": "/api/v2/system/crl",
+                "body": {
+                    "descr": "CRL for revoke",
+                    "method": "internal",
+                    "text": "",
+                },
+                "receives_from": {0: {"caref": "refid"}},
+                "inject": {"parent_id": "id"},
+            },
+        ],
+        "child_body": {
+            "revoke_time": 1700000000,
+            "reason": 0,
+        },
+        "update_field": None,
+    },
 }
 
 
@@ -2468,15 +2669,22 @@ def _gen_chained_crud_test(group: EndpointGroup) -> str:
     inner = base_indent + "    "
 
     # Determine if sub-resource GET/DELETE also need parent_id
+    static_parent_id = chain.get("static_parent_id")
     parent_id_injection = None
-    for child_field, pvar, pfield in injections:
-        if child_field == "parent_id":
-            parent_id_injection = (pvar, pfield)
-            break
+    if static_parent_id is None:
+        for child_field, pvar, pfield in injections:
+            if child_field == "parent_id":
+                parent_id_injection = (pvar, pfield)
+                break
 
     # GET
     lines.append(f"{inner}# GET (singular)")
-    if parent_id_injection:
+    if static_parent_id:
+        lines.append(f"{inner}get_resp = client.get(")
+        lines.append(f'{inner}    "{path}",')
+        lines.append(f'{inner}    params={{"id": obj_id, "parent_id": {static_parent_id!r}}},')
+        lines.append(f"{inner})")
+    elif parent_id_injection:
         pvar, pfield = parent_id_injection
         lines.append(f"{inner}get_resp = client.get(")
         lines.append(f'{inner}    "{path}",')
@@ -2493,7 +2701,12 @@ def _gen_chained_crud_test(group: EndpointGroup) -> str:
     # UPDATE
     if update_field:
         lines.append(f"{inner}# UPDATE")
-        if parent_id_injection:
+        if static_parent_id:
+            lines.append(f"{inner}update_resp = client.patch(")
+            lines.append(f'{inner}    "{path}",')
+            lines.append(f'{inner}    json={{"id": obj_id, "parent_id": {static_parent_id!r}, "{update_field}": {update_value}}},')
+            lines.append(f"{inner})")
+        elif parent_id_injection:
             pvar, pfield = parent_id_injection
             lines.append(f"{inner}update_resp = client.patch(")
             lines.append(f'{inner}    "{path}",')
@@ -2509,7 +2722,12 @@ def _gen_chained_crud_test(group: EndpointGroup) -> str:
 
     # DELETE child (finally)
     lines.append(f"{base_indent}finally:")
-    if parent_id_injection:
+    if static_parent_id:
+        lines.append(
+            f'{base_indent}    _delete_with_retry(client, "{path}", obj_id, '
+            f'{{"parent_id": {static_parent_id!r}}})'
+        )
+    elif parent_id_injection:
         pvar, pfield = parent_id_injection
         lines.append(
             f'{base_indent}    _delete_with_retry(client, "{path}", obj_id, '

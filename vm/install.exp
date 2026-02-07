@@ -19,15 +19,20 @@ exec qemu-img create -f qcow2 $disk 4G
 
 puts "==> Booting pfSense installer..."
 spawn qemu-system-x86_64 \
-    -m 1024 \
+    -m 2048 \
     -enable-kvm \
     -drive file=$disk,if=virtio,format=qcow2 \
     -drive file=$memstick,format=raw,if=none,id=usbstick \
     -device usb-ehci \
     -device usb-storage,drive=usbstick,bootindex=0 \
+    -device virtio-rng-pci \
     -nographic \
-    -net nic,model=virtio \
-    -net user,hostfwd=tcp::18443-:443,hostfwd=tcp::12222-:22
+    -netdev user,id=wan0,net=10.0.2.0/24,hostfwd=tcp::18443-:443,hostfwd=tcp::12222-:22 \
+    -device e1000,netdev=wan0,mac=52:54:00:00:00:01 \
+    -netdev user,id=lan0,net=10.0.3.0/24 \
+    -device e1000,netdev=lan0,mac=52:54:00:00:00:02 \
+    -netdev user,id=opt0,net=10.0.4.0/24 \
+    -device e1000,netdev=opt0,mac=52:54:00:00:00:03
 
 # ---- Phase 1: Console type prompt ----
 # "Console type [vt100]: "

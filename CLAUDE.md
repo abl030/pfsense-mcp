@@ -51,22 +51,36 @@ This is a serial-console installer image. `-nographic` in QEMU gives serial on s
 # Create disk
 qemu-img create -f qcow2 vm/pfsense-test.qcow2 4G
 
-# Install (boots from memstick, installs to QCOW2)
-qemu-system-x86_64 -m 1024 -enable-kvm \
+# Boot (3 e1000 NICs: em0=WAN, em1=LAN, em2=spare for LAGG tests)
+qemu-system-x86_64 -m 2048 -enable-kvm \
     -drive file=vm/pfsense-test.qcow2,if=virtio,format=qcow2 \
-    -drive file=vm/pfSense-CE-memstick-serial-2.7.2-RELEASE-amd64.img,format=raw,if=none,id=usbstick \
-    -device usb-ehci -device usb-storage,drive=usbstick,bootindex=0 \
-    -nographic -net nic,model=virtio \
-    -net user,hostfwd=tcp::8443-:443,hostfwd=tcp::2222-:22
-
-# Boot from disk (after install)
-qemu-system-x86_64 -m 1024 -enable-kvm \
-    -drive file=vm/pfsense-test.qcow2,if=virtio,format=qcow2 \
-    -nographic -net nic,model=virtio \
-    -net user,hostfwd=tcp::8443-:443,hostfwd=tcp::2222-:22
+    -device virtio-rng-pci \
+    -nographic \
+    -netdev user,id=wan0,net=10.0.2.0/24,hostfwd=tcp::18443-:443,hostfwd=tcp::12222-:22 \
+    -device e1000,netdev=wan0,mac=52:54:00:00:00:01 \
+    -netdev user,id=lan0,net=10.0.3.0/24 \
+    -device e1000,netdev=lan0,mac=52:54:00:00:00:02 \
+    -netdev user,id=opt0,net=10.0.4.0/24 \
+    -device e1000,netdev=opt0,mac=52:54:00:00:00:03
 ```
 
-Requirements: KVM, 1024 MB RAM, 4 GB disk. QEMU user-mode networking assigns 10.0.2.15 via DHCP.
+Requirements: KVM, 2048 MB RAM, 4 GB disk. VirtIO RNG for entropy (critical for cert generation). QEMU user-mode networking assigns 10.0.2.15 via DHCP on WAN. 3 e1000 NICs needed for WAN+LAN+LAGG testing.
+
+### VM Build Optimization
+
+The install step (`install.exp`) takes ~3-5 minutes and produces a pristine installed disk. When iterating on `firstboot.exp`, you can skip reinstalling by keeping the installed disk and only deleting `vm/api-key.json`:
+
+```bash
+# Full rebuild (install + firstboot + golden):
+rm -f vm/pfsense-test.qcow2 vm/api-key.json vm/golden.qcow2
+bash vm/setup.sh
+
+# Firstboot-only rebuild (skip install):
+rm -f vm/api-key.json vm/golden.qcow2
+bash vm/setup.sh
+```
+
+However, if firstboot fails partway through, the work disk may have corrupt state (REST API partially installed, wrong firewall rules, etc.). In that case, delete `vm/pfsense-test.qcow2` too and do a full rebuild. Signs of corrupt state: "already installed" messages when you expect a fresh install, unexpected firewall behavior, wrong NIC assignments.
 
 ### Expect Script Gotchas (CRITICAL)
 
@@ -84,7 +98,17 @@ These were discovered through painful trial and error. Do NOT change the working
 
 6. **`service php-fpm restart` fails**: Returns error about php_fpm_enable. Ignore it — REST API works anyway because package installation triggers a webConfigurator restart.
 
-7. **Disk appears as `vtbd0`** (VirtIO block device), NIC as `vtnet0`.
+7. **Disk appears as `vtbd0`** (VirtIO block device), NICs as `em0`/`em1`/`em2` (e1000).
+
+8. **WAN `blockpriv` blocks QEMU traffic**: With WAN+LAN configured, pfSense enables `blockpriv` (Block Private Networks) on WAN. This silently drops ALL traffic from QEMU's `10.0.2.x` subnet BEFORE any user-defined firewall rules are evaluated. Adding pass rules via easyrule or REST API has NO effect. Fix: run `pfSsh.php playback enableallowallwan` from the shell — this removes `blockpriv`, `blockbogons`, adds a pass-all WAN rule, and reloads the filter atomically.
+
+9. **`pfctl -d` is instantly re-enabled**: Any filter reload (including REST API calls that trigger `filter_configure_sync()`) re-enables pf, making `pfctl -d` useless for anything beyond a single immediate command.
+
+10. **Tcl bracket escaping**: `[` and `]` in Tcl `send` commands are interpreted as command substitution. Escape them as `\[` and `\]` when they appear in JSON arrays (e.g., `\"interface\":\[\"wan\"\]`).
+
+11. **Always delete stale work disks**: When debugging firstboot.exp, always `rm vm/pfsense-test.qcow2 vm/api-key.json` before rebuilding. A work disk from a failed firstboot has partial state (REST API may be "already installed", firewall rules may be half-applied) that causes confusing expect pattern mismatches and wastes time.
+
+12. **Curl needs `-m` timeout**: All curl commands in expect/bash scripts MUST include `-m 5` (or similar timeout). Without it, curl hangs indefinitely on SSL handshake when the firewall blocks traffic, stalling the entire build.
 
 ### Config.xml: What Needs Fixing
 
@@ -251,7 +275,7 @@ Exclude from generation or add extra warnings:
 
 ## Phase 2 Status: Test Coverage
 
-**Current: 179 tests, 179 passing**
+**Current: 206 tests, 206 passing**
 
 The test generator (`generator/test_generator.py`) produces `generated/tests.py` against the live VM. Tests cover CRUD lifecycles, settings roundtrips, read-only GETs, apply endpoints, and plural list endpoints.
 
@@ -259,51 +283,27 @@ The test generator (`generator/test_generator.py`) produces `generated/tests.py`
 
 - `RetryClient` wraps httpx.Client with automatic retry on 503 (dispatcher busy), up to 4 attempts with backoff
 - `_CHAINED_CRUD` supports multi-parent dependency chains with `receives_from` for inter-parent field injection (e.g., cert needs CA's refid)
+- `_CHAINED_CRUD` supports `static_parent_id` for sub-resources with a fixed parent (e.g., DHCP sub-resources always use `parent_id: "lan"`)
 - PEM certificates embedded in test constants for CA/cert-dependent endpoints (IPsec, OpenVPN, CRL, HAProxy frontend/certificate)
+- VM uses 3 e1000 NICs (em0=WAN, em1=LAN, em2=spare for LAGG), VirtIO RNG, 2GB RAM
+- REST API v2.6.8 (upgraded from v2.4.3 for FreeRADIUS, timezone, cert generation fixes)
 
 ### Permanently skipped endpoints — with reasons
 
 Every skip is documented in `_SKIP_CRUD_PATHS`, `_SKIP_ACTION`, `_SKIP_SINGLETON`, or `_PHANTOM_PLURAL_ROUTES` in `test_generator.py`.
 
-**Hardware/VM limitations (5):**
-- `interface` — requires available physical interface (VM has only 1 NIC assigned to WAN)
-- `interface/lagg` — requires multiple physical interfaces
-- `interface/gre` — requires specific tunnel config between interfaces
-- `interface/gif` — requires specific tunnel config between interfaces
-- `vpn/openvpn/client_export/config` — requires functioning OpenVPN server with connected client cert
+**Hardware/VM limitations (2):**
+- `interface` — interface CRUD can destabilize VM (em2 reserved for LAGG)
+- `vpn/openvpn/client_export/config` — complex 5-step chain: CA+cert+OVPN server+user cert (deferred)
 
 **pfSense singleton design (1):**
 - `services/dhcp_server` — per-interface singleton, POST not supported
 
-**No LAN interface in VM (3):**
-- `services/dhcp_server/address_pool` — requires LAN interface
-- `services/dhcp_server/custom_option` — requires LAN interface
-- `services/dhcp_server/static_mapping` — requires LAN interface
-
-**pfSense server bugs (10):**
-- `services/freeradius/client` — routes return nginx 404 despite package installed
-- `services/freeradius/interface` — routes return nginx 404
-- `services/freeradius/user` — routes return nginx 404
-- `system/crl/revoked_certificate` — cert serial number is hex but CRL X509_CRL.php expects INT (500)
-- `system/certificate_authority/generate` — returns 500 "failed for unknown reason" with any params
-- `system/certificate_authority/renew` — depends on CA generate (broken)
-- `system/certificate/generate` — depends on CA generate (broken)
-- `system/certificate/renew` — depends on CA generate (broken)
-- `system/certificate/pkcs12/export` — depends on generated cert (CA generate broken)
-- `system/certificate/signing_request/sign` — depends on CA generate (broken)
-
-**Phantom singleton/action routes (2):**
-- `system/timezone` — nginx 404 (not registered on server)
-- `diagnostics/ping` — nginx 404 (not registered on server)
+**Phantom action routes (1):**
+- `diagnostics/ping` — version-gated to REST API v2.7.0+, not available on CE 2.7.2
 
 **Requires BasicAuth (not API key auth):**
 - `auth/key` and `auth/jwt` — tested with dedicated BasicAuth client
-
-**Impractical test payloads (4):**
-- `services/haproxy/backend/action` — 16 required context-dependent fields
-- `services/haproxy/frontend/action` — 16 required context-dependent fields
-- `services/haproxy/settings/dns_resolver` — server 500, requires parent model
-- `services/haproxy/settings/email_mailer` — server 500, requires parent model
 
 **External dependencies (5):**
 - `services/acme/account_key/register` — needs real ACME server
@@ -312,10 +312,7 @@ Every skip is documented in `_SKIP_CRUD_PATHS`, `_SKIP_ACTION`, `_SKIP_SINGLETON
 - `services/wake_on_lan/send` — needs real MAC address on LAN
 - `system/restapi/settings/sync` — HA sync endpoint times out without peer
 
-**Service stability risk (1):**
-- `status/service` — service restart can destabilize test VM mid-suite
-
-### Phantom plural routes (42)
+### Phantom plural routes (36)
 
 Routes present in the OpenAPI spec but return nginx 404 on the real server. These are sub-resource plural endpoints whose singular forms require `parent_id`. The pfSense REST API simply doesn't register these routes. All are tested via their singular CRUD endpoints instead.
 

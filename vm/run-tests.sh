@@ -57,12 +57,17 @@ fi
 # --- Boot VM ---
 echo "==> Booting pfSense VM (HTTPS=$HTTPS_PORT, SSH=$SSH_PORT)..."
 qemu-system-x86_64 \
-    -m 1024 \
+    -m 2048 \
     -enable-kvm \
     -drive "file=$TMPIMG,if=virtio,format=qcow2" \
+    -device virtio-rng-pci \
     -nographic \
-    -net nic,model=virtio \
-    -net "user,hostfwd=tcp::${HTTPS_PORT}-:443,hostfwd=tcp::${SSH_PORT}-:22" \
+    -netdev "user,id=wan0,net=10.0.2.0/24,hostfwd=tcp::${HTTPS_PORT}-:443,hostfwd=tcp::${SSH_PORT}-:22" \
+    -device e1000,netdev=wan0,mac=52:54:00:00:00:01 \
+    -netdev user,id=lan0,net=10.0.3.0/24 \
+    -device e1000,netdev=lan0,mac=52:54:00:00:00:02 \
+    -netdev user,id=opt0,net=10.0.4.0/24 \
+    -device e1000,netdev=opt0,mac=52:54:00:00:00:03 \
     &>/dev/null &
 QEMU_PID=$!
 echo "==> QEMU PID: $QEMU_PID"
@@ -72,7 +77,7 @@ echo "==> Waiting for REST API..."
 MAX_WAIT=120
 WAITED=0
 while [[ $WAITED -lt $MAX_WAIT ]]; do
-    HTTP_CODE=$(curl -sk -o /dev/null -w '%{http_code}' \
+    HTTP_CODE=$(curl -sk -m 5 -o /dev/null -w '%{http_code}' \
         -u admin:pfsense \
         "https://127.0.0.1:${HTTPS_PORT}/api/v2/system/version" 2>/dev/null || echo "000")
     if [[ "$HTTP_CODE" == "200" ]]; then

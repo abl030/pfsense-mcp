@@ -20,16 +20,21 @@ set disk "vm/pfsense-test.qcow2"
 
 puts "==> Booting pfSense from installed disk..."
 spawn qemu-system-x86_64 \
-    -m 1024 \
+    -m 2048 \
     -enable-kvm \
     -drive file=$disk,if=virtio,format=qcow2 \
+    -device virtio-rng-pci \
     -nographic \
-    -net nic,model=virtio \
-    -net user,hostfwd=tcp::18443-:443,hostfwd=tcp::12222-:22
+    -netdev user,id=wan0,net=10.0.2.0/24,hostfwd=tcp::18443-:443,hostfwd=tcp::12222-:22 \
+    -device e1000,netdev=wan0,mac=52:54:00:00:00:01 \
+    -netdev user,id=lan0,net=10.0.3.0/24 \
+    -device e1000,netdev=lan0,mac=52:54:00:00:00:02 \
+    -netdev user,id=opt0,net=10.0.4.0/24 \
+    -device e1000,netdev=opt0,mac=52:54:00:00:00:03
 
 # ---- Phase 1-5: Interface assignment OR direct console menu ----
-# First boot detects interface mismatch (em0/em1 vs vtnet0)
-# Subsequent boots go straight to console menu.
+# First boot detects 3 e1000 NICs: em0, em1, em2.
+# Assign em0=WAN, em1=LAN, skip em2 (reserved for LAGG tests).
 puts "\n==> Waiting for VLAN prompt or console menu..."
 expect {
     "Should VLANs be set up now*\]?" {
@@ -39,21 +44,33 @@ expect {
 
         puts "\n==> Waiting for WAN interface prompt..."
         expect -re "Enter the WAN interface|WAN interface name"
-        puts "\n==> Assigning vtnet0 as WAN..."
+        puts "\n==> Assigning em0 as WAN..."
         sleep 1
-        send "vtnet0\r"
+        send "em0\r"
 
         puts "\n==> Waiting for LAN interface prompt..."
         expect -re "Enter the LAN interface|LAN interface name"
-        puts "\n==> No LAN interface (single NIC)..."
+        puts "\n==> Assigning em1 as LAN..."
         sleep 1
-        send "\r"
+        send "em1\r"
 
-        puts "\n==> Waiting for confirmation..."
-        expect -re "Do you want to proceed|proceed.*\\\?"
-        puts "\n==> Confirming interface assignment..."
-        sleep 1
-        send "y\r"
+        puts "\n==> Waiting for Optional 1 or confirmation..."
+        expect {
+            -re "Enter the Optional 1 interface|Optional 1 interface name" {
+                puts "\n==> Skipping Optional 1 interface..."
+                sleep 1
+                send "\r"
+                expect -re "Do you want to proceed|proceed.*\\\?"
+                puts "\n==> Confirming interface assignment..."
+                sleep 1
+                send "y\r"
+            }
+            -re "Do you want to proceed|proceed.*\\\?" {
+                puts "\n==> Confirming interface assignment..."
+                sleep 1
+                send "y\r"
+            }
+        }
 
         puts "\n==> Waiting for console menu..."
         set timeout 300
@@ -111,6 +128,9 @@ expect {
     -re "Installing.*done|Extracting.*done" {
         puts "\n==> REST API package installed!"
     }
+    -re "already installed" {
+        puts "\n==> REST API already installed (reusing previous)"
+    }
     -re "Error|FAILED|failed" {
         puts "\n==> REST API install FAILED"
         # Continue anyway — we can debug
@@ -138,6 +158,23 @@ expect {
     timeout { puts "\n==> TIMEOUT after php-fpm restart" }
 }
 
+# Enable WAN access using pfSense's built-in emergency access script.
+# With WAN+LAN, the anti-lockout rule is on LAN only. Additionally,
+# blockpriv (Block Private Networks) on WAN silently drops all traffic
+# from QEMU's 10.0.2.x subnet BEFORE any user-defined firewall rules.
+# enableallowallwan atomically: removes blockpriv, removes blockbogons,
+# adds a pass-all rule on WAN, and reloads the filter.
+puts "\n==> Enabling WAN access via pfSsh.php playback..."
+send "pfSsh.php playback enableallowallwan\r"
+set timeout 60
+
+expect {
+    -re "home\\.arpa" {
+        puts "\n==> enableallowallwan complete"
+    }
+    timeout { puts "\n==> TIMEOUT running enableallowallwan" }
+}
+
 # Return to main menu
 puts "\n==> Exiting shell..."
 send "exit\r"
@@ -153,11 +190,31 @@ expect {
 # ---- Phase 8: Create API key via curl from host ----
 # The QEMU port forward maps host:18443 → guest:443
 # Use BasicAuth with default admin:pfsense to create an API key
+# Wait for REST API to become ready after webConfigurator restart
+puts "\n==> Waiting for REST API to become ready..."
+set timeout 120
+set api_ready 0
+for {set attempt 0} {$attempt < 60} {incr attempt} {
+    set http_code [exec sh -c {curl -sk -m 5 -o /dev/null -w '%{http_code}' -u admin:pfsense https://127.0.0.1:18443/api/v2/system/version 2>/dev/null || true}]
+    if {$attempt % 5 == 0} {
+        puts "\n==> Poll attempt $attempt: HTTP $http_code"
+    }
+    if {$http_code eq "200"} {
+        puts "\n==> API ready after ${attempt} attempts (~[expr {$attempt * 7}]s)"
+        set api_ready 1
+        break
+    }
+    after 2000
+}
+if {!$api_ready} {
+    puts "\n==> WARNING: API not ready after 120s, trying anyway..."
+}
+
 puts "\n==> Creating API key via REST API..."
 set timeout 30
 
 # Run curl from the HOST side (not inside the VM)
-set api_result [exec curl -sk -u admin:pfsense -X POST https://127.0.0.1:18443/api/v2/auth/key 2>&1]
+set api_result [exec curl -sk -m 10 -u admin:pfsense -X POST https://127.0.0.1:18443/api/v2/auth/key 2>&1]
 puts "\n==> API key response: $api_result"
 
 # Save full response to file

@@ -42,7 +42,7 @@ wait_for_api() {
     local attempt=0
     log "Waiting for REST API to become ready (max ${max_attempts}s)..."
     while [[ $attempt -lt $max_attempts ]]; do
-        if curl -sk -o /dev/null -w '%{http_code}' \
+        if curl -sk -m 5 -o /dev/null -w '%{http_code}' \
             -u admin:pfsense \
             "https://127.0.0.1:${HTTPS_PORT}/api/v2/system/version" 2>/dev/null | grep -q '200'; then
             log "API is ready! (took ${attempt}s)"
@@ -97,12 +97,17 @@ log "Configuring golden image (auth_methods + packages)..."
 
 # Boot the VM in background (no -nographic with -daemonize; use -display none)
 qemu-system-x86_64 \
-    -m 1024 \
+    -m 2048 \
     -enable-kvm \
     -drive "file=$WORK_DISK,if=virtio,format=qcow2" \
+    -device virtio-rng-pci \
     -display none \
-    -net nic,model=virtio \
-    -net "user,hostfwd=tcp::${HTTPS_PORT}-:443,hostfwd=tcp::${SSH_PORT}-:22" \
+    -netdev "user,id=wan0,net=10.0.2.0/24,hostfwd=tcp::${HTTPS_PORT}-:443,hostfwd=tcp::${SSH_PORT}-:22" \
+    -device e1000,netdev=wan0,mac=52:54:00:00:00:01 \
+    -netdev user,id=lan0,net=10.0.3.0/24 \
+    -device e1000,netdev=lan0,mac=52:54:00:00:00:02 \
+    -netdev user,id=opt0,net=10.0.4.0/24 \
+    -device e1000,netdev=opt0,mac=52:54:00:00:00:03 \
     -daemonize \
     -pidfile vm/qemu.pid \
     -serial null \
@@ -185,6 +190,24 @@ installed=$(curl -sk -u admin:pfsense \
     python3 -c "import sys,json; pkgs=json.load(sys.stdin).get('data',[]); [print(f'  {p[\"name\"]}') for p in pkgs]" 2>/dev/null)
 log "Installed packages:"
 echo "$installed"
+
+# --- Configure LAN + DHCP ---
+# LAN (em1) was assigned during firstboot with 192.168.1.1/24.
+# WAN firewall rules for HTTPS/SSH were added via REST API in firstboot.
+# Enable DHCP server on LAN for sub-resource tests.
+log "Enabling DHCP server on LAN..."
+dhcp_result=$(curl -sk -u admin:pfsense \
+    -X PATCH \
+    -H "Content-Type: application/json" \
+    -d '{"id":"lan","enable":true,"range_from":"192.168.1.100","range_to":"192.168.1.200"}' \
+    "https://127.0.0.1:${HTTPS_PORT}/api/v2/services/dhcp_server" 2>/dev/null)
+dhcp_code=$(echo "$dhcp_result" | python3 -c "import sys,json; print(json.load(sys.stdin).get('code','?'))" 2>/dev/null || echo "err")
+log "DHCP server enable: $dhcp_code"
+
+log "Applying DHCP changes..."
+curl -sk -u admin:pfsense -X POST \
+    "https://127.0.0.1:${HTTPS_PORT}/api/v2/services/dhcp_server/apply" 2>/dev/null || true
+sleep 2
 
 # Shut down the VM gracefully so config.xml is saved to disk
 log "Shutting down VM gracefully via REST API..."

@@ -40,7 +40,7 @@
       ]);
     in {
       default = pkgs.mkShell {
-        packages = [pythonEnv];
+        packages = [pythonEnv pkgs.qemu pkgs.curl];
       };
     });
   };
