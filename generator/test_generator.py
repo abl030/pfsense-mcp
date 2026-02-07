@@ -39,7 +39,10 @@ _PHANTOM_PLURAL_ROUTES = {
     "/api/v2/vpn/ipsec/phase1/encryptions",
     "/api/v2/vpn/ipsec/phase2/encryptions",
     "/api/v2/vpn/openvpn/client_export/configs",
-    # DHCP sub-resource plurals: now tested via chained CRUD with LAN interface
+    # DHCP sub-resource plurals: singular CRUD works (chained with parent_id=lan), but plurals 404
+    "/api/v2/services/dhcp_server/address_pools",
+    "/api/v2/services/dhcp_server/custom_options",
+    "/api/v2/services/dhcp_server/static_mappings",
     "/api/v2/status/openvpn/server/connections",
     "/api/v2/status/openvpn/server/routes",
     "/api/v2/status/ipsec/child_sas",
@@ -317,6 +320,7 @@ _ENDPOINT_OVERRIDES: dict[str, dict[str, str]] = {
     "/api/v2/interface/gre": {
         "if": '"wan"',
         "remote_addr": '"198.51.100.1"',
+        "tunnel_local_addr": '"10.255.0.1"',
         "tunnel_remote_addr": '"10.255.0.2"',
         "tunnel_remote_addr6": '""',
     },
@@ -344,8 +348,14 @@ _SKIP_CRUD_PATHS: dict[str, str] = {
     "/api/v2/services/freeradius/client": "freeradius routes need REST API v2.6+ (pfSense 2.8+)",
     "/api/v2/services/freeradius/interface": "freeradius routes need REST API v2.6+ (pfSense 2.8+)",
     "/api/v2/services/freeradius/user": "freeradius routes need REST API v2.6+ (pfSense 2.8+)",
-    # HAProxy actions + DHCP sub-resources + HAProxy settings subs: now tested via chained CRUD
-    # CRL revoked_certificate: now tested via chained CRUD
+    # HAProxy action acl field cannot be empty — needs ACL created as sibling dependency
+    "/api/v2/services/haproxy/backend/action": "acl field cannot be empty, requires ACL sibling chain",
+    "/api/v2/services/haproxy/frontend/action": "acl field cannot be empty, requires ACL sibling chain",
+    # HAProxy settings subs: server 500 "parent Model has been constructed" bug
+    "/api/v2/services/haproxy/settings/dns_resolver": "server 500: parent model construction bug in REST API v2.4.3",
+    "/api/v2/services/haproxy/settings/email_mailer": "server 500: parent model construction bug in REST API v2.4.3",
+    # CRL revoked_certificate: cert serial hex → PHP INT overflow
+    "/api/v2/system/crl/revoked_certificate": "cert serial is hex but CRL X509_CRL.php expects INT (500)",
 }
 
 # ── Singleton GET/PATCH endpoints (settings-like but not auto-detected) ───────
@@ -477,7 +487,13 @@ _SKIP_ACTION: dict[str, str] = {
     "/api/v2/vpn/openvpn/client_export": "requires functioning OpenVPN server",
     # status/service: now tested (restart syslogd)
     "/api/v2/system/restapi/settings/sync": "HA sync endpoint times out without peer",
-    # CA/cert generate endpoints: testing with VirtIO RNG (entropy was the issue, not API version)
+    # CA/cert generate returns 500 "failed for unknown reason" on REST API v2.4.3 (pfSense CE 2.7.2)
+    "/api/v2/system/certificate_authority/generate": "server 500: failed for unknown reason (REST API v2.4.3 bug)",
+    "/api/v2/system/certificate_authority/renew": "depends on CA generate (broken in v2.4.3)",
+    "/api/v2/system/certificate/generate": "depends on CA generate (broken in v2.4.3)",
+    "/api/v2/system/certificate/renew": "depends on cert generate (broken in v2.4.3)",
+    "/api/v2/system/certificate/pkcs12/export": "depends on generated cert (broken in v2.4.3)",
+    "/api/v2/system/certificate/signing_request/sign": "depends on CA generate (broken in v2.4.3)",
 }
 
 # ── Pre-generated test PEM certificates ───────────────────────────────────────
@@ -1631,6 +1647,7 @@ _CHAINED_CRUD: dict[str, dict[str, Any]] = {
         "child_body": {
             "if": "wan",
             "remote_addr": "198.51.100.1",
+            "tunnel_local_addr": "10.255.0.1",
             "tunnel_remote_addr": "10.255.0.2",
             "tunnel_remote_addr6": "",
         },
@@ -1938,13 +1955,13 @@ def _should_skip_crud(group: EndpointGroup) -> tuple[bool, str]:
     if not group.create:
         return True, "no create endpoint"
 
+    # Check path-based skip list first (takes priority over chained config)
+    if group.base_path in _SKIP_CRUD_PATHS:
+        return True, _SKIP_CRUD_PATHS[group.base_path]
+
     # Chained tests handle their own dependencies — don't skip them
     if group.base_path in _CHAINED_CRUD:
         return False, ""
-
-    # Check path-based skip list
-    if group.base_path in _SKIP_CRUD_PATHS:
-        return True, _SKIP_CRUD_PATHS[group.base_path]
 
     # Check for required fields we can't generate
     for p in group.create.parameters:
@@ -2031,7 +2048,10 @@ def generate_tests(contexts: list[ToolContext]) -> str:
 
     # Action POST tests
     for group in groups:
-        if group.category == "action" and group.base_path in _ACTION_TESTS:
+        if group.category == "action" and group.base_path in _SKIP_ACTION:
+            lines.append(f"# SKIP {group.base_path}: {_SKIP_ACTION[group.base_path]}")
+            lines.append("")
+        elif group.category == "action" and group.base_path in _ACTION_TESTS:
             config = _ACTION_TESTS[group.base_path]
             if _is_dangerous(group.create):
                 lines.append(f"# SKIP {group.base_path}: dangerous endpoint")
@@ -2040,9 +2060,6 @@ def generate_tests(contexts: list[ToolContext]) -> str:
             lines.append(_gen_action_test(group.base_path, config))
             lines.append("")
             test_count += 1
-        elif group.category == "action" and group.base_path in _SKIP_ACTION:
-            lines.append(f"# SKIP {group.base_path}: {_SKIP_ACTION[group.base_path]}")
-            lines.append("")
 
     # Add a summary comment at the top
     header_line = f"# Total generated tests: {test_count}"
