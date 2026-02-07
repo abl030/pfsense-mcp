@@ -44,3 +44,4 @@ vm/*.log
 
 # VM API key (contains test credentials)
 vm/api-key.json
+vm/api-key.txt

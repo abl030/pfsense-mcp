@@ -27,7 +27,7 @@ spawn qemu-system-x86_64 \
     -device usb-storage,drive=usbstick,bootindex=0 \
     -nographic \
     -net nic,model=virtio \
-    -net user,hostfwd=tcp::8443-:443,hostfwd=tcp::2222-:22
+    -net user,hostfwd=tcp::18443-:443,hostfwd=tcp::12222-:22
 
 # ---- Phase 1: Console type prompt ----
 # "Console type [vt100]: "

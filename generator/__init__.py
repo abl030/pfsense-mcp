@@ -1,0 +1,1 @@
+"""pfSense MCP server generator."""
