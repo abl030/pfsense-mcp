@@ -327,6 +327,10 @@ Every untested path has a documented reason. Zero silent skips.
 
 The OpenAPI spec includes 39 plural sub-resource endpoints (e.g., `/api/v2/firewall/schedule/time_ranges`) that return nginx 404 on the real server. These are spec-only artifacts — pfSense doesn't register them. Their singular CRUD counterparts all work and are fully tested. These phantom routes are excluded from the test count but documented in the generator source.
 
+### Contributing
+
+PRs to expand test coverage are welcome — especially for the skipped endpoints listed above. The test generator in `generator/test_generator.py` makes it straightforward to add new test configurations without writing test code by hand.
+
 ## This Project is 100% AI-Generated
 
 Every file in this repository was written by Claude (Anthropic). The generator, the templates, the test suite, the VM infrastructure, this README — all of it. No human wrote any code.
