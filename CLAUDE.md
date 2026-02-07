@@ -275,16 +275,16 @@ Exclude from generation or add extra warnings:
 
 ## Phase 2 Status: Test Coverage
 
-**Current: 185 tests, 185 passing** against 258 API paths (677 operations)
+**Current: 187 tests, 187 passing** against 258 API paths (677 operations)
 
 ### Coverage summary
 
 | Metric | Count | % |
 |---|---|---|
-| Paths with active tests | 185 | 71.7% |
-| Paths with documented skip | 67 | 26.0% |
-| Unaccounted gaps | 6 | 2.3% |
-| **Total accounted** | **252** | **97.7%** |
+| Paths with active tests | 187 | 72.5% |
+| Paths with documented skip | 68 | 26.4% |
+| Unaccounted gaps | 4 | 1.6% |
+| **Total accounted** | **255** | **98.8%** |
 
 REST API v2.4.3 is the latest version that supports pfSense CE 2.7.2. v2.6.8+ only targets pfSense 2.8+. This blocks FreeRADIUS, timezone, and cert generation endpoints.
 
@@ -297,15 +297,12 @@ REST API v2.4.3 is the latest version that supports pfSense CE 2.7.2. v2.6.8+ on
 - VM uses 3 e1000 NICs (em0=WAN, em1=LAN, em2=spare for LAGG), VirtIO RNG, 2GB RAM
 - REST API v2.4.3 (only version with pfSense CE 2.7.2 package; v2.6.8+ requires pfSense 2.8+)
 
-### Untested gaps (6 paths — need real tests, not skip comments)
+### Untested gaps (4 paths — need real tests, not skip comments)
 
 These paths have no test. The goal is 100% real coverage — find a way to test each one:
 
-- `diagnostics/command_prompt` — run a harmless command (e.g., `echo test`), verify output
 - `diagnostics/halt_system` — test last (kills VM), verify 200 response before VM dies
 - `diagnostics/reboot` — test last (kills VM), verify 200 response before VM reboots
-- `graphql` — send a simple introspection or read-only query
-- `system/timezone` — nginx 404 on v2.4.3; needs creative workaround or direct config.xml verification
 - `system/package` — install a small utility (e.g., `iftop`), verify via GET, uninstall
 
 ### Permanently skipped endpoints — with reasons
@@ -327,9 +324,9 @@ Every skip is documented in `_SKIP_CRUD_PATHS`, `_SKIP_ACTION`, `_SKIP_SINGLETON
 - `services/haproxy/settings/dns_resolver`, `email_mailer` — 500 parent model construction bug
 - `services/haproxy/backend/action`, `frontend/action` — acl field cannot be empty (needs ACL sibling chain)
 
-**Phantom/404 routes (2):**
+**Phantom/404 routes (3):**
 - `diagnostics/ping` — version-gated to REST API v2.7.0+, not available on CE 2.7.2
-- `system/timezone` — nginx 404 (needs REST API v2.6+ / pfSense 2.8+)
+- `system/timezone` — nginx 404 (needs REST API v2.6+ / pfSense 2.8+); in `_SKIP_SINGLETON`
 
 **External dependencies (5):**
 - `services/acme/account_key/register` — needs real ACME server
@@ -350,16 +347,16 @@ Routes present in the OpenAPI spec but return nginx 404 on the real server. Thes
 
 These are currently skipped but should have real tests. Ordered by approachability:
 
-1. **HAProxy actions** (+2 tests) — retry with non-empty `acl` field or create ACL as sibling in chain
+1. **HAProxy actions** (+2 tests) — `acl` field truly cannot be empty (API returns 400). Need to create ACL as sibling under same parent, then reference its name. Requires sibling dependency support in test generator.
 2. **HAProxy frontend/certificate** (+1 test) — needs `certref` injection from parent cert chain
 3. **OpenVPN client_export** (+2 tests) — build 5-step chain: CA → cert → OVPN server → user cert → export
-4. **CRL revoked_certificate** (+1 test) — workaround the PHP INT bug (generate cert with small serial?)
+4. **CRL revoked_certificate** (+1 test) — PHP INT overflow confirmed even with imported PEM certs (serial too large). May need to generate a cert with artificially small serial.
 5. **Cert generation** (+6 tests) — server 500 on v2.4.3; may need to find the right parameter combination or workaround
 
 ### Known stale entries to clean up
 
-- `_CHAINED_CRUD` has entry for `/api/v2/services/bind/sync/domain` — path does not exist in OpenAPI spec
-- `_PHANTOM_PLURAL_ROUTES` has `/api/v2/services/bind/sync/domains` — corresponding stale entry
+- ~~`_CHAINED_CRUD` has entry for `/api/v2/services/bind/sync/domain`~~ — removed (path does not exist in OpenAPI spec)
+- ~~`_PHANTOM_PLURAL_ROUTES` has `/api/v2/services/bind/sync/domains`~~ — removed
 
 ### Key test patterns
 

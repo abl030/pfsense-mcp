@@ -79,7 +79,7 @@ def _delete_with_retry(client: httpx.Client, path: str, obj_id, params: dict | N
             break
         time.sleep(5)
     assert resp.status_code in (200, 404), f"Delete {path} id={obj_id} failed: {resp.text[:500]}"
-# Total generated tests: 186
+# Total generated tests: 188
 
 def test_crud_firewall_alias(client: httpx.Client):
     """CRUD lifecycle: /api/v2/firewall/alias"""
@@ -3262,7 +3262,7 @@ def test_crud_system_crl(client: httpx.Client):
         _delete_with_retry(client, "/api/v2/system/certificate_authority", p0_id)
 
 
-# SKIP /api/v2/system/crl/revoked_certificate: cert serial is hex but CRL X509_CRL.php expects INT (500)
+# SKIP /api/v2/system/crl/revoked_certificate: cert serial hex → PHP INT overflow (v2.4.3 bug, confirmed with imported PEM certs)
 
 def test_crud_system_restapi_access_list_entry(client: httpx.Client):
     """CRUD lifecycle: /api/v2/system/restapi/access_list/entry"""
@@ -5436,6 +5436,8 @@ def test_singleton_system_notifications_email_settings(client: httpx.Client):
 
 # SKIP /api/v2/system/restapi/version: PATCH triggers API version change (destructive)
 
+# SKIP /api/v2/system/timezone: nginx 404 on REST API v2.4.3 (needs v2.6+ / pfSense 2.8+)
+
 def test_action_auth_jwt(client: httpx.Client):
     """Action: POST /api/v2/auth/jwt"""
     # Auth endpoints require BasicAuth, not API key
@@ -5464,7 +5466,22 @@ def test_action_auth_key(client: httpx.Client):
     assert data is not None
 
 
+def test_action_diagnostics_command_prompt(client: httpx.Client):
+    """Action: POST /api/v2/diagnostics/command_prompt"""
+    resp = client.post("/api/v2/diagnostics/command_prompt", json={'command': 'echo pfsense-mcp-test'})
+    data = _ok(resp)
+    assert data is not None
+
+
 # SKIP /api/v2/diagnostics/ping: version-gated to REST API v2.7.0+, not available on CE 2.7.2
+
+def test_action_graphql(client: httpx.Client):
+    """Action: POST /api/v2/graphql"""
+    resp = client.post("/api/v2/graphql", json={'query': '{ __schema { queryType { name } } }'})
+    assert resp.status_code == 200, f"{resp.status_code}: {resp.text[:500]}"
+    data = resp.json()
+    assert data is not None
+
 
 # SKIP /api/v2/services/acme/account_key/register: needs real ACME server for registration
 

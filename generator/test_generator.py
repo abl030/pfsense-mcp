@@ -63,7 +63,7 @@ _PHANTOM_PLURAL_ROUTES = {
     "/api/v2/services/haproxy/frontend/error_files",
     # BIND sub-resource plurals
     "/api/v2/services/bind/access_list/entries",
-    "/api/v2/services/bind/sync/domains",
+    # bind/sync/domains removed — corresponding singular does not exist in OpenAPI spec
     # FreeRADIUS plural routes — nginx 404 (needs REST API v2.6+ / pfSense 2.8+)
     "/api/v2/services/freeradius/clients",
     "/api/v2/services/freeradius/interfaces",
@@ -348,14 +348,14 @@ _SKIP_CRUD_PATHS: dict[str, str] = {
     "/api/v2/services/freeradius/client": "freeradius routes need REST API v2.6+ (pfSense 2.8+)",
     "/api/v2/services/freeradius/interface": "freeradius routes need REST API v2.6+ (pfSense 2.8+)",
     "/api/v2/services/freeradius/user": "freeradius routes need REST API v2.6+ (pfSense 2.8+)",
-    # HAProxy action acl field cannot be empty — needs ACL created as sibling dependency
+    # HAProxy actions: acl field cannot be empty — needs ACL created as sibling dependency
     "/api/v2/services/haproxy/backend/action": "acl field cannot be empty, requires ACL sibling chain",
     "/api/v2/services/haproxy/frontend/action": "acl field cannot be empty, requires ACL sibling chain",
     # HAProxy settings subs: server 500 "parent Model has been constructed" bug
     "/api/v2/services/haproxy/settings/dns_resolver": "server 500: parent model construction bug in REST API v2.4.3",
     "/api/v2/services/haproxy/settings/email_mailer": "server 500: parent model construction bug in REST API v2.4.3",
-    # CRL revoked_certificate: cert serial hex → PHP INT overflow
-    "/api/v2/system/crl/revoked_certificate": "cert serial is hex but CRL X509_CRL.php expects INT (500)",
+    # CRL revoked_certificate: cert serial hex → PHP INT overflow (confirmed with PEM certs too)
+    "/api/v2/system/crl/revoked_certificate": "cert serial hex → PHP INT overflow (v2.4.3 bug, confirmed with imported PEM certs)",
 }
 
 # ── Singleton GET/PATCH endpoints (settings-like but not auto-detected) ───────
@@ -408,7 +408,6 @@ _SINGLETON_TESTS: dict[str, dict[str, Any]] = {
         "value": "127.0.0.1",
         "extra_fields": {"username": "test", "password": "test"},
     },
-    # system/timezone: nginx 404 on REST API v2.4.3 (needs v2.6+ / pfSense 2.8+)
     "/api/v2/services/dhcp_server/backend": {
         "field": "dhcpbackend",
         "value": "kea",
@@ -420,6 +419,7 @@ _SINGLETON_TESTS: dict[str, dict[str, Any]] = {
 # Singleton endpoints to skip
 _SKIP_SINGLETON: dict[str, str] = {
     "/api/v2/system/restapi/version": "PATCH triggers API version change (destructive)",
+    "/api/v2/system/timezone": "nginx 404 on REST API v2.4.3 (needs v2.6+ / pfSense 2.8+)",
 }
 
 # ── Action POST endpoints ─────────────────────────────────────────────────────
@@ -474,6 +474,13 @@ _ACTION_TESTS: dict[str, dict[str, Any]] = {
     "/api/v2/system/certificate/signing_request/sign": {"needs_ca_and_csr": True},
     "/api/v2/status/service": {
         "body": {"id": 0, "action": "restart"},
+    },
+    "/api/v2/diagnostics/command_prompt": {
+        "body": {"command": "echo pfsense-mcp-test"},
+    },
+    "/api/v2/graphql": {
+        "body": {"query": "{ __schema { queryType { name } } }"},
+        "raw_response": True,  # GraphQL returns raw {"data": ...} not standard envelope
     },
 }
 
@@ -805,29 +812,7 @@ _CHAINED_CRUD: dict[str, dict[str, Any]] = {
         },
         "update_field": None,
     },
-    # ── BIND: sync/domain needs zone ──────────────────────────────────────
-    "/api/v2/services/bind/sync/domain": {
-        "parents": [
-            {
-                "path": "/api/v2/services/bind/zone",
-                "body": {
-                    "name": "chain.example.com",
-                    "nameserver": "ns1.example.com",
-                    "mail": "admin.example.com",
-                    "serial": 2024010101,
-                    "forwarders": [],
-                    "baseip": "10.99.99.0",
-                },
-                "inject": {"parent_id": "id"},
-            }
-        ],
-        "child_body": {
-            "dstdomainport": "53",
-            "synctype": "master",
-            "targetip": "10.99.99.100",
-        },
-        "update_field": None,
-    },
+    # NOTE: bind/sync/domain removed — path does not exist in OpenAPI spec
     # ── Certificate Authority (PEM data) ──────────────────────────────────
     "/api/v2/system/certificate_authority": {
         "parents": [],
@@ -2053,10 +2038,6 @@ def generate_tests(contexts: list[ToolContext]) -> str:
             lines.append("")
         elif group.category == "action" and group.base_path in _ACTION_TESTS:
             config = _ACTION_TESTS[group.base_path]
-            if _is_dangerous(group.create):
-                lines.append(f"# SKIP {group.base_path}: dangerous endpoint")
-                lines.append("")
-                continue
             lines.append(_gen_action_test(group.base_path, config))
             lines.append("")
             test_count += 1
@@ -2532,7 +2513,12 @@ def _gen_action_test(path: str, config: dict[str, Any]) -> str:
         client_var = "client"
 
     lines.append(f'    resp = {client_var}.post("{path}", json={body!r})')
-    if expect_status == [200]:
+    raw_response = config.get("raw_response", False)
+    if raw_response:
+        lines.append(f"    assert resp.status_code == 200, f\"{{resp.status_code}}: {{resp.text[:500]}}\"")
+        lines.append(f"    data = resp.json()")
+        lines.append(f"    assert data is not None")
+    elif expect_status == [200]:
         lines.append(f"    data = _ok(resp)")
         lines.append(f"    assert data is not None")
     else:
