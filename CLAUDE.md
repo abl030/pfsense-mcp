@@ -346,8 +346,8 @@ Every skip is documented in `_SKIP_CRUD_PATHS`, `_SKIP_ACTION`, `_SKIP_SINGLETON
 **Hardware/VM limitations (1):**
 - `vpn/openvpn/client_export/config` — complex 5-step chain: CA+cert+OVPN server+user cert (deferred)
 
-**pfSense singleton design (1):**
-- `services/dhcp_server` — per-interface singleton, POST not supported
+**Not applicable — by design (1):**
+- `services/dhcp_server` — per-interface singleton, POST not supported by design. PATCH tested via singleton test.
 
 **REST API bugs persisting in v2.7.1 (3):**
 - `services/haproxy/settings/dns_resolver`, `email_mailer` — 500 parent model construction bug
@@ -385,7 +385,7 @@ Deep research on all skipped endpoints is in `research/skipped-endpoints-analysi
 |--------|-----------|----------|--------|
 | 0 | Phantom plural routes (41 paths) | Remove from MCP server generator (`codegen.py`/`context_builder.py`) using `_PHANTOM_PLURAL_ROUTES` set. Update tool count in `README.md` and `flake.nix`. | **DONE** — 41 paths (78 ops) filtered in `context_builder.py`. 677→599 tools. |
 | 1 | `interface` CRUD (+1 test) | Create VLAN on em2, assign as opt1, PATCH, delete. Safe — doesn't touch WAN/LAN. | **DONE** — VLAN parent on em2:999, interface CRUD test passes. 203→204 tests. |
-| 2 | `services/dhcp_server` POST | Confirm by-design limitation. Re-categorize skip reason from "singleton" to "not applicable — POST not supported, PATCH tested". No new tests needed. | **TODO** |
+| 2 | `services/dhcp_server` POST | Confirm by-design limitation. Re-categorize skip reason from "singleton" to "not applicable — POST not supported, PATCH tested". No new tests needed. | **DONE** — re-categorized skip reason. No test changes needed. |
 | 3 | `system/certificate/pkcs12/export` (+1 test) | Try `Accept: application/octet-stream` header. If still 406, use client-side PKCS12 generation as fallback proof. | **TODO** |
 | 4 | `services/haproxy/settings/dns_resolver` & `email_mailer` (+2 tests) | Initialize HAProxy config in config.xml via `diagnostics/command_prompt` PHP call, then POST sub-resources. | **TODO** |
 | 5 | `system/package` POST/DELETE (+1 test) | Try `pfSense-pkg-cron` (smaller than arping). Use 504-as-success polling pattern. | **TODO** |

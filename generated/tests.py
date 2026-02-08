@@ -2053,7 +2053,7 @@ def test_crud_services_cron_job(client: httpx.Client):
         assert del_resp.status_code in (200, 404), f"Delete failed: {del_resp.text[:500]}"
 
 
-# SKIP /api/v2/services/dhcp_server: per-interface singleton, POST not supported
+# SKIP /api/v2/services/dhcp_server: per-interface singleton — POST not supported by design, PATCH tested via singleton
 
 def test_crud_services_dhcp_server_address_pool(client: httpx.Client):
     """CRUD lifecycle: /api/v2/services/dhcp_server/address_pool (chained)"""

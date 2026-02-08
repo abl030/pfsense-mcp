@@ -318,7 +318,7 @@ Every untested path has a documented reason. Zero silent skips.
 | `system/package` (POST/DELETE) | nginx 504 gateway timeout via QEMU NAT; GET tested |
 | `vpn/openvpn/client_export/config` | Complex 5-step dependency chain (deferred) |
 | `vpn/openvpn/client_export` | Requires functioning OpenVPN server |
-| `services/dhcp_server` (POST) | Per-interface singleton, POST not supported by pfSense |
+| `services/dhcp_server` (POST) | Per-interface singleton — POST not supported by design, PATCH tested via singleton |
 | `services/acme/*/register\|issue\|renew` | Requires real ACME server |
 | `system/restapi/settings/sync` | Requires HA peer |
 | `system/restapi/version` (PATCH) | Destructive: changes API version |

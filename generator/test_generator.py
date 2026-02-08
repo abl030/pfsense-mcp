@@ -289,7 +289,7 @@ _ENDPOINT_OVERRIDES: dict[str, dict[str, str]] = {
 # Endpoints that should be completely skipped for CRUD tests
 _SKIP_CRUD_PATHS: dict[str, str] = {
     "/api/v2/vpn/openvpn/client_export/config": "complex 5-step chain: CA+cert+OVPN server+user cert (deferred)",
-    "/api/v2/services/dhcp_server": "per-interface singleton, POST not supported",
+    "/api/v2/services/dhcp_server": "per-interface singleton — POST not supported by design, PATCH tested via singleton",
     "/api/v2/services/haproxy/settings/dns_resolver": "500 parent Model not constructed (bug persists in v2.7.1)",
     "/api/v2/services/haproxy/settings/email_mailer": "500 parent Model not constructed (bug persists in v2.7.1)",
     "/api/v2/system/package": "install/delete trigger nginx 504 gateway timeout (>60s via QEMU NAT)",
