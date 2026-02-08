@@ -3413,9 +3413,9 @@ def test_crud_services_haproxy_frontend_error_file(client: httpx.Client):
         _delete_with_retry(client, "/api/v2/services/haproxy/file", p0_id)
 
 
-# SKIP /api/v2/services/haproxy/settings/dns_resolver: 500 parent Model not constructed (bug persists in v2.7.1)
+# SKIP /api/v2/services/haproxy/settings/dns_resolver: 500 parent Model not constructed — GET/DELETE broken even after config.xml init (confirmed v2.7.1 bug)
 
-# SKIP /api/v2/services/haproxy/settings/email_mailer: 500 parent Model not constructed (bug persists in v2.7.1)
+# SKIP /api/v2/services/haproxy/settings/email_mailer: 500 parent Model not constructed — GET/DELETE broken even after config.xml init (confirmed v2.7.1 bug)
 
 def test_crud_services_ntp_time_server(client: httpx.Client):
     """CRUD lifecycle: /api/v2/services/ntp/time_server"""

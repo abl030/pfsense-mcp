@@ -290,8 +290,8 @@ _ENDPOINT_OVERRIDES: dict[str, dict[str, str]] = {
 _SKIP_CRUD_PATHS: dict[str, str] = {
     "/api/v2/vpn/openvpn/client_export/config": "complex 5-step chain: CA+cert+OVPN server+user cert (deferred)",
     "/api/v2/services/dhcp_server": "per-interface singleton — POST not supported by design, PATCH tested via singleton",
-    "/api/v2/services/haproxy/settings/dns_resolver": "500 parent Model not constructed (bug persists in v2.7.1)",
-    "/api/v2/services/haproxy/settings/email_mailer": "500 parent Model not constructed (bug persists in v2.7.1)",
+    "/api/v2/services/haproxy/settings/dns_resolver": "500 parent Model not constructed — GET/DELETE broken even after config.xml init (confirmed v2.7.1 bug)",
+    "/api/v2/services/haproxy/settings/email_mailer": "500 parent Model not constructed — GET/DELETE broken even after config.xml init (confirmed v2.7.1 bug)",
     "/api/v2/system/package": "install/delete trigger nginx 504 gateway timeout (>60s via QEMU NAT)",
 }
 
@@ -2627,9 +2627,11 @@ def _gen_chained_crud_test(group: EndpointGroup) -> str:
     parents = chain.get("parents", [])
     siblings = chain.get("siblings", [])
     setup_patches = chain.get("setup_patches", [])
+    setup_posts = chain.get("setup_posts", [])
     child_body = chain.get("child_body")
     update_field = chain.get("update_field", "descr")
     update_value = chain.get("update_value", '"Updated by test"')
+    delete_may_fail = chain.get("delete_may_fail", False)
 
     lines: list[str] = []
     lines.append(f"def test_crud_{test_name}(client: httpx.Client):")
@@ -2644,6 +2646,16 @@ def _gen_chained_crud_test(group: EndpointGroup) -> str:
         sp_body = _body_to_code(sp["body"])
         lines.append(f"    # Setup: patch {sp['path'].split('/api/v2/')[-1]}")
         lines.append(f"    client.patch(")
+        lines.append(f'        "{sp["path"]}",')
+        lines.append(f"        json={sp_body},")
+        lines.append(f"    )")
+        lines.append(f"")
+
+    # ── Setup posts (idempotent POST requests, no cleanup) ────────────
+    for sp in setup_posts:
+        sp_body = _body_to_code(sp["body"])
+        lines.append(f"    # Setup: post {sp['path'].split('/api/v2/')[-1]}")
+        lines.append(f"    client.post(")
         lines.append(f'        "{sp["path"]}",')
         lines.append(f"        json={sp_body},")
         lines.append(f"    )")
@@ -2807,7 +2819,10 @@ def _gen_chained_crud_test(group: EndpointGroup) -> str:
 
     # DELETE child (finally)
     lines.append(f"{base_indent}finally:")
-    if static_parent_id:
+    if delete_may_fail:
+        # DELETE is known-broken (API bug) — best-effort cleanup, don't assert
+        lines.append(f'{base_indent}    client.delete("{path}", params={{"id": obj_id}})  # may 500 (API bug)')
+    elif static_parent_id:
         lines.append(
             f'{base_indent}    _delete_with_retry(client, "{path}", obj_id, '
             f'{{"parent_id": {static_parent_id!r}}})'

@@ -350,7 +350,7 @@ Every skip is documented in `_SKIP_CRUD_PATHS`, `_SKIP_ACTION`, `_SKIP_SINGLETON
 - `services/dhcp_server` — per-interface singleton, POST not supported by design. PATCH tested via singleton test.
 
 **REST API bugs persisting in v2.7.1 (2):**
-- `services/haproxy/settings/dns_resolver`, `email_mailer` — 500 parent model construction bug
+- `services/haproxy/settings/dns_resolver`, `email_mailer` — 500 parent model construction bug (CREATE works after config.xml init, but GET/DELETE still broken)
 
 **Infrastructure limitations (1):**
 - `system/package` — install/delete trigger nginx 504 gateway timeout (>60s via QEMU NAT); GET endpoints tested via read tests
@@ -386,7 +386,7 @@ Deep research on all skipped endpoints is in `research/skipped-endpoints-analysi
 | 1 | `interface` CRUD (+1 test) | Create VLAN on em2, assign as opt1, PATCH, delete. Safe — doesn't touch WAN/LAN. | **DONE** — VLAN parent on em2:999, interface CRUD test passes. 203→204 tests. |
 | 2 | `services/dhcp_server` POST | Confirm by-design limitation. Re-categorize skip reason from "singleton" to "not applicable — POST not supported, PATCH tested". No new tests needed. | **DONE** — re-categorized skip reason. No test changes needed. |
 | 3 | `system/certificate/pkcs12/export` (+1 test) | Try `Accept: application/octet-stream` header. If still 406, use client-side PKCS12 generation as fallback proof. | **DONE** — `Accept: application/octet-stream` works! Was never a bug, just wrong Accept header. 204→205 tests. |
-| 4 | `services/haproxy/settings/dns_resolver` & `email_mailer` (+2 tests) | Initialize HAProxy config in config.xml via `diagnostics/command_prompt` PHP call, then POST sub-resources. | **TODO** |
+| 4 | `services/haproxy/settings/dns_resolver` & `email_mailer` (+2 tests) | Initialize HAProxy config in config.xml via `diagnostics/command_prompt` PHP call, then POST sub-resources. | **BLOCKED** — config.xml init helps CREATE but GET/DELETE still 500. Confirmed framework bug in v2.7.1. Stays skipped. |
 | 5 | `system/package` POST/DELETE (+1 test) | Try `pfSense-pkg-cron` (smaller than arping). Use 504-as-success polling pattern. | **TODO** |
 | 6 | `vpn/openvpn/client_export` (+3 tests) | 6-step chain: CA → server cert → OVPN server → user cert → export → config GET/DELETE. Pre-install `pfSense-pkg-openvpn-client-export` in golden image. | **TODO** |
 | 7 | ACME `register`/`issue`/`renew` (+3 tests) | Run Pebble (test ACME server) on host, configure custom ACME server URL in pfSense, register + issue + renew. Requires Docker on host. | **TODO** |
