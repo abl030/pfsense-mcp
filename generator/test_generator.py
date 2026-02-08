@@ -292,7 +292,7 @@ _SKIP_CRUD_PATHS: dict[str, str] = {
     "/api/v2/services/dhcp_server": "per-interface singleton — POST not supported by design, PATCH tested via singleton",
     "/api/v2/services/haproxy/settings/dns_resolver": "500 parent Model not constructed — GET/DELETE broken even after config.xml init (confirmed v2.7.1 bug)",
     "/api/v2/services/haproxy/settings/email_mailer": "500 parent Model not constructed — GET/DELETE broken even after config.xml init (confirmed v2.7.1 bug)",
-    "/api/v2/system/package": "install/delete trigger nginx 504 gateway timeout (>60s via QEMU NAT)",
+    "/api/v2/system/package": "nginx 504 timeout (60s hardcoded) + QEMU NAT too slow for package downloads; GET tested via read tests",
 }
 
 # ── Singleton GET/PATCH endpoints (settings-like but not auto-detected) ───────
@@ -1961,6 +1961,10 @@ def _should_skip_crud(group: EndpointGroup) -> tuple[bool, str]:
     return False, ""
 
 
+# ── Custom test functions (non-standard patterns) ────────────────────────────
+_CUSTOM_TESTS: list[str] = []
+
+
 def generate_tests(contexts: list[ToolContext]) -> str:
     """Generate the complete test file content."""
     groups = _group_endpoints(contexts)
@@ -2049,9 +2053,11 @@ def generate_tests(contexts: list[ToolContext]) -> str:
                 lines.append("")
                 test_count += 1
 
-    # system/package CRUD skipped — install/delete trigger nginx 504 gateway timeout
-    # (package operations take >60s via QEMU NAT, exceeding nginx upstream timeout)
-    # GET endpoints tested via test_read_system_packages and test_read_system_package_available
+    # ── Custom tests (hand-written, non-standard patterns) ──────────────
+    for custom_fn in _CUSTOM_TESTS:
+        lines.append(custom_fn)
+        lines.append("")
+        test_count += 1
 
     # Emit deferred action tests last, sorted by prefix (zz_ before zzz_)
     for _prefix, action_path, config in sorted(deferred_actions, key=lambda x: x[0]):
