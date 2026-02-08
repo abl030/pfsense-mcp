@@ -317,14 +317,14 @@ Exclude from generation or add extra warnings:
 
 ## Phase 2 Status: Test Coverage
 
-**Current: 207 tests, 207 passing** against 217 active API paths (599 tools; 41 phantom plural routes filtered out)
+**Current: 208 tests, 208 passing** against 217 active API paths (599 tools; 41 phantom plural routes filtered out)
 
 ### Coverage summary
 
 | Metric | Count | % |
 |---|---|---|
-| Paths with active tests | 207 | 80.2% |
-| Paths with documented skip | 51 | 19.8% |
+| Paths with active tests | 208 | 80.6% |
+| Paths with documented skip | 50 | 19.4% |
 | **Total accounted** | **258** | **100%** |
 
 pfSense CE 2.8.1 with REST API v2.7.1 (upgraded from 2.7.2 via `upgrade-2.8.exp`).
@@ -354,8 +354,7 @@ Every skip is documented in `_SKIP_CRUD_PATHS`, `_SKIP_ACTION`, `_SKIP_SINGLETON
 **Infrastructure limitations (1):**
 - `system/package` — install/delete trigger nginx 504 gateway timeout (>60s via QEMU NAT); GET endpoints tested via read tests
 
-**External dependencies (1):**
-- `system/restapi/settings/sync` — HA sync endpoint times out without peer
+**External dependencies (0):**
 
 **Other (1):**
 - `system/restapi/version` — PATCH triggers API version change (destructive)
@@ -385,7 +384,7 @@ Deep research on all skipped endpoints is in `research/skipped-endpoints-analysi
 | 5 | `system/package` POST/DELETE (+1 test) | Try `pfSense-pkg-cron` (smaller than arping). Use 504-as-success polling pattern. | **BLOCKED** — pfSense-pkg-cron not found in repo. QEMU NAT too slow/unreliable for package downloads. Stays skipped; GET tested via read tests. |
 | 6 | `vpn/openvpn/client_export` (+1 test) | 6-step chain: CA → server cert → OVPN server → user cert → export config → export. Pre-install `pfSense-pkg-openvpn-client-export` in golden image. | **DONE** — custom test with 7-step chain (CA, server cert, OVPN server, user cert, export config, export, cleanup). 205→206 tests. |
 | 7 | ACME `register`/`issue`/`renew` (+1 test) | All three are async (fire-and-forget) — return 200 immediately with `status: pending`. No external ACME server needed. | **DONE** — custom test covers all 3 endpoints. 206→207 tests. |
-| 8 | `system/restapi/settings/sync` | Try localhost sync or async dispatcher. Low confidence — likely stays skipped. | **TODO** |
+| 8 | `system/restapi/settings/sync` (+1 test) | Sync-to-self: GET PHP-serialized settings via command_prompt, POST to sync endpoint. No HA peer needed. | **DONE** — custom test reads current config and syncs it back. 207→208 tests. |
 | 9 | `system/restapi/version` PATCH | Confirm too destructive. Keep skipped. | **TODO** |
 
 ### Key test patterns

@@ -452,7 +452,7 @@ _SKIP_ACTION: dict[str, str] = {
     "/api/v2/services/acme/account_key/register": "tested via custom test_action_acme_register_issue_renew",
     "/api/v2/services/acme/certificate/issue": "tested via custom test_action_acme_register_issue_renew",
     "/api/v2/services/acme/certificate/renew": "tested via custom test_action_acme_register_issue_renew",
-    "/api/v2/system/restapi/settings/sync": "HA sync endpoint times out without peer",
+    "/api/v2/system/restapi/settings/sync": "tested via custom test_action_restapi_settings_sync",
 }
 
 # ── Pre-generated test PEM certificates ───────────────────────────────────────
@@ -2093,6 +2093,39 @@ def test_action_acme_register_issue_renew(client: httpx.Client):
             client.delete("/api/v2/services/acme/certificate", params={"id": cert["id"]})
     finally:
         client.delete("/api/v2/services/acme/account_key", params={"id": acct["id"]})''',
+    # REST API settings sync: receives PHP-serialized settings data.
+    # Works by syncing current settings back to self (no HA peer needed).
+    # Requires BasicAuth per the OpenAPI spec.
+    '''\
+def test_action_restapi_settings_sync(client: httpx.Client):
+    """Action: /api/v2/system/restapi/settings/sync (sync-to-self)"""
+    # 1. Get PHP-serialized REST API settings via command_prompt
+    php_cmd = (
+        'require_once("globals.inc"); require_once("config.inc"); '
+        'global $config; $pkgs = $config["installedpackages"]["package"]; '
+        'foreach($pkgs as $p) { if ($p["internal_name"] == "restapi") '
+        '{ echo serialize($p["conf"]); break; } }'
+    )
+    cmd_resp = client.post("/api/v2/diagnostics/command_prompt", json={
+        "command": f"php -r \\'{php_cmd}\\'",
+    })
+    assert cmd_resp.status_code == 200, f"command_prompt failed: {cmd_resp.text[:500]}"
+    serialized = cmd_resp.json()["data"]["output"]
+    assert serialized.startswith("a:"), f"Expected PHP array, got: {serialized[:100]}"
+
+    # 2. POST serialized data to sync (requires BasicAuth)
+    ba_client = httpx.Client(
+        base_url=BASE_URL, verify=False, auth=(AUTH_USER, AUTH_PASS), timeout=30,
+    )
+    try:
+        sync_resp = ba_client.post("/api/v2/system/restapi/settings/sync", json={
+            "sync_data": serialized,
+        })
+        assert sync_resp.status_code == 200, f"Sync {sync_resp.status_code}: {sync_resp.text[:500]}"
+        sync_data = sync_resp.json()
+        assert sync_data["code"] == 200
+    finally:
+        ba_client.close()''',
 ]
 
 

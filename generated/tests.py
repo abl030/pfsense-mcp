@@ -80,7 +80,7 @@ def _delete_with_retry(client: httpx.Client, path: str, obj_id, params: dict | N
             break
         time.sleep(5)
     assert resp.status_code in (200, 404), f"Delete {path} id={obj_id} failed: {resp.text[:500]}"
-# Total generated tests: 208
+# Total generated tests: 209
 
 def test_crud_firewall_alias(client: httpx.Client):
     """CRUD lifecycle: /api/v2/firewall/alias"""
@@ -6025,7 +6025,7 @@ def test_action_system_certificate_authority_renew(client: httpx.Client):
         client.delete("/api/v2/system/certificate_authority", params={"id": ca["id"]})
 
 
-# SKIP /api/v2/system/restapi/settings/sync: HA sync endpoint times out without peer
+# SKIP /api/v2/system/restapi/settings/sync: tested via custom test_action_restapi_settings_sync
 
 def test_action_vpn_openvpn_client_export(client: httpx.Client):
     """Action + CRUD: /api/v2/vpn/openvpn/client_export (+config)"""
@@ -6153,6 +6153,36 @@ def test_action_acme_register_issue_renew(client: httpx.Client):
             client.delete("/api/v2/services/acme/certificate", params={"id": cert["id"]})
     finally:
         client.delete("/api/v2/services/acme/account_key", params={"id": acct["id"]})
+
+def test_action_restapi_settings_sync(client: httpx.Client):
+    """Action: /api/v2/system/restapi/settings/sync (sync-to-self)"""
+    # 1. Get PHP-serialized REST API settings via command_prompt
+    php_cmd = (
+        'require_once("globals.inc"); require_once("config.inc"); '
+        'global $config; $pkgs = $config["installedpackages"]["package"]; '
+        'foreach($pkgs as $p) { if ($p["internal_name"] == "restapi") '
+        '{ echo serialize($p["conf"]); break; } }'
+    )
+    cmd_resp = client.post("/api/v2/diagnostics/command_prompt", json={
+        "command": f"php -r \'{php_cmd}\'",
+    })
+    assert cmd_resp.status_code == 200, f"command_prompt failed: {cmd_resp.text[:500]}"
+    serialized = cmd_resp.json()["data"]["output"]
+    assert serialized.startswith("a:"), f"Expected PHP array, got: {serialized[:100]}"
+
+    # 2. POST serialized data to sync (requires BasicAuth)
+    ba_client = httpx.Client(
+        base_url=BASE_URL, verify=False, auth=(AUTH_USER, AUTH_PASS), timeout=30,
+    )
+    try:
+        sync_resp = ba_client.post("/api/v2/system/restapi/settings/sync", json={
+            "sync_data": serialized,
+        })
+        assert sync_resp.status_code == 200, f"Sync {sync_resp.status_code}: {sync_resp.text[:500]}"
+        sync_data = sync_resp.json()
+        assert sync_data["code"] == 200
+    finally:
+        ba_client.close()
 
 def test_zz_action_diagnostics_reboot(client: httpx.Client):
     """Action: POST /api/v2/diagnostics/reboot"""

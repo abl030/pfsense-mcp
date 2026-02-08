@@ -384,6 +384,21 @@ This would cause the box to sync REST API settings to itself. The XMLRPC call sh
 
 **Confidence:** Low. Testing this properly requires either a second VM (expensive) or the localhost hack (risky). If the Dispatcher makes it async, confidence rises to Medium. **Recommendation: skip this endpoint** unless the test infrastructure can support a second pfSense VM.
 
+### Sprint 8 Result
+
+**DONE** — The sync endpoint is NOT an HA sync to a remote peer. It's the *receiver* side: it accepts PHP-serialized REST API settings data (`sync_data` field) and applies them locally. No HA peer or remote connection needed.
+
+The test works by:
+1. Using `diagnostics/command_prompt` to run PHP that reads the current REST API config from config.xml and serializes it with `serialize()`
+2. POSTing that serialized data back to the sync endpoint (requires BasicAuth per spec)
+3. The endpoint returns 200 with the synced data echoed back
+
+Key findings:
+- `sync_data` must be PHP `serialize()` format, not JSON. JSON returns `RESTAPI_SETTINGS_SYNC_SYNC_DATA_COULD_NOT_BE_UNSERIALIZED`
+- The endpoint requires BasicAuth (not API key auth)
+- Syncing current settings back to self is a safe no-op
+- 207 → 208 tests
+
 ---
 
 ## 9. REST API version endpoint triggers a package reinstall

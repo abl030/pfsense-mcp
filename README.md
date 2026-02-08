@@ -261,7 +261,7 @@ templates/
   server.py.j2               # FastMCP server template
 generated/                   # OUTPUT — never hand-edit
   server.py                  # The MCP server (this is what you run)
-  tests.py                   # 207 integration tests
+  tests.py                   # 208 integration tests
 vm/                          # Test infrastructure
   setup.sh                   # Golden image builder
   install.exp                # Automated pfSense installer
@@ -274,7 +274,7 @@ vm/                          # Test infrastructure
 
 ## Running the Test Suite
 
-The test suite runs against a real pfSense VM via QEMU. 207 tests, all passing.
+The test suite runs against a real pfSense VM via QEMU. 208 tests, all passing.
 
 ```bash
 # Enter dev shell (provides qemu, curl, pytest, expect)
@@ -301,8 +301,8 @@ The golden image build is fully automated: download pfSense installer, install v
 | Metric | Count | % |
 |--------|-------|---|
 | Active paths (tools generated) | 217 | 84.1% |
-| Paths with active tests | 207 | 80.2% |
-| Paths with documented skip | 8 | 3.1% |
+| Paths with active tests | 208 | 80.6% |
+| Paths with documented skip | 7 | 2.7% |
 | Phantom plural routes (removed from generator) | 41 | 15.9% |
 | **Total in spec** | **258** | **100%** |
 
@@ -316,7 +316,6 @@ Every untested path has a documented reason. Zero silent skips.
 | `services/haproxy/settings/email_mailer` | REST API bug: 500 "parent Model not constructed" |
 | `system/package` (POST/DELETE) | nginx 504 gateway timeout via QEMU NAT; GET tested |
 | `services/dhcp_server` (POST) | Per-interface singleton — POST not supported by design, PATCH tested via singleton |
-| `system/restapi/settings/sync` | Requires HA peer |
 | `system/restapi/version` (PATCH) | Destructive: changes API version |
 
 ### Phantom plural routes (41 paths, removed from generator)
