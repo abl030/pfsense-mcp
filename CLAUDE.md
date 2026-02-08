@@ -319,9 +319,7 @@ Exclude from generation or add extra warnings:
 
 OpenAPI spec: 258 paths, 677 operations. Generated MCP server: 677 tools.
 
-Previous run (`run-20260208-192434`): **42/42 tasks PASS**, 448/677 tools (66.2%).
-
-**Current task: coverage expansion run**. 45 tasks (was 42), 533/677 tools referenced statically (78.7%), targeting ~90%+ at runtime. Changes: list-tool discovery fix, +16 PATCH update_fields, +18 read-only endpoints (task 38), +38 PUT/replace operations (task 39), +2 destructive (task 99).
+Bank tester: **44/44 tasks PASS**, 504/677 tools invoked (**74.4% tool coverage**), 926 tool calls across 2 runs. 173 uncovered tools: 101 bulk DELETEs (intentionally skipped), 37 PUT/replace (MCP client bug #22), ~28 sub-resource CRUD gaps, 7 permanently untestable.
 
 Testing is done via the bank tester (`bank-tester/run-bank-test.sh`), which boots a VM, runs Claude against the MCP server, and validates results. See the Phase 3 section for details.
 
@@ -455,6 +453,10 @@ Findings from building a 677-tool MCP server and testing it with an AI consumer 
 
 21. **Settings mutations that change the API listening endpoint break all subsequent tests.** Changing WebGUI port (443→8443), protocol (HTTPS→HTTP), or SSL certificate makes the API unreachable from MCP clients configured with the original endpoint. In a full 42-task suite run, task 28's port change killed tasks 29-37 (all returned ConnectTimeout). Fix: exclude endpoint-altering settings from automated test sequences, or run them last. These tools work correctly — they're just destructive to the test harness itself.
 
+### MCP Client Serialization Bug
+
+22. **Claude Code MCP client inconsistently serializes `list` parameters as strings.** When a tool has `items: list[dict[str, Any]]`, the MCP client sometimes passes the JSON array as a string (`'[]'`) instead of a parsed list. This causes Pydantic validation failures: `Input should be a valid list [type=list_type, input_value='[]', input_type=str]`. The bug is non-deterministic — `pfsense_replace_firewall_aliases` works but all 37 other identically-typed `replace_*` tools fail. The generated server code, OpenAPI schemas, and tool schemas are verified identical across all 38 endpoints. This blocks all PUT/replace testing except one tool.
+
 ### Bank Tester Results
 
 **Previous baseline** (`run-20260208-192434`): **42/42 tasks PASS**
@@ -464,25 +466,33 @@ Findings from building a 677-tool MCP server and testing it with an AI consumer 
 - Runtime: ~66 minutes end-to-end
 - Failure categories: `missing_required_field` (6), `dependency_unknown` (5), `parameter_format` (3)
 
-### Current Task: Coverage Expansion Run
+### Coverage Expansion Run (Complete)
 
-**Goal**: Run the expanded 45-task suite (was 42), fix any failures, re-run until all green.
+**Expanded suite**: 45 tasks (was 42), 533/677 tools referenced statically (78.7%).
 
-**What changed**:
+**Changes made**:
 - Fixed list-tool discovery bug in `generate-tasks.py` (shortest path match, not first match)
 - Added `update_field` to 16 CRUD entries that lacked PATCH coverage
-- New task 38: 18 read-only plural endpoints (status, diagnostics, certs, ACME, interfaces, users)
-- New task 39: 38 PUT/replace endpoints (GET→PUT same data→verify pattern, safe no-op)
+- Added `patch_only` settings support (DHCP backend has no GET)
+- Fixed DHCP address_pool `descr` (field doesn't exist), outbound mapping `target`
+- New task 38: 18 read-only plural endpoints
+- New task 39: 38 PUT/replace endpoints (GET→PUT same data→verify)
 - Task 99 expanded: +ARP table clear, +firewall states clear
-- Added `replace` step type to `generate-tasks.py`
-- Static tool references: 533/677 (78.7%), runtime target: ~90%+
 
-**Run procedure**:
-1. `nix develop -c bash bank-tester/run-bank-test.sh` — full suite
-2. Monitor: `tail -f bank-tester/results/run-*/live.log` — watch for stalls or failures
-3. On failure: read the task output, fix generator/templates/task-config, regenerate, re-run failed task(s)
-4. Repeat until all 45 tasks PASS (excluding task 99 destructive unless INCLUDE_DESTRUCTIVE=1)
-5. Run `nix develop -c python bank-tester/analyze-results.py bank-tester/results/run-*/` for final coverage
+**Results** (two runs combined: `run-20260208-222134` + `run-20260209-062124`):
+- **44/44 tasks PASS** (all exit code 0; 23 in run 1, 26 in run 2 — 5 overlap)
+- 926 total tool calls across both runs
+- **504/677 unique tools invoked (74.4% tool coverage)**
+- Runtime: ~56 min (run 2, 26 tasks)
+
+**Coverage gap analysis** (173 uncovered tools):
+
+| Category | Count | Notes |
+|----------|-------|-------|
+| Bulk DELETE (plural) | 101 | Intentionally skipped (destructive) |
+| PUT replace | 37 | Blocked by MCP client serialization bug (#22) |
+| Sub-resource CRUD | ~28 | CRL revoked certs, gateway group priorities, network interface, OpenVPN client export |
+| Permanently untestable | 7 | See below |
 
 **Permanently untestable** (~7 tools):
 - `pfsense_post_diagnostics_halt_system` — shuts down VM
