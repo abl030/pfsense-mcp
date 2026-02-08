@@ -1,0 +1,3 @@
+# Keep this folder tracked but ignore any scratch files
+*.tmp
+*.log

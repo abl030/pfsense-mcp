@@ -371,10 +371,29 @@ Every skip is documented in `_SKIP_CRUD_PATHS`, `_SKIP_ACTION`, `_SKIP_SINGLETON
 
 Routes present in the OpenAPI spec but return nginx 404 on the real server. These are sub-resource plural endpoints whose singular forms require `parent_id`. The pfSense REST API simply doesn't register these routes. All are tested via their singular CRUD endpoints instead.
 
-### Backlog
+### Backlog: Endpoint Unblocking Sprints
 
-1. **Remove phantom plural routes from MCP server** — The 39 phantom plural routes (listed above) exist in the OpenAPI spec but return nginx 404 on the real pfSense server. They are currently generated into `generated/server.py` as tools, which means an LLM agent could call them and always get 404 errors. Add an exclusion list to the server generator (`generator/codegen.py` or `context_builder.py`) using the same `_PHANTOM_PLURAL_ROUTES` set from `test_generator.py`. After removing, update the tool count in `README.md` and `flake.nix`.
-2. **OpenVPN client_export** (+2 tests) — build 5-step chain: CA → cert → OVPN server → user cert → export
+Deep research on all skipped endpoints is in `research/skipped-endpoints-analysis.md`. Work is split into 10 sprints, ordered by confidence (high first). Each sprint follows the same process:
+
+1. **Plan** — read the research report for that sprint, read the current test generator and any relevant generated tests, then enter plan mode and propose an approach
+2. **Iterate** — implement, regenerate, run targeted tests (`-k`), fix failures, repeat
+3. **Finalize** — run full suite, commit, update this section with the outcome (passed/blocked/skipped)
+4. **Decision** — if it doesn't work for a technical reason, document why here and move on
+
+**When you open a new Claude session in this repo, check which sprint is next (the first one without a status) and start its planning phase.**
+
+| Sprint | Endpoints | Approach | Status |
+|--------|-----------|----------|--------|
+| 0 | Phantom plural routes (39 paths) | Remove from MCP server generator (`codegen.py`/`context_builder.py`) using `_PHANTOM_PLURAL_ROUTES` set. Update tool count in `README.md` and `flake.nix`. | **TODO** |
+| 1 | `interface` CRUD (+3 tests) | Create VLAN on em2, assign as opt1, PATCH, delete. Safe — doesn't touch WAN/LAN. | **TODO** |
+| 2 | `services/dhcp_server` POST | Confirm by-design limitation. Re-categorize skip reason from "singleton" to "not applicable — POST not supported, PATCH tested". No new tests needed. | **TODO** |
+| 3 | `system/certificate/pkcs12/export` (+1 test) | Try `Accept: application/octet-stream` header. If still 406, use client-side PKCS12 generation as fallback proof. | **TODO** |
+| 4 | `services/haproxy/settings/dns_resolver` & `email_mailer` (+2 tests) | Initialize HAProxy config in config.xml via `diagnostics/command_prompt` PHP call, then POST sub-resources. | **TODO** |
+| 5 | `system/package` POST/DELETE (+1 test) | Try `pfSense-pkg-cron` (smaller than arping). Use 504-as-success polling pattern. | **TODO** |
+| 6 | `vpn/openvpn/client_export` (+3 tests) | 6-step chain: CA → server cert → OVPN server → user cert → export → config GET/DELETE. Pre-install `pfSense-pkg-openvpn-client-export` in golden image. | **TODO** |
+| 7 | ACME `register`/`issue`/`renew` (+3 tests) | Run Pebble (test ACME server) on host, configure custom ACME server URL in pfSense, register + issue + renew. Requires Docker on host. | **TODO** |
+| 8 | `system/restapi/settings/sync` | Try localhost sync or async dispatcher. Low confidence — likely stays skipped. | **TODO** |
+| 9 | `system/restapi/version` PATCH | Confirm too destructive. Keep skipped. | **TODO** |
 
 ### Key test patterns
 
