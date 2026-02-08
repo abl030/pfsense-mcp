@@ -350,6 +350,16 @@ An alternative to Pebble is the **Let's Encrypt staging environment** (`https://
 
 **Confidence:** High for the Pebble approach (the ACME package explicitly supports custom servers). The main risk is network connectivity between the QEMU VM and the host's Docker container.
 
+### Sprint 7 Result
+
+**DONE** — Pebble was NOT needed. All three ACME endpoints (register, issue, renew) are fully async and return 200 immediately with `status: pending`, regardless of whether acme.sh can actually reach the ACME server. The background process runs (and may fail), but the REST API endpoint itself works correctly.
+
+Key findings:
+- `acmeserver` field on account keys validates against a fixed enum: `letsencrypt-staging-2`, `letsencrypt-production-2`, `zerossl-production`, etc. Custom server names are rejected with `FIELD_INVALID_CHOICE`. Pebble would require bypassing REST API validation via PHP/config.xml.
+- Using `letsencrypt-staging-2` works fine — the register/issue/renew endpoints fire-and-forget the acme.sh process and return 200 immediately.
+- Single custom test `test_action_acme_register_issue_renew` covers all three endpoints in one test function: create account key, register, create cert, issue, renew, cleanup.
+- 206 → 207 tests. No external infrastructure needed.
+
 ---
 
 ## 8. Settings sync needs an HA peer and should likely stay skipped

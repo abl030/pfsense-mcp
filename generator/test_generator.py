@@ -449,9 +449,9 @@ _ACTION_TESTS: dict[str, dict[str, Any]] = {
 
 # Action endpoints to skip
 _SKIP_ACTION: dict[str, str] = {
-    "/api/v2/services/acme/account_key/register": "needs real ACME server for registration",
-    "/api/v2/services/acme/certificate/issue": "requires real ACME server",
-    "/api/v2/services/acme/certificate/renew": "requires real ACME server",
+    "/api/v2/services/acme/account_key/register": "tested via custom test_action_acme_register_issue_renew",
+    "/api/v2/services/acme/certificate/issue": "tested via custom test_action_acme_register_issue_renew",
+    "/api/v2/services/acme/certificate/renew": "tested via custom test_action_acme_register_issue_renew",
     "/api/v2/system/restapi/settings/sync": "HA sync endpoint times out without peer",
 }
 
@@ -2037,6 +2037,62 @@ def test_action_vpn_openvpn_client_export(client: httpx.Client):
             client.delete("/api/v2/system/certificate", params={"id": srv_cert["id"]})
     finally:
         client.delete("/api/v2/system/certificate_authority", params={"id": ca["id"]})''',
+    # ACME register/issue/renew: async endpoints that return 200 immediately.
+    # No external ACME server needed — endpoints fire-and-forget the acme.sh process.
+    '''\
+def test_action_acme_register_issue_renew(client: httpx.Client):
+    """Action: ACME register + issue + renew (async, no external server needed)"""
+    # 1. Create ACME account key
+    acct_resp = client.post("/api/v2/services/acme/account_key", json={
+        "name": "pft_acme_rir",
+        "descr": "Test ACME key for register/issue/renew",
+        "email": "test@example.com",
+        "acmeserver": "letsencrypt-staging-2",
+    })
+    acct = _ok(acct_resp)
+    try:
+        # 2. Register account key (async — returns 200 with status=pending)
+        reg_resp = client.post("/api/v2/services/acme/account_key/register", json={
+            "name": "pft_acme_rir",
+        })
+        assert reg_resp.status_code == 200, f"Register {reg_resp.status_code}: {reg_resp.text[:500]}"
+        reg_data = reg_resp.json()
+        assert reg_data["code"] == 200
+        assert reg_data["data"]["status"] in ("pending", "registered")
+
+        # 3. Create ACME certificate with standalone domain verification
+        cert_resp = client.post("/api/v2/services/acme/certificate", json={
+            "name": "pft_acme_rir_cert",
+            "descr": "Test ACME cert for issue/renew",
+            "acmeaccount": "pft_acme_rir",
+            "keylength": "2048",
+            "a_domainlist": [
+                {"name": "test.example.com", "method": "standalone", "status": "enable"}
+            ],
+        })
+        cert = _ok(cert_resp)
+        try:
+            # 4. Issue certificate (async — returns 200 with status=pending)
+            issue_resp = client.post("/api/v2/services/acme/certificate/issue", json={
+                "certificate": "pft_acme_rir_cert",
+            })
+            assert issue_resp.status_code == 200, f"Issue {issue_resp.status_code}: {issue_resp.text[:500]}"
+            issue_data = issue_resp.json()
+            assert issue_data["code"] == 200
+            assert issue_data["data"]["status"] in ("pending", "completed")
+
+            # 5. Renew certificate (async — returns 200 with status=pending)
+            renew_resp = client.post("/api/v2/services/acme/certificate/renew", json={
+                "certificate": "pft_acme_rir_cert",
+            })
+            assert renew_resp.status_code == 200, f"Renew {renew_resp.status_code}: {renew_resp.text[:500]}"
+            renew_data = renew_resp.json()
+            assert renew_data["code"] == 200
+            assert renew_data["data"]["status"] in ("pending", "completed")
+        finally:
+            client.delete("/api/v2/services/acme/certificate", params={"id": cert["id"]})
+    finally:
+        client.delete("/api/v2/services/acme/account_key", params={"id": acct["id"]})''',
 ]
 
 
