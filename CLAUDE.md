@@ -372,7 +372,7 @@ Deep research on all skipped endpoints is in `research/skipped-endpoints-analysi
 3. **Finalize** — run full suite, commit, update this section with the outcome (passed/blocked/skipped)
 4. **Decision** — if it doesn't work for a technical reason, document why here and move on
 
-**When you open a new Claude session in this repo, check which sprint is next (the first one without a status) and start its planning phase.**
+**All 10 sprints (0-9) are complete.** Final result: 208 tests, 208 passing. 7 endpoints remain permanently skipped with documented reasons.
 
 | Sprint | Endpoints | Approach | Status |
 |--------|-----------|----------|--------|
@@ -385,7 +385,7 @@ Deep research on all skipped endpoints is in `research/skipped-endpoints-analysi
 | 6 | `vpn/openvpn/client_export` (+1 test) | 6-step chain: CA → server cert → OVPN server → user cert → export config → export. Pre-install `pfSense-pkg-openvpn-client-export` in golden image. | **DONE** — custom test with 7-step chain (CA, server cert, OVPN server, user cert, export config, export, cleanup). 205→206 tests. |
 | 7 | ACME `register`/`issue`/`renew` (+1 test) | All three are async (fire-and-forget) — return 200 immediately with `status: pending`. No external ACME server needed. | **DONE** — custom test covers all 3 endpoints. 206→207 tests. |
 | 8 | `system/restapi/settings/sync` (+1 test) | Sync-to-self: GET PHP-serialized settings via command_prompt, POST to sync endpoint. No HA peer needed. | **DONE** — custom test reads current config and syncs it back. 207→208 tests. |
-| 9 | `system/restapi/version` PATCH | Confirm too destructive. Keep skipped. | **TODO** |
+| 9 | `system/restapi/version` PATCH | Confirm too destructive. Keep skipped. | **DONE** — confirmed destructive (triggers package reinstall). Stays permanently skipped. |
 
 ### Key test patterns
 

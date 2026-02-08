@@ -431,6 +431,17 @@ GET /api/v2/system/restapi/version
 
 **Confidence:** Low for safe testing. The reinstall is too risky for automated CI. **Recommendation: keep this skipped** in automated test suites. If manual testing is needed, snapshot the VM first and test as the very last operation.
 
+### Sprint 9 Result
+
+**Confirmed: stays permanently skipped.** The PATCH endpoint triggers a full package reinstall cycle — downloading, removing, and reinstalling the REST API package. This is genuinely destructive:
+
+- API becomes unavailable during reinstallation
+- Network issues during download can leave the package broken
+- Even "safe" same-version reinstall triggers `pkg` operations that hit nginx 504 timeouts (same issue as Sprint 5's package install/delete)
+- Must be the absolute last test if ever run, with VM snapshot rollback
+
+The GET endpoint (`GET /api/v2/system/restapi/version`) is already tested via the read tests. Only the PATCH is skipped. No code changes needed — this sprint is docs-only confirmation.
+
 ---
 
 ## Consolidated scorecard and recommended test order
