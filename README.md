@@ -261,7 +261,7 @@ templates/
   server.py.j2               # FastMCP server template
 generated/                   # OUTPUT — never hand-edit
   server.py                  # The MCP server (this is what you run)
-  tests.py                   # 205 integration tests
+  tests.py                   # 206 integration tests
 vm/                          # Test infrastructure
   setup.sh                   # Golden image builder
   install.exp                # Automated pfSense installer
@@ -274,7 +274,7 @@ vm/                          # Test infrastructure
 
 ## Running the Test Suite
 
-The test suite runs against a real pfSense VM via QEMU. 205 tests, all passing.
+The test suite runs against a real pfSense VM via QEMU. 206 tests, all passing.
 
 ```bash
 # Enter dev shell (provides qemu, curl, pytest, expect)
@@ -301,8 +301,8 @@ The golden image build is fully automated: download pfSense installer, install v
 | Metric | Count | % |
 |--------|-------|---|
 | Active paths (tools generated) | 217 | 84.1% |
-| Paths with active tests | 205 | 79.5% |
-| Paths with documented skip | 12 | 4.7% |
+| Paths with active tests | 206 | 79.8% |
+| Paths with documented skip | 11 | 4.3% |
 | Phantom plural routes (removed from generator) | 41 | 15.9% |
 | **Total in spec** | **258** | **100%** |
 
@@ -315,8 +315,6 @@ Every untested path has a documented reason. Zero silent skips.
 | `services/haproxy/settings/dns_resolver` | REST API bug: 500 "parent Model not constructed" |
 | `services/haproxy/settings/email_mailer` | REST API bug: 500 "parent Model not constructed" |
 | `system/package` (POST/DELETE) | nginx 504 gateway timeout via QEMU NAT; GET tested |
-| `vpn/openvpn/client_export/config` | Complex 5-step dependency chain (deferred) |
-| `vpn/openvpn/client_export` | Requires functioning OpenVPN server |
 | `services/dhcp_server` (POST) | Per-interface singleton — POST not supported by design, PATCH tested via singleton |
 | `services/acme/*/register\|issue\|renew` | Requires real ACME server |
 | `system/restapi/settings/sync` | Requires HA peer |

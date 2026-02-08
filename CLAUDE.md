@@ -317,14 +317,14 @@ Exclude from generation or add extra warnings:
 
 ## Phase 2 Status: Test Coverage
 
-**Current: 205 tests, 205 passing** against 217 active API paths (599 tools; 41 phantom plural routes filtered out)
+**Current: 206 tests, 206 passing** against 217 active API paths (599 tools; 41 phantom plural routes filtered out)
 
 ### Coverage summary
 
 | Metric | Count | % |
 |---|---|---|
-| Paths with active tests | 205 | 79.5% |
-| Paths with documented skip | 53 | 20.5% |
+| Paths with active tests | 206 | 79.8% |
+| Paths with documented skip | 52 | 20.2% |
 | **Total accounted** | **258** | **100%** |
 
 pfSense CE 2.8.1 with REST API v2.7.1 (upgraded from 2.7.2 via `upgrade-2.8.exp`).
@@ -343,8 +343,7 @@ pfSense CE 2.8.1 with REST API v2.7.1 (upgraded from 2.7.2 via `upgrade-2.8.exp`
 
 Every skip is documented in `_SKIP_CRUD_PATHS`, `_SKIP_ACTION`, `_SKIP_SINGLETON`, or `_PHANTOM_PLURAL_ROUTES` in `test_generator.py`.
 
-**Hardware/VM limitations (1):**
-- `vpn/openvpn/client_export/config` — complex 5-step chain: CA+cert+OVPN server+user cert (deferred)
+**Hardware/VM limitations (0):**
 
 **Not applicable — by design (1):**
 - `services/dhcp_server` — per-interface singleton, POST not supported by design. PATCH tested via singleton test.
@@ -361,8 +360,7 @@ Every skip is documented in `_SKIP_CRUD_PATHS`, `_SKIP_ACTION`, `_SKIP_SINGLETON
 - `services/acme/certificate/renew` — needs real ACME server
 - `system/restapi/settings/sync` — HA sync endpoint times out without peer
 
-**Other (2):**
-- `vpn/openvpn/client_export` — requires functioning OpenVPN server
+**Other (1):**
 - `system/restapi/version` — PATCH triggers API version change (destructive)
 
 ### Phantom plural routes (41)
@@ -388,7 +386,7 @@ Deep research on all skipped endpoints is in `research/skipped-endpoints-analysi
 | 3 | `system/certificate/pkcs12/export` (+1 test) | Try `Accept: application/octet-stream` header. If still 406, use client-side PKCS12 generation as fallback proof. | **DONE** — `Accept: application/octet-stream` works! Was never a bug, just wrong Accept header. 204→205 tests. |
 | 4 | `services/haproxy/settings/dns_resolver` & `email_mailer` (+2 tests) | Initialize HAProxy config in config.xml via `diagnostics/command_prompt` PHP call, then POST sub-resources. | **BLOCKED** — config.xml init helps CREATE but GET/DELETE still 500. Confirmed framework bug in v2.7.1. Stays skipped. |
 | 5 | `system/package` POST/DELETE (+1 test) | Try `pfSense-pkg-cron` (smaller than arping). Use 504-as-success polling pattern. | **BLOCKED** — pfSense-pkg-cron not found in repo. QEMU NAT too slow/unreliable for package downloads. Stays skipped; GET tested via read tests. |
-| 6 | `vpn/openvpn/client_export` (+3 tests) | 6-step chain: CA → server cert → OVPN server → user cert → export → config GET/DELETE. Pre-install `pfSense-pkg-openvpn-client-export` in golden image. | **TODO** |
+| 6 | `vpn/openvpn/client_export` (+1 test) | 6-step chain: CA → server cert → OVPN server → user cert → export config → export. Pre-install `pfSense-pkg-openvpn-client-export` in golden image. | **DONE** — custom test with 7-step chain (CA, server cert, OVPN server, user cert, export config, export, cleanup). 205→206 tests. |
 | 7 | ACME `register`/`issue`/`renew` (+3 tests) | Run Pebble (test ACME server) on host, configure custom ACME server URL in pfSense, register + issue + renew. Requires Docker on host. | **TODO** |
 | 8 | `system/restapi/settings/sync` | Try localhost sync or async dispatcher. Low confidence — likely stays skipped. | **TODO** |
 | 9 | `system/restapi/version` PATCH | Confirm too destructive. Keep skipped. | **TODO** |

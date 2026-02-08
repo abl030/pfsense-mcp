@@ -10,6 +10,7 @@ Fix the generator instead, then re-run.
 
 from __future__ import annotations
 
+import json
 import os
 import time
 
@@ -79,7 +80,7 @@ def _delete_with_retry(client: httpx.Client, path: str, obj_id, params: dict | N
             break
         time.sleep(5)
     assert resp.status_code in (200, 404), f"Delete {path} id={obj_id} failed: {resp.text[:500]}"
-# Total generated tests: 206
+# Total generated tests: 207
 
 def test_crud_firewall_alias(client: httpx.Client):
     """CRUD lifecycle: /api/v2/firewall/alias"""
@@ -4490,7 +4491,7 @@ def test_crud_vpn_openvpn_client(client: httpx.Client):
         _delete_with_retry(client, "/api/v2/system/certificate_authority", p0_id)
 
 
-# SKIP /api/v2/vpn/openvpn/client_export/config: complex 5-step chain: CA+cert+OVPN server+user cert (deferred)
+# SKIP /api/v2/vpn/openvpn/client_export/config: tested via custom test_action_vpn_openvpn_client_export (6-step chain)
 
 def test_crud_vpn_openvpn_cso(client: httpx.Client):
     """CRUD lifecycle: /api/v2/vpn/openvpn/cso (chained)"""
@@ -6026,7 +6027,78 @@ def test_action_system_certificate_authority_renew(client: httpx.Client):
 
 # SKIP /api/v2/system/restapi/settings/sync: HA sync endpoint times out without peer
 
-# SKIP /api/v2/vpn/openvpn/client_export: requires functioning OpenVPN server
+def test_action_vpn_openvpn_client_export(client: httpx.Client):
+    """Action + CRUD: /api/v2/vpn/openvpn/client_export (+config)"""
+    # 1. Create CA
+    ca_resp = client.post("/api/v2/system/certificate_authority/generate", json={
+        "descr": "CA for OVPN export", "keytype": "RSA", "keylen": 2048,
+        "digest_alg": "sha256", "dn_commonname": "OVPN Export CA", "lifetime": 3650,
+        "dn_country": "US", "dn_state": "California", "dn_city": "San Francisco",
+        "dn_organization": "pfSense Test", "dn_organizationalunit": "Testing",
+    })
+    ca = _ok(ca_resp)
+    try:
+        # 2. Create server certificate
+        srv_cert_resp = client.post("/api/v2/system/certificate/generate", json={
+            "descr": "OVPN server cert", "caref": ca["refid"], "keytype": "RSA",
+            "keylen": 2048, "digest_alg": "sha256", "dn_commonname": "ovpn-server.test",
+            "lifetime": 365, "type": "server",
+        })
+        srv_cert = _ok(srv_cert_resp)
+        try:
+            # 3. Create OpenVPN server (server_tls mode avoids auth issues)
+            ovpn_resp = client.post("/api/v2/vpn/openvpn/server", json={
+                "mode": "server_tls", "dev_mode": "tun", "protocol": "UDP4",
+                "interface": "wan", "local_port": "11941",
+                "caref": ca["refid"], "certref": srv_cert["refid"],
+                "dh_length": "2048", "ecdh_curve": "prime256v1",
+                "tunnel_network": "10.0.8.0/24",
+                "description": "OVPN export test",
+                "data_ciphers": ["AES-256-GCM"],
+                "data_ciphers_fallback": "AES-256-GCM",
+                "digest": "SHA256",
+            })
+            # server_tls mode may produce log output before JSON
+            assert ovpn_resp.status_code == 200, f"OVPN server create {ovpn_resp.status_code}: {ovpn_resp.text[:500]}"
+            text = ovpn_resp.text
+            json_start = text.find("{")
+            ovpn = json.loads(text[json_start:])["data"] if json_start > 0 else ovpn_resp.json()["data"]
+            try:
+                # 4. Create user certificate
+                user_cert_resp = client.post("/api/v2/system/certificate/generate", json={
+                    "descr": "OVPN user cert", "caref": ca["refid"], "keytype": "RSA",
+                    "keylen": 2048, "digest_alg": "sha256", "dn_commonname": "ovpn-user.test",
+                    "lifetime": 365, "type": "user",
+                })
+                user_cert = _ok(user_cert_resp)
+                try:
+                    # 5. Create export config
+                    cfg_resp = client.post("/api/v2/vpn/openvpn/client_export/config", json={
+                        "server": ovpn["vpnid"],
+                        "pkcs11providers": [], "pkcs11id": "", "pass": "",
+                        "proxyaddr": "", "proxyport": "", "useproxypass": "",
+                        "proxyuser": "", "proxypass": "",
+                    })
+                    cfg = _ok(cfg_resp)
+                    cfg_id = cfg.get("id")
+                    try:
+                        # 6. Export (the action under test)
+                        export_resp = client.post("/api/v2/vpn/openvpn/client_export", json={
+                            "id": cfg_id, "certref": user_cert["refid"],
+                            "type": "confinline",
+                        })
+                        _ok(export_resp)
+                    finally:
+                        client.delete("/api/v2/vpn/openvpn/client_export/config",
+                                      params={"id": cfg_id})
+                finally:
+                    client.delete("/api/v2/system/certificate", params={"id": user_cert["id"]})
+            finally:
+                client.delete("/api/v2/vpn/openvpn/server", params={"id": ovpn["id"]})
+        finally:
+            client.delete("/api/v2/system/certificate", params={"id": srv_cert["id"]})
+    finally:
+        client.delete("/api/v2/system/certificate_authority", params={"id": ca["id"]})
 
 def test_zz_action_diagnostics_reboot(client: httpx.Client):
     """Action: POST /api/v2/diagnostics/reboot"""
