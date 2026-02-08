@@ -49,14 +49,14 @@ details:
 cleanup_complete: true | false
 notes: |
   <freeform observations about tool discoverability, confusing names, missing info, etc.>
----TASK-REPORT-END---
 tools_invoked:
   - <tool_name_1>
   - <tool_name_2>
   - ...
+---TASK-REPORT-END---
 ```
 
-**IMPORTANT**: The `tools_invoked` list must include EVERY `pfsense_*` tool you called during this task, regardless of success or failure. This is used for coverage tracking.
+**IMPORTANT**: The `tools_invoked` list MUST be inside the report block (before `---TASK-REPORT-END---`). It must include EVERY `pfsense_*` tool you called during this task, regardless of success or failure. This is used for coverage tracking.
 
 If the task succeeded with no failures, still output the report with an empty `details` list (but always include `tools_invoked`).
 

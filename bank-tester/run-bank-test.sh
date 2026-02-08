@@ -19,6 +19,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$REPO_DIR"
 
+# --- Logging helpers ---
+ts() { date '+%H:%M:%S'; }
+log() { echo "[$(ts)] $*"; }
+logf() { echo "[$(ts)] $*" | tee -a "$LIVE_LOG"; }
+
 GOLDEN="vm/golden.qcow2"
 HTTPS_PORT=18443
 SSH_PORT=12222
@@ -30,55 +35,58 @@ TASK_FILTER="${1:-}"
 INCLUDE_DESTRUCTIVE="${INCLUDE_DESTRUCTIVE:-0}"
 
 # --- Preflight checks ---
-[[ -f "$GOLDEN" ]] || { echo "FATAL: $GOLDEN not found. Run vm/setup.sh first."; exit 1; }
-[[ -f "$API_KEY_FILE" ]] || { echo "FATAL: $API_KEY_FILE not found. Run vm/setup.sh first."; exit 1; }
-[[ -f "$MCP_CONFIG_TEMPLATE" ]] || { echo "FATAL: $MCP_CONFIG_TEMPLATE not found."; exit 1; }
-[[ -f "$TESTER_PROMPT" ]] || { echo "FATAL: $TESTER_PROMPT not found."; exit 1; }
-command -v claude >/dev/null 2>&1 || { echo "FATAL: claude CLI not found on PATH."; exit 1; }
+[[ -f "$GOLDEN" ]] || { log "FATAL: $GOLDEN not found. Run vm/setup.sh first."; exit 1; }
+[[ -f "$API_KEY_FILE" ]] || { log "FATAL: $API_KEY_FILE not found. Run vm/setup.sh first."; exit 1; }
+[[ -f "$MCP_CONFIG_TEMPLATE" ]] || { log "FATAL: $MCP_CONFIG_TEMPLATE not found."; exit 1; }
+[[ -f "$TESTER_PROMPT" ]] || { log "FATAL: $TESTER_PROMPT not found."; exit 1; }
+command -v claude >/dev/null 2>&1 || { log "FATAL: claude CLI not found on PATH."; exit 1; }
 
 # Resolve fastmcp to absolute path (nix develop puts it on PATH)
 FASTMCP_PATH="$(command -v fastmcp 2>/dev/null || true)"
 if [[ -z "$FASTMCP_PATH" ]]; then
-    echo "FATAL: fastmcp not found on PATH. Run inside 'nix develop -c'."
+    log "FATAL: fastmcp not found on PATH. Run inside 'nix develop -c'."
     exit 1
 fi
-echo "==> Using fastmcp: $FASTMCP_PATH"
+log "Using fastmcp: $FASTMCP_PATH"
 
 # --- Create results directory ---
 RUN_ID="$(date +%Y%m%d-%H%M%S)"
 RESULTS_DIR="bank-tester/results/run-${RUN_ID}"
 mkdir -p "$RESULTS_DIR"
-echo "==> Results will be written to $RESULTS_DIR"
+log "Results dir: $RESULTS_DIR"
+
+# --- Create live log early (logf needs it) ---
+LIVE_LOG="${RESULTS_DIR}/live.log"
+touch "$LIVE_LOG"
 
 # --- Create temp clone ---
 TMPIMG=$(mktemp /tmp/pfsense-banktest-XXXXXX.qcow2)
-echo "==> Cloning golden image to $TMPIMG..."
+log "Cloning golden image to $TMPIMG..."
 cp "$GOLDEN" "$TMPIMG"
 
 # --- Cleanup on exit ---
 QEMU_PID=""
 cleanup() {
-    echo "==> Cleaning up..."
+    log "Cleaning up..."
     if [[ -n "$QEMU_PID" ]] && kill -0 "$QEMU_PID" 2>/dev/null; then
         kill "$QEMU_PID" 2>/dev/null || true
         wait "$QEMU_PID" 2>/dev/null || true
     fi
     rm -f "$TMPIMG"
-    # Clean up live MCP config
     rm -f "${RESULTS_DIR}/mcp-config-live.json"
-    echo "==> Done."
+    log "Done."
 }
 trap cleanup EXIT
 
 # --- Check port availability ---
 if ss -tln 2>/dev/null | grep -q ":${HTTPS_PORT} " || \
    lsof -iTCP:${HTTPS_PORT} -sTCP:LISTEN 2>/dev/null | grep -q .; then
-    echo "FATAL: Port $HTTPS_PORT already in use"
+    log "FATAL: Port $HTTPS_PORT already in use"
     exit 1
 fi
 
 # --- Boot VM ---
-echo "==> Booting pfSense VM (HTTPS=$HTTPS_PORT, SSH=$SSH_PORT)..."
+log "Booting pfSense VM (HTTPS=$HTTPS_PORT, SSH=$SSH_PORT)..."
 qemu-system-x86_64 \
     -m 2048 \
     -enable-kvm \
@@ -93,10 +101,10 @@ qemu-system-x86_64 \
     -device e1000,netdev=opt0,mac=52:54:00:00:00:03 \
     &>/dev/null &
 QEMU_PID=$!
-echo "==> QEMU PID: $QEMU_PID"
+log "QEMU PID: $QEMU_PID"
 
-# --- Wait for API ---
-echo "==> Waiting for REST API..."
+# --- Wait for API (with progress) ---
+log "Waiting for REST API..."
 MAX_WAIT=120
 WAITED=0
 while [[ $WAITED -lt $MAX_WAIT ]]; do
@@ -104,15 +112,29 @@ while [[ $WAITED -lt $MAX_WAIT ]]; do
         -u admin:pfsense \
         "https://127.0.0.1:${HTTPS_PORT}/api/v2/system/version" 2>/dev/null || echo "000")
     if [[ "$HTTP_CODE" == "200" ]]; then
-        echo "==> API ready! (${WAITED}s)"
+        echo ""
+        log "API ready! (${WAITED}s)"
         break
+    fi
+    # Print progress: HTTP code every 10s, dot otherwise
+    if (( WAITED % 10 == 0 && WAITED > 0 )); then
+        echo -n " [${HTTP_CODE}]"
+    else
+        echo -n "."
     fi
     sleep 2
     WAITED=$((WAITED + 2))
 done
 
 if [[ $WAITED -ge $MAX_WAIT ]]; then
-    echo "FATAL: API not ready after ${MAX_WAIT}s"
+    echo ""
+    log "FATAL: API not ready after ${MAX_WAIT}s (last HTTP code: $HTTP_CODE)"
+    exit 1
+fi
+
+# --- Verify QEMU still running ---
+if ! kill -0 "$QEMU_PID" 2>/dev/null; then
+    log "FATAL: QEMU died during API wait"
     exit 1
 fi
 
@@ -123,7 +145,16 @@ sed -e "s|FASTMCP_PATH_PLACEHOLDER|${FASTMCP_PATH}|g" \
     -e "s|REPO_DIR_PLACEHOLDER|${REPO_DIR}|g" \
     -e "s|API_KEY_PLACEHOLDER|${API_KEY}|g" \
     "$MCP_CONFIG_TEMPLATE" > "$LIVE_MCP_CONFIG"
-echo "==> Live MCP config written to $LIVE_MCP_CONFIG"
+log "MCP config: $LIVE_MCP_CONFIG"
+
+# --- Quick MCP server smoke test ---
+log "Smoke-testing MCP server..."
+MCP_SMOKE=$(timeout 10 "$FASTMCP_PATH" run "$REPO_DIR/generated/server.py" --transport stdio <<< '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"smoke","version":"0.1"}}}' 2>/dev/null | head -1 || true)
+if [[ -n "$MCP_SMOKE" ]] && echo "$MCP_SMOKE" | python3 -c "import sys,json; d=json.load(sys.stdin); assert 'result' in d" 2>/dev/null; then
+    log "MCP server responds OK"
+else
+    log "WARNING: MCP server smoke test inconclusive (may still work via claude CLI)"
+fi
 
 # --- Collect task files ---
 # Default ordering: 01-09 (workflow) → 35,37 (read-only) → 10-34 (systematic) → 36 → 40-44 (adversarial) → 99 (destructive)
@@ -134,7 +165,7 @@ for task_file in "$TASKS_DIR"/*.md; do
 
     # Skip destructive tasks unless opted in
     if [[ "$task_basename" == 99-* ]] && [[ "$INCLUDE_DESTRUCTIVE" != "1" ]]; then
-        echo "==> Skipping destructive task: $task_basename (set INCLUDE_DESTRUCTIVE=1 to include)"
+        log "Skipping destructive task: $task_basename (set INCLUDE_DESTRUCTIVE=1 to include)"
         continue
     fi
 
@@ -154,27 +185,47 @@ for task_file in "$TASKS_DIR"/*.md; do
 done
 
 if [[ ${#TASK_FILES[@]} -eq 0 ]]; then
-    echo "FATAL: No task files found matching filter '${TASK_FILTER}'"
+    log "FATAL: No task files found matching filter '${TASK_FILTER}'"
     exit 1
 fi
 
-LIVE_LOG="${RESULTS_DIR}/live.log"
-touch "$LIVE_LOG"
-
-echo "==> Running ${#TASK_FILES[@]} task(s)..."
-echo "==> Tail the live log in another terminal:"
-echo "    tail -f ${LIVE_LOG}"
+log "Running ${#TASK_FILES[@]} task(s)..."
+log "Tail the live log: tail -f ${LIVE_LOG}"
 echo ""
 
 # --- Run each task ---
 PASSED=0
 FAILED=0
+TASK_NUM=0
 TESTER_SYSTEM_PROMPT="$(cat "$TESTER_PROMPT")"
 
 for task_file in "${TASK_FILES[@]}"; do
     task_name="$(basename "$task_file" .md)"
-    echo "=== Task: $task_name ===" | tee -a "$LIVE_LOG"
+    TASK_NUM=$((TASK_NUM + 1))
+    logf "=== Task ${TASK_NUM}/${#TASK_FILES[@]}: $task_name ==="
     task_content="$(cat "$task_file")"
+
+    # Log the claude CLI invocation (without the full prompt, just the flags)
+    CLAUDE_CMD="claude -p --mcp-config $LIVE_MCP_CONFIG --strict-mcp-config --permission-mode bypassPermissions --output-format text --model sonnet --max-budget-usd 2.00"
+    logf "  cmd: $CLAUDE_CMD"
+    logf "  task file: $task_file ($(wc -c < "$task_file") bytes)"
+
+    # Check QEMU health before each task
+    if ! kill -0 "$QEMU_PID" 2>/dev/null; then
+        logf "  FATAL: QEMU died before task could start"
+        FAILED=$((FAILED + 1))
+        continue
+    fi
+
+    # Quick API health check
+    API_CHECK=$(curl -sk -m 5 -o /dev/null -w '%{http_code}' \
+        -u admin:pfsense \
+        "https://127.0.0.1:${HTTPS_PORT}/api/v2/system/version" 2>/dev/null || echo "000")
+    if [[ "$API_CHECK" != "200" ]]; then
+        logf "  WARNING: API returned $API_CHECK before task start"
+    fi
+
+    TASK_START=$(date +%s)
 
     # Run tester Claude with text output (human-readable, tailable)
     set +e
@@ -192,30 +243,43 @@ for task_file in "${TASK_FILES[@]}"; do
     task_exit=${PIPESTATUS[0]}
     set -e
 
+    TASK_END=$(date +%s)
+    TASK_DURATION=$((TASK_END - TASK_START))
+    OUTPUT_SIZE=$(wc -c < "${RESULTS_DIR}/${task_name}.txt")
+    STDERR_SIZE=$(wc -c < "${RESULTS_DIR}/${task_name}.stderr" 2>/dev/null || echo 0)
+
     if [[ $task_exit -eq 0 ]]; then
-        echo "    PASS (exit $task_exit)" | tee -a "$LIVE_LOG"
+        logf "  PASS (exit $task_exit, ${TASK_DURATION}s, output=${OUTPUT_SIZE}B, stderr=${STDERR_SIZE}B)"
         PASSED=$((PASSED + 1))
     else
-        echo "    FAIL (exit $task_exit)" | tee -a "$LIVE_LOG"
+        logf "  FAIL (exit $task_exit, ${TASK_DURATION}s, output=${OUTPUT_SIZE}B, stderr=${STDERR_SIZE}B)"
         FAILED=$((FAILED + 1))
-        # Print stderr for debugging
-        if [[ -s "${RESULTS_DIR}/${task_name}.stderr" ]]; then
-            echo "    stderr:" | tee -a "$LIVE_LOG"
-            head -5 "${RESULTS_DIR}/${task_name}.stderr" | sed 's/^/      /' | tee -a "$LIVE_LOG"
-        fi
     fi
+
+    # Always show stderr if non-empty (not just on failure)
+    if [[ -s "${RESULTS_DIR}/${task_name}.stderr" ]]; then
+        logf "  --- stderr (first 10 lines) ---"
+        head -10 "${RESULTS_DIR}/${task_name}.stderr" | sed 's/^/  | /' | tee -a "$LIVE_LOG"
+        logf "  --- end stderr ---"
+    fi
+
+    # Warn if output is suspiciously small (likely empty/no tool calls)
+    if [[ $OUTPUT_SIZE -lt 50 ]]; then
+        logf "  WARNING: Output is only ${OUTPUT_SIZE} bytes — Claude may not have called any tools"
+    fi
+
     echo "" | tee -a "$LIVE_LOG"
 done
 
 # --- Analyze results ---
-echo "==> Analyzing results..."
+log "Analyzing results..."
 python3 bank-tester/analyze-results.py "$RESULTS_DIR"
 
 echo ""
-echo "=== Bank Test Complete ==="
-echo "  Passed: $PASSED / ${#TASK_FILES[@]}"
-echo "  Failed: $FAILED / ${#TASK_FILES[@]}"
-echo "  Results: $RESULTS_DIR"
-echo "  Summary: ${RESULTS_DIR}/summary.md"
+log "=== Bank Test Complete ==="
+log "  Passed: $PASSED / ${#TASK_FILES[@]}"
+log "  Failed: $FAILED / ${#TASK_FILES[@]}"
+log "  Results: $RESULTS_DIR"
+log "  Summary: ${RESULTS_DIR}/summary.md"
 
 exit $FAILED

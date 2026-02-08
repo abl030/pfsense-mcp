@@ -19,16 +19,30 @@ SERVER_PY = REPO_ROOT / "generated" / "server.py"
 
 
 def extract_reports_from_text(filepath: Path) -> list[dict]:
-    """Extract task reports from a plain text output file."""
+    """Extract task reports from a plain text output file.
+
+    Also looks for tools_invoked immediately after the report block,
+    since earlier tester prompts placed it outside the markers.
+    """
     reports = []
     text = filepath.read_text()
 
+    # Match report blocks, optionally capturing tools_invoked after the END marker
     pattern = r"---TASK-REPORT-START---(.*?)---TASK-REPORT-END---"
-    matches = re.findall(pattern, text, re.DOTALL)
-
-    for match in matches:
-        report = parse_report(match.strip())
+    for m in re.finditer(pattern, text, re.DOTALL):
+        report = parse_report(m.group(1).strip())
         if report:
+            # If tools_invoked wasn't inside the block, look right after it
+            if "tools_invoked" not in report or not report["tools_invoked"]:
+                after = text[m.end():m.end() + 2000]
+                after_match = re.match(r"\s*tools_invoked:\s*\n((?:\s+-\s+\S+\n?)+)", after)
+                if after_match:
+                    tools = []
+                    for line in after_match.group(1).strip().split("\n"):
+                        name = line.strip().lstrip("- ").strip()
+                        if name:
+                            tools.append(name)
+                    report["tools_invoked"] = tools
             reports.append(report)
 
     return reports
@@ -55,6 +69,7 @@ def parse_report(text: str) -> dict | None:
 
             if key == "details":
                 # Parse the details list
+                TOP_LEVEL_KEYS = {"cleanup_complete", "notes", "tools_invoked", "task_id", "status", "total_tool_calls", "first_attempt_failures"}
                 details = []
                 i += 1
                 current_detail = {}
@@ -64,6 +79,13 @@ def parse_report(text: str) -> dict | None:
                     if stripped.startswith("```"):
                         i += 1
                         continue
+                    # Check if we've hit a top-level key (not indented)
+                    if stripped and ":" in stripped and not dline.startswith(" ") and not dline.startswith("\t"):
+                        tl_key = stripped.partition(":")[0].strip()
+                        if tl_key in TOP_LEVEL_KEYS:
+                            if current_detail:
+                                details.append(current_detail)
+                            break
                     if stripped.startswith("- tool:"):
                         if current_detail:
                             details.append(current_detail)
@@ -104,13 +126,19 @@ def parse_report(text: str) -> dict | None:
                 continue
 
             elif key == "notes":
-                # Multiline notes block
+                # Multiline notes block — stop at report markers or top-level keys
                 notes_lines = []
                 i += 1
                 while i < len(lines):
                     nline = lines[i]
-                    if nline.strip().startswith("---") or nline.strip().startswith("```"):
+                    stripped = nline.strip()
+                    if stripped.startswith("---") or stripped.startswith("```"):
                         break
+                    # Stop if we hit a top-level key (unindented, with colon)
+                    if stripped and ":" in stripped and not nline.startswith(" ") and not nline.startswith("\t"):
+                        tl_key = stripped.partition(":")[0].strip()
+                        if tl_key in ("tools_invoked", "cleanup_complete", "task_id", "status"):
+                            break
                     notes_lines.append(nline)
                     i += 1
                 report["notes"] = "\n".join(notes_lines).strip()
@@ -132,11 +160,17 @@ def extract_all_tool_names() -> set[str]:
 
 
 def collect_invoked_tools(reports: list[dict]) -> set[str]:
-    """Collect all tools invoked across all reports."""
+    """Collect all tools invoked across all reports.
+
+    Strips the 'mcp__pfsense__' prefix that Claude CLI adds, so names
+    match the function names extracted from generated/server.py.
+    """
     tools: set[str] = set()
     for r in reports:
         for t in r.get("tools_invoked", []):
-            tools.add(t)
+            # Strip MCP server prefix: mcp__pfsense__pfsense_foo → pfsense_foo
+            name = re.sub(r"^mcp__pfsense__", "", t)
+            tools.add(name)
     return tools
 
 

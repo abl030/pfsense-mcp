@@ -8,7 +8,7 @@
 - `pfsense_get_vpn_wire_guard_settings`
 - `pfsense_update_vpn_wire_guard_settings`
 - `pfsense_create_vpn_wire_guard_tunnel`
-- `pfsense_list_vpn_wire_guard_tunnels`
+- `pfsense_list_vpn_wire_guard_tunnel_addresses`
 - `pfsense_get_vpn_wire_guard_tunnel`
 - `pfsense_update_vpn_wire_guard_tunnel`
 - `pfsense_delete_vpn_wire_guard_tunnel`
@@ -16,7 +16,7 @@
 - `pfsense_get_vpn_wire_guard_tunnel_address`
 - `pfsense_delete_vpn_wire_guard_tunnel_address`
 - `pfsense_create_vpn_wire_guard_peer`
-- `pfsense_list_vpn_wire_guard_peers`
+- `pfsense_list_vpn_wire_guard_peer_allowed_i_ps`
 - `pfsense_get_vpn_wire_guard_peer`
 - `pfsense_update_vpn_wire_guard_peer`
 - `pfsense_delete_vpn_wire_guard_peer`
@@ -35,27 +35,29 @@
     - `listenport`: `51820`
     - `privatekey`: `YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY=`
     - `addresses`: `[]`
-5. **List** using `pfsense_list_vpn_wire_guard_tunnels` — verify the created resource appears
+5. **List** using `pfsense_list_vpn_wire_guard_tunnel_addresses` — verify the created resource appears
 6. **Get** using `pfsense_get_vpn_wire_guard_tunnel` with the ID from the create response
 7. **Update** using `pfsense_update_vpn_wire_guard_tunnel` with `confirm=True` — set `listenport` to `51821`
 8. **Get** again using `pfsense_get_vpn_wire_guard_tunnel` — verify `listenport` was updated
 9. **Create** using `pfsense_create_vpn_wire_guard_tunnel_address` with `confirm=True` (use the `parent_id` from the parent resource created earlier):
     - `address`: `10.100.0.1`
     - `mask`: `24`
-10. **Get** using `pfsense_get_vpn_wire_guard_tunnel_address` with the ID from the create response
-11. **Create** using `pfsense_create_vpn_wire_guard_peer` with `confirm=True` (inject `tun` from parent's `name` field):
+10. **List** using `pfsense_list_vpn_wire_guard_tunnel_addresses` — verify the created resource appears
+11. **Get** using `pfsense_get_vpn_wire_guard_tunnel_address` with the ID from the create response
+12. **Create** using `pfsense_create_vpn_wire_guard_peer` with `confirm=True` (inject `tun` from parent's `name` field):
     - `publickey`: `YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY=`
     - `descr`: `bt_sys34_peer`
-12. **List** using `pfsense_list_vpn_wire_guard_peers` — verify the created resource appears
-13. **Get** using `pfsense_get_vpn_wire_guard_peer` with the ID from the create response
-14. **Update** using `pfsense_update_vpn_wire_guard_peer` with `confirm=True` — set `descr` to `Updated peer`
-15. **Get** again using `pfsense_get_vpn_wire_guard_peer` — verify `descr` was updated
-16. **Create** using `pfsense_create_vpn_wire_guard_peer_allowed_ip` with `confirm=True` (use the `parent_id` from the parent resource created earlier):
+13. **List** using `pfsense_list_vpn_wire_guard_peer_allowed_i_ps` — verify the created resource appears
+14. **Get** using `pfsense_get_vpn_wire_guard_peer` with the ID from the create response
+15. **Update** using `pfsense_update_vpn_wire_guard_peer` with `confirm=True` — set `descr` to `Updated peer`
+16. **Get** again using `pfsense_get_vpn_wire_guard_peer` — verify `descr` was updated
+17. **Create** using `pfsense_create_vpn_wire_guard_peer_allowed_ip` with `confirm=True` (use the `parent_id` from the parent resource created earlier):
     - `address`: `10.200.0.0`
     - `mask`: `24`
-17. **Get** using `pfsense_get_vpn_wire_guard_peer_allowed_ip` with the ID from the create response
-18. **Check apply status** using `pfsense_get_vpn_wire_guard_apply_status`
-19. **Apply changes** using `pfsense_vpn_wire_guard_apply` with `confirm=True`
+18. **List** using `pfsense_list_vpn_wire_guard_peer_allowed_i_ps` — verify the created resource appears
+19. **Get** using `pfsense_get_vpn_wire_guard_peer_allowed_ip` with the ID from the create response
+20. **Check apply status** using `pfsense_get_vpn_wire_guard_apply_status`
+21. **Apply changes** using `pfsense_vpn_wire_guard_apply` with `confirm=True`
 
 **Important notes**:
 Tunnel addresses and peer allowed_ips are sub-resources (NOT inline arrays).

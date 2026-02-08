@@ -24,7 +24,6 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from generator.naming import operation_id_to_tool_name
 from generator.loader import load_spec, parse_operations
-from generator.context_builder import _PHANTOM_PLURAL_ROUTES
 
 SPEC_PATH = REPO_ROOT / "openapi-spec.json"
 CONFIG_PATH = REPO_ROOT / "bank-tester" / "task-config.yaml"
@@ -39,12 +38,15 @@ def load_config() -> list[dict[str, Any]]:
 
 
 def build_tool_name_map(spec: dict[str, Any]) -> dict[str, dict[str, str]]:
-    """Build a mapping of (path, method) -> tool_name from the spec."""
+    """Build a mapping of (path, method) -> tool_name from the spec.
+
+    Includes ALL paths (even phantom routes) so task-config.yaml
+    references resolve correctly. The phantom route filter only
+    applies to code generation, not task generation.
+    """
     tool_map: dict[str, dict[str, str]] = {}
     operations = parse_operations(spec)
     for op in operations:
-        if op.path in _PHANTOM_PLURAL_ROUTES:
-            continue
         param_names = [p.name for p in op.parameters]
         tool_name = operation_id_to_tool_name(
             op.operation_id, op.method, op.path, param_names

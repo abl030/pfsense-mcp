@@ -6,7 +6,7 @@
 
 **Tools to exercise** (10):
 - `pfsense_create_firewall_schedule`
-- `pfsense_list_firewall_schedules`
+- `pfsense_list_firewall_schedule_time_ranges`
 - `pfsense_get_firewall_schedule`
 - `pfsense_update_firewall_schedule`
 - `pfsense_delete_firewall_schedule`
@@ -21,7 +21,7 @@
     - `name`: `bt_sys12_sched`
     - `timerange`: `[{'month': '1,2,3', 'day': '1,2,3', 'hour': '0:00-23:59', 'position': []}]`
     - `descr`: `Bank tester schedule`
-2. **List** using `pfsense_list_firewall_schedules` — verify the created resource appears
+2. **List** using `pfsense_list_firewall_schedule_time_ranges` — verify the created resource appears
 3. **Get** using `pfsense_get_firewall_schedule` with the ID from the create response
 4. **Update** using `pfsense_update_firewall_schedule` with `confirm=True` — set `descr` to `Updated schedule`
 5. **Get** again using `pfsense_get_firewall_schedule` — verify `descr` was updated
@@ -29,9 +29,10 @@
     - `month`: `[4, 5, 6]`
     - `day`: `[10, 11, 12]`
     - `hour`: `8:00-17:00`
-7. **Get** using `pfsense_get_firewall_schedule_time_range` with the ID from the create response
-8. **Check apply status** using `pfsense_get_firewall_apply_status`
-9. **Apply changes** using `pfsense_firewall_apply` with `confirm=True`
+7. **List** using `pfsense_list_firewall_schedule_time_ranges` — verify the created resource appears
+8. **Get** using `pfsense_get_firewall_schedule_time_range` with the ID from the create response
+9. **Check apply status** using `pfsense_get_firewall_apply_status`
+10. **Apply changes** using `pfsense_firewall_apply` with `confirm=True`
 
 **Important notes**:
 Time range is a sub-resource of schedule — needs parent_id from the schedule.

@@ -4,15 +4,16 @@
 
 **Objective**: Exercise all tools in the services/bind subsystem through CRUD lifecycle, settings, and actions.
 
-**Tools to exercise** (23):
+**Tools to exercise** (24):
 - `pfsense_get_services_bind_settings`
 - `pfsense_update_services_bind_settings`
 - `pfsense_create_services_bind_access_list`
-- `pfsense_get_services_bind_access_list_entry`
+- `pfsense_list_services_bind_access_list_entries`
 - `pfsense_get_services_bind_access_list`
 - `pfsense_update_services_bind_access_list`
 - `pfsense_delete_services_bind_access_list`
 - `pfsense_create_services_bind_access_list_entry`
+- `pfsense_get_services_bind_access_list_entry`
 - `pfsense_delete_services_bind_access_list_entry`
 - `pfsense_create_services_bind_view`
 - `pfsense_list_services_bind_views`
@@ -36,7 +37,7 @@
 4. **Create** using `pfsense_create_services_bind_access_list` with `confirm=True`:
     - `entries`: `[{'value': '10.0.0.0/8', 'description': 'test entry'}]`
     - `name`: `bt_sys24_bacl`
-5. **List** using `pfsense_get_services_bind_access_list_entry` — verify the created resource appears
+5. **List** using `pfsense_list_services_bind_access_list_entries` — verify the created resource appears
 6. **Get** using `pfsense_get_services_bind_access_list` with the ID from the create response
 7. **Update** using `pfsense_update_services_bind_access_list` with `confirm=True` — set `name` to `bt_sys24_bacl_upd`
 8. **Get** again using `pfsense_get_services_bind_access_list` — verify `name` was updated
@@ -81,4 +82,4 @@ Cleanup: record → zone, entry → access_list, view.
 - Delete using `pfsense_delete_services_bind_access_list_entry` with `confirm=True` (ID from create step)
 - Delete using `pfsense_delete_services_bind_access_list` with `confirm=True` (ID from create step)
 
-**Expected outcome**: All 23 tools exercised successfully.
+**Expected outcome**: All 24 tools exercised successfully.

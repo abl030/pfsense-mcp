@@ -18,7 +18,7 @@
 - `pfsense_list_status_logs_system`
 - `pfsense_list_status_logs_firewall`
 - `pfsense_list_status_logs_dhcp`
-- `pfsense_get_/api/v2/status/logs/auth`
+- `pfsense_list_status_logs_auth`
 - `pfsense_get_status_logs_settings`
 - `pfsense_update_status_logs_settings`
 
@@ -38,7 +38,7 @@
 13. **Read** using `pfsense_list_status_logs_system` (Use limit parameter to avoid huge responses)
 14. **Read** using `pfsense_list_status_logs_firewall`
 15. **Read** using `pfsense_list_status_logs_dhcp`
-16. **Read** using `pfsense_get_/api/v2/status/logs/auth`
+16. **Read** using `pfsense_list_status_logs_auth`
 17. **Get settings** using `pfsense_get_status_logs_settings` — note current value of `logall`
 18. **Update settings** using `pfsense_update_status_logs_settings` with `confirm=True` — set `logall` to `True`
 19. **Get settings** again using `pfsense_get_status_logs_settings` — verify `logall` was updated

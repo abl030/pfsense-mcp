@@ -11,7 +11,7 @@
 - `pfsense_update_vpn_open_vpn_server`
 - `pfsense_delete_vpn_open_vpn_server`
 - `pfsense_create_vpn_open_vpn_client`
-- `pfsense_list_vpn_open_vpn_clients`
+- `pfsense_list_vpn_open_vpn_client_export_configs`
 - `pfsense_get_vpn_open_vpn_client`
 - `pfsense_update_vpn_open_vpn_client`
 - `pfsense_delete_vpn_open_vpn_client`
@@ -42,7 +42,7 @@
     - `server_addr`: `10.99.99.30`
     - `server_port`: `1194`
     - `descr`: `bt_sys33_ovpn_cl`
-7. **List** using `pfsense_list_vpn_open_vpn_clients` — verify the created resource appears
+7. **List** using `pfsense_list_vpn_open_vpn_client_export_configs` — verify the created resource appears
 8. **Get** using `pfsense_get_vpn_open_vpn_client` with the ID from the create response
 9. **Update** using `pfsense_update_vpn_open_vpn_client` with `confirm=True` — set `descr` to `Updated OVPN client`
 10. **Get** again using `pfsense_get_vpn_open_vpn_client` — verify `descr` was updated
