@@ -445,7 +445,7 @@ Endpoints discovered as phantom or broken during bank tester runs. Compare again
 | 11 | `pfsense_create_firewall_nat_outbound_mapping` | `target_subnet` default 128 fails IPv4 | conditional defaults → None (`schema_parser.py`) |
 | 12 | `pfsense_create_firewall_schedule` | `timerange: list[str]` should be `list[dict]` | handle `allOf`/`$ref` in type resolver (`schema_parser.py`) |
 
-**Task status**: 10 green, 11 green, 12 green, 35 green. Next: 13.
+**Task status**: 10-17 green, 35 green. Next: 18.
 
 *This table grows as tasks are run. Every failure, phantom, or API bug gets recorded here.*
 
