@@ -14,12 +14,10 @@ from pathlib import Path
 from .codegen import render, write_output
 from .context_builder import build_tool_contexts
 from .loader import load_spec
-from .test_generator import generate_tests
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_SPEC = REPO_ROOT / "openapi-spec.json"
 DEFAULT_OUTPUT = REPO_ROOT / "generated" / "server.py"
-DEFAULT_TEST_OUTPUT = REPO_ROOT / "generated" / "tests.py"
 
 
 def main() -> None:
@@ -35,12 +33,6 @@ def main() -> None:
         type=Path,
         default=DEFAULT_OUTPUT,
         help="Output path for generated server",
-    )
-    parser.add_argument(
-        "--test-output",
-        type=Path,
-        default=DEFAULT_TEST_OUTPUT,
-        help="Output path for generated tests",
     )
     args = parser.parse_args()
 
@@ -74,29 +66,7 @@ def main() -> None:
         print(f"  SYNTAX ERROR: {e}", file=sys.stderr)
         sys.exit(1)
 
-    # --- Generate tests ---
-    print("Generating tests...")
-    test_content = generate_tests(contexts)
-
-    print(f"Writing tests to {args.test_output}...")
-    args.test_output.parent.mkdir(parents=True, exist_ok=True)
-    args.test_output.write_text(test_content)
-
-    print("Verifying test syntax...")
-    try:
-        compile(test_content, str(args.test_output), "exec")
-        print("  Valid Python syntax")
-    except SyntaxError as e:
-        print(f"  SYNTAX ERROR: {e}", file=sys.stderr)
-        sys.exit(1)
-
-    # Count tests
-    test_count = test_content.count("\ndef test_")
-    print(f"  {test_count} test functions")
-
-    print(f"\nDone!")
-    print(f"  Server: {args.output} ({len(contexts)} tools)")
-    print(f"  Tests:  {args.test_output} ({test_count} tests)")
+    print(f"\nDone! Server: {args.output} ({len(contexts)} tools)")
 
 
 if __name__ == "__main__":

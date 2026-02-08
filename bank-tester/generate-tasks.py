@@ -38,12 +38,7 @@ def load_config() -> list[dict[str, Any]]:
 
 
 def build_tool_name_map(spec: dict[str, Any]) -> dict[str, dict[str, str]]:
-    """Build a mapping of (path, method) -> tool_name from the spec.
-
-    Includes ALL paths (even phantom routes) so task-config.yaml
-    references resolve correctly. The phantom route filter only
-    applies to code generation, not task generation.
-    """
+    """Build a mapping of (path, method) -> tool_name from the spec."""
     tool_map: dict[str, dict[str, str]] = {}
     operations = parse_operations(spec)
     for op in operations:

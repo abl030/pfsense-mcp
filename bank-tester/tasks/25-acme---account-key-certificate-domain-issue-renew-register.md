@@ -43,7 +43,9 @@
 9. **Create** using `pfsense_create_services_acme_certificate` with `confirm=True`:
     - `name`: `bt_sys25_acme_cert`
     - `descr`: `Bank tester ACME cert`
-    - `acmeserver`: `letsencrypt-staging-2`
+    - `acme_account_key_id`: (use the ID from the account key created in step 4)
+    - `a_domainlist`: `[{"name": "test.example.com", "method": "standalone"}]`
+    Note: `acmeserver` belongs on the account key (step 4), NOT the certificate. The certificate inherits the ACME server from its associated account key. At least one domain is required in `a_domainlist`.
 10. **List** using `pfsense_list_services_acme_certificate_issuances` — verify the created resource appears
 11. **Get** using `pfsense_get_services_acme_certificate` with the ID from the create response
 12. **Update** using `pfsense_update_services_acme_certificate` with `confirm=True` — set `descr` to `Updated ACME cert`

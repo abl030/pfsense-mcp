@@ -1,6 +1,6 @@
 # pfSense MCP Server
 
-An MCP (Model Context Protocol) server that gives AI agents full control over pfSense firewalls via the REST API v2. 599 tools covering firewall rules, NAT, VPN (IPsec, WireGuard, OpenVPN), services (DHCP, DNS, HAProxy), routing, certificates, users, and more.
+An MCP (Model Context Protocol) server that gives AI agents full control over pfSense firewalls via the REST API v2. 677 tools covering firewall rules, NAT, VPN (IPsec, WireGuard, OpenVPN), services (DHCP, DNS, HAProxy), routing, certificates, users, and more.
 
 This entire project — the generator, the server, the test suite, and this README — was built by AI (Claude) and is designed to be installed and used by AI agents.
 
@@ -62,7 +62,7 @@ uv sync
 uv run python -m generator
 ```
 
-This produces `generated/server.py` — the MCP server with 599 tools.
+This produces `generated/server.py` — the MCP server with 677 tools.
 
 ### Configure Your MCP Client
 
@@ -110,7 +110,7 @@ claude mcp add pfsense -- \
 
 Requires the [pfSense REST API v2](https://github.com/jaredhendrickson13/pfsense-api) package installed on your pfSense firewall. Tested with REST API v2.7.1 on pfSense CE 2.8.1.
 
-## What You Get: 599 Tools
+## What You Get: 677 Tools
 
 ### Firewall (99 tools)
 
@@ -244,134 +244,83 @@ This repo contains a **generator** that reads the pfSense REST API v2 OpenAPI sp
 
 ### Why a generator?
 
-The pfSense REST API spec has 258 paths and 677 operations, but 41 paths (78 operations) are phantom plural routes that don't exist on the real server. Rather than hand-writing 599 tool functions, we wrote a generator that reads the official OpenAPI 3.0.0 spec, filters out the phantom routes, and produces the server automatically. When pfSense updates their API, pull a new spec and re-run the generator.
+The pfSense REST API spec has 258 paths and 677 operations. Rather than hand-writing 677 tool functions, we wrote a generator that reads the official OpenAPI 3.0.0 spec and produces the server automatically. When pfSense updates their API, pull a new spec and re-run the generator.
 
 ### Architecture
 
 ```
-openapi-spec.json            # OpenAPI 3.0.0 spec (258 paths, 217 active, 599 tools)
+openapi-spec.json            # OpenAPI 3.0.0 spec (258 paths, 677 operations)
 generator/                   # Python generator that builds the server
   loader.py                  # Load and parse the OpenAPI spec
   naming.py                  # Convert operationIds to tool names
   schema_parser.py           # Extract parameter types from schemas
   context_builder.py         # Build template context for each tool
   codegen.py                 # Render templates and write output
-  test_generator.py          # Generate integration tests
 templates/
   server.py.j2               # FastMCP server template
 generated/                   # OUTPUT — never hand-edit
   server.py                  # The MCP server (this is what you run)
-  tests.py                   # 208 integration tests
+bank-tester/                 # AI-driven integration test suite
+  run-bank-test.sh           # Orchestrator: boot VM, run tasks, collect results
+  generate-tasks.py          # Auto-generate task files from spec + config
+  task-config.yaml           # Per-subsystem test values and dependencies
+  analyze-results.py         # Parse results, compute tool coverage
+  tasks/                     # 42 task files (workflow + systematic + adversarial)
 vm/                          # Test infrastructure
   setup.sh                   # Golden image builder
   install.exp                # Automated pfSense installer
   firstboot.exp              # First-boot configuration
   upgrade-2.8.exp            # pfSense 2.7.2 → 2.8.1 upgrade
-  run-tests.sh               # Test runner (boot VM, run tests, cleanup)
 ```
 
 **Critical rule:** Generated code in `generated/` is never hand-edited. If the output has bugs, fix the generator templates or modules and re-run.
 
-## Running the Test Suite
+## Testing: AI-Driven Integration Suite
 
-The test suite runs against a real pfSense VM via QEMU. 208 tests, all passing.
+Instead of traditional unit/integration tests, this project uses an **AI-driven test methodology**: a "tester Claude" consumes the MCP server as a real client, executing structured task files against a live pfSense VM.
+
+### How it works
+
+1. **Golden image**: `vm/setup.sh` builds a pfSense CE 2.8.1 VM with REST API v2.7.1 (fully automated, ~25 min one-time)
+2. **Task generation**: `generate-tasks.py` reads the OpenAPI spec + `task-config.yaml` and produces 42 markdown task files — each one instructs the tester to exercise specific tools with specific values
+3. **Test execution**: `run-bank-test.sh` boots a fresh VM, then runs each task file through Claude with the MCP server connected. Claude calls the real tools against the real API.
+4. **Result analysis**: Each task produces a structured TASK-REPORT with tool call counts, failure categories, and the list of tools invoked. `analyze-results.py` aggregates these into coverage metrics.
+
+### Running the tests
 
 ```bash
-# Enter dev shell (provides qemu, curl, pytest, expect)
+# Enter dev shell (provides qemu, curl, expect, python)
 nix develop
 
 # Build golden image (one-time, ~25 minutes)
 bash vm/setup.sh
 
-# Run full test suite (~5 minutes)
-bash vm/run-tests.sh -v
+# Run all 42 tasks (~66 minutes)
+nix develop -c bash bank-tester/run-bank-test.sh
 
-# Run specific tests
-bash vm/run-tests.sh -v -k "firewall_alias or vpn_wireguard"
+# Run a single task
+nix develop -c bash bank-tester/run-bank-test.sh 01
+
+# Analyze results
+nix develop -c python bank-tester/analyze-results.py bank-tester/results/run-*/
 ```
 
-### Test infrastructure
+### Current coverage
 
-Each test run copies the golden image, boots a fresh VM, runs tests against the live API, then destroys the VM. No state leaks between runs.
+| Metric | Value |
+|--------|-------|
+| OpenAPI spec operations | 677 |
+| Generated MCP tools | 677 |
+| Tasks | 42/42 PASS |
+| Tools invoked | 448/677 (66.2%) |
+| Total tool calls | 665 |
+| First-attempt success rate | 97.9% |
 
-The golden image build is fully automated: download pfSense installer, install via expect scripts, configure the REST API, upgrade from 2.7.2 to 2.8.1, and snapshot. All driven by `vm/setup.sh`.
+229 tools remain untested — primarily PUT (bulk replace) endpoints and niche sub-resource operations. Next milestone: 100% tool coverage.
 
-### Coverage
+### Why AI testing?
 
-| Metric | Count | % |
-|--------|-------|---|
-| Active paths (tools generated) | 217 | 84.1% |
-| Paths with active tests | 208 | 80.6% |
-| Paths with documented skip | 7 | 2.7% |
-| Phantom plural routes (removed from generator) | 41 | 15.9% |
-| **Total in spec** | **258** | **100%** |
-
-Every untested path has a documented reason. Zero silent skips.
-
-### Skipped endpoints
-
-| Endpoint | Reason |
-|----------|--------|
-| `services/haproxy/settings/dns_resolver` | REST API bug: 500 "parent Model not constructed" |
-| `services/haproxy/settings/email_mailer` | REST API bug: 500 "parent Model not constructed" |
-| `system/package` (POST/DELETE) | nginx 504 gateway timeout via QEMU NAT; GET tested |
-| `services/dhcp_server` (POST) | Per-interface singleton — POST not supported by design, PATCH tested via singleton |
-| `system/restapi/version` (PATCH) | Destructive: changes API version |
-
-### Phantom plural routes (41 paths, removed from generator)
-
-The OpenAPI spec includes 41 plural sub-resource endpoints that return nginx 404 on the real pfSense server. These are spec-only artifacts — pfSense doesn't register them. Their singular CRUD counterparts all work and are fully tested. We chose to filter these out during code generation so the MCP server only exposes tools that actually work. This may be revisited if a future pfSense REST API version registers these routes.
-
-<details>
-<summary>Full list of removed paths</summary>
-
-- `/api/v2/diagnostics/tables`
-- `/api/v2/firewall/schedule/time_ranges`
-- `/api/v2/firewall/traffic_shaper/limiter/bandwidths`
-- `/api/v2/firewall/traffic_shaper/limiter/queues`
-- `/api/v2/firewall/traffic_shaper/queues`
-- `/api/v2/routing/gateway/group/priorities`
-- `/api/v2/services/bind/access_list/entries`
-- `/api/v2/services/dhcp_server/address_pools`
-- `/api/v2/services/dhcp_server/custom_options`
-- `/api/v2/services/dhcp_server/static_mappings`
-- `/api/v2/services/dns_forwarder/host_override/aliases`
-- `/api/v2/services/dns_resolver/access_list/networks`
-- `/api/v2/services/dns_resolver/host_override/aliases`
-- `/api/v2/services/freeradius/clients`
-- `/api/v2/services/freeradius/interfaces`
-- `/api/v2/services/freeradius/users`
-- `/api/v2/services/haproxy/backend/acls`
-- `/api/v2/services/haproxy/backend/actions`
-- `/api/v2/services/haproxy/backend/errorfiles`
-- `/api/v2/services/haproxy/backend/servers`
-- `/api/v2/services/haproxy/frontend/acls`
-- `/api/v2/services/haproxy/frontend/actions`
-- `/api/v2/services/haproxy/frontend/addresses`
-- `/api/v2/services/haproxy/frontend/certificates`
-- `/api/v2/services/haproxy/frontend/error_files`
-- `/api/v2/services/haproxy/settings/dns_resolvers`
-- `/api/v2/services/haproxy/settings/email_mailers`
-- `/api/v2/status/ipsec/child_sa`
-- `/api/v2/status/ipsec/child_sas`
-- `/api/v2/status/logs/auth`
-- `/api/v2/status/logs/openvpn`
-- `/api/v2/status/logs/packages/restapi`
-- `/api/v2/status/openvpn/server/connection`
-- `/api/v2/status/openvpn/server/connections`
-- `/api/v2/status/openvpn/server/route`
-- `/api/v2/status/openvpn/server/routes`
-- `/api/v2/vpn/ipsec/phase1/encryptions`
-- `/api/v2/vpn/ipsec/phase2/encryptions`
-- `/api/v2/vpn/openvpn/client_export/configs`
-- `/api/v2/vpn/wireguard/peer/allowed_ips`
-- `/api/v2/vpn/wireguard/tunnel/addresses`
-
-</details>
-
-### Contributing
-
-PRs to expand test coverage are welcome — especially for the skipped endpoints listed above. The test generator in `generator/test_generator.py` makes it straightforward to add new test configurations without writing test code by hand.
+Traditional pytest tested the HTTP API directly — it verified the API works but said nothing about whether an AI agent can actually *use* the MCP tools. The bank tester validates the full stack: tool naming, parameter descriptions, docstrings, error messages, and the confirmation gate pattern. It catches issues like truncated descriptions, misleading defaults, and confusing enum values that unit tests would never find.
 
 ## This Project is 100% AI-Generated
 

@@ -2,7 +2,7 @@
 
 ## Goal
 
-Build a **self-contained, auto-generated MCP server** for the pfSense REST API v2. The server is generated from `openapi-spec.json` (the official OpenAPI 3.0.0 spec, 258 paths, 178 schemas, 677 operations). 41 phantom plural routes (78 operations) are filtered out during generation, producing 599 tools. When pfSense updates their API, pull a new spec and re-run the generator.
+Build a **self-contained, auto-generated MCP server** for the pfSense REST API v2. The server is generated from `openapi-spec.json` (the official OpenAPI 3.0.0 spec, 258 paths, 178 schemas, 677 operations). When pfSense updates their API, pull a new spec and re-run the generator.
 
 ## Work Order
 
@@ -315,63 +315,16 @@ Exclude from generation or add extra warnings:
 
 ---
 
-## Phase 2 Status: Test Coverage
+## Test Coverage
 
-**Current: 208 tests, 208 passing** against 217 active API paths (677 tools total; 41 phantom plural routes included in MCP server but skipped in pytest)
+OpenAPI spec: 258 paths, 677 operations. Generated MCP server: 677 tools.
 
-### Coverage summary
+Bank tester (`run-20260208-192434`): **42/42 tasks PASS**.
+- 448/677 tools invoked (66.2%)
+- 665 tool calls, 97.9% first-attempt success rate
+- 14 first-attempt failures, all self-corrected
 
-| Metric | Count | % |
-|---|---|---|
-| Paths with active tests | 208 | 80.6% |
-| Paths with documented skip | 50 | 19.4% |
-| **Total accounted** | **258** | **100%** |
-
-pfSense CE 2.8.1 with REST API v2.7.1 (upgraded from 2.7.2 via `upgrade-2.8.exp`).
-
-### Test infrastructure
-
-- `RetryClient` wraps httpx.Client with automatic retry on 503 (dispatcher busy), up to 6 attempts with backoff
-- `_CHAINED_CRUD` supports multi-parent dependency chains with `receives_from` for inter-parent field injection (e.g., cert needs CA's refid)
-- `_CHAINED_CRUD` supports `static_parent_id` for sub-resources with a fixed parent (e.g., DHCP sub-resources always use `parent_id: "lan"`)
-- `_CHAINED_CRUD` supports `siblings` for creating sibling resources under the same parent (e.g., HAProxy ACL for action tests)
-- PEM certificates embedded in test constants for CA/cert-dependent endpoints (IPsec, OpenVPN, CRL, HAProxy frontend/certificate)
-- VM uses 3 e1000 NICs (em0=WAN, em1=LAN, em2=spare for LAGG), VirtIO RNG, 2GB RAM
-- REST API v2.7.1 on pfSense CE 2.8.1 (upgraded via `vm/upgrade-2.8.exp`)
-
-### Permanently skipped endpoints — with reasons
-
-Every skip is documented in `_SKIP_CRUD_PATHS`, `_SKIP_ACTION`, `_SKIP_SINGLETON`, or `_PHANTOM_PLURAL_ROUTES` in `test_generator.py`.
-
-**Hardware/VM limitations (0):**
-
-**Not applicable — by design (1):**
-- `services/dhcp_server` — per-interface singleton, POST not supported by design. PATCH tested via singleton test.
-
-**REST API bugs persisting in v2.7.1 (2):**
-- `services/haproxy/settings/dns_resolver`, `email_mailer` — 500 parent model construction bug (CREATE works after config.xml init, but GET/DELETE still broken)
-
-**Infrastructure limitations (1):**
-- `system/package` — install/delete trigger nginx 504 gateway timeout (>60s via QEMU NAT); GET endpoints tested via read tests
-
-**External dependencies (0):**
-
-**Other (1):**
-- `system/restapi/version` — PATCH triggers API version change (destructive)
-
-### Phantom plural routes (41)
-
-Routes present in the OpenAPI spec but return nginx 404 on the real server. These are sub-resource plural endpoints whose singular forms require `parent_id`. The pfSense REST API simply doesn't register these routes. All are tested via their singular CRUD endpoints in pytest. These routes are **intentionally included** in the MCP server (677 tools) so the bank tester can rediscover them naturally — they will 404 when called.
-
-Listed in `_PHANTOM_PLURAL_ROUTES` in `context_builder.py`. Skipped in `test_generator.py` only.
-
-### Key test patterns
-
-- **IPsec encryption**: Use `aes` (AES-CBC) with `keylen=256`, NOT `aes256gcm` (GCM keylen field is not the key size)
-- **Gateway group priority**: Need a second gateway as parent — the priority's `gateway` field must reference an existing gateway by name
-- **CRL `descr` field**: Not editable via PATCH — set `update_field=None` for CRL chains
-- **Auth endpoints**: `auth/key` and `auth/jwt` require BasicAuth, not API key. Tests use a dedicated httpx.Client with `auth=(user, pass)`
-- **Skip priority**: `_SKIP_CRUD_PATHS` is checked before `_CHAINED_CRUD`, `_SKIP_ACTION` is checked before `_ACTION_TESTS` — this ensures skips always win
+Testing is done via the bank tester (`bank-tester/run-bank-test.sh`), which boots a VM, runs Claude against the MCP server, and validates results. See the Phase 3 section for details.
 
 ---
 
@@ -387,11 +340,11 @@ packages.x86_64-linux.default = writeShellApplication {
 };
 ```
 
-The dev shell includes jinja2, pytest, qemu, and curl for generator development and VM testing.
+The dev shell includes jinja2, qemu, and curl for generator development and VM testing.
 
 ## Phase 3: Bank Tester Integration Testing
 
-Test the MCP server end-to-end by having a "tester Claude" use it as a real consumer. 43 task files (9 workflow + 28 systematic + 5 adversarial + 1 destructive) cover all 677 tools. Use findings to improve tool docstrings, parameter hints, and error messages.
+Test the MCP server end-to-end by having a "tester Claude" use it as a real consumer. 42 task files (9 workflow + 28 systematic + 5 adversarial) cover 448/677 tools (66.2%). Use findings to improve tool docstrings, parameter hints, and error messages. Next goal: expand task-config.yaml to reach 100% tool coverage.
 
 ### Running the bank tester
 
@@ -412,82 +365,10 @@ bank-tester/
   TESTER-CLAUDE.md          # System prompt for the tester Claude
   generate-tasks.py         # Auto-generate task files from OpenAPI spec + task-config.yaml
   task-config.yaml           # Per-subsystem test values, deps, skip reasons
-  tasks/                    # 43 task files (01-09 workflow, 10-37 systematic, 40-44 adversarial, 99 destructive)
+  tasks/                    # 42 task files (01-09 workflow, 10-37 systematic, 40-44 adversarial)
   analyze-results.py        # Parse tester output, aggregate failure categories + tool coverage
   results/run-*/            # Per-run results (txt + summary.md + live.log)
 ```
-
-### Phase 3.2 Work Order: Iterative Test-Fix-Regenerate
-
-Work through every bank tester task sequentially (10, 11, 12, ... 37, 40-44), greening each one before moving to the next. No user input needed until all tasks are done.
-
-For each task:
-
-1. **Run the task** — `nix develop -c bash bank-tester/run-bank-test.sh <task-number>`
-2. **Read results** — check the task `.txt` file and `summary.md`
-3. **Fix EVERY failure** — no skipping, no "moving on". Every `first_attempt_failure` must be investigated and fixed, whether it's in the generator, task-config, or MCP server. Fix the root cause (generator/codegen/task-config), regenerate, and re-run until the task has 0 first-attempt failures.
-4. **Tabulate** — add any phantom 404s or API 500s to the "Bank Tester Endpoint Discovery" table below
-5. **Commit** — commit fixes + regenerated server.py after each task greens
-6. **Move to next task** — only after the current task is fully green
-
-**CRITICAL: NEVER skip a failure.** The entire purpose of this phase is to find and fix every issue. A failure that gets skipped is a failure that ships. If a description is truncated, fix the truncation. If a test value is wrong, fix the test value. If the generator produces bad output, fix the generator. No exceptions.
-
-Task 35 already done. Work through 10→44 sequentially.
-
-### Bank Tester Endpoint Discovery
-
-Endpoints discovered as phantom or broken during bank tester runs.
-
-#### Generator fixes applied (fixed root cause in generator)
-
-| Task | Tool | Issue | Fix |
-|------|------|-------|-----|
-| 11 | `create_firewall_nat_outbound_mapping` | `target_subnet` default 128 fails IPv4 | conditional defaults → None (`schema_parser.py`) |
-| 12 | `create_firewall_schedule` | `timerange: list[str]` should be `list[dict]` | handle `allOf`/`$ref` in type resolver (`schema_parser.py`) |
-| 20 | `create_services_dhcp_server_address_pool` | `parent_id: int` should accept strings like `"lan"` | normalize `parent_id` → `str \| int` in body params (`schema_parser.py`) |
-| 30 | `update_system_restapi_settings` | PATCH defaults overwrite existing config (auth_methods, etc.) | PATCH non-required body fields default to `None` (`schema_parser.py`) |
-
-#### Task-config fixes (wrong test values in task files)
-
-| Task | Tool | Issue | Fix |
-|------|------|-------|-----|
-| 11 | `create_firewall_nat_port_forward` | `destination: "wanip"` wrong format | task-config fixed to `"wan:ip"` |
-| 21,23 | `create_services_ha_proxy_backend` | `descr` field doesn't exist on backends | task fixed to use `stats_desc` with `stats_enabled=true` |
-| 24 | `pfsense_post_/api/v2/services/bind/sync` | tool doesn't exist — no bare sync POST | task fixed to use `sync_settings` + `sync_remote_host` CRUD |
-| 25 | `create_services_acme_certificate` | empty `a_domainlist` array rejected | task needs at least one domain |
-| 28 | `update_system_web_gui_settings` | `webguicss` not in OpenAPI spec | task fixed to use `port` field |
-
-#### API quirks (self-corrected, not fixable in generator)
-
-| Task | Tool | Issue | Notes |
-|------|------|-------|-------|
-| 23 | `get_ha_proxy_frontend_certificate` | cert create returns id=0 but GET 404s | needs real `ssl_certificate` refid to persist |
-| 26 | `update_status_logs_settings` | `logall` silently ignored without `enableremotelogging=true` | docstring already documents this |
-| 27 | `update_services_free_radius_user` | update requires `password` even for partial updates | API quirk, not standard CRUD |
-| 31 | `create_user_group` | uses `description` field vs user's `descr` | API naming inconsistency |
-| 31 | `create_user_auth_server` | RADIUS-only fields marked required for LDAP | spec marks conditional fields as unconditionally required |
-| 32 | `create_vpni_psec_phase1` | conditional fields (caref, certref) all required | spec issue — empty strings work |
-| 32 | `create_vpni_psec_phase1` | encryption array cannot be empty | API minimum-length constraint not in spec |
-| 32 | `create_vpni_psec_phase2` | NAT/BINAT fields required in all modes | spec marks conditional fields required |
-| 32 | `create_vpni_psec_phase2` | hash needs `hmac_` prefix (unlike Phase 1) | API inconsistency, not in spec |
-| 36 | `create_auth_key` / `post_auth_jwt` | requires BasicAuth, not API key | MCP server only supports API key auth |
-| 37 | `get_system_package` | ID is numeric index, not package name | spec description too generic |
-
-#### Phantom routes (confirmed 404)
-
-| Task | Endpoint | Notes |
-|------|----------|-------|
-| 35 | `list_status_logs_auth` | phantom plural route |
-
-**Task status**: All systematic tasks (10-37) and adversarial tasks (40-44) complete.
-
-**Aggregate results (final runs only)**:
-- 31 tasks run, 0 permanent failures
-- 4 generator fixes applied (conditional defaults, allOf/$ref types, parent_id normalization, PATCH defaults)
-- 9 task-config fixes applied
-- 11 API quirks tabulated (self-corrected by tester, not fixable in generator)
-- 100% first-attempt success on 14/31 tasks
-- Tasks with most friction: IPsec (32), auth (36), PKI (29)
 
 ---
 
@@ -497,24 +378,7 @@ Endpoints discovered as phantom or broken during bank tester runs.
 2. **`openapi-spec.json` is the single source of truth**. All type information, parameter names, and endpoint structure come from the spec.
 3. **Test against the VM, not production**. The golden image exists for this purpose.
 4. **Expect scripts are fragile but working**. Do not change timing, patterns, or shortcuts unless something breaks. See gotchas above.
-5. **Every skipped endpoint must be documented with a reason** — in `_SKIP_CRUD_PATHS`, `_SKIP_ACTION`, `_SKIP_SINGLETON`, or `_PHANTOM_PLURAL_ROUTES` in `test_generator.py`, AND in the "Permanently skipped endpoints" section of this file. No silent skips.
-6. **Always use `nix develop -c` for ALL commands** that need qemu, curl, python, pytest, expect, or any dev tool. These are NOT on the system PATH — they are only available inside the nix dev shell. Running `qemu-system-x86_64` or `pytest` without `nix develop -c` will fail with "command not found".
-
-## Test Development Workflow
-
-Each full test run takes ~5-8 minutes. To avoid wasting time:
-
-1. **Regenerate**: `nix develop -c python -m generator`
-2. **Test only new/changed tests first** using `-k` filter:
-   ```bash
-   nix develop -c bash vm/run-tests.sh -v -k "singleton_ or action_"
-   ```
-3. **Iterate on failures** — keep using `-k` to re-run only failing tests until all pass
-4. **Final full suite run** — only after new tests all pass individually:
-   ```bash
-   nix develop -c bash vm/run-tests.sh -v
-   ```
-5. **Commit** only after full suite passes
+5. **Always use `nix develop -c` for ALL commands** that need qemu, curl, python, pytest, expect, or any dev tool. These are NOT on the system PATH — they are only available inside the nix dev shell. Running `qemu-system-x86_64` or `pytest` without `nix develop -c` will fail with "command not found".
 
 ## Integration
 
@@ -534,7 +398,7 @@ Findings from building a 677-tool MCP server and testing it with an AI consumer 
 
 2. **Sanitize large integers from OpenAPI specs.** The Anthropic API rejects tool schemas containing integers that exceed safe serialization limits (e.g., `9223372036854775807` / int64 max). OpenAPI specs commonly use these as sentinel values meaning "no limit". The generator must detect values where `abs(value) >= 2**53` and replace them with `None` defaults. Without this, the entire MCP server fails to register with `tools.N.custom.input_schema: int too big to convert`.
 
-3. **One bad tool schema poisons the whole server.** When the Anthropic API rejects a single tool's schema, ALL tools become unavailable for that request — not just the broken one. This makes schema validation bugs critical-severity, since a single overlooked field can take down a 599-tool server.
+3. **One bad tool schema poisons the whole server.** When the Anthropic API rejects a single tool's schema, ALL tools become unavailable for that request — not just the broken one. This makes schema validation bugs critical-severity, since a single overlooked field can take down a 677-tool server.
 
 ### Tool Discoverability (What Works)
 
@@ -556,7 +420,7 @@ Findings from building a 677-tool MCP server and testing it with an AI consumer 
 
 ### OpenAPI-to-MCP Generation Lessons
 
-10. **Phantom routes in specs cause silent failures.** OpenAPI specs may document routes that don't exist on the real server (e.g., plural sub-resource endpoints). These generate tools that always 404. Filter them by testing against a live instance during generation, or maintain an exclusion list.
+10. **Undocumented route differences cause silent failures.** OpenAPI specs may document routes that behave differently on the real server (e.g., some sub-resource plural endpoints may 404 on older versions). Test generated tools against a live instance to identify discrepancies.
 
 11. **`readOnly` schema fields must be excluded from request parameters.** Including response-only fields as tool parameters confuses the consumer into thinking they're settable.
 
@@ -588,33 +452,15 @@ Findings from building a 677-tool MCP server and testing it with an AI consumer 
 
 20. **Sub-resource `parent_id` fields need consistent typing.** OpenAPI specs may type `parent_id` as `integer` in request bodies but `oneOf: [integer, string]` in query parameters. The API actually accepts strings (e.g., `"lan"` for DHCP server sub-resources). Normalizing `parent_id` to `str | int` everywhere prevents type errors when consumers pass interface names as parent identifiers.
 
-### Bank Tester Run 1 Results (pre-fix baseline)
+### Destructive Settings in Automated Testing
 
-**Test run**: `run-20260208-144233` (8 tasks, pre-generator-fix)
-- 6/8 passed, 2 failed (both `int too big to convert` — fixed by sanitizing int64 max defaults)
-- 95% first-attempt success rate across working tests (57/60 tool calls)
-- Failure categories: `parameter_format` (2), `missing_enum_values` (1)
-- Zero failures on: firewall rules, DNS settings, certificates, diagnostics, full network setup
-- All failures were in WireGuard (sub-resource array pattern + private key format guessing)
-- Output validation errors on list endpoints noted but non-blocking (fixed by widening return type)
+21. **Settings mutations that change the API listening endpoint break all subsequent tests.** Changing WebGUI port (443→8443), protocol (HTTPS→HTTP), or SSL certificate makes the API unreachable from MCP clients configured with the original endpoint. In a full 42-task suite run, task 28's port change killed tasks 29-37 (all returned ConnectTimeout). Fix: exclude endpoint-altering settings from automated test sequences, or run them last. These tools work correctly — they're just destructive to the test harness itself.
 
-**Generator fixes applied after this run:**
-- `codegen.py`: return type `dict[str, Any] | str` → `dict[str, Any] | list[Any] | str`
-- `schema_parser.py`: sanitize defaults where `abs(value) >= 2**53` → treat as `None`
+### Bank Tester Results
 
-### Bank Tester Phase 3.2 Results (systematic + adversarial)
-
-**31 tasks run** (10-37 systematic, 40-44 adversarial), all against pfSense CE 2.8.1 with REST API v2.7.1.
-
-**Generator fixes applied during this phase:**
-1. `schema_parser.py`: conditional fields with "only available when" → default `None`
-2. `schema_parser.py`: handle `allOf`/`$ref` in array item types → `list[dict[str, Any]]`
-3. `schema_parser.py`: normalize body `parent_id` from `int` → `str | int`
-4. `schema_parser.py`: PATCH non-required body fields → default `None` (prevents overwriting existing config)
-5. `codegen.py`: remove description truncation entirely + strip HTML tags
-
-**Results:**
-- 14/31 tasks: 100% first-attempt success (zero failures)
-- Remaining 17 tasks: all self-corrected; failures were task-config errors or API quirks
-- 0 permanent generator failures after fixes
-- ~400+ tool invocations across all tasks with >95% aggregate first-attempt success rate
+**Final run** (`run-20260208-192434`): **42/42 tasks PASS**
+- 665 total tool calls, 14 first-attempt failures, **97.9% first-attempt success rate**
+- 448/677 tools invoked (**66.2% tool coverage**)
+- All 14 first-attempt failures self-corrected (conditional required fields, cascade deletes, encryption field names)
+- Runtime: ~66 minutes end-to-end
+- Failure categories: `missing_required_field` (6), `dependency_unknown` (5), `parameter_format` (3)

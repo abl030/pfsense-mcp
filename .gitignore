@@ -48,3 +48,6 @@ vm/api-key.txt
 
 # VM upgrade sentinel
 vm/upgrade-done
+
+# Bank tester results (large, regenerated per run)
+bank-tester/results/

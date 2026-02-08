@@ -45,7 +45,7 @@
     - `protocol`: `tcp`
     - `source`: `any`
     - `destination`: `any`
-    - `target`: ``
+    - `target`: `wan:ip`
     - `descr`: `bt_sys11_outbound`
 7. **List** using `pfsense_list_firewall_nat_outbound_mappings` — verify the created resource appears
 8. **Get** using `pfsense_get_firewall_nat_outbound_mapping` with the ID from the create response
