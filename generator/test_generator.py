@@ -454,7 +454,6 @@ _SKIP_ACTION: dict[str, str] = {
     "/api/v2/services/acme/certificate/renew": "requires real ACME server",
     "/api/v2/vpn/openvpn/client_export": "requires functioning OpenVPN server",
     "/api/v2/system/restapi/settings/sync": "HA sync endpoint times out without peer",
-    "/api/v2/system/certificate/pkcs12/export": "406 no content handler for binary format (bug persists in v2.7.1)",
 }
 
 # ── Pre-generated test PEM certificates ───────────────────────────────────────
@@ -2478,8 +2477,8 @@ def _gen_action_test(path: str, config: dict[str, Any]) -> str:
         body_fields = ", ".join(f'"{k}": {v!r}' for k, v in body.items()) if body else ""
         extra = f", {body_fields}" if body_fields else ""
         if binary_export:
-            # PKCS12 export returns binary — must use Accept: */* and check status only
-            lines.append(f'        resp = client.post("{path}", json={{"certref": cert["refid"]{extra}}}, headers={{"Accept": "*/*"}})')
+            # PKCS12 export returns binary — use Accept: application/octet-stream
+            lines.append(f'        resp = client.post("{path}", json={{"certref": cert["refid"]{extra}}}, headers={{"Accept": "application/octet-stream"}})')
             lines.append(f'        assert resp.status_code == 200, f"PKCS12 export {{resp.status_code}}: {{resp.text[:200]}}"')
             lines.append(f'        assert len(resp.content) > 0, "PKCS12 export returned empty body"')
         else:

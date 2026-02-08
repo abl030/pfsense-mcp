@@ -79,7 +79,7 @@ def _delete_with_retry(client: httpx.Client, path: str, obj_id, params: dict | N
             break
         time.sleep(5)
     assert resp.status_code in (200, 404), f"Delete {path} id={obj_id} failed: {resp.text[:500]}"
-# Total generated tests: 205
+# Total generated tests: 206
 
 def test_crud_firewall_alias(client: httpx.Client):
     """CRUD lifecycle: /api/v2/firewall/alias"""
@@ -5916,7 +5916,29 @@ def test_action_system_certificate_generate(client: httpx.Client):
         client.delete("/api/v2/system/certificate_authority", params={"id": ca["id"]})
 
 
-# SKIP /api/v2/system/certificate/pkcs12/export: 406 no content handler for binary format (bug persists in v2.7.1)
+def test_action_system_certificate_pkcs12_export(client: httpx.Client):
+    """Action: POST /api/v2/system/certificate/pkcs12/export"""
+    # Generate a CA and cert first
+    ca_resp = client.post("/api/v2/system/certificate_authority/generate", json={
+        "descr": "CA for cert action", "keytype": "RSA", "keylen": 2048,
+        "digest_alg": "sha256", "dn_commonname": "Cert Action CA", "lifetime": 3650,
+        "dn_country": "US", "dn_state": "California", "dn_city": "San Francisco", "dn_organization": "pfSense Test", "dn_organizationalunit": "Testing",
+    })
+    ca = _ok(ca_resp)
+    cert_resp = client.post("/api/v2/system/certificate/generate", json={
+        "descr": "Cert for action", "caref": ca["refid"], "keytype": "RSA",
+        "keylen": 2048, "digest_alg": "sha256", "dn_commonname": "action.test",
+        "lifetime": 365, "type": "server",
+    })
+    cert = _ok(cert_resp)
+    try:
+        resp = client.post("/api/v2/system/certificate/pkcs12/export", json={"certref": cert["refid"]}, headers={"Accept": "application/octet-stream"})
+        assert resp.status_code == 200, f"PKCS12 export {resp.status_code}: {resp.text[:200]}"
+        assert len(resp.content) > 0, "PKCS12 export returned empty body"
+    finally:
+        client.delete("/api/v2/system/certificate", params={"id": cert["id"]})
+        client.delete("/api/v2/system/certificate_authority", params={"id": ca["id"]})
+
 
 def test_action_system_certificate_renew(client: httpx.Client):
     """Action: POST /api/v2/system/certificate/renew"""
