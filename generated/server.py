@@ -707,9 +707,9 @@ async def pfsense_create_firewall_alias(
 
     name: Sets the name for the alias. This name must be unique from all other aliases.
     type_: Sets the type of alias this object will be. This directly impacts what values can be specified in the `address` field. Valid values: ['host', 'network', 'port']
-    address: Sets the host, network or port entries for the alias. When `type` is set to `host`, each entry must be a valid IP address or FQDN. When `type` is set to `network`, each entry must be a valid network CIDR or FQDN. When `type` is set to `port`, each...
+    address: Sets the host, network or port entries for the alias. When `type` is set to `host`, each entry must be a valid IP address or FQDN. When `type` is set to `network`, each entry must be a valid network CIDR or FQDN. When `type` is set to `port`, each entry must be a valid port or port range. You may also specify an existing alias's `name` as an entry to created nested aliases.
     descr: Sets a description to help specify the purpose or contents of the alias.
-    detail: Sets descriptions for each alias `address`. Values must match the order of the `address` value it relates to. For example, the first value specified here is the description for the first value specified in the `address` field. This value cannot co...
+    detail: Sets descriptions for each alias `address`. Values must match the order of the `address` value it relates to. For example, the first value specified here is the description for the first value specified in the `address` field. This value cannot contain
     """
     if not confirm:
         return (
@@ -750,9 +750,9 @@ async def pfsense_update_firewall_alias(
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     id: The ID of the object or resource to interact with.
-    address: Sets the host, network or port entries for the alias. When `type` is set to `host`, each entry must be a valid IP address or FQDN. When `type` is set to `network`, each entry must be a valid network CIDR or FQDN. When `type` is set to `port`, each...
+    address: Sets the host, network or port entries for the alias. When `type` is set to `host`, each entry must be a valid IP address or FQDN. When `type` is set to `network`, each entry must be a valid network CIDR or FQDN. When `type` is set to `port`, each entry must be a valid port or port range. You may also specify an existing alias's `name` as an entry to created nested aliases.
     descr: Sets a description to help specify the purpose or contents of the alias.
-    detail: Sets descriptions for each alias `address`. Values must match the order of the `address` value it relates to. For example, the first value specified here is the description for the first value specified in the `address` field. This value cannot co...
+    detail: Sets descriptions for each alias `address`. Values must match the order of the `address` value it relates to. For example, the first value specified here is the description for the first value specified in the `address` field. This value cannot contain
     name: Sets the name for the alias. This name must be unique from all other aliases.
     type_: Sets the type of alias this object will be. This directly impacts what values can be specified in the `address` field. Valid values: ['host', 'network', 'port']
     """
@@ -966,10 +966,10 @@ async def pfsense_create_firewall_nat_one_to_one_mapping(
 
     Note: Call pfsense_firewall_apply after this to apply changes.
 
-    destination: The destination IP address or subnet that traffic must match to apply this mapping. Valid value options are: an existing interface, an IP address, a subnet CIDR, an existing alias, `any`, `l2tp`, `pppoe`. The context of this address can be inverte...
+    destination: The destination IP address or subnet that traffic must match to apply this mapping. Valid value options are: an existing interface, an IP address, a subnet CIDR, an existing alias, `any`, `l2tp`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
     external: The external IP address or interface for the 1:1 mapping. Valid value options are: an IP address. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
     interface: The interface this 1:1 NAT mapping applies to.
-    source: The source IP address or subnet that traffic must match to apply this mapping. Valid value options are: an existing interface, an IP address, a subnet CIDR, `any`, `l2tp`, `pppoe`. The context of this address can be inverted by prefixing the value...
+    source: The source IP address or subnet that traffic must match to apply this mapping. Valid value options are: an existing interface, an IP address, a subnet CIDR, `any`, `l2tp`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
     descr: A description for this 1:1 NAT mapping
     disabled: Disables this 1:1 NAT mapping.
     ipprotocol: The IP version this mapping applies to. Valid values: ['inet', 'inet6']
@@ -1028,14 +1028,14 @@ async def pfsense_update_firewall_nat_one_to_one_mapping(
 
     id: The ID of the object or resource to interact with.
     descr: A description for this 1:1 NAT mapping
-    destination: The destination IP address or subnet that traffic must match to apply this mapping. Valid value options are: an existing interface, an IP address, a subnet CIDR, an existing alias, `any`, `l2tp`, `pppoe`. The context of this address can be inverte...
+    destination: The destination IP address or subnet that traffic must match to apply this mapping. Valid value options are: an existing interface, an IP address, a subnet CIDR, an existing alias, `any`, `l2tp`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
     disabled: Disables this 1:1 NAT mapping.
     external: The external IP address or interface for the 1:1 mapping. Valid value options are: an IP address. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
     interface: The interface this 1:1 NAT mapping applies to.
     ipprotocol: The IP version this mapping applies to. Valid values: ['inet', 'inet6']
     natreflection: Enables or disables NAT reflection for traffic matching this mapping. Set to `null` to use the system default. Valid values: ['enable', 'disable']
     nobinat: Exclude traffic matching this mapping from a later, more general, mapping.
-    source: The source IP address or subnet that traffic must match to apply this mapping. Valid value options are: an existing interface, an IP address, a subnet CIDR, `any`, `l2tp`, `pppoe`. The context of this address can be inverted by prefixing the value...
+    source: The source IP address or subnet that traffic must match to apply this mapping. Valid value options are: an existing interface, an IP address, a subnet CIDR, `any`, `l2tp`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
     """
     if not confirm:
         return (
@@ -1225,31 +1225,31 @@ async def pfsense_create_firewall_nat_outbound_mapping(
     nosync: bool | None = None,
     poolopts: str | None = None,
     protocol: str | None = None,
-    source_hash_key: str | None = '0x0b6b2c4dbf91e989016aa939cb2eebbf',
+    source_hash_key: str | None = None,
     source_port: str | None = None,
     static_nat_port: bool | None = None,
-    target_subnet: int | None = 128,
+    target_subnet: int | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/firewall/nat/outbound/mapping
 
     Note: Call pfsense_firewall_apply after this to apply changes.
 
-    destination: The destination network this rule should match. Valid value options are: an existing interface, a subnet CIDR, an existing alias, `any`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`. For interface values, th...
+    destination: The destination network this rule should match. Valid value options are: an existing interface, a subnet CIDR, an existing alias, `any`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
     interface: The interface on which traffic is matched as it exits the firewall. In most cases this is a WAN-type or another externally-connected interface.
-    source: The source network this rule should match. Valid value options are: an existing interface, a subnet CIDR, an existing alias, `any`, `(self)`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`. For interface value...
-    target: The target network traffic matching this rule should be translated to. Valid value options are: an IP address, an existing alias. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of it...
+    source: The source network this rule should match. Valid value options are: an existing interface, a subnet CIDR, an existing alias, `any`, `(self)`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
+    target: The target network traffic matching this rule should be translated to. Valid value options are: an IP address, an existing alias. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.This field is only available when the following conditions are met:- `nonat` must be equal to `false`
     descr: A description for the outbound NAT mapping.
     destination_port: The destination port this rule should match. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`, an existing port type firewall alias
     disabled: Disable this outbound NAT rule.
-    nat_port: The external source port or port range used for rewriting the original source port on connections matching the rule. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`This field is only available when the following con...
+    nat_port: The external source port or port range used for rewriting the original source port on connections matching the rule. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`This field is only available when the following conditions are met:- `static_nat_port` must be equal to `false`- `nonat` must be equal to `false`
     nonat: Do not NAT traffic matching this rule.
     nosync: Do not sync this rule to HA peers.
-    poolopts: The pool option used to load balance external IP mapping when `target` is set to a subnet or alias of many addresses. Set to `null` to revert to the system default.This field is only available when the following conditions are met:- `nonat` must b... Valid values: ['round-robin', 'round-robin sticky-address', 'random', 'random sticky-address', 'source-hash', 'bitmask']
+    poolopts: The pool option used to load balance external IP mapping when `target` is set to a subnet or alias of many addresses. Set to `null` to revert to the system default.This field is only available when the following conditions are met:- `nonat` must be equal to `false` Valid values: ['round-robin', 'round-robin sticky-address', 'random', 'random sticky-address', 'source-hash', 'bitmask']
     protocol: The protocol this rule should match. Use `null` for any protocol. Valid values: ['tcp', 'udp', 'tcp/udp', 'icmp', 'esp', 'ah', 'gre', 'ipv6', 'igmp', 'pim', 'ospf']
-    source_hash_key: The key that is fed to the hashing algorithm in hex format. This must be a 16 byte (32 character) hex string prefixed with `0x`. If a value is not provided, one will automatically be generatedThis field is only available when the following conditi...
+    source_hash_key: The key that is fed to the hashing algorithm in hex format. This must be a 16 byte (32 character) hex string prefixed with `0x`. If a value is not provided, one will automatically be generatedThis field is only available when the following conditions are met:- `poolopts` must be equal to `'source-hash'`- `nonat` must be equal to `false`
     source_port: The source port this rule should match. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`, an existing port type firewall alias
     static_nat_port: Do not rewrite source port for traffic matching this rule.This field is only available when the following conditions are met:- `nonat` must be equal to `false`
-    target_subnet: The subnet bits for the assigned `target`. This field is only applicable if `target` is set to an IP address. This has no affect for alias or interface `targets`.This field is only available when the following conditions are met:- `nonat` must be ...
+    target_subnet: The subnet bits for the assigned `target`. This field is only applicable if `target` is set to an IP address. This has no affect for alias or interface `targets`.This field is only available when the following conditions are met:- `nonat` must be equal to `false`
     """
     if not confirm:
         return (
@@ -1312,11 +1312,11 @@ async def pfsense_update_firewall_nat_outbound_mapping(
     poolopts: str | None = None,
     protocol: str | None = None,
     source: str | None = None,
-    source_hash_key: str | None = '0x0b6b2c4dbf91e989016aa939cb2eebbf',
+    source_hash_key: str | None = None,
     source_port: str | None = None,
     static_nat_port: bool | None = None,
     target: str | None = None,
-    target_subnet: int | None = 128,
+    target_subnet: int | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/firewall/nat/outbound/mapping
 
@@ -1324,21 +1324,21 @@ async def pfsense_update_firewall_nat_outbound_mapping(
 
     id: The ID of the object or resource to interact with.
     descr: A description for the outbound NAT mapping.
-    destination: The destination network this rule should match. Valid value options are: an existing interface, a subnet CIDR, an existing alias, `any`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`. For interface values, th...
+    destination: The destination network this rule should match. Valid value options are: an existing interface, a subnet CIDR, an existing alias, `any`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
     destination_port: The destination port this rule should match. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`, an existing port type firewall alias
     disabled: Disable this outbound NAT rule.
     interface: The interface on which traffic is matched as it exits the firewall. In most cases this is a WAN-type or another externally-connected interface.
-    nat_port: The external source port or port range used for rewriting the original source port on connections matching the rule. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`This field is only available when the following con...
+    nat_port: The external source port or port range used for rewriting the original source port on connections matching the rule. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`This field is only available when the following conditions are met:- `static_nat_port` must be equal to `false`- `nonat` must be equal to `false`
     nonat: Do not NAT traffic matching this rule.
     nosync: Do not sync this rule to HA peers.
-    poolopts: The pool option used to load balance external IP mapping when `target` is set to a subnet or alias of many addresses. Set to `null` to revert to the system default.This field is only available when the following conditions are met:- `nonat` must b... Valid values: ['round-robin', 'round-robin sticky-address', 'random', 'random sticky-address', 'source-hash', 'bitmask']
+    poolopts: The pool option used to load balance external IP mapping when `target` is set to a subnet or alias of many addresses. Set to `null` to revert to the system default.This field is only available when the following conditions are met:- `nonat` must be equal to `false` Valid values: ['round-robin', 'round-robin sticky-address', 'random', 'random sticky-address', 'source-hash', 'bitmask']
     protocol: The protocol this rule should match. Use `null` for any protocol. Valid values: ['tcp', 'udp', 'tcp/udp', 'icmp', 'esp', 'ah', 'gre', 'ipv6', 'igmp', 'pim', 'ospf']
-    source: The source network this rule should match. Valid value options are: an existing interface, a subnet CIDR, an existing alias, `any`, `(self)`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`. For interface value...
-    source_hash_key: The key that is fed to the hashing algorithm in hex format. This must be a 16 byte (32 character) hex string prefixed with `0x`. If a value is not provided, one will automatically be generatedThis field is only available when the following conditi...
+    source: The source network this rule should match. Valid value options are: an existing interface, a subnet CIDR, an existing alias, `any`, `(self)`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
+    source_hash_key: The key that is fed to the hashing algorithm in hex format. This must be a 16 byte (32 character) hex string prefixed with `0x`. If a value is not provided, one will automatically be generatedThis field is only available when the following conditions are met:- `poolopts` must be equal to `'source-hash'`- `nonat` must be equal to `false`
     source_port: The source port this rule should match. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`, an existing port type firewall alias
     static_nat_port: Do not rewrite source port for traffic matching this rule.This field is only available when the following conditions are met:- `nonat` must be equal to `false`
-    target: The target network traffic matching this rule should be translated to. Valid value options are: an IP address, an existing alias. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of it...
-    target_subnet: The subnet bits for the assigned `target`. This field is only applicable if `target` is set to an IP address. This has no affect for alias or interface `targets`.This field is only available when the following conditions are met:- `nonat` must be ...
+    target: The target network traffic matching this rule should be translated to. Valid value options are: an IP address, an existing alias. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.This field is only available when the following conditions are met:- `nonat` must be equal to `false`
+    target_subnet: The subnet bits for the assigned `target`. This field is only applicable if `target` is set to an IP address. This has no affect for alias or interface `targets`.This field is only available when the following conditions are met:- `nonat` must be equal to `false`
     """
     if not confirm:
         return (
@@ -1529,7 +1529,7 @@ async def pfsense_update_firewall_nat_outbound_mode(
 
     Note: Call pfsense_firewall_apply after this to apply changes.
 
-    mode: The outbound NAT mode to assign this system. Set to `automatic` to have this system automatically generate NAT rules this firewall, `hybrid` to automatically generate NAT rules AND allow manual outbound NAT mappings to be assigned, `manual` to pre... Valid values: ['automatic', 'hybrid', 'advanced', 'disabled']
+    mode: The outbound NAT mode to assign this system. Set to `automatic` to have this system automatically generate NAT rules this firewall, `hybrid` to automatically generate NAT rules AND allow manual outbound NAT mappings to be assigned, `manual` to prevent the system from automatically generating NAT rules and only allow manual outbound NAT mappings, or `disabled` to disable outbound NAT on this system entirely. Valid values: ['automatic', 'hybrid', 'advanced', 'disabled']
     """
     if not confirm:
         return (
@@ -1588,21 +1588,21 @@ async def pfsense_create_firewall_nat_port_forward(
 
     Note: Call pfsense_firewall_apply after this to apply changes.
 
-    destination: The destination address this rule applies to. Valid value options are: an existing interface, an IP address, a subnet CIDR, an existing alias, `any`, `(self)`, `l2tp`, `pppoe`. The context of this address can be inverted by prefixing the value wit...
+    destination: The destination address this rule applies to. Valid value options are: an existing interface, an IP address, a subnet CIDR, an existing alias, `any`, `(self)`, `l2tp`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
     interface: The interface this port forward rule applies to.
-    local_port: The port on the internal host to forward matching traffic to. In most cases, this must match the `destination_port` value. In the event that the `desintation_port` is a range, this value should be the first value in that range. Valid options are: ...
+    local_port: The port on the internal host to forward matching traffic to. In most cases, this must match the `destination_port` value. In the event that the `desintation_port` is a range, this value should be the first value in that range. Valid options are: a TCP/UDP port number, an existing port type firewall aliasThis field is only available when the following conditions are met:- `protocol` must be one of [ tcp, udp, tcp/udp ]
     protocol: The IP/transport protocol this port forward rule should match. Valid values: ['any', 'tcp', 'udp', 'tcp/udp', 'icmp', 'esp', 'ah', 'gre', 'ipv6', 'igmp', 'pim', 'ospf']
-    source: The source address this port forward rule applies to. Valid value options are: an existing interface, an IP address, a subnet CIDR, an existing alias, `any`, `(self)`, `l2tp`, `pppoe`. The context of this address can be inverted by prefixing the v...
-    target: The IP address or alias of the internal host to forward matching traffic to. Valid value options are: an IP address, an existing alias. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead...
-    associated_rule_id: The associated firewall rule mode. Use an empty string to require a separate firewall rule to be created to pass traffic matching this port forward rule. Use `new` to create a new associated firewall rule to pass traffic matching this port forward...
+    source: The source address this port forward rule applies to. Valid value options are: an existing interface, an IP address, a subnet CIDR, an existing alias, `any`, `(self)`, `l2tp`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
+    target: The IP address or alias of the internal host to forward matching traffic to. Valid value options are: an IP address, an existing alias. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
+    associated_rule_id: The associated firewall rule mode. Use an empty string to require a separate firewall rule to be created to pass traffic matching this port forward rule. Use `new` to create a new associated firewall rule to pass traffic matching this port forward rule. Use `pass` to automatically pass traffic matching this port forward rule without the need for a firewall rule. Otherwise, you can specify the `associated_rule_id` of an existing firewall rule to associate with this port forward rule.
     descr: A description for this port forward rule.
-    destination_port: The destination port this port forward rule applies to. Set to `null` to allow any destination port. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`, an existing port type firewall aliasThis field is only available ...
+    destination_port: The destination port this port forward rule applies to. Set to `null` to allow any destination port. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`, an existing port type firewall aliasThis field is only available when the following conditions are met:- `protocol` must be one of [ tcp, udp, tcp/udp ]
     disabled: Disables this port forward rule.
     ipprotocol: The IP protocol this port forward rule should match. Valid values: ['inet', 'inet6', 'inet46']
     natreflection: The NAT reflection mode to use for traffic matching this port forward rule. Set to `null` to use the system default. Valid values: ['enable', 'disable', 'purenat']
     nordr: Disables redirection for traffic matching this rule.
     nosync: Prevents this port forward rule from being synced to non-primary CARP members.
-    source_port: The source port this port forward rule applies to. Set to `null` to allow any source port. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`, an existing port type firewall aliasThis field is only available when the f...
+    source_port: The source port this port forward rule applies to. Set to `null` to allow any source port. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`, an existing port type firewall aliasThis field is only available when the following conditions are met:- `protocol` must be one of [ tcp, udp, tcp/udp ]
     """
     if not confirm:
         return (
@@ -1673,21 +1673,21 @@ async def pfsense_update_firewall_nat_port_forward(
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     id: The ID of the object or resource to interact with.
-    associated_rule_id: The associated firewall rule mode. Use an empty string to require a separate firewall rule to be created to pass traffic matching this port forward rule. Use `new` to create a new associated firewall rule to pass traffic matching this port forward...
+    associated_rule_id: The associated firewall rule mode. Use an empty string to require a separate firewall rule to be created to pass traffic matching this port forward rule. Use `new` to create a new associated firewall rule to pass traffic matching this port forward rule. Use `pass` to automatically pass traffic matching this port forward rule without the need for a firewall rule. Otherwise, you can specify the `associated_rule_id` of an existing firewall rule to associate with this port forward rule.
     descr: A description for this port forward rule.
-    destination: The destination address this rule applies to. Valid value options are: an existing interface, an IP address, a subnet CIDR, an existing alias, `any`, `(self)`, `l2tp`, `pppoe`. The context of this address can be inverted by prefixing the value wit...
-    destination_port: The destination port this port forward rule applies to. Set to `null` to allow any destination port. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`, an existing port type firewall aliasThis field is only available ...
+    destination: The destination address this rule applies to. Valid value options are: an existing interface, an IP address, a subnet CIDR, an existing alias, `any`, `(self)`, `l2tp`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
+    destination_port: The destination port this port forward rule applies to. Set to `null` to allow any destination port. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`, an existing port type firewall aliasThis field is only available when the following conditions are met:- `protocol` must be one of [ tcp, udp, tcp/udp ]
     disabled: Disables this port forward rule.
     interface: The interface this port forward rule applies to.
     ipprotocol: The IP protocol this port forward rule should match. Valid values: ['inet', 'inet6', 'inet46']
-    local_port: The port on the internal host to forward matching traffic to. In most cases, this must match the `destination_port` value. In the event that the `desintation_port` is a range, this value should be the first value in that range. Valid options are: ...
+    local_port: The port on the internal host to forward matching traffic to. In most cases, this must match the `destination_port` value. In the event that the `desintation_port` is a range, this value should be the first value in that range. Valid options are: a TCP/UDP port number, an existing port type firewall aliasThis field is only available when the following conditions are met:- `protocol` must be one of [ tcp, udp, tcp/udp ]
     natreflection: The NAT reflection mode to use for traffic matching this port forward rule. Set to `null` to use the system default. Valid values: ['enable', 'disable', 'purenat']
     nordr: Disables redirection for traffic matching this rule.
     nosync: Prevents this port forward rule from being synced to non-primary CARP members.
     protocol: The IP/transport protocol this port forward rule should match. Valid values: ['any', 'tcp', 'udp', 'tcp/udp', 'icmp', 'esp', 'ah', 'gre', 'ipv6', 'igmp', 'pim', 'ospf']
-    source: The source address this port forward rule applies to. Valid value options are: an existing interface, an IP address, a subnet CIDR, an existing alias, `any`, `(self)`, `l2tp`, `pppoe`. The context of this address can be inverted by prefixing the v...
-    source_port: The source port this port forward rule applies to. Set to `null` to allow any source port. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`, an existing port type firewall aliasThis field is only available when the f...
-    target: The IP address or alias of the internal host to forward matching traffic to. Valid value options are: an IP address, an existing alias. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead...
+    source: The source address this port forward rule applies to. Valid value options are: an existing interface, an IP address, a subnet CIDR, an existing alias, `any`, `(self)`, `l2tp`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
+    source_port: The source port this port forward rule applies to. Set to `null` to allow any source port. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`, an existing port type firewall aliasThis field is only available when the following conditions are met:- `protocol` must be one of [ tcp, udp, tcp/udp ]
+    target: The IP address or alias of the internal host to forward matching traffic to. Valid value options are: an IP address, an existing alias. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
     """
     if not confirm:
         return (
@@ -1886,12 +1886,12 @@ async def pfsense_create_firewall_rule(
     defaultqueue: str | None = None,
     descr: str | None = None,
     destination_port: str | None = None,
-    direction: str | None = 'any',
+    direction: str | None = None,
     disabled: bool | None = None,
     dnpipe: str | None = None,
     floating: bool | None = None,
     gateway: str | None = None,
-    icmptype: list[str] | None = ['any'],
+    icmptype: list[str] | None = None,
     log: bool | None = None,
     pdnpipe: str | None = None,
     protocol: str | None = None,
@@ -1908,15 +1908,15 @@ async def pfsense_create_firewall_rule(
 
     Note: Call pfsense_firewall_apply after this to apply changes.
 
-    destination: The destination address this rule applies to. Valid value options are: an existing interface, an IP address, a subnet CIDR, an existing alias, `any`, `(self)`, `l2tp`, `pppoe`. The context of this address can be inverted by prefixing the value wit...
+    destination: The destination address this rule applies to. Valid value options are: an existing interface, an IP address, a subnet CIDR, an existing alias, `any`, `(self)`, `l2tp`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
     interface: The interface where packets must originate to match this rule.
     ipprotocol: The IP version(s) this rule applies to. Valid values: ['inet', 'inet6', 'inet46']
-    source: The source address this rule applies to. Valid value options are: an existing interface, an IP address, a subnet CIDR, an existing alias, `any`, `(self)`, `l2tp`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`...
+    source: The source address this rule applies to. Valid value options are: an existing interface, an IP address, a subnet CIDR, an existing alias, `any`, `(self)`, `l2tp`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
     type_: The action to take against traffic that matches this rule. Valid values: ['pass', 'block', 'reject']
     ackqueue: The name of the traffic shaper queue to assume as the ACK queue for ACK traffic matching this rule.
     defaultqueue: The name of the traffic shaper queue to assume as the default queue for traffic matching this rule.
     descr: A description detailing the purpose or justification of this firewall rule.
-    destination_port: The destination port this rule applies to. Set to `null` to allow any destination port. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`, an existing port type firewall aliasThis field is only available when the foll...
+    destination_port: The destination port this rule applies to. Set to `null` to allow any destination port. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`, an existing port type firewall aliasThis field is only available when the following conditions are met:- `protocol` must be one of [ tcp, udp, tcp/udp ]
     direction: The direction of traffic this firewall rule applies to. This field only applies to floating firewall rules.This field is only available when the following conditions are met:- `floating` must be equal to `true` Valid values: ['any', 'in', 'out']
     disabled: Enable or disable this firewall rule.
     dnpipe: The name of the traffic shaper limiter pipe or queue to use for incoming traffic.
@@ -1928,7 +1928,7 @@ async def pfsense_create_firewall_rule(
     protocol: The IP/transport protocol this rule should match. Valid values: ['tcp', 'udp', 'tcp/udp', 'icmp', 'esp', 'ah', 'gre', 'ipv6', 'igmp', 'pim', 'ospf', 'carp', 'pfsync']
     quick: Apply this action to traffic that matches this rule immediately. This field only applies to floating firewall rules.This field is only available when the following conditions are met:- `floating` must be equal to `true`
     sched: The name of an existing firewall schedule to assign to this firewall rule.
-    source_port: The source port this rule applies to. Set to `null` to allow any source port. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`, an existing port type firewall aliasThis field is only available when the following cond...
+    source_port: The source port this rule applies to. Set to `null` to allow any source port. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`, an existing port type firewall aliasThis field is only available when the following conditions are met:- `protocol` must be one of [ tcp, udp, tcp/udp ]
     statetype: The state mechanism to use for this firewall rule. Valid values: ['keep state', 'sloppy state', 'synproxy state', 'none']
     tag: A packet matching this rule can be marked and this mark used to match on other NAT/filter rules. It is called
     tcp_flags_any: Allow any TCP flags.
@@ -2010,12 +2010,12 @@ async def pfsense_update_firewall_rule(
     descr: str | None = None,
     destination: str | None = None,
     destination_port: str | None = None,
-    direction: str | None = 'any',
+    direction: str | None = None,
     disabled: bool | None = None,
     dnpipe: str | None = None,
     floating: bool | None = None,
     gateway: str | None = None,
-    icmptype: list[str] | None = ['any'],
+    icmptype: list[str] | None = None,
     interface: list[str] | None = None,
     ipprotocol: str | None = None,
     log: bool | None = None,
@@ -2040,8 +2040,8 @@ async def pfsense_update_firewall_rule(
     ackqueue: The name of the traffic shaper queue to assume as the ACK queue for ACK traffic matching this rule.
     defaultqueue: The name of the traffic shaper queue to assume as the default queue for traffic matching this rule.
     descr: A description detailing the purpose or justification of this firewall rule.
-    destination: The destination address this rule applies to. Valid value options are: an existing interface, an IP address, a subnet CIDR, an existing alias, `any`, `(self)`, `l2tp`, `pppoe`. The context of this address can be inverted by prefixing the value wit...
-    destination_port: The destination port this rule applies to. Set to `null` to allow any destination port. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`, an existing port type firewall aliasThis field is only available when the foll...
+    destination: The destination address this rule applies to. Valid value options are: an existing interface, an IP address, a subnet CIDR, an existing alias, `any`, `(self)`, `l2tp`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
+    destination_port: The destination port this rule applies to. Set to `null` to allow any destination port. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`, an existing port type firewall aliasThis field is only available when the following conditions are met:- `protocol` must be one of [ tcp, udp, tcp/udp ]
     direction: The direction of traffic this firewall rule applies to. This field only applies to floating firewall rules.This field is only available when the following conditions are met:- `floating` must be equal to `true` Valid values: ['any', 'in', 'out']
     disabled: Enable or disable this firewall rule.
     dnpipe: The name of the traffic shaper limiter pipe or queue to use for incoming traffic.
@@ -2055,8 +2055,8 @@ async def pfsense_update_firewall_rule(
     protocol: The IP/transport protocol this rule should match. Valid values: ['tcp', 'udp', 'tcp/udp', 'icmp', 'esp', 'ah', 'gre', 'ipv6', 'igmp', 'pim', 'ospf', 'carp', 'pfsync']
     quick: Apply this action to traffic that matches this rule immediately. This field only applies to floating firewall rules.This field is only available when the following conditions are met:- `floating` must be equal to `true`
     sched: The name of an existing firewall schedule to assign to this firewall rule.
-    source: The source address this rule applies to. Valid value options are: an existing interface, an IP address, a subnet CIDR, an existing alias, `any`, `(self)`, `l2tp`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`...
-    source_port: The source port this rule applies to. Set to `null` to allow any source port. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`, an existing port type firewall aliasThis field is only available when the following cond...
+    source: The source address this rule applies to. Valid value options are: an existing interface, an IP address, a subnet CIDR, an existing alias, `any`, `(self)`, `l2tp`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
+    source_port: The source port this rule applies to. Set to `null` to allow any source port. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`, an existing port type firewall aliasThis field is only available when the following conditions are met:- `protocol` must be one of [ tcp, udp, tcp/udp ]
     statetype: The state mechanism to use for this firewall rule. Valid values: ['keep state', 'sloppy state', 'synproxy state', 'none']
     tag: A packet matching this rule can be marked and this mark used to match on other NAT/filter rules. It is called
     tcp_flags_any: Allow any TCP flags.
@@ -2404,11 +2404,11 @@ async def pfsense_create_firewall_schedule_time_range(
 
     Note: Call pfsense_firewall_apply after this to apply changes.
 
-    day: The day for each specified `month` value. Each value specified must correspond with a `month` field value and must match the order exactly. For example, a `month` value of `[3, 6]` and a `day` value of `[2, 17]` would evaluate to March 2nd and Jun...
+    day: The day for each specified `month` value. Each value specified must correspond with a `month` field value and must match the order exactly. For example, a `month` value of `[3, 6]` and a `day` value of `[2, 17]` would evaluate to March 2nd and June 17th respectively.This field is only available when the following conditions are met:- `position` must be equal to `NULL`
     hour: The start time and end time for this time range in 24-hour format (i.e. HH:MM-HH:MM).
-    month: The month for each specified `day` value. Each value specified must correspond with a `day` field value and must match the order exactly. For example, a `month` value of `[3, 6]` and a `day` value of `[2, 17]` would evaluate to March 2nd and June ...
+    month: The month for each specified `day` value. Each value specified must correspond with a `day` field value and must match the order exactly. For example, a `month` value of `[3, 6]` and a `day` value of `[2, 17]` would evaluate to March 2nd and June 17th respectively.This field is only available when the following conditions are met:- `position` must be equal to `NULL`
     parent_id: The ID of the parent this object is nested under.
-    position: The day of the week this schedule should be active for. Use `1` for every Monday, `2` for every Tuesday, `3` for every Wednesday, `4` for every Thursday, `5` for every Friday, `6` for every Saturday, or `7` for every Sunday. If this field has a va...
+    position: The day of the week this schedule should be active for. Use `1` for every Monday, `2` for every Tuesday, `3` for every Wednesday, `4` for every Thursday, `5` for every Friday, `6` for every Saturday, or `7` for every Sunday. If this field has a value specified, the `month` and `day` fields will be unavailable.
     rangedescr: A description detailing this firewall schedule time range's purpose.
     """
     if not confirm:
@@ -2454,10 +2454,10 @@ async def pfsense_update_firewall_schedule_time_range(
 
     id: The ID of the object or resource to interact with.
     parent_id: The ID of the parent this object is nested under.
-    day: The day for each specified `month` value. Each value specified must correspond with a `month` field value and must match the order exactly. For example, a `month` value of `[3, 6]` and a `day` value of `[2, 17]` would evaluate to March 2nd and Jun...
+    day: The day for each specified `month` value. Each value specified must correspond with a `month` field value and must match the order exactly. For example, a `month` value of `[3, 6]` and a `day` value of `[2, 17]` would evaluate to March 2nd and June 17th respectively.This field is only available when the following conditions are met:- `position` must be equal to `NULL`
     hour: The start time and end time for this time range in 24-hour format (i.e. HH:MM-HH:MM).
-    month: The month for each specified `day` value. Each value specified must correspond with a `day` field value and must match the order exactly. For example, a `month` value of `[3, 6]` and a `day` value of `[2, 17]` would evaluate to March 2nd and June ...
-    position: The day of the week this schedule should be active for. Use `1` for every Monday, `2` for every Tuesday, `3` for every Wednesday, `4` for every Thursday, `5` for every Friday, `6` for every Saturday, or `7` for every Sunday. If this field has a va...
+    month: The month for each specified `day` value. Each value specified must correspond with a `day` field value and must match the order exactly. For example, a `month` value of `[3, 6]` and a `day` value of `[2, 17]` would evaluate to March 2nd and June 17th respectively.This field is only available when the following conditions are met:- `position` must be equal to `NULL`
+    position: The day of the week this schedule should be active for. Use `1` for every Monday, `2` for every Tuesday, `3` for every Wednesday, `4` for every Thursday, `5` for every Friday, `6` for every Saturday, or `7` for every Sunday. If this field has a value specified, the `month` and `day` fields will be unavailable.
     rangedescr: A description detailing this firewall schedule time range's purpose.
     """
     if not confirm:
@@ -2851,7 +2851,7 @@ async def pfsense_create_firewall_traffic_shaper(
     scheduler: str,
     confirm: bool = False,
     enabled: bool | None = True,
-    qlimit: int | None = 50,
+    qlimit: int | None = None,
     queue: list[str] | None = None,
     tbrconfig: int | None = None,
 ) -> dict[str, Any] | list[Any] | str:
@@ -2906,7 +2906,7 @@ async def pfsense_update_firewall_traffic_shaper(
     bandwidthtype: str | None = None,
     enabled: bool | None = True,
     interface: str | None = None,
-    qlimit: int | None = 50,
+    qlimit: int | None = None,
     queue: list[str] | None = None,
     scheduler: str | None = None,
     tbrconfig: int | None = None,
@@ -3219,8 +3219,8 @@ async def pfsense_create_firewall_traffic_shaper_limiter(
     ecn: bool | None = None,
     enabled: bool | None = None,
     mask: str | None = 'none',
-    maskbits: int | None = 32,
-    maskbitsv6: int | None = 128,
+    maskbits: int | None = None,
+    maskbitsv6: int | None = None,
     param_codel_interval: int | None = None,
     param_codel_target: int | None = None,
     param_fq_codel_flows: int | None = None,
@@ -3237,20 +3237,20 @@ async def pfsense_create_firewall_traffic_shaper_limiter(
     param_fq_pie_quantum: int | None = None,
     param_fq_pie_target: int | None = None,
     param_fq_pie_tupdate: int | None = None,
-    param_gred_max_p: int | None = 1,
-    param_gred_max_th: int | None = 1,
+    param_gred_max_p: int | None = None,
+    param_gred_max_th: int | None = None,
     param_gred_min_th: int | None = None,
-    param_gred_w_q: int | None = 1,
+    param_gred_w_q: int | None = None,
     param_pie_alpha: int | None = None,
     param_pie_beta: int | None = None,
     param_pie_max_burst: int | None = None,
     param_pie_max_ecnth: int | None = None,
     param_pie_target: int | None = None,
     param_pie_tupdate: int | None = None,
-    param_red_max_p: int | None = 1,
-    param_red_max_th: int | None = 1,
+    param_red_max_p: int | None = None,
+    param_red_max_th: int | None = None,
     param_red_min_th: int | None = None,
-    param_red_w_q: int | None = 1,
+    param_red_w_q: int | None = None,
     pie_capdrop: bool | None = None,
     pie_onoff: bool | None = None,
     pie_pderand: bool | None = None,
@@ -3270,9 +3270,9 @@ async def pfsense_create_firewall_traffic_shaper_limiter(
     buckets: The limiter's bucket size (slots).
     delay: The amount of delay (in milliseconds) added to traffic passing through this limiter.
     description: The verbose description for this limiter.
-    ecn: Enable or disable ECN. ECN sets a reserved TCP flag when the queue is nearing or exceeding capacity. Not all AQMs or schedulers support this.This field is only available when the following conditions are met:- `aqm` must be one of [ codel, pie, re...
+    ecn: Enable or disable ECN. ECN sets a reserved TCP flag when the queue is nearing or exceeding capacity. Not all AQMs or schedulers support this.This field is only available when the following conditions are met:- `aqm` must be one of [ codel, pie, red, gred ]- `sched` must be one of [ fq_codel, fq_pie ]
     enabled: Enables or disables this limiter and its child queues.
-    mask: If `source` or `destination` slots is chosen a dynamic pipe with the bandwidth, delay, packet loss and queue size given above will be created for each source/destination IP address encountered, respectively. This makes it possible to easily specif... Valid values: ['none', 'srcaddress', 'dstaddress']
+    mask: If `source` or `destination` slots is chosen a dynamic pipe with the bandwidth, delay, packet loss and queue size given above will be created for each source/destination IP address encountered, respectively. This makes it possible to easily specify bandwidth limits per host or subnet. Valid values: ['none', 'srcaddress', 'dstaddress']
     maskbits: The IPv4 mask bits to use when determine the scope of the dynamic pipe for IPv4 traffic.This field is only available when the following conditions are met:- `mask` must be one of [ srcaddress, dstaddress ]
     maskbitsv6: The IPv6 mask bits to use when determine the scope of the dynamic pipe for IPv4 traffic.This field is only available when the following conditions are met:- `mask` must be one of [ srcaddress, dstaddress ]
     param_codel_interval: The value for the CoDel interval parameter.This field is only available when the following conditions are met:- `aqm` must be equal to `'codel'`
@@ -3437,8 +3437,8 @@ async def pfsense_update_firewall_traffic_shaper_limiter(
     ecn: bool | None = None,
     enabled: bool | None = None,
     mask: str | None = 'none',
-    maskbits: int | None = 32,
-    maskbitsv6: int | None = 128,
+    maskbits: int | None = None,
+    maskbitsv6: int | None = None,
     name: str | None = None,
     param_codel_interval: int | None = None,
     param_codel_target: int | None = None,
@@ -3456,20 +3456,20 @@ async def pfsense_update_firewall_traffic_shaper_limiter(
     param_fq_pie_quantum: int | None = None,
     param_fq_pie_target: int | None = None,
     param_fq_pie_tupdate: int | None = None,
-    param_gred_max_p: int | None = 1,
-    param_gred_max_th: int | None = 1,
+    param_gred_max_p: int | None = None,
+    param_gred_max_th: int | None = None,
     param_gred_min_th: int | None = None,
-    param_gred_w_q: int | None = 1,
+    param_gred_w_q: int | None = None,
     param_pie_alpha: int | None = None,
     param_pie_beta: int | None = None,
     param_pie_max_burst: int | None = None,
     param_pie_max_ecnth: int | None = None,
     param_pie_target: int | None = None,
     param_pie_tupdate: int | None = None,
-    param_red_max_p: int | None = 1,
-    param_red_max_th: int | None = 1,
+    param_red_max_p: int | None = None,
+    param_red_max_th: int | None = None,
     param_red_min_th: int | None = None,
-    param_red_w_q: int | None = 1,
+    param_red_w_q: int | None = None,
     pie_capdrop: bool | None = None,
     pie_onoff: bool | None = None,
     pie_pderand: bool | None = None,
@@ -3489,9 +3489,9 @@ async def pfsense_update_firewall_traffic_shaper_limiter(
     buckets: The limiter's bucket size (slots).
     delay: The amount of delay (in milliseconds) added to traffic passing through this limiter.
     description: The verbose description for this limiter.
-    ecn: Enable or disable ECN. ECN sets a reserved TCP flag when the queue is nearing or exceeding capacity. Not all AQMs or schedulers support this.This field is only available when the following conditions are met:- `aqm` must be one of [ codel, pie, re...
+    ecn: Enable or disable ECN. ECN sets a reserved TCP flag when the queue is nearing or exceeding capacity. Not all AQMs or schedulers support this.This field is only available when the following conditions are met:- `aqm` must be one of [ codel, pie, red, gred ]- `sched` must be one of [ fq_codel, fq_pie ]
     enabled: Enables or disables this limiter and its child queues.
-    mask: If `source` or `destination` slots is chosen a dynamic pipe with the bandwidth, delay, packet loss and queue size given above will be created for each source/destination IP address encountered, respectively. This makes it possible to easily specif... Valid values: ['none', 'srcaddress', 'dstaddress']
+    mask: If `source` or `destination` slots is chosen a dynamic pipe with the bandwidth, delay, packet loss and queue size given above will be created for each source/destination IP address encountered, respectively. This makes it possible to easily specify bandwidth limits per host or subnet. Valid values: ['none', 'srcaddress', 'dstaddress']
     maskbits: The IPv4 mask bits to use when determine the scope of the dynamic pipe for IPv4 traffic.This field is only available when the following conditions are met:- `mask` must be one of [ srcaddress, dstaddress ]
     maskbitsv6: The IPv6 mask bits to use when determine the scope of the dynamic pipe for IPv4 traffic.This field is only available when the following conditions are met:- `mask` must be one of [ srcaddress, dstaddress ]
     name: The unique name for this limiter.
@@ -3712,24 +3712,24 @@ async def pfsense_create_firewall_traffic_shaper_limiter_queue(
     ecn: bool | None = None,
     enabled: bool | None = None,
     mask: str | None = 'none',
-    maskbits: int | None = 32,
-    maskbitsv6: int | None = 128,
+    maskbits: int | None = None,
+    maskbitsv6: int | None = None,
     param_codel_interval: int | None = None,
     param_codel_target: int | None = None,
-    param_gred_max_p: int | None = 1,
-    param_gred_max_th: int | None = 1,
+    param_gred_max_p: int | None = None,
+    param_gred_max_th: int | None = None,
     param_gred_min_th: int | None = None,
-    param_gred_w_q: int | None = 1,
+    param_gred_w_q: int | None = None,
     param_pie_alpha: int | None = None,
     param_pie_beta: int | None = None,
     param_pie_max_burst: int | None = None,
     param_pie_max_ecnth: int | None = None,
     param_pie_target: int | None = None,
     param_pie_tupdate: int | None = None,
-    param_red_max_p: int | None = 1,
-    param_red_max_th: int | None = 1,
+    param_red_max_p: int | None = None,
+    param_red_max_th: int | None = None,
     param_red_min_th: int | None = None,
-    param_red_w_q: int | None = 1,
+    param_red_w_q: int | None = None,
     pie_capdrop: bool | None = None,
     pie_onoff: bool | None = None,
     pie_pderand: bool | None = None,
@@ -3747,9 +3747,9 @@ async def pfsense_create_firewall_traffic_shaper_limiter_queue(
     parent_id: The ID of the parent this object is nested under.
     buckets: The limiter queue's bucket size (slots).
     description: The verbose description for this limiter queue.
-    ecn: Enable or disable ECN. ECN sets a reserved TCP flag when the queue is nearing or exceeding capacity. Not all AQMs or schedulers support this.This field is only available when the following conditions are met:- `aqm` must be one of [ codel, pie, re...
+    ecn: Enable or disable ECN. ECN sets a reserved TCP flag when the queue is nearing or exceeding capacity. Not all AQMs or schedulers support this.This field is only available when the following conditions are met:- `aqm` must be one of [ codel, pie, red, gred ]- `sched` must be one of [ fq_codel, fq_pie ]
     enabled: Enables or disables this limiter queue.
-    mask: If `source` or `destination` slots is chosen a dynamic pipe with the bandwidth, delay, packet loss and queue size given above will be created for each source/destination IP address encountered, respectively. This makes it possible to easily specif... Valid values: ['none', 'srcaddress', 'dstaddress']
+    mask: If `source` or `destination` slots is chosen a dynamic pipe with the bandwidth, delay, packet loss and queue size given above will be created for each source/destination IP address encountered, respectively. This makes it possible to easily specify bandwidth limits per host or subnet. Valid values: ['none', 'srcaddress', 'dstaddress']
     maskbits: The IPv4 mask bits to use when determine the scope of the dynamic pipe for IPv4 traffic.This field is only available when the following conditions are met:- `mask` must be one of [ srcaddress, dstaddress ]
     maskbitsv6: The IPv6 mask bits to use when determine the scope of the dynamic pipe for IPv4 traffic.This field is only available when the following conditions are met:- `mask` must be one of [ srcaddress, dstaddress ]
     param_codel_interval: The value for the CoDel interval parameter.This field is only available when the following conditions are met:- `aqm` must be equal to `'codel'`
@@ -3867,25 +3867,25 @@ async def pfsense_update_firewall_traffic_shaper_limiter_queue(
     ecn: bool | None = None,
     enabled: bool | None = None,
     mask: str | None = 'none',
-    maskbits: int | None = 32,
-    maskbitsv6: int | None = 128,
+    maskbits: int | None = None,
+    maskbitsv6: int | None = None,
     name: str | None = None,
     param_codel_interval: int | None = None,
     param_codel_target: int | None = None,
-    param_gred_max_p: int | None = 1,
-    param_gred_max_th: int | None = 1,
+    param_gred_max_p: int | None = None,
+    param_gred_max_th: int | None = None,
     param_gred_min_th: int | None = None,
-    param_gred_w_q: int | None = 1,
+    param_gred_w_q: int | None = None,
     param_pie_alpha: int | None = None,
     param_pie_beta: int | None = None,
     param_pie_max_burst: int | None = None,
     param_pie_max_ecnth: int | None = None,
     param_pie_target: int | None = None,
     param_pie_tupdate: int | None = None,
-    param_red_max_p: int | None = 1,
-    param_red_max_th: int | None = 1,
+    param_red_max_p: int | None = None,
+    param_red_max_th: int | None = None,
     param_red_min_th: int | None = None,
-    param_red_w_q: int | None = 1,
+    param_red_w_q: int | None = None,
     pie_capdrop: bool | None = None,
     pie_onoff: bool | None = None,
     pie_pderand: bool | None = None,
@@ -3903,9 +3903,9 @@ async def pfsense_update_firewall_traffic_shaper_limiter_queue(
     aqm: The Active Queue Management (AQM) algorithm to use for this queue. AQM is the intelligent drop of network packets inside the queue, when it becomes full or gets close to becoming full, with the goal of reducing network congestion. Valid values: ['droptail', 'codel', 'pie', 'red', 'gred']
     buckets: The limiter queue's bucket size (slots).
     description: The verbose description for this limiter queue.
-    ecn: Enable or disable ECN. ECN sets a reserved TCP flag when the queue is nearing or exceeding capacity. Not all AQMs or schedulers support this.This field is only available when the following conditions are met:- `aqm` must be one of [ codel, pie, re...
+    ecn: Enable or disable ECN. ECN sets a reserved TCP flag when the queue is nearing or exceeding capacity. Not all AQMs or schedulers support this.This field is only available when the following conditions are met:- `aqm` must be one of [ codel, pie, red, gred ]- `sched` must be one of [ fq_codel, fq_pie ]
     enabled: Enables or disables this limiter queue.
-    mask: If `source` or `destination` slots is chosen a dynamic pipe with the bandwidth, delay, packet loss and queue size given above will be created for each source/destination IP address encountered, respectively. This makes it possible to easily specif... Valid values: ['none', 'srcaddress', 'dstaddress']
+    mask: If `source` or `destination` slots is chosen a dynamic pipe with the bandwidth, delay, packet loss and queue size given above will be created for each source/destination IP address encountered, respectively. This makes it possible to easily specify bandwidth limits per host or subnet. Valid values: ['none', 'srcaddress', 'dstaddress']
     maskbits: The IPv4 mask bits to use when determine the scope of the dynamic pipe for IPv4 traffic.This field is only available when the following conditions are met:- `mask` must be one of [ srcaddress, dstaddress ]
     maskbitsv6: The IPv6 mask bits to use when determine the scope of the dynamic pipe for IPv4 traffic.This field is only available when the following conditions are met:- `mask` must be one of [ srcaddress, dstaddress ]
     name: The unique name for this limiter queue.
@@ -4206,7 +4206,7 @@ async def pfsense_create_firewall_traffic_shaper_queue(
     realtime_m2: str,
     upperlimit_m2: str,
     confirm: bool = False,
-    bandwidthtype: str | None = 'Mb',
+    bandwidthtype: str | None = None,
     borrow: bool | None = None,
     buckets: int | None = None,
     codel: bool | None = None,
@@ -4218,7 +4218,7 @@ async def pfsense_create_firewall_traffic_shaper_queue(
     linkshare: bool | None = None,
     linkshare_d: int | None = None,
     linkshare_m1: str | None = None,
-    priority: int | None = 1,
+    priority: int | None = None,
     realtime: bool | None = None,
     realtime_d: int | None = None,
     realtime_m1: str | None = None,
@@ -4233,12 +4233,12 @@ async def pfsense_create_firewall_traffic_shaper_queue(
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     bandwidth: The total bandwidth amount allowed by this traffic shaper.This field is only available when the following conditions are met:- Parent field `scheduler` must be one of [ FAIRQ, CBQ, HFSC ]
-    linkshare_m2: The maximum bandwidth this traffic shaper queue is allowed to use. Note: This behaves exactly the same as the `bandwidth` field. If this field is set, it will override whatever value is current assigned to the `bandwidth` field.This field is only ...
+    linkshare_m2: The maximum bandwidth this traffic shaper queue is allowed to use. Note: This behaves exactly the same as the `bandwidth` field. If this field is set, it will override whatever value is current assigned to the `bandwidth` field.This field is only available when the following conditions are met:- `linkshare` must be equal to `true`
     name: The name to assign this traffic shaper queue.
     parent_id: The ID of the parent this object is nested under.
     qlimit: The number of packets that can be held in a queue waiting to be transmitted by the shaper.
     realtime_m2: The maximum bandwidth this traffic shaper queue is allowed to use. Note: This value should not exceed 30% of parent queue's maximum bandwidth.This field is only available when the following conditions are met:- `realtime` must be equal to `true`
-    upperlimit_m2: The normal bandwidth limit for this traffic shaper queue. If `upperlimit_m1` is not defined, this limit will always be in effect. If `upperlimit_m1` is defined, this limit will take effect after the `upperlimit_d` duration has expired.This field i...
+    upperlimit_m2: The normal bandwidth limit for this traffic shaper queue. If `upperlimit_m1` is not defined, this limit will always be in effect. If `upperlimit_m1` is defined, this limit will take effect after the `upperlimit_d` duration has expired.This field is only available when the following conditions are met:- `upperlimit` must be equal to `true`
     bandwidthtype: The scale type of the `bandwidth` field's value.This field is only available when the following conditions are met:- Parent field `scheduler` must be one of [ FAIRQ, CBQ, HFSC ] Valid values: ['%', 'b', 'Kb', 'Mb', 'Gb']
     borrow: Allow this queue to borrow from other queues when available.This field is only available when the following conditions are met:- Parent field `scheduler` must be equal to `'CBQ'`
     buckets: This field is only available when the following conditions are met:- Parent field `scheduler` must be equal to `'FAIRQ'`
@@ -4337,7 +4337,7 @@ async def pfsense_update_firewall_traffic_shaper_queue(
     parent_id: int,
     confirm: bool = False,
     bandwidth: int | None = None,
-    bandwidthtype: str | None = 'Mb',
+    bandwidthtype: str | None = None,
     borrow: bool | None = None,
     buckets: int | None = None,
     codel: bool | None = None,
@@ -4351,7 +4351,7 @@ async def pfsense_update_firewall_traffic_shaper_queue(
     linkshare_m1: str | None = None,
     linkshare_m2: str | None = None,
     name: str | None = None,
-    priority: int | None = 1,
+    priority: int | None = None,
     qlimit: int | None = None,
     realtime: bool | None = None,
     realtime_d: int | None = None,
@@ -4383,7 +4383,7 @@ async def pfsense_update_firewall_traffic_shaper_queue(
     linkshare: Allow sharing bandwidth from this queue for other queues as long as the real time values have been satisfied.This field is only available when the following conditions are met:- Parent field `scheduler` must be equal to `'HFSC'`
     linkshare_d: The duration (in milliseconds) that the initial bandwidth limit (`linkshare_m1`) is in effect.This field is only available when the following conditions are met:- `linkshare` must be equal to `true`
     linkshare_m1: The initial bandwidth limit for this traffic shaper queue when link sharing.This field is only available when the following conditions are met:- `linkshare` must be equal to `true`
-    linkshare_m2: The maximum bandwidth this traffic shaper queue is allowed to use. Note: This behaves exactly the same as the `bandwidth` field. If this field is set, it will override whatever value is current assigned to the `bandwidth` field.This field is only ...
+    linkshare_m2: The maximum bandwidth this traffic shaper queue is allowed to use. Note: This behaves exactly the same as the `bandwidth` field. If this field is set, it will override whatever value is current assigned to the `bandwidth` field.This field is only available when the following conditions are met:- `linkshare` must be equal to `true`
     name: The name to assign this traffic shaper queue.
     priority: The priority level for this traffic shaper queue.This field is only available when the following conditions are met:- Parent field `scheduler` must be one of [ FAIRQ, CBQ, PRIQ ]
     qlimit: The number of packets that can be held in a queue waiting to be transmitted by the shaper.
@@ -4396,7 +4396,7 @@ async def pfsense_update_firewall_traffic_shaper_queue(
     upperlimit: Allow setting the maximum bandwidth allowed for the queue. Will force hard bandwidth limiting.This field is only available when the following conditions are met:- Parent field `scheduler` must be equal to `'HFSC'`
     upperlimit_d: The duration (in milliseconds) that the burst-able bandwidth limit (`upperlimit_m1` is in effect.This field is only available when the following conditions are met:- `upperlimit` must be equal to `true`
     upperlimit_m1: The burst-able bandwidth limit for this traffic shaper queue.This field is only available when the following conditions are met:- `upperlimit` must be equal to `true`
-    upperlimit_m2: The normal bandwidth limit for this traffic shaper queue. If `upperlimit_m1` is not defined, this limit will always be in effect. If `upperlimit_m1` is defined, this limit will take effect after the `upperlimit_d` duration has expired.This field i...
+    upperlimit_m2: The normal bandwidth limit for this traffic shaper queue. If `upperlimit_m1` is not defined, this limit will always be in effect. If `upperlimit_m1` is defined, this limit will take effect after the `upperlimit_d` duration has expired.This field is only available when the following conditions are met:- `upperlimit` must be equal to `true`
     """
     if not confirm:
         return (
@@ -4716,9 +4716,9 @@ async def pfsense_create_firewall_virtual_ip(
     subnet_bits: int,
     vhid: int,
     confirm: bool = False,
-    advbase: int | None = 1,
+    advbase: int | None = None,
     advskew: int | None = None,
-    carp_mode: str | None = 'mcast',
+    carp_mode: str | None = None,
     descr: str | None = None,
     noexpand: bool | None = None,
     type_: str | None = 'single',
@@ -4785,9 +4785,9 @@ async def pfsense_create_firewall_virtual_ip(
 async def pfsense_update_firewall_virtual_ip(
     id: int,
     confirm: bool = False,
-    advbase: int | None = 1,
+    advbase: int | None = None,
     advskew: int | None = None,
-    carp_mode: str | None = 'mcast',
+    carp_mode: str | None = None,
     carp_peer: str | None = None,
     descr: str | None = None,
     interface: str | None = None,
@@ -5223,8 +5223,8 @@ async def pfsense_create_interface_gre(
     descr: str | None = None,
     tunnel_local_addr: str | None = None,
     tunnel_local_addr6: str | None = None,
-    tunnel_remote_net: int | None = 32,
-    tunnel_remote_net6: int | None = 128,
+    tunnel_remote_net: int | None = None,
+    tunnel_remote_net6: int | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/interface/gre
 
@@ -5287,8 +5287,8 @@ async def pfsense_update_interface_gre(
     tunnel_local_addr6: str | None = None,
     tunnel_remote_addr: str | None = None,
     tunnel_remote_addr6: str | None = None,
-    tunnel_remote_net: int | None = 32,
-    tunnel_remote_net6: int | None = 128,
+    tunnel_remote_net: int | None = None,
+    tunnel_remote_net6: int | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/interface/gre
 
@@ -5667,9 +5667,9 @@ async def pfsense_create_interface_lagg(
     proto: str,
     confirm: bool = False,
     descr: str | None = None,
-    failovermaster: str | None = 'auto',
-    lacptimeout: str | None = 'slow',
-    lagghash: str | None = 'l2,l3,l4',
+    failovermaster: str | None = None,
+    lacptimeout: str | None = None,
+    lagghash: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/interface/lagg
 
@@ -5713,9 +5713,9 @@ async def pfsense_update_interface_lagg(
     id: int,
     confirm: bool = False,
     descr: str | None = None,
-    failovermaster: str | None = 'auto',
-    lacptimeout: str | None = 'slow',
-    lagghash: str | None = 'l2,l3,l4',
+    failovermaster: str | None = None,
+    lacptimeout: str | None = None,
+    lagghash: str | None = None,
     members: list[str] | None = None,
     proto: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
@@ -6085,12 +6085,12 @@ async def pfsense_create_network_interface(
     adv_dhcp_pt_retry: int | None = None,
     adv_dhcp_pt_select_timeout: int | None = None,
     adv_dhcp_pt_timeout: int | None = None,
-    adv_dhcp_pt_values: str | None = 'SavedCfg',
+    adv_dhcp_pt_values: str | None = None,
     adv_dhcp_request_options: str | None = None,
     adv_dhcp_required_options: str | None = None,
     adv_dhcp_send_options: str | None = None,
     alias_address: str | None = None,
-    alias_subnet: int | None = 32,
+    alias_subnet: int | None = None,
     blockbogons: bool | None = None,
     blockpriv: bool | None = None,
     dhcphostname: str | None = None,
@@ -6127,8 +6127,8 @@ async def pfsense_create_network_interface(
     adv_dhcp_config_file_override: Enables or disables overriding the entire DHCP configuration file for this interface.This field is only available when the following conditions are met:- `typev4` must be equal to `'dhcp'`
     adv_dhcp_config_file_override_path: Sets the local file path of the custom DHCP configuration file.This field is only available when the following conditions are met:- `typev4` must be equal to `'dhcp'`- `adv_dhcp_config_file_override` must be equal to `true`
     adv_dhcp_option_modifiers: Sets DHCP option modifiers applied to the obtained DHCP lease.This field is only available when the following conditions are met:- `typev4` must be equal to `'dhcp'`- `adv_dhcp_config_advanced` must be equal to `true`
-    adv_dhcp_pt_backoff_cutoff: Manually sets the backoff cutoff timing value used when requested DHCP leases on this interface.This field is only available when the following conditions are met:- `typev4` must be equal to `'dhcp'`- `adv_dhcp_config_advanced` must be equal to `t...
-    adv_dhcp_pt_initial_interval: Manually sets the initial interval timing value used when requested DHCP leases on this interface.This field is only available when the following conditions are met:- `typev4` must be equal to `'dhcp'`- `adv_dhcp_config_advanced` must be equal to ...
+    adv_dhcp_pt_backoff_cutoff: Manually sets the backoff cutoff timing value used when requested DHCP leases on this interface.This field is only available when the following conditions are met:- `typev4` must be equal to `'dhcp'`- `adv_dhcp_config_advanced` must be equal to `true`
+    adv_dhcp_pt_initial_interval: Manually sets the initial interval timing value used when requested DHCP leases on this interface.This field is only available when the following conditions are met:- `typev4` must be equal to `'dhcp'`- `adv_dhcp_config_advanced` must be equal to `true`
     adv_dhcp_pt_reboot: Manually sets the reboot timing value used when requested DHCP leases on this interface.This field is only available when the following conditions are met:- `typev4` must be equal to `'dhcp'`- `adv_dhcp_config_advanced` must be equal to `true`
     adv_dhcp_pt_retry: Manually sets the retry timing value used when requested DHCP leases on this interface.This field is only available when the following conditions are met:- `typev4` must be equal to `'dhcp'`- `adv_dhcp_config_advanced` must be equal to `true`
     adv_dhcp_pt_select_timeout: Manually sets the select timing value used when requested DHCP leases on this interface.This field is only available when the following conditions are met:- `typev4` must be equal to `'dhcp'`- `adv_dhcp_config_advanced` must be equal to `true`
@@ -6270,12 +6270,12 @@ async def pfsense_update_network_interface(
     adv_dhcp_pt_retry: int | None = None,
     adv_dhcp_pt_select_timeout: int | None = None,
     adv_dhcp_pt_timeout: int | None = None,
-    adv_dhcp_pt_values: str | None = 'SavedCfg',
+    adv_dhcp_pt_values: str | None = None,
     adv_dhcp_request_options: str | None = None,
     adv_dhcp_required_options: str | None = None,
     adv_dhcp_send_options: str | None = None,
     alias_address: str | None = None,
-    alias_subnet: int | None = 32,
+    alias_subnet: int | None = None,
     blockbogons: bool | None = None,
     blockpriv: bool | None = None,
     descr: str | None = None,
@@ -6313,8 +6313,8 @@ async def pfsense_update_network_interface(
     adv_dhcp_config_file_override: Enables or disables overriding the entire DHCP configuration file for this interface.This field is only available when the following conditions are met:- `typev4` must be equal to `'dhcp'`
     adv_dhcp_config_file_override_path: Sets the local file path of the custom DHCP configuration file.This field is only available when the following conditions are met:- `typev4` must be equal to `'dhcp'`- `adv_dhcp_config_file_override` must be equal to `true`
     adv_dhcp_option_modifiers: Sets DHCP option modifiers applied to the obtained DHCP lease.This field is only available when the following conditions are met:- `typev4` must be equal to `'dhcp'`- `adv_dhcp_config_advanced` must be equal to `true`
-    adv_dhcp_pt_backoff_cutoff: Manually sets the backoff cutoff timing value used when requested DHCP leases on this interface.This field is only available when the following conditions are met:- `typev4` must be equal to `'dhcp'`- `adv_dhcp_config_advanced` must be equal to `t...
-    adv_dhcp_pt_initial_interval: Manually sets the initial interval timing value used when requested DHCP leases on this interface.This field is only available when the following conditions are met:- `typev4` must be equal to `'dhcp'`- `adv_dhcp_config_advanced` must be equal to ...
+    adv_dhcp_pt_backoff_cutoff: Manually sets the backoff cutoff timing value used when requested DHCP leases on this interface.This field is only available when the following conditions are met:- `typev4` must be equal to `'dhcp'`- `adv_dhcp_config_advanced` must be equal to `true`
+    adv_dhcp_pt_initial_interval: Manually sets the initial interval timing value used when requested DHCP leases on this interface.This field is only available when the following conditions are met:- `typev4` must be equal to `'dhcp'`- `adv_dhcp_config_advanced` must be equal to `true`
     adv_dhcp_pt_reboot: Manually sets the reboot timing value used when requested DHCP leases on this interface.This field is only available when the following conditions are met:- `typev4` must be equal to `'dhcp'`- `adv_dhcp_config_advanced` must be equal to `true`
     adv_dhcp_pt_retry: Manually sets the retry timing value used when requested DHCP leases on this interface.This field is only available when the following conditions are met:- `typev4` must be equal to `'dhcp'`- `adv_dhcp_config_advanced` must be equal to `true`
     adv_dhcp_pt_select_timeout: Manually sets the select timing value used when requested DHCP leases on this interface.This field is only available when the following conditions are met:- `typev4` must be equal to `'dhcp'`- `adv_dhcp_config_advanced` must be equal to `true`
@@ -6678,14 +6678,14 @@ async def pfsense_create_routing_gateway(
     disabled: Disable this gateway.
     dpinger_dont_add_static_route: Prevents gateway monitoring from adding a static route for this gateway's monitor IP.
     force_down: Always consider this gateway to be up.
-    gw_down_kill_states: Controls the state killing behavior when this specific gateway goes down. Killing states for specific down gateways only affects states created by policy routing rules and reply-to. Has no effect if gateway monitoring or its action are disabled or... Valid values: ['', 'none', 'down']
+    gw_down_kill_states: Controls the state killing behavior when this specific gateway goes down. Killing states for specific down gateways only affects states created by policy routing rules and reply-to. Has no effect if gateway monitoring or its action are disabled or if the gateway is forced down. May not have any effect on dynamic gateways during a link loss event. Valid values: ['', 'none', 'down']
     interval: Sets how often ICMP probes will be sent in milliseconds.
     latencyhigh: Sets the threshold to consider latency as high. This value must be greater than `latencylow`.
     latencylow: Sets the threshold to consider latency as low.
     loss_interval: Sets the time interval in milliseconds before packets are treated as lost.
     losshigh: Sets the threshold to consider packet loss as high. This value must be greater than `losslow`.
     losslow: Sets the threshold to consider packet loss as low.
-    monitor: Sets a different IP address to use when monitoring this gateway. This is typically only necessary if the gateway IP does not accept ICMP probes.This field is only available when the following conditions are met:- `monitor_disable` must be equal to...
+    monitor: Sets a different IP address to use when monitoring this gateway. This is typically only necessary if the gateway IP does not accept ICMP probes.This field is only available when the following conditions are met:- `monitor_disable` must be equal to `false`
     monitor_disable: Disable gateway monitoring for this gateway.
     nonlocalgateway: Allows or disallows gateway IPs that are not a part of the parent interface's subnet(s).
     time_period: Sets the time period in milliseconds over which results are averaged.
@@ -6792,7 +6792,7 @@ async def pfsense_update_routing_gateway(
     dpinger_dont_add_static_route: Prevents gateway monitoring from adding a static route for this gateway's monitor IP.
     force_down: Always consider this gateway to be up.
     gateway: Sets the IP address of the remote gateway.
-    gw_down_kill_states: Controls the state killing behavior when this specific gateway goes down. Killing states for specific down gateways only affects states created by policy routing rules and reply-to. Has no effect if gateway monitoring or its action are disabled or... Valid values: ['', 'none', 'down']
+    gw_down_kill_states: Controls the state killing behavior when this specific gateway goes down. Killing states for specific down gateways only affects states created by policy routing rules and reply-to. Has no effect if gateway monitoring or its action are disabled or if the gateway is forced down. May not have any effect on dynamic gateways during a link loss event. Valid values: ['', 'none', 'down']
     interface: Sets the interface this gateway will apply to.
     interval: Sets how often ICMP probes will be sent in milliseconds.
     ipprotocol: Sets the Internet Protocol version this gateway uses. Valid values: ['inet', 'inet6']
@@ -6801,7 +6801,7 @@ async def pfsense_update_routing_gateway(
     loss_interval: Sets the time interval in milliseconds before packets are treated as lost.
     losshigh: Sets the threshold to consider packet loss as high. This value must be greater than `losslow`.
     losslow: Sets the threshold to consider packet loss as low.
-    monitor: Sets a different IP address to use when monitoring this gateway. This is typically only necessary if the gateway IP does not accept ICMP probes.This field is only available when the following conditions are met:- `monitor_disable` must be equal to...
+    monitor: Sets a different IP address to use when monitoring this gateway. This is typically only necessary if the gateway IP does not accept ICMP probes.This field is only available when the following conditions are met:- `monitor_disable` must be equal to `false`
     monitor_disable: Disable gateway monitoring for this gateway.
     name: Sets a name for the gateway.
     nonlocalgateway: Allows or disallows gateway IPs that are not a part of the parent interface's subnet(s).
@@ -8302,7 +8302,7 @@ async def pfsense_create_services_acme_certificate_domain(
     ali_key: API KeyThis field is only available when the following conditions are met:- `method` must be equal to `'dns_ali'`
     ali_secret: API SecretThis field is only available when the following conditions are met:- `method` must be equal to `'dns_ali'`
     anx_token: API TokenThis field is only available when the following conditions are met:- `method` must be equal to `'dns_anx'`
-    anydnschallengealias: (Optional) Adds the --challenge-alias flag to the acme.sh call.To use a CNAME for _acme-challenge.importantDomain.tld to direct the acme validation to a different (sub)domain _acme-challenge.aliasDomainForValidationOnly.tld, configure the alternat...
+    anydnschallengealias: (Optional) Adds the --challenge-alias flag to the acme.sh call.To use a CNAME for _acme-challenge.importantDomain.tld to direct the acme validation to a different (sub)domain _acme-challenge.aliasDomainForValidationOnly.tld, configure the alternate domain here.More information can be found here.This field is only available when the following conditions are met:- `method` must not be one of [ webroot, webrootftp, standalone, standalonetls ]
     anydnschallengedomain: (Optional) Uses the challenge domain alias value as --domain-alias instead in the acme.sh call.This field is only available when the following conditions are met:- `method` must not be one of [ webroot, webrootftp, standalone, standalonetls ]
     arvan_token: Arvan API TokenThis field is only available when the following conditions are met:- `method` must be equal to `'dns_arvan'`
     aurora_key: API KeyThis field is only available when the following conditions are met:- `method` must be equal to `'dns_aurora'`
@@ -8380,7 +8380,7 @@ async def pfsense_create_services_acme_certificate_domain(
     duckdns_token: DuckDNS API Token (Look in DuckDNS account settings)This field is only available when the following conditions are met:- `method` must be equal to `'dns_duckdns'`
     dyn_customer: dyn.com customer IDThis field is only available when the following conditions are met:- `method` must be equal to `'dns_dyn'`
     dyn_password: dyn.com PasswordThis field is only available when the following conditions are met:- `method` must be equal to `'dns_dyn'`
-    dyn_username: dyn.com API Username (Dyn Managed DNS user, Needs Z&R Permissions for RecordAdd, RecordUpdate, RecordDelete, RecordGet, ZoneGet, ZoneAddNode, ZoneRemoveNode, ZonePublish)This field is only available when the following conditions are met:- `method`...
+    dyn_username: dyn.com API Username (Dyn Managed DNS user, Needs Z&R Permissions for RecordAdd, RecordUpdate, RecordDelete, RecordGet, ZoneGet, ZoneAddNode, ZoneRemoveNode, ZonePublish)This field is only available when the following conditions are met:- `method` must be equal to `'dns_dyn'`
     dynu_clientid: Dynu API Client ID created in the Dynu account settingsThis field is only available when the following conditions are met:- `method` must be equal to `'dns_dynu'`
     dynu_secret: Dynu API SecretThis field is only available when the following conditions are met:- `method` must be equal to `'dns_dynu'`
     easydns_key: easyDNS API Key. Sign up for a key at https://cp.easydns.com/manage/security/api/signup.phpThis field is only available when the following conditions are met:- `method` must be equal to `'dns_easydns'`
@@ -8413,7 +8413,7 @@ async def pfsense_create_services_acme_certificate_domain(
     infoblox_creds: Infoblox credentials in username:password formatThis field is only available when the following conditions are met:- `method` must be equal to `'dns_infoblox'`
     infoblox_server: Infoblox server IP address or hostnameThis field is only available when the following conditions are met:- `method` must be equal to `'dns_infoblox'`
     infoblox_view: Infoblox DNS View name, or enter "default"This field is only available when the following conditions are met:- `method` must be equal to `'dns_infoblox'`
-    infomaniak_api_token: Infomaniak API token. Visit https://manager.infomaniak.com/v3/&lt;account_id&gt;/api/dashboard and generate a token with the scope Domain.This field is only available when the following conditions are met:- `method` must be equal to `'dns_infomani...
+    infomaniak_api_token: Infomaniak API token. Visit https://manager.infomaniak.com/v3/&lt;account_id&gt;/api/dashboard and generate a token with the scope Domain.This field is only available when the following conditions are met:- `method` must be equal to `'dns_infomaniak'`
     infomaniak_ttl: Infomaniak DNS record TTL (Default: 300)This field is only available when the following conditions are met:- `method` must be equal to `'dns_infomaniak'`
     internetbs_api_key: Internet.BS API KeyThis field is only available when the following conditions are met:- `method` must be equal to `'dns_internetbs'`
     internetbs_api_password: Internet.BS API PasswordThis field is only available when the following conditions are met:- `method` must be equal to `'dns_internetbs'`
@@ -8538,8 +8538,8 @@ async def pfsense_create_services_acme_certificate_domain(
     simply_apikey: API KeyThis field is only available when the following conditions are met:- `method` must be equal to `'dns_simply'`
     sl_key: Selectel API KeyThis field is only available when the following conditions are met:- `method` must be equal to `'dns_selectel'`
     standaloneipv6: Bind to IPv6 instead of IPv4.This field is only available when the following conditions are met:- `method` must be equal to `'standalone'`
-    standaloneport: HTTP listen port for stand-alone server. Must be 80 or have port 80 on WAN forwarded to this port. Firewall rules must allow traffic to reach this port.This field is only available when the following conditions are met:- `method` must be equal to ...
-    standalonetlsport: TLS listen port for stand-alone server. Must be 443 or have port 443 on WAN forwarded to this port. Firewall rules must allow traffic to reach this port.This field is only available when the following conditions are met:- `method` must be equal to...
+    standaloneport: HTTP listen port for stand-alone server. Must be 80 or have port 80 on WAN forwarded to this port. Firewall rules must allow traffic to reach this port.This field is only available when the following conditions are met:- `method` must be equal to `'standalone'`
+    standalonetlsport: TLS listen port for stand-alone server. Must be 443 or have port 443 on WAN forwarded to this port. Firewall rules must allow traffic to reach this port.This field is only available when the following conditions are met:- `method` must be equal to `'standalonetls'`
     status: The activation status of the ACME certificate. Valid values: ['enable', 'disable']
     tele3_key: Tele3 KeyThis field is only available when the following conditions are met:- `method` must be equal to `'dns_tele3'`
     tele3_secret: Tele3 SecretThis field is only available when the following conditions are met:- `method` must be equal to `'dns_tele3'`
@@ -9506,7 +9506,7 @@ async def pfsense_update_services_acme_certificate_domain(
     ali_key: API KeyThis field is only available when the following conditions are met:- `method` must be equal to `'dns_ali'`
     ali_secret: API SecretThis field is only available when the following conditions are met:- `method` must be equal to `'dns_ali'`
     anx_token: API TokenThis field is only available when the following conditions are met:- `method` must be equal to `'dns_anx'`
-    anydnschallengealias: (Optional) Adds the --challenge-alias flag to the acme.sh call.To use a CNAME for _acme-challenge.importantDomain.tld to direct the acme validation to a different (sub)domain _acme-challenge.aliasDomainForValidationOnly.tld, configure the alternat...
+    anydnschallengealias: (Optional) Adds the --challenge-alias flag to the acme.sh call.To use a CNAME for _acme-challenge.importantDomain.tld to direct the acme validation to a different (sub)domain _acme-challenge.aliasDomainForValidationOnly.tld, configure the alternate domain here.More information can be found here.This field is only available when the following conditions are met:- `method` must not be one of [ webroot, webrootftp, standalone, standalonetls ]
     anydnschallengedomain: (Optional) Uses the challenge domain alias value as --domain-alias instead in the acme.sh call.This field is only available when the following conditions are met:- `method` must not be one of [ webroot, webrootftp, standalone, standalonetls ]
     arvan_token: Arvan API TokenThis field is only available when the following conditions are met:- `method` must be equal to `'dns_arvan'`
     aurora_key: API KeyThis field is only available when the following conditions are met:- `method` must be equal to `'dns_aurora'`
@@ -9584,7 +9584,7 @@ async def pfsense_update_services_acme_certificate_domain(
     duckdns_token: DuckDNS API Token (Look in DuckDNS account settings)This field is only available when the following conditions are met:- `method` must be equal to `'dns_duckdns'`
     dyn_customer: dyn.com customer IDThis field is only available when the following conditions are met:- `method` must be equal to `'dns_dyn'`
     dyn_password: dyn.com PasswordThis field is only available when the following conditions are met:- `method` must be equal to `'dns_dyn'`
-    dyn_username: dyn.com API Username (Dyn Managed DNS user, Needs Z&R Permissions for RecordAdd, RecordUpdate, RecordDelete, RecordGet, ZoneGet, ZoneAddNode, ZoneRemoveNode, ZonePublish)This field is only available when the following conditions are met:- `method`...
+    dyn_username: dyn.com API Username (Dyn Managed DNS user, Needs Z&R Permissions for RecordAdd, RecordUpdate, RecordDelete, RecordGet, ZoneGet, ZoneAddNode, ZoneRemoveNode, ZonePublish)This field is only available when the following conditions are met:- `method` must be equal to `'dns_dyn'`
     dynu_clientid: Dynu API Client ID created in the Dynu account settingsThis field is only available when the following conditions are met:- `method` must be equal to `'dns_dynu'`
     dynu_secret: Dynu API SecretThis field is only available when the following conditions are met:- `method` must be equal to `'dns_dynu'`
     easydns_key: easyDNS API Key. Sign up for a key at https://cp.easydns.com/manage/security/api/signup.phpThis field is only available when the following conditions are met:- `method` must be equal to `'dns_easydns'`
@@ -9617,7 +9617,7 @@ async def pfsense_update_services_acme_certificate_domain(
     infoblox_creds: Infoblox credentials in username:password formatThis field is only available when the following conditions are met:- `method` must be equal to `'dns_infoblox'`
     infoblox_server: Infoblox server IP address or hostnameThis field is only available when the following conditions are met:- `method` must be equal to `'dns_infoblox'`
     infoblox_view: Infoblox DNS View name, or enter "default"This field is only available when the following conditions are met:- `method` must be equal to `'dns_infoblox'`
-    infomaniak_api_token: Infomaniak API token. Visit https://manager.infomaniak.com/v3/&lt;account_id&gt;/api/dashboard and generate a token with the scope Domain.This field is only available when the following conditions are met:- `method` must be equal to `'dns_infomani...
+    infomaniak_api_token: Infomaniak API token. Visit https://manager.infomaniak.com/v3/&lt;account_id&gt;/api/dashboard and generate a token with the scope Domain.This field is only available when the following conditions are met:- `method` must be equal to `'dns_infomaniak'`
     infomaniak_ttl: Infomaniak DNS record TTL (Default: 300)This field is only available when the following conditions are met:- `method` must be equal to `'dns_infomaniak'`
     internetbs_api_key: Internet.BS API KeyThis field is only available when the following conditions are met:- `method` must be equal to `'dns_internetbs'`
     internetbs_api_password: Internet.BS API PasswordThis field is only available when the following conditions are met:- `method` must be equal to `'dns_internetbs'`
@@ -9744,8 +9744,8 @@ async def pfsense_update_services_acme_certificate_domain(
     simply_apikey: API KeyThis field is only available when the following conditions are met:- `method` must be equal to `'dns_simply'`
     sl_key: Selectel API KeyThis field is only available when the following conditions are met:- `method` must be equal to `'dns_selectel'`
     standaloneipv6: Bind to IPv6 instead of IPv4.This field is only available when the following conditions are met:- `method` must be equal to `'standalone'`
-    standaloneport: HTTP listen port for stand-alone server. Must be 80 or have port 80 on WAN forwarded to this port. Firewall rules must allow traffic to reach this port.This field is only available when the following conditions are met:- `method` must be equal to ...
-    standalonetlsport: TLS listen port for stand-alone server. Must be 443 or have port 443 on WAN forwarded to this port. Firewall rules must allow traffic to reach this port.This field is only available when the following conditions are met:- `method` must be equal to...
+    standaloneport: HTTP listen port for stand-alone server. Must be 80 or have port 80 on WAN forwarded to this port. Firewall rules must allow traffic to reach this port.This field is only available when the following conditions are met:- `method` must be equal to `'standalone'`
+    standalonetlsport: TLS listen port for stand-alone server. Must be 443 or have port 443 on WAN forwarded to this port. Firewall rules must allow traffic to reach this port.This field is only available when the following conditions are met:- `method` must be equal to `'standalonetls'`
     status: The activation status of the ACME certificate. Valid values: ['enable', 'disable']
     tele3_key: Tele3 KeyThis field is only available when the following conditions are met:- `method` must be equal to `'dns_tele3'`
     tele3_secret: Tele3 SecretThis field is only available when the following conditions are met:- `method` must be equal to `'dns_tele3'`
@@ -11245,7 +11245,7 @@ async def pfsense_update_services_bind_settings(
     log_options: list[str] | None = ['default'],
     log_severity: str | None = 'critical',
     rate_enabled: bool | None = None,
-    rate_limit: int | None = 15,
+    rate_limit: int | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/bind/settings
 
@@ -11870,7 +11870,7 @@ async def pfsense_create_services_bind_zone(
     dnssec: Enable DNSSEC for this BIND zone.This field is only available when the following conditions are met:- `type` must be one of [ master, slave ]
     enable_updatepolicy: Enable a specific dynamic update policy for this BIND zone.This field is only available when the following conditions are met:- `type` must be equal to `'master'`
     expire: The SOA expiry interval for this zone. TTL-style time-unit suffixes are supported (e.g. 1h, 1d, 1w), otherwise time in seconds is assumed.This field is only available when the following conditions are met:- `type` must be one of [ master, redirect ]
-    minimum: The SOA minimum TTL interval (in seconds) for this zone. This is also referred to as the negative TTL. TTL-style time-unit suffixes are supported (e.g. 1h, 1d, 1w), otherwise time in seconds is assumed.This field is only available when the followi...
+    minimum: The SOA minimum TTL interval (in seconds) for this zone. This is also referred to as the negative TTL. TTL-style time-unit suffixes are supported (e.g. 1h, 1d, 1w), otherwise time in seconds is assumed.This field is only available when the following conditions are met:- `type` must be one of [ master, redirect ]
     records: The records for this BIND zone.
     refresh: The SOA refresh interval for this zone. TTL-style time-unit suffixes are supported (e.g. 1h, 1d, 1w), otherwise time in seconds is assumed.This field is only available when the following conditions are met:- `type` must be one of [ master, redirect ]
     regdhcpstatic: Register DHCP static mappings as records in this BIND zone.
@@ -12009,7 +12009,7 @@ async def pfsense_update_services_bind_zone(
     expire: The SOA expiry interval for this zone. TTL-style time-unit suffixes are supported (e.g. 1h, 1d, 1w), otherwise time in seconds is assumed.This field is only available when the following conditions are met:- `type` must be one of [ master, redirect ]
     forwarders: The forwarders for this BIND zone.This field is only available when the following conditions are met:- `type` must be equal to `'forward'`
     mail: The SOA email address (RNAME) for this zone. This must be in an FQDN format.This field is only available when the following conditions are met:- `type` must be one of [ master, redirect ]
-    minimum: The SOA minimum TTL interval (in seconds) for this zone. This is also referred to as the negative TTL. TTL-style time-unit suffixes are supported (e.g. 1h, 1d, 1w), otherwise time in seconds is assumed.This field is only available when the followi...
+    minimum: The SOA minimum TTL interval (in seconds) for this zone. This is also referred to as the negative TTL. TTL-style time-unit suffixes are supported (e.g. 1h, 1d, 1w), otherwise time in seconds is assumed.This field is only available when the following conditions are met:- `type` must be one of [ master, redirect ]
     name: The name of this BIND zone.
     nameserver: The SOA nameserver for this zone.This field is only available when the following conditions are met:- `type` must be one of [ master, redirect ]
     records: The records for this BIND zone.
@@ -12375,11 +12375,11 @@ async def pfsense_create_services_cron_job(
     """POST /api/v2/services/cron/job
 
     command: The command to run. Use full file paths for this command and include an command parameters.
-    hour: The hour(s) at which the command will be executed. (0-23, ranges, or divided, *=all)This field is only available when the following conditions are met:- `minute` must not be one of [ @reboot, @yearly, @annually, @monthly, @weekly, @daily, @midnigh...
-    mday: The day(s) of the month on which the command will be executed. (1-31, ranges, or divided, *=all).This field is only available when the following conditions are met:- `minute` must not be one of [ @reboot, @yearly, @annually, @monthly, @weekly, @da...
+    hour: The hour(s) at which the command will be executed. (0-23, ranges, or divided, *=all)This field is only available when the following conditions are met:- `minute` must not be one of [ @reboot, @yearly, @annually, @monthly, @weekly, @daily, @midnight, @hourly, @every_minute, @every_second ]
+    mday: The day(s) of the month on which the command will be executed. (1-31, ranges, or divided, *=all).This field is only available when the following conditions are met:- `minute` must not be one of [ @reboot, @yearly, @annually, @monthly, @weekly, @daily, @midnight, @hourly, @every_minute, @every_second ]
     minute: The minute(s) at which the command will be executed or a special @ event string. (0-59, ranges, divided, @ event or delay, *=all). When using a special @ event, such as @reboot, the other time fields must be empty.
-    month: The month(s) of the year in which the command will be executed. (1-31, ranges, or divided, *=all).This field is only available when the following conditions are met:- `minute` must not be one of [ @reboot, @yearly, @annually, @monthly, @weekly, @d...
-    wday: The day(s) of the week on which the command will be executed. (0-7, 7=Sun or use names, ranges, or divided, *=all).This field is only available when the following conditions are met:- `minute` must not be one of [ @reboot, @yearly, @annually, @mon...
+    month: The month(s) of the year in which the command will be executed. (1-31, ranges, or divided, *=all).This field is only available when the following conditions are met:- `minute` must not be one of [ @reboot, @yearly, @annually, @monthly, @weekly, @daily, @midnight, @hourly, @every_minute, @every_second ]
+    wday: The day(s) of the week on which the command will be executed. (0-7, 7=Sun or use names, ranges, or divided, *=all).This field is only available when the following conditions are met:- `minute` must not be one of [ @reboot, @yearly, @annually, @monthly, @weekly, @daily, @midnight, @hourly, @every_minute, @every_second ]
     who: The OS user to use when cron runs the command.
     """
     if not confirm:
@@ -12425,11 +12425,11 @@ async def pfsense_update_services_cron_job(
 
     id: The ID of the object or resource to interact with.
     command: The command to run. Use full file paths for this command and include an command parameters.
-    hour: The hour(s) at which the command will be executed. (0-23, ranges, or divided, *=all)This field is only available when the following conditions are met:- `minute` must not be one of [ @reboot, @yearly, @annually, @monthly, @weekly, @daily, @midnigh...
-    mday: The day(s) of the month on which the command will be executed. (1-31, ranges, or divided, *=all).This field is only available when the following conditions are met:- `minute` must not be one of [ @reboot, @yearly, @annually, @monthly, @weekly, @da...
+    hour: The hour(s) at which the command will be executed. (0-23, ranges, or divided, *=all)This field is only available when the following conditions are met:- `minute` must not be one of [ @reboot, @yearly, @annually, @monthly, @weekly, @daily, @midnight, @hourly, @every_minute, @every_second ]
+    mday: The day(s) of the month on which the command will be executed. (1-31, ranges, or divided, *=all).This field is only available when the following conditions are met:- `minute` must not be one of [ @reboot, @yearly, @annually, @monthly, @weekly, @daily, @midnight, @hourly, @every_minute, @every_second ]
     minute: The minute(s) at which the command will be executed or a special @ event string. (0-59, ranges, divided, @ event or delay, *=all). When using a special @ event, such as @reboot, the other time fields must be empty.
-    month: The month(s) of the year in which the command will be executed. (1-31, ranges, or divided, *=all).This field is only available when the following conditions are met:- `minute` must not be one of [ @reboot, @yearly, @annually, @monthly, @weekly, @d...
-    wday: The day(s) of the week on which the command will be executed. (0-7, 7=Sun or use names, ranges, or divided, *=all).This field is only available when the following conditions are met:- `minute` must not be one of [ @reboot, @yearly, @annually, @mon...
+    month: The month(s) of the year in which the command will be executed. (1-31, ranges, or divided, *=all).This field is only available when the following conditions are met:- `minute` must not be one of [ @reboot, @yearly, @annually, @monthly, @weekly, @daily, @midnight, @hourly, @every_minute, @every_second ]
+    wday: The day(s) of the week on which the command will be executed. (0-7, 7=Sun or use names, ranges, or divided, *=all).This field is only available when the following conditions are met:- `minute` must not be one of [ @reboot, @yearly, @annually, @monthly, @weekly, @daily, @midnight, @hourly, @every_minute, @every_second ]
     who: The OS user to use when cron runs the command.
     """
     if not confirm:
@@ -12670,13 +12670,13 @@ async def pfsense_create_services_dhcp_server_address_pool(
     range_from: The starting IP address for this address pool. This address must be less than or equal to the `range_to` field.
     range_to: The ending IP address for the this address pool. This address must be greater than or equal to the `range_to` field.
     defaultleasetime: The default DHCP lease validity period (in seconds). This is used for clients that do not ask for a specific expiration time.
-    denyunknown: Define how to handle unknown clients requesting DHCP leases. When set to `null`, any DHCP client will get an IP address within this scope/range on this interface. If set to `enabled`, any DHCP client with a MAC address listed in a static mapping o... Valid values: ['enabled', 'class']
+    denyunknown: Define how to handle unknown clients requesting DHCP leases. When set to `null`, any DHCP client will get an IP address within this scope/range on this interface. If set to `enabled`, any DHCP client with a MAC address listed in a static mapping on any scope(s)/interface(s) will get an IP address. If set to `class`, only MAC addresses listed in static mappings on this interface will get an IP address within this scope/range. Valid values: ['enabled', 'class']
     dnsserver: The DNS servers to provide via DHCP. Leave empty to default to system nameservers.
     domain: The domain to be assigned via DHCP.
     domainsearchlist: The domain search list to provide via DHCP.
     gateway: The gateway IPv4 address to provide via DHCP. This is only necessary if you are not using the interface's IP as the gateway. Specify `none` for no gateway assignment.
     ignorebootp: Force this DHCP server to ignore BOOTP queries.
-    ignoreclientuids: Prevent recording a unique identifier (UID) in client lease data if present in the client DHCP request. This option may be useful when a client can dual boot using different client identifiers but the same hardware (MAC) address. Note that the res...
+    ignoreclientuids: Prevent recording a unique identifier (UID) in client lease data if present in the client DHCP request. This option may be useful when a client can dual boot using different client identifiers but the same hardware (MAC) address. Note that the resulting server behavior violates the official DHCP specification.
     mac_allow: MAC addresses this DHCP server is allowed to provide leases for.
     mac_deny: MAC addresses this DHCP server is not allowed to provide leases for.
     maxleasetime: The maximum DHCP lease validity period (in seconds) a client can request.
@@ -12757,13 +12757,13 @@ async def pfsense_update_services_dhcp_server_address_pool(
     id: The ID of the object or resource to interact with.
     parent_id: The ID of the parent this object is nested under.
     defaultleasetime: The default DHCP lease validity period (in seconds). This is used for clients that do not ask for a specific expiration time.
-    denyunknown: Define how to handle unknown clients requesting DHCP leases. When set to `null`, any DHCP client will get an IP address within this scope/range on this interface. If set to `enabled`, any DHCP client with a MAC address listed in a static mapping o... Valid values: ['enabled', 'class']
+    denyunknown: Define how to handle unknown clients requesting DHCP leases. When set to `null`, any DHCP client will get an IP address within this scope/range on this interface. If set to `enabled`, any DHCP client with a MAC address listed in a static mapping on any scope(s)/interface(s) will get an IP address. If set to `class`, only MAC addresses listed in static mappings on this interface will get an IP address within this scope/range. Valid values: ['enabled', 'class']
     dnsserver: The DNS servers to provide via DHCP. Leave empty to default to system nameservers.
     domain: The domain to be assigned via DHCP.
     domainsearchlist: The domain search list to provide via DHCP.
     gateway: The gateway IPv4 address to provide via DHCP. This is only necessary if you are not using the interface's IP as the gateway. Specify `none` for no gateway assignment.
     ignorebootp: Force this DHCP server to ignore BOOTP queries.
-    ignoreclientuids: Prevent recording a unique identifier (UID) in client lease data if present in the client DHCP request. This option may be useful when a client can dual boot using different client identifiers but the same hardware (MAC) address. Note that the res...
+    ignoreclientuids: Prevent recording a unique identifier (UID) in client lease data if present in the client DHCP request. This option may be useful when a client can dual boot using different client identifiers but the same hardware (MAC) address. Note that the resulting server behavior violates the official DHCP specification.
     mac_allow: MAC addresses this DHCP server is allowed to provide leases for.
     mac_deny: MAC addresses this DHCP server is not allowed to provide leases for.
     maxleasetime: The maximum DHCP lease validity period (in seconds) a client can request.
@@ -13231,9 +13231,9 @@ async def pfsense_create_services_dhcp_server(
 
     Note: Call pfsense_services_dhcp_server_apply after this to apply changes.
 
-    interface: The interface to configure the DHCP server for. This field is only necessary when you wantto change the interface (ID) of an existing DHCP server, or you are replacing all DHCP server objects with a new configuration. Note that specifying an inter...
+    interface: The interface to configure the DHCP server for. This field is only necessary when you wantto change the interface (ID) of an existing DHCP server, or you are replacing all DHCP server objects with a new configuration. Note that specifying an interface in this field will update the ID of the DHCP server to match the interface specified here. Leaving this field empty will retain the existing interface.
     defaultleasetime: The default DHCP lease validity period (in seconds). This is used for clients that do not ask for a specific expiration time.
-    denyunknown: Define how to handle unknown clients requesting DHCP leases. When set to `null`, any DHCP client will get an IP address within this scope/range on this interface. If set to `enabled`, any DHCP client with a MAC address listed in a static mapping o... Valid values: ['enabled', 'class']
+    denyunknown: Define how to handle unknown clients requesting DHCP leases. When set to `null`, any DHCP client will get an IP address within this scope/range on this interface. If set to `enabled`, any DHCP client with a MAC address listed in a static mapping on any scope(s)/interface(s) will get an IP address. If set to `class`, only MAC addresses listed in static mappings on this interface will get an IP address within this scope/range. Valid values: ['enabled', 'class']
     dhcpleaseinlocaltime: Display the DHCP lease times in local time instead of UTC.
     disablepingcheck: Prevent the DHCP server from sending a ping to the address being assigned, where if no response has been heard, it assigns the address.
     dnsserver: The DNS servers to provide via DHCP. Leave empty to default to system nameservers.
@@ -13243,7 +13243,7 @@ async def pfsense_create_services_dhcp_server(
     failover_peerip: The interface IP address of the other firewall (failover peer) in this subnet. Leave empty to disable failover peering.
     gateway: The gateway IPv4 address to provide via DHCP. This is only necessary if you are not using the interface's IP as the gateway. Specify `none` for no gateway assignment.
     ignorebootp: Force this DHCP server to ignore BOOTP queries.
-    ignoreclientuids: Prevent recording a unique identifier (UID) in client lease data if present in the client DHCP request. This option may be useful when a client can dual boot using different client identifiers but the same hardware (MAC) address. Note that the res...
+    ignoreclientuids: Prevent recording a unique identifier (UID) in client lease data if present in the client DHCP request. This option may be useful when a client can dual boot using different client identifiers but the same hardware (MAC) address. Note that the resulting server behavior violates the official DHCP specification.
     mac_allow: MAC addresses this DHCP server is allowed to provide leases for.
     mac_deny: MAC addresses this DHCP server is not allowed to provide leases for.
     maxleasetime: The maximum DHCP lease validity period (in seconds) a client can request.
@@ -13361,7 +13361,7 @@ async def pfsense_update_services_dhcp_server(
 
     id: The ID of the object or resource to interact with.
     defaultleasetime: The default DHCP lease validity period (in seconds). This is used for clients that do not ask for a specific expiration time.
-    denyunknown: Define how to handle unknown clients requesting DHCP leases. When set to `null`, any DHCP client will get an IP address within this scope/range on this interface. If set to `enabled`, any DHCP client with a MAC address listed in a static mapping o... Valid values: ['enabled', 'class']
+    denyunknown: Define how to handle unknown clients requesting DHCP leases. When set to `null`, any DHCP client will get an IP address within this scope/range on this interface. If set to `enabled`, any DHCP client with a MAC address listed in a static mapping on any scope(s)/interface(s) will get an IP address. If set to `class`, only MAC addresses listed in static mappings on this interface will get an IP address within this scope/range. Valid values: ['enabled', 'class']
     dhcpleaseinlocaltime: Display the DHCP lease times in local time instead of UTC.
     disablepingcheck: Prevent the DHCP server from sending a ping to the address being assigned, where if no response has been heard, it assigns the address.
     dnsserver: The DNS servers to provide via DHCP. Leave empty to default to system nameservers.
@@ -13371,8 +13371,8 @@ async def pfsense_update_services_dhcp_server(
     failover_peerip: The interface IP address of the other firewall (failover peer) in this subnet. Leave empty to disable failover peering.
     gateway: The gateway IPv4 address to provide via DHCP. This is only necessary if you are not using the interface's IP as the gateway. Specify `none` for no gateway assignment.
     ignorebootp: Force this DHCP server to ignore BOOTP queries.
-    ignoreclientuids: Prevent recording a unique identifier (UID) in client lease data if present in the client DHCP request. This option may be useful when a client can dual boot using different client identifiers but the same hardware (MAC) address. Note that the res...
-    interface: The interface to configure the DHCP server for. This field is only necessary when you wantto change the interface (ID) of an existing DHCP server, or you are replacing all DHCP server objects with a new configuration. Note that specifying an inter...
+    ignoreclientuids: Prevent recording a unique identifier (UID) in client lease data if present in the client DHCP request. This option may be useful when a client can dual boot using different client identifiers but the same hardware (MAC) address. Note that the resulting server behavior violates the official DHCP specification.
+    interface: The interface to configure the DHCP server for. This field is only necessary when you wantto change the interface (ID) of an existing DHCP server, or you are replacing all DHCP server objects with a new configuration. Note that specifying an interface in this field will update the ID of the DHCP server to match the interface specified here. Leaving this field empty will retain the existing interface.
     mac_allow: MAC addresses this DHCP server is allowed to provide leases for.
     mac_deny: MAC addresses this DHCP server is not allowed to provide leases for.
     maxleasetime: The maximum DHCP lease validity period (in seconds) a client can request.
@@ -15434,14 +15434,14 @@ async def pfsense_update_services_dns_resolver_settings(
     outgoing_interface: list[str] | None = None,
     port: str | None = '53',
     python: bool | None = None,
-    python_order: str | None = 'pre_validator',
+    python_order: str | None = None,
     python_script: str | None = None,
     regdhcp: bool | None = None,
     regdhcpstatic: bool | None = None,
     regovpnclients: bool | None = None,
     strictout: bool | None = None,
     system_domain_local_zone_type: str | None = 'transparent',
-    tlsport: str | None = '853',
+    tlsport: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/dns_resolver/settings
 
@@ -16012,10 +16012,10 @@ async def pfsense_create_services_free_radius_user(
     description: str | None = None,
     framed_ip_address: str | None = None,
     framed_ip_netmask: str | None = None,
-    motp_authmethod: str | None = 'googleauth',
+    motp_authmethod: str | None = None,
     motp_enable: bool | None = None,
     motp_offset: int | None = None,
-    password_encryption: str | None = 'Cleartext-Password',
+    password_encryption: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/freeradius/user
 
@@ -16073,13 +16073,13 @@ async def pfsense_update_services_free_radius_user(
     description: str | None = None,
     framed_ip_address: str | None = None,
     framed_ip_netmask: str | None = None,
-    motp_authmethod: str | None = 'googleauth',
+    motp_authmethod: str | None = None,
     motp_enable: bool | None = None,
     motp_offset: int | None = None,
     motp_pin: str | None = None,
     motp_secret: str | None = None,
     password: str | None = None,
-    password_encryption: str | None = 'Cleartext-Password',
+    password_encryption: str | None = None,
     username: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/freeradius/user
@@ -16306,7 +16306,7 @@ async def pfsense_create_services_ha_proxy_backend_acl(
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
-    expression: The expression to use to determine the match for this ACL. Valid values: ['host_starts_with', 'host_ends_with', 'host_matches', 'host_regex', 'host_contains', 'path_starts_with', 'path_ends_with', 'path_matches', 'path_regex', 'path_contains', 'path_dir', 'url_parameter', 'ssl_c_verify_code', 'ssl_c_verify', 'ssl_c_ca_commonname', 'source_ip', 'backendservercount', 'traffic_is_http', 'traffic_i...
+    expression: The expression to use to determine the match for this ACL. Valid values: ['host_starts_with', 'host_ends_with', 'host_matches', 'host_regex', 'host_contains', 'path_starts_with', 'path_ends_with', 'path_matches', 'path_regex', 'path_contains', 'path_dir', 'url_parameter', 'ssl_c_verify_code', 'ssl_c_verify', 'ssl_c_ca_commonname', 'source_ip', 'backendservercount', 'traffic_is_http', 'traffic_is_ssl', 'ssl_sni_matches', 'ssl_sni_contains', 'ssl_sni_starts_with', 'ssl_sni_ends_with', 'ssl_sni_regex', 'custom']
     name: The unique name for this backend ACL.
     parent_id: The ID of the parent this object is nested under.
     value: The value which indicates a match for this ACL.
@@ -16357,7 +16357,7 @@ async def pfsense_update_services_ha_proxy_backend_acl(
     id: The ID of the object or resource to interact with.
     parent_id: The ID of the parent this object is nested under.
     casesensitive: Enables or disables case-sensitive matching for this ACL.
-    expression: The expression to use to determine the match for this ACL. Valid values: ['host_starts_with', 'host_ends_with', 'host_matches', 'host_regex', 'host_contains', 'path_starts_with', 'path_ends_with', 'path_matches', 'path_regex', 'path_contains', 'path_dir', 'url_parameter', 'ssl_c_verify_code', 'ssl_c_verify', 'ssl_c_ca_commonname', 'source_ip', 'backendservercount', 'traffic_is_http', 'traffic_i...
+    expression: The expression to use to determine the match for this ACL. Valid values: ['host_starts_with', 'host_ends_with', 'host_matches', 'host_regex', 'host_contains', 'path_starts_with', 'path_ends_with', 'path_matches', 'path_regex', 'path_contains', 'path_dir', 'url_parameter', 'ssl_c_verify_code', 'ssl_c_verify', 'ssl_c_ca_commonname', 'source_ip', 'backendservercount', 'traffic_is_http', 'traffic_is_ssl', 'ssl_sni_matches', 'ssl_sni_contains', 'ssl_sni_starts_with', 'ssl_sni_ends_with', 'ssl_sni_regex', 'custom']
     name: The unique name for this backend ACL.
     not_: Enables or disables inverting the context of this ACL.
     value: The value which indicates a match for this ACL.
@@ -16533,18 +16533,18 @@ async def pfsense_create_services_ha_proxy_backend_action(
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
     acl: The name of the backend ACL this action is associated with.
-    action: The action to take when an ACL match is found. Valid values: ['use_server', 'custom', 'http-request_allow', 'http-request_deny', 'http-request_tarpit', 'http-request_auth', 'http-request_redirect', 'http-request_lua', 'http-request_use-service', 'http-request_add-header', 'http-request_set-header', 'http-request_del-header', 'http-request_replace-header', 'http-request_replace-path', 'http-requ...
+    action: The action to take when an ACL match is found. Valid values: ['use_server', 'custom', 'http-request_allow', 'http-request_deny', 'http-request_tarpit', 'http-request_auth', 'http-request_redirect', 'http-request_lua', 'http-request_use-service', 'http-request_add-header', 'http-request_set-header', 'http-request_del-header', 'http-request_replace-header', 'http-request_replace-path', 'http-request_replace-value', 'http-request_set-method', 'http-request_set-path', 'http-request_set-query', 'http-request_set-uri', 'http-response_allow', 'http-response_deny', 'http-response_lua', 'http-response_add-header', 'http-response_set-header', 'http-response_del-header', 'http-response_replace-header', 'http-response_replace-value', 'http-response_set-status', 'http-after-response_add-header', 'http-after-response_set-header', 'http-after-response_del-header', 'http-after-response_replace-header', 'http-after-response_replace-value', 'http-after-response_set-status', 'tcp-request_connection_accept', 'tcp-request_connection_reject', 'tcp-request_content_accept', 'tcp-request_content_reject', 'tcp-request_content_lua', 'tcp-request_content_use-service', 'tcp-response_content_accept', 'tcp-response_content_close', 'tcp-response_content_reject', 'tcp-response_content_lua']
     customaction: The custom action to take when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'custom'`
     deny_status: The deny status to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_deny, http-request_tarpit ]
-    find: The value to find when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_replace-header, http-request_replace-value, http-response_replace-header, http-request_replace...
-    fmt: The fmt value to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_add-header, http-request_set-header, http-request_set-method, http-request_set-path, http-r...
-    lua_function: The Lua function to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_lua, http-request_use-service, http-response_lua, tcp-request_content_lua, tcp-request_c...
-    name: The name to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_add-header, http-request_set-header, http-request_del-header, http-request_replace-header, http-...
+    find: The value to find when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_replace-header, http-request_replace-value, http-response_replace-header, http-request_replace-path, http-response_replace-value, http-after-response_replace-header, http-after-response_replace-value ]
+    fmt: The fmt value to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_add-header, http-request_set-header, http-request_set-method, http-request_set-path, http-request_set-query, http-request_set-uri, http-response_add-header, http-response_set-header, http-after-response_add-header, http-after-response_set-header ]
+    lua_function: The Lua function to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_lua, http-request_use-service, http-response_lua, tcp-request_content_lua, tcp-request_content_use-service, tcp-response_content_lua ]
+    name: The name to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_add-header, http-request_set-header, http-request_del-header, http-request_replace-header, http-request_replace-value, http-response_add-header, http-response_set-header, http-response_del-header, http-response_replace-header, http-response_replace-value, http-after-response_add-header, http-after-response_set-header, http-after-response_del-header, http-after-response_replace-header, http-after-response_replace-value ]
     parent_id: The ID of the parent this object is nested under.
     path: The path to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'http-request_replace-path'`
     realm: The authentication realm to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'http-request_auth'`
     reason: The status reason to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-response_set-status, http-after-response_set-status ]
-    replace: The value to replace with when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_replace-header, http-request_replace-value, http-request_replace-path, http-response_r...
+    replace: The value to replace with when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_replace-header, http-request_replace-value, http-request_replace-path, http-response_replace-header, http-response_replace-value, http-after-response_replace-header, http-after-response_replace-value ]
     rule: The redirect rule to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'http-request_redirect'`
     server: The backend server to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'use_server'`
     status: The status to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-response_set-status, http-after-response_set-status ]
@@ -16623,17 +16623,17 @@ async def pfsense_update_services_ha_proxy_backend_action(
     id: The ID of the object or resource to interact with.
     parent_id: The ID of the parent this object is nested under.
     acl: The name of the backend ACL this action is associated with.
-    action: The action to take when an ACL match is found. Valid values: ['use_server', 'custom', 'http-request_allow', 'http-request_deny', 'http-request_tarpit', 'http-request_auth', 'http-request_redirect', 'http-request_lua', 'http-request_use-service', 'http-request_add-header', 'http-request_set-header', 'http-request_del-header', 'http-request_replace-header', 'http-request_replace-path', 'http-requ...
+    action: The action to take when an ACL match is found. Valid values: ['use_server', 'custom', 'http-request_allow', 'http-request_deny', 'http-request_tarpit', 'http-request_auth', 'http-request_redirect', 'http-request_lua', 'http-request_use-service', 'http-request_add-header', 'http-request_set-header', 'http-request_del-header', 'http-request_replace-header', 'http-request_replace-path', 'http-request_replace-value', 'http-request_set-method', 'http-request_set-path', 'http-request_set-query', 'http-request_set-uri', 'http-response_allow', 'http-response_deny', 'http-response_lua', 'http-response_add-header', 'http-response_set-header', 'http-response_del-header', 'http-response_replace-header', 'http-response_replace-value', 'http-response_set-status', 'http-after-response_add-header', 'http-after-response_set-header', 'http-after-response_del-header', 'http-after-response_replace-header', 'http-after-response_replace-value', 'http-after-response_set-status', 'tcp-request_connection_accept', 'tcp-request_connection_reject', 'tcp-request_content_accept', 'tcp-request_content_reject', 'tcp-request_content_lua', 'tcp-request_content_use-service', 'tcp-response_content_accept', 'tcp-response_content_close', 'tcp-response_content_reject', 'tcp-response_content_lua']
     customaction: The custom action to take when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'custom'`
     deny_status: The deny status to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_deny, http-request_tarpit ]
-    find: The value to find when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_replace-header, http-request_replace-value, http-response_replace-header, http-request_replace...
-    fmt: The fmt value to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_add-header, http-request_set-header, http-request_set-method, http-request_set-path, http-r...
-    lua_function: The Lua function to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_lua, http-request_use-service, http-response_lua, tcp-request_content_lua, tcp-request_c...
-    name: The name to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_add-header, http-request_set-header, http-request_del-header, http-request_replace-header, http-...
+    find: The value to find when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_replace-header, http-request_replace-value, http-response_replace-header, http-request_replace-path, http-response_replace-value, http-after-response_replace-header, http-after-response_replace-value ]
+    fmt: The fmt value to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_add-header, http-request_set-header, http-request_set-method, http-request_set-path, http-request_set-query, http-request_set-uri, http-response_add-header, http-response_set-header, http-after-response_add-header, http-after-response_set-header ]
+    lua_function: The Lua function to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_lua, http-request_use-service, http-response_lua, tcp-request_content_lua, tcp-request_content_use-service, tcp-response_content_lua ]
+    name: The name to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_add-header, http-request_set-header, http-request_del-header, http-request_replace-header, http-request_replace-value, http-response_add-header, http-response_set-header, http-response_del-header, http-response_replace-header, http-response_replace-value, http-after-response_add-header, http-after-response_set-header, http-after-response_del-header, http-after-response_replace-header, http-after-response_replace-value ]
     path: The path to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'http-request_replace-path'`
     realm: The authentication realm to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'http-request_auth'`
     reason: The status reason to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-response_set-status, http-after-response_set-status ]
-    replace: The value to replace with when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_replace-header, http-request_replace-value, http-request_replace-path, http-response_r...
+    replace: The value to replace with when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_replace-header, http-request_replace-value, http-request_replace-path, http-response_replace-header, http-response_replace-value, http-after-response_replace-header, http-after-response_replace-value ]
     rule: The redirect rule to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'http-request_redirect'`
     server: The backend server to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'use_server'`
     status: The status to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-response_set-status, http-after-response_set-status ]
@@ -16811,7 +16811,7 @@ async def pfsense_create_services_ha_proxy_backend(
     advanced: str | None = None,
     advanced_backend: str | None = None,
     agent_checks: bool | None = None,
-    agent_inter: int | None = 2000,
+    agent_inter: int | None = None,
     balance: str | None = None,
     balance_uridepth: int | None = None,
     balance_urilen: int | None = None,
@@ -16827,16 +16827,16 @@ async def pfsense_create_services_ha_proxy_backend(
     haproxy_cookie_dynamic_cookie_key: str | None = None,
     haproxy_cookie_maxidle: int | None = None,
     haproxy_cookie_maxlife: int | None = None,
-    httpcheck_method: str | None = 'OPTIONS',
+    httpcheck_method: str | None = None,
     log_health_checks: bool | None = None,
     monitor_domain: str | None = None,
-    monitor_httpversion: str | None = 'HTTP/1.0',
-    monitor_uri: str | None = '/',
+    monitor_httpversion: str | None = None,
+    monitor_uri: str | None = None,
     monitor_username: str | None = None,
     persist_cookie_cachable: bool | None = None,
     persist_cookie_enabled: bool | None = None,
     persist_cookie_httponly: bool | None = None,
-    persist_cookie_mode: str | None = 'passive',
+    persist_cookie_mode: str | None = None,
     persist_cookie_postonly: bool | None = None,
     persist_cookie_secure: bool | None = None,
     persist_stick_cookiename: str | None = None,
@@ -16853,7 +16853,7 @@ async def pfsense_create_services_ha_proxy_backend(
     stats_node: str | None = None,
     stats_password: str | None = None,
     stats_realm: str | None = None,
-    stats_refresh: int | None = 10,
+    stats_refresh: int | None = None,
     stats_scope: list[str] | None = None,
     stats_uri: str | None = None,
     stats_username: str | None = None,
@@ -17060,7 +17060,7 @@ async def pfsense_update_services_ha_proxy_backend(
     advanced: str | None = None,
     advanced_backend: str | None = None,
     agent_checks: bool | None = None,
-    agent_inter: int | None = 2000,
+    agent_inter: int | None = None,
     agent_port: str | None = None,
     balance: str | None = None,
     balance_uridepth: int | None = None,
@@ -17077,17 +17077,17 @@ async def pfsense_update_services_ha_proxy_backend(
     haproxy_cookie_dynamic_cookie_key: str | None = None,
     haproxy_cookie_maxidle: int | None = None,
     haproxy_cookie_maxlife: int | None = None,
-    httpcheck_method: str | None = 'OPTIONS',
+    httpcheck_method: str | None = None,
     log_health_checks: bool | None = None,
     monitor_domain: str | None = None,
-    monitor_httpversion: str | None = 'HTTP/1.0',
-    monitor_uri: str | None = '/',
+    monitor_httpversion: str | None = None,
+    monitor_uri: str | None = None,
     monitor_username: str | None = None,
     name: str | None = None,
     persist_cookie_cachable: bool | None = None,
     persist_cookie_enabled: bool | None = None,
     persist_cookie_httponly: bool | None = None,
-    persist_cookie_mode: str | None = 'passive',
+    persist_cookie_mode: str | None = None,
     persist_cookie_name: str | None = None,
     persist_cookie_postonly: bool | None = None,
     persist_cookie_secure: bool | None = None,
@@ -17105,7 +17105,7 @@ async def pfsense_update_services_ha_proxy_backend(
     stats_node: str | None = None,
     stats_password: str | None = None,
     stats_realm: str | None = None,
-    stats_refresh: int | None = 10,
+    stats_refresh: int | None = None,
     stats_scope: list[str] | None = None,
     stats_uri: str | None = None,
     stats_username: str | None = None,
@@ -18100,7 +18100,7 @@ async def pfsense_create_services_ha_proxy_frontend_acl(
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
-    expression: The expression to use to determine the match for this ACL. Valid values: ['host_starts_with', 'host_ends_with', 'host_matches', 'host_regex', 'host_contains', 'path_starts_with', 'path_ends_with', 'path_matches', 'path_regex', 'path_contains', 'path_dir', 'url_parameter', 'ssl_c_verify_code', 'ssl_c_verify', 'ssl_c_ca_commonname', 'source_ip', 'backendservercount', 'traffic_is_http', 'traffic_i...
+    expression: The expression to use to determine the match for this ACL. Valid values: ['host_starts_with', 'host_ends_with', 'host_matches', 'host_regex', 'host_contains', 'path_starts_with', 'path_ends_with', 'path_matches', 'path_regex', 'path_contains', 'path_dir', 'url_parameter', 'ssl_c_verify_code', 'ssl_c_verify', 'ssl_c_ca_commonname', 'source_ip', 'backendservercount', 'traffic_is_http', 'traffic_is_ssl', 'ssl_sni_matches', 'ssl_sni_contains', 'ssl_sni_starts_with', 'ssl_sni_ends_with', 'ssl_sni_regex', 'custom']
     name: The unique name for this frontend ACL.
     parent_id: The ID of the parent this object is nested under.
     value: The value which indicates a match for this ACL.
@@ -18151,7 +18151,7 @@ async def pfsense_update_services_ha_proxy_frontend_acl(
     id: The ID of the object or resource to interact with.
     parent_id: The ID of the parent this object is nested under.
     casesensitive: Enables or disables case-sensitive matching for this ACL.
-    expression: The expression to use to determine the match for this ACL. Valid values: ['host_starts_with', 'host_ends_with', 'host_matches', 'host_regex', 'host_contains', 'path_starts_with', 'path_ends_with', 'path_matches', 'path_regex', 'path_contains', 'path_dir', 'url_parameter', 'ssl_c_verify_code', 'ssl_c_verify', 'ssl_c_ca_commonname', 'source_ip', 'backendservercount', 'traffic_is_http', 'traffic_i...
+    expression: The expression to use to determine the match for this ACL. Valid values: ['host_starts_with', 'host_ends_with', 'host_matches', 'host_regex', 'host_contains', 'path_starts_with', 'path_ends_with', 'path_matches', 'path_regex', 'path_contains', 'path_dir', 'url_parameter', 'ssl_c_verify_code', 'ssl_c_verify', 'ssl_c_ca_commonname', 'source_ip', 'backendservercount', 'traffic_is_http', 'traffic_is_ssl', 'ssl_sni_matches', 'ssl_sni_contains', 'ssl_sni_starts_with', 'ssl_sni_ends_with', 'ssl_sni_regex', 'custom']
     name: The unique name for this frontend ACL.
     not_: Enables or disables inverting the context of this ACL.
     value: The value which indicates a match for this ACL.
@@ -18327,19 +18327,19 @@ async def pfsense_create_services_ha_proxy_frontend_action(
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
     acl: The name of the frontend ACL this action is associated with.
-    action: The action to take when an ACL match is found. Valid values: ['use_backend', 'custom', 'http-request_allow', 'http-request_deny', 'http-request_tarpit', 'http-request_auth', 'http-request_redirect', 'http-request_lua', 'http-request_use-service', 'http-request_add-header', 'http-request_set-header', 'http-request_del-header', 'http-request_replace-header', 'http-request_replace-path', 'http-req...
+    action: The action to take when an ACL match is found. Valid values: ['use_backend', 'custom', 'http-request_allow', 'http-request_deny', 'http-request_tarpit', 'http-request_auth', 'http-request_redirect', 'http-request_lua', 'http-request_use-service', 'http-request_add-header', 'http-request_set-header', 'http-request_del-header', 'http-request_replace-header', 'http-request_replace-path', 'http-request_replace-value', 'http-request_set-method', 'http-request_set-path', 'http-request_set-query', 'http-request_set-uri', 'http-response_allow', 'http-response_deny', 'http-response_lua', 'http-response_add-header', 'http-response_set-header', 'http-response_del-header', 'http-response_replace-header', 'http-response_replace-value', 'http-response_set-status', 'http-after-response_add-header', 'http-after-response_set-header', 'http-after-response_del-header', 'http-after-response_replace-header', 'http-after-response_replace-value', 'http-after-response_set-status', 'tcp-request_connection_accept', 'tcp-request_connection_reject', 'tcp-request_content_accept', 'tcp-request_content_reject', 'tcp-request_content_lua', 'tcp-request_content_use-service', 'tcp-response_content_accept', 'tcp-response_content_close', 'tcp-response_content_reject', 'tcp-response_content_lua']
     backend: The backend to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'use_backend'`
     customaction: The custom action to take when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'custom'`
     deny_status: The deny status to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_deny, http-request_tarpit ]
-    find: The value to find when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_replace-header, http-request_replace-value, http-response_replace-header, http-request_replace...
-    fmt: The fmt value to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_add-header, http-request_set-header, http-request_set-method, http-request_set-path, http-r...
-    lua_function: The Lua function to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_lua, http-request_use-service, http-response_lua, tcp-request_content_lua, tcp-request_c...
-    name: The name to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_add-header, http-request_set-header, http-request_del-header, http-request_replace-header, http-...
+    find: The value to find when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_replace-header, http-request_replace-value, http-response_replace-header, http-request_replace-path, http-response_replace-value, http-after-response_replace-header, http-after-response_replace-value ]
+    fmt: The fmt value to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_add-header, http-request_set-header, http-request_set-method, http-request_set-path, http-request_set-query, http-request_set-uri, http-response_add-header, http-response_set-header, http-after-response_add-header, http-after-response_set-header ]
+    lua_function: The Lua function to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_lua, http-request_use-service, http-response_lua, tcp-request_content_lua, tcp-request_content_use-service, tcp-response_content_lua ]
+    name: The name to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_add-header, http-request_set-header, http-request_del-header, http-request_replace-header, http-request_replace-value, http-response_add-header, http-response_set-header, http-response_del-header, http-response_replace-header, http-response_replace-value, http-after-response_add-header, http-after-response_set-header, http-after-response_del-header, http-after-response_replace-header, http-after-response_replace-value ]
     parent_id: The ID of the parent this object is nested under.
     path: The path to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'http-request_replace-path'`
     realm: The authentication realm to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'http-request_auth'`
     reason: The status reason to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-response_set-status, http-after-response_set-status ]
-    replace: The value to replace with when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_replace-header, http-request_replace-value, http-request_replace-path, http-response_r...
+    replace: The value to replace with when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_replace-header, http-request_replace-value, http-request_replace-path, http-response_replace-header, http-response_replace-value, http-after-response_replace-header, http-after-response_replace-value ]
     rule: The redirect rule to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'http-request_redirect'`
     status: The status to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-response_set-status, http-after-response_set-status ]
     """
@@ -18417,18 +18417,18 @@ async def pfsense_update_services_ha_proxy_frontend_action(
     id: The ID of the object or resource to interact with.
     parent_id: The ID of the parent this object is nested under.
     acl: The name of the frontend ACL this action is associated with.
-    action: The action to take when an ACL match is found. Valid values: ['use_backend', 'custom', 'http-request_allow', 'http-request_deny', 'http-request_tarpit', 'http-request_auth', 'http-request_redirect', 'http-request_lua', 'http-request_use-service', 'http-request_add-header', 'http-request_set-header', 'http-request_del-header', 'http-request_replace-header', 'http-request_replace-path', 'http-req...
+    action: The action to take when an ACL match is found. Valid values: ['use_backend', 'custom', 'http-request_allow', 'http-request_deny', 'http-request_tarpit', 'http-request_auth', 'http-request_redirect', 'http-request_lua', 'http-request_use-service', 'http-request_add-header', 'http-request_set-header', 'http-request_del-header', 'http-request_replace-header', 'http-request_replace-path', 'http-request_replace-value', 'http-request_set-method', 'http-request_set-path', 'http-request_set-query', 'http-request_set-uri', 'http-response_allow', 'http-response_deny', 'http-response_lua', 'http-response_add-header', 'http-response_set-header', 'http-response_del-header', 'http-response_replace-header', 'http-response_replace-value', 'http-response_set-status', 'http-after-response_add-header', 'http-after-response_set-header', 'http-after-response_del-header', 'http-after-response_replace-header', 'http-after-response_replace-value', 'http-after-response_set-status', 'tcp-request_connection_accept', 'tcp-request_connection_reject', 'tcp-request_content_accept', 'tcp-request_content_reject', 'tcp-request_content_lua', 'tcp-request_content_use-service', 'tcp-response_content_accept', 'tcp-response_content_close', 'tcp-response_content_reject', 'tcp-response_content_lua']
     backend: The backend to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'use_backend'`
     customaction: The custom action to take when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'custom'`
     deny_status: The deny status to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_deny, http-request_tarpit ]
-    find: The value to find when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_replace-header, http-request_replace-value, http-response_replace-header, http-request_replace...
-    fmt: The fmt value to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_add-header, http-request_set-header, http-request_set-method, http-request_set-path, http-r...
-    lua_function: The Lua function to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_lua, http-request_use-service, http-response_lua, tcp-request_content_lua, tcp-request_c...
-    name: The name to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_add-header, http-request_set-header, http-request_del-header, http-request_replace-header, http-...
+    find: The value to find when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_replace-header, http-request_replace-value, http-response_replace-header, http-request_replace-path, http-response_replace-value, http-after-response_replace-header, http-after-response_replace-value ]
+    fmt: The fmt value to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_add-header, http-request_set-header, http-request_set-method, http-request_set-path, http-request_set-query, http-request_set-uri, http-response_add-header, http-response_set-header, http-after-response_add-header, http-after-response_set-header ]
+    lua_function: The Lua function to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_lua, http-request_use-service, http-response_lua, tcp-request_content_lua, tcp-request_content_use-service, tcp-response_content_lua ]
+    name: The name to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_add-header, http-request_set-header, http-request_del-header, http-request_replace-header, http-request_replace-value, http-response_add-header, http-response_set-header, http-response_del-header, http-response_replace-header, http-response_replace-value, http-after-response_add-header, http-after-response_set-header, http-after-response_del-header, http-after-response_replace-header, http-after-response_replace-value ]
     path: The path to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'http-request_replace-path'`
     realm: The authentication realm to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'http-request_auth'`
     reason: The status reason to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-response_set-status, http-after-response_set-status ]
-    replace: The value to replace with when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_replace-header, http-request_replace-value, http-request_replace-path, http-response_r...
+    replace: The value to replace with when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_replace-header, http-request_replace-value, http-request_replace-path, http-response_replace-header, http-response_replace-value, http-after-response_replace-header, http-after-response_replace-value ]
     rule: The redirect rule to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'http-request_redirect'`
     status: The status to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-response_set-status, http-after-response_set-status ]
     """
@@ -20081,7 +20081,7 @@ async def pfsense_update_services_ntp_settings(
     ntpmaxpeers: The maximum number of candidate peers in the NTP pool.
     ntpmaxpoll: The maximum poll interval for NTP messages. Use empty string to assume system default, and `omit` to not set this value. This value must be greater than the `ntpminpoll`. Valid values: ['', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', 'omit']
     ntpminpoll: The minimum poll interval for NTP messages. Use empty string to assume system default, and `omit` to not set this value. Valid values: ['', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', 'omit']
-    orphan: The orphan mode stratum to set. Orphan mode allows the system clock to be used when no other clocks are available. The number here specifies the stratum reported during orphan mode and should normally be set to a number high enough to ensure that ...
+    orphan: The orphan mode stratum to set. Orphan mode allows the system clock to be used when no other clocks are available. The number here specifies the stratum reported during orphan mode and should normally be set to a number high enough to ensure that any other servers available to clients are preferred over this server
     peerstats: Enable or disable logging peer statistics.
     serverauth: Enable or disable NTPv3 server authentication. (RFC 1305)
     serverauthalgo: The digest algorithm for the server authentication key. Valid values: ['md5', 'sha1', 'sha256']
@@ -20165,7 +20165,7 @@ async def pfsense_create_services_ntp_time_server(
     timeserver: The IP or hostname of the remote NTP time server, pool or peer.
     noselect: Prevent NTP from using this timeserver, but continue collecting stats.This field is only available when the following conditions are met:- `type` must not be equal to `'pool'`
     prefer: Enable NTP favoring the use of this server more than all others.
-    type_: The type of this timeserver. Use `server` is `timeserver` is a standalone NTP server, use `pool` if `timeserver` represents an NTP pool, or `peer` if `timeserver` is an NTP peer. Note: If the `timeserver` value ends with the `pool.ntp.org` suffix,... Valid values: ['server', 'pool', 'peer']
+    type_: The type of this timeserver. Use `server` is `timeserver` is a standalone NTP server, use `pool` if `timeserver` represents an NTP pool, or `peer` if `timeserver` is an NTP peer. Note: If the `timeserver` value ends with the `pool.ntp.org` suffix, this field will be forced to use `pool`. Valid values: ['server', 'pool', 'peer']
     """
     if not confirm:
         return (
@@ -20203,7 +20203,7 @@ async def pfsense_update_services_ntp_time_server(
     noselect: Prevent NTP from using this timeserver, but continue collecting stats.This field is only available when the following conditions are met:- `type` must not be equal to `'pool'`
     prefer: Enable NTP favoring the use of this server more than all others.
     timeserver: The IP or hostname of the remote NTP time server, pool or peer.
-    type_: The type of this timeserver. Use `server` is `timeserver` is a standalone NTP server, use `pool` if `timeserver` represents an NTP pool, or `peer` if `timeserver` is an NTP peer. Note: If the `timeserver` value ends with the `pool.ntp.org` suffix,... Valid values: ['server', 'pool', 'peer']
+    type_: The type of this timeserver. Use `server` is `timeserver` is a standalone NTP server, use `pool` if `timeserver` represents an NTP pool, or `peer` if `timeserver` is an NTP peer. Note: If the `timeserver` value ends with the `pool.ntp.org` suffix, this field will be forced to use `pool`. Valid values: ['server', 'pool', 'peer']
     """
     if not confirm:
         return (
@@ -21049,7 +21049,7 @@ async def pfsense_update_status_logs_settings(
     filterdescriptions: int | None = None,
     format: str | None = 'rfc3164',
     hostapd: bool | None = None,
-    ipprotocol: str | None = 'ipv4',
+    ipprotocol: str | None = None,
     logall: bool | None = None,
     logcompressiontype: str | None = 'bzip2',
     logconfigchanges: bool | None = None,
@@ -21103,7 +21103,7 @@ async def pfsense_update_status_logs_settings(
     rawfilter: Display logs in the UI as they are generated by the packet filter, without any formatting.
     remoteserver: The first remote syslog server to send log entries to.This field is only available when the following conditions are met:- `enableremotelogging` must be equal to `true`
     remoteserver2: The second remote syslog server to send log entries to.This field is only available when the following conditions are met:- `enableremotelogging` must be equal to `true`- `remoteserver` must not be equal to `NULL`
-    remoteserver3: The third remote syslog server to send log entries to.This field is only available when the following conditions are met:- `enableremotelogging` must be equal to `true`- `remoteserver` must not be equal to `NULL`- `remoteserver2` must not be equal...
+    remoteserver3: The third remote syslog server to send log entries to.This field is only available when the following conditions are met:- `enableremotelogging` must be equal to `true`- `remoteserver` must not be equal to `NULL`- `remoteserver2` must not be equal to `NULL`
     resolver: Log DNS resolver events to the remote syslog server(s).This field is only available when the following conditions are met:- `enableremotelogging` must be equal to `true`- `logall` must not be equal to `true`
     reverseorder: Reverse the order of log entries.
     rotatecount: The number of log file rotations to keep.
@@ -21562,7 +21562,7 @@ async def pfsense_create_system_crl(
     text: str,
     confirm: bool = False,
     cert: list[str] | None = None,
-    lifetime: int | None = 730,
+    lifetime: int | None = None,
     serial: int | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/system/crl
@@ -21609,7 +21609,7 @@ async def pfsense_update_system_crl(
     caref: str | None = None,
     cert: list[str] | None = None,
     descr: str | None = None,
-    lifetime: int | None = 730,
+    lifetime: int | None = None,
     method: str | None = None,
     serial: int | None = None,
     text: str | None = None,
@@ -23343,16 +23343,16 @@ async def pfsense_update_system_restapi_settings(
     ha_sync_hosts: Set a list of IP addresses or hostnames to sync API settings to.
     ha_sync_password: Sets the password to use when authenticating for HA sync processes. This must be the password for the user defined in `ha_sync_username` and must be the same on all hosts defined in `ha_sync_hosts`.
     ha_sync_username: Sets the username to use when authenticating for HA sync processes. This user must be the present on all hosts defined in `ha_sync_hosts`.
-    ha_sync_validate_certs: Enables or disables certificate validation when syncing API configurations to HA sync peers. If enabled, all hosts defined in `ha_sync_hosts` must have their webConfigurator configured with a certificate trusted by this system. It is strongly reco...
-    hateoas: Enables or disables HATEOAS. Enabling HATEOAS will allow the API to include links to related resources in API responses. This is primarily useful for frontend web applications and self-navigating client scripts that integrate with HAL standards. E...
+    ha_sync_validate_certs: Enables or disables certificate validation when syncing API configurations to HA sync peers. If enabled, all hosts defined in `ha_sync_hosts` must have their webConfigurator configured with a certificate trusted by this system. It is strongly recommended this be enabled at all times to help mitigate Man-in-the-Middle attacks.
+    hateoas: Enables or disables HATEOAS. Enabling HATEOAS will allow the API to include links to related resources in API responses. This is primarily useful for frontend web applications and self-navigating client scripts that integrate with HAL standards. Enabling HATEOAS may increase API response times, especially on systems with large configurations.
     jwt_exp: Sets the amount of time (in seconds) JWTs are valid for.
     keep_backup: Enables or disables keeping a persistent backup of the API configuration that can be used to restore the API configuration after package and systems updates.
     log_level: Sets the log level for API logging. The log level determines the minimum severity of messages that should be logged. Valid values: ['LOG_DEBUG', 'LOG_INFO', 'LOG_NOTICE', 'LOG_WARNING', 'LOG_ERR', 'LOG_CRIT', 'LOG_ALERT', 'LOG_EMERG']
-    log_successful_auth: Enables or disables logging of API authentication attempts that are successful. By default, only failed API authentication attempts are logged to prevent flooding the authentication logs. This field is only applicable when the API `login_protectio...
-    login_protection: Enables or disables Login Protection for API authentication. When enabled, Login Protection will monitor API attempts and temporarily block clients who fail API authentication too many times within a period of time. When disabled, Login Protection...
-    override_sensitive_fields: Specifies a list of fields (formatted as ModelName:FieldName) that should have their sensitive attribute overridden. Fields selected here will not be considered sensitive and will be included in API responses regardless of the `expose_sensitive_fi...
+    log_successful_auth: Enables or disables logging of API authentication attempts that are successful. By default, only failed API authentication attempts are logged to prevent flooding the authentication logs. This field is only applicable when the API `login_protection` setting is enabled.
+    login_protection: Enables or disables Login Protection for API authentication. When enabled, Login Protection will monitor API attempts and temporarily block clients who fail API authentication too many times within a period of time. When disabled, Login Protection will not monitor API authentication but will continue to monitor webConfigurator and SSH logins (if configured). Login Protection can be configured globally in System > Advanced.
+    override_sensitive_fields: Specifies a list of fields (formatted as ModelName:FieldName) that should have their sensitive attribute overridden. Fields selected here will not be considered sensitive and will be included in API responses regardless of the `expose_sensitive_fields` setting.This field is only available when the following conditions are met:- `expose_sensitive_fields` must be equal to `false`
     read_only: Enables or disables read-only API access. If enabled, the API will only respond to GET requests and can only be disabled via webConfigurator.
-    represent_interfaces_as: Specifies how the API should represent interface names. Use `descr` to represent interface objects by their description name, use `id` to represent interface objects by their internal pfSense ID (e.g. wan, lan, opt1), or use `if` to represent inte... Valid values: ['descr', 'id', 'if']
+    represent_interfaces_as: Specifies how the API should represent interface names. Use `descr` to represent interface objects by their description name, use `id` to represent interface objects by their internal pfSense ID (e.g. wan, lan, opt1), or use `if` to represent interface objects by their real interface name (e.g. em0, igb1, bxe3). Valid values: ['descr', 'id', 'if']
     """
     if not confirm:
         return (
@@ -23781,28 +23781,28 @@ async def pfsense_create_user_auth_server(
     radius_secret: str,
     type_: str,
     confirm: bool = False,
-    ldap_allow_unauthenticated: bool | None = True,
-    ldap_attr_group: str | None = 'cn',
-    ldap_attr_groupobj: str | None = 'posixGroup',
-    ldap_attr_member: str | None = 'member',
-    ldap_attr_user: str | None = 'cn',
+    ldap_allow_unauthenticated: bool | None = None,
+    ldap_attr_group: str | None = None,
+    ldap_attr_groupobj: str | None = None,
+    ldap_attr_member: str | None = None,
+    ldap_attr_user: str | None = None,
     ldap_authcn: str | None = None,
     ldap_basedn: str | None = None,
     ldap_binddn: str | None = None,
-    ldap_caref: str | None = 'global',
+    ldap_caref: str | None = None,
     ldap_extended_enabled: bool | None = None,
     ldap_extended_query: str | None = None,
     ldap_nostrip_at: bool | None = None,
     ldap_pam_groupdn: str | None = None,
-    ldap_protver: int | None = 3,
+    ldap_protver: int | None = None,
     ldap_rfc2307: bool | None = None,
     ldap_rfc2307_userdn: bool | None = None,
-    ldap_timeout: int | None = 25,
+    ldap_timeout: int | None = None,
     ldap_utf8: bool | None = None,
-    radius_acct_port: str | None = '1813',
-    radius_auth_port: str | None = '1812',
-    radius_protocol: str | None = 'MSCHAPv2',
-    radius_timeout: int | None = 5,
+    radius_acct_port: str | None = None,
+    radius_auth_port: str | None = None,
+    radius_protocol: str | None = None,
+    radius_timeout: int | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/user/auth_server
 
@@ -23810,12 +23810,12 @@ async def pfsense_create_user_auth_server(
     ldap_bindpw: The password to use when binding to this authentication server.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'`- `ldap_binddn` must not be equal to `NULL`
     ldap_port: The LDAP port to connect to on this LDAP authentication server. Valid options are: a TCP/UDP port numberThis field is only available when the following conditions are met:- `type` must be equal to `'ldap'`
     ldap_scope: The LDAP search scope. Use `one` to limit the scope to a single level, or `subtree` to allow the entire subtree to be searched.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'` Valid values: ['one', 'subtree']
-    ldap_urltype: The encryption mode to use when connecting to this authentication server. Use `Standard TCP` for unencrypted LDAP connections, use `STARTTLS Encrypt` to start an encrypted connection via STARTTLS if it's available, or `SSL/TLS Encrypted` to only u... Valid values: ['Standard TCP', 'STARTTLS Encrypt', 'SSL/TLS Encrypted']
+    ldap_urltype: The encryption mode to use when connecting to this authentication server. Use `Standard TCP` for unencrypted LDAP connections, use `STARTTLS Encrypt` to start an encrypted connection via STARTTLS if it's available, or `SSL/TLS Encrypted` to only use LDAPS encrypted connections.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'` Valid values: ['Standard TCP', 'STARTTLS Encrypt', 'SSL/TLS Encrypted']
     name: The descriptive name for this authentication server.
-    radius_nasip_attribute: The interface whose IP will be used as the 'NAS-IP-Address' attribute during RADIUS Access-Requests. This choice will not change the interface used for contacting the RADIUS server.This field is only available when the following conditions are met...
+    radius_nasip_attribute: The interface whose IP will be used as the 'NAS-IP-Address' attribute during RADIUS Access-Requests. This choice will not change the interface used for contacting the RADIUS server.This field is only available when the following conditions are met:- `type` must be equal to `'radius'`
     radius_secret: The shared secret to use when authenticating to this RADIUS server.This field is only available when the following conditions are met:- `type` must be equal to `'radius'`
     type_: The type of this authentication server. Valid values: ['ldap', 'radius']
-    ldap_allow_unauthenticated: Enables or disables unauthenticated binding. Unauthenticated binds are bind with an existing login but with an empty password. Some LDAP servers (Microsoft AD) allow this type of bind without any possibility to disable it.This field is only availa...
+    ldap_allow_unauthenticated: Enables or disables unauthenticated binding. Unauthenticated binds are bind with an existing login but with an empty password. Some LDAP servers (Microsoft AD) allow this type of bind without any possibility to disable it.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'`
     ldap_attr_group: The LDAP group attribute.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'`
     ldap_attr_groupobj: The group object class for groups in RFC2307 mode.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'`- `ldap_rfc2307` must be equal to `true`
     ldap_attr_member: The LDAP member attribute.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'`
@@ -23918,42 +23918,42 @@ async def pfsense_update_user_auth_server(
     id: int,
     confirm: bool = False,
     host: str | None = None,
-    ldap_allow_unauthenticated: bool | None = True,
-    ldap_attr_group: str | None = 'cn',
-    ldap_attr_groupobj: str | None = 'posixGroup',
-    ldap_attr_member: str | None = 'member',
-    ldap_attr_user: str | None = 'cn',
+    ldap_allow_unauthenticated: bool | None = None,
+    ldap_attr_group: str | None = None,
+    ldap_attr_groupobj: str | None = None,
+    ldap_attr_member: str | None = None,
+    ldap_attr_user: str | None = None,
     ldap_authcn: str | None = None,
     ldap_basedn: str | None = None,
     ldap_binddn: str | None = None,
     ldap_bindpw: str | None = None,
-    ldap_caref: str | None = 'global',
+    ldap_caref: str | None = None,
     ldap_extended_enabled: bool | None = None,
     ldap_extended_query: str | None = None,
     ldap_nostrip_at: bool | None = None,
     ldap_pam_groupdn: str | None = None,
     ldap_port: str | None = None,
-    ldap_protver: int | None = 3,
+    ldap_protver: int | None = None,
     ldap_rfc2307: bool | None = None,
     ldap_rfc2307_userdn: bool | None = None,
     ldap_scope: str | None = None,
-    ldap_timeout: int | None = 25,
+    ldap_timeout: int | None = None,
     ldap_urltype: str | None = None,
     ldap_utf8: bool | None = None,
     name: str | None = None,
-    radius_acct_port: str | None = '1813',
-    radius_auth_port: str | None = '1812',
+    radius_acct_port: str | None = None,
+    radius_auth_port: str | None = None,
     radius_nasip_attribute: str | None = None,
-    radius_protocol: str | None = 'MSCHAPv2',
+    radius_protocol: str | None = None,
     radius_secret: str | None = None,
-    radius_timeout: int | None = 5,
+    radius_timeout: int | None = None,
     type_: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/user/auth_server
 
     id: The ID of the object or resource to interact with.
     host: The remote IP address or hostname of the authentication server.
-    ldap_allow_unauthenticated: Enables or disables unauthenticated binding. Unauthenticated binds are bind with an existing login but with an empty password. Some LDAP servers (Microsoft AD) allow this type of bind without any possibility to disable it.This field is only availa...
+    ldap_allow_unauthenticated: Enables or disables unauthenticated binding. Unauthenticated binds are bind with an existing login but with an empty password. Some LDAP servers (Microsoft AD) allow this type of bind without any possibility to disable it.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'`
     ldap_attr_group: The LDAP group attribute.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'`
     ldap_attr_groupobj: The group object class for groups in RFC2307 mode.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'`- `ldap_rfc2307` must be equal to `true`
     ldap_attr_member: The LDAP member attribute.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'`
@@ -23973,12 +23973,12 @@ async def pfsense_update_user_auth_server(
     ldap_rfc2307_userdn: Enables or disable the use of DNs for username searches.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'`- `ldap_rfc2307` must be equal to `true`
     ldap_scope: The LDAP search scope. Use `one` to limit the scope to a single level, or `subtree` to allow the entire subtree to be searched.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'` Valid values: ['one', 'subtree']
     ldap_timeout: The timeout (in seconds) for connections to the LDAP authentication server.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'`
-    ldap_urltype: The encryption mode to use when connecting to this authentication server. Use `Standard TCP` for unencrypted LDAP connections, use `STARTTLS Encrypt` to start an encrypted connection via STARTTLS if it's available, or `SSL/TLS Encrypted` to only u... Valid values: ['Standard TCP', 'STARTTLS Encrypt', 'SSL/TLS Encrypted']
+    ldap_urltype: The encryption mode to use when connecting to this authentication server. Use `Standard TCP` for unencrypted LDAP connections, use `STARTTLS Encrypt` to start an encrypted connection via STARTTLS if it's available, or `SSL/TLS Encrypted` to only use LDAPS encrypted connections.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'` Valid values: ['Standard TCP', 'STARTTLS Encrypt', 'SSL/TLS Encrypted']
     ldap_utf8: Enables or disables UTF-8 encoding LDAP parameters before sending them to this authentication serverThis field is only available when the following conditions are met:- `type` must be equal to `'ldap'`
     name: The descriptive name for this authentication server.
     radius_acct_port: The port used by RADIUS for accounting. Set to `null` to disable use of accounting services. Valid options are: a TCP/UDP port numberThis field is only available when the following conditions are met:- `type` must be equal to `'radius'`
     radius_auth_port: The port used by RADIUS for authentication. Set to `null` to disable use of authentication services. Valid options are: a TCP/UDP port numberThis field is only available when the following conditions are met:- `type` must be equal to `'radius'`
-    radius_nasip_attribute: The interface whose IP will be used as the 'NAS-IP-Address' attribute during RADIUS Access-Requests. This choice will not change the interface used for contacting the RADIUS server.This field is only available when the following conditions are met...
+    radius_nasip_attribute: The interface whose IP will be used as the 'NAS-IP-Address' attribute during RADIUS Access-Requests. This choice will not change the interface used for contacting the RADIUS server.This field is only available when the following conditions are met:- `type` must be equal to `'radius'`
     radius_protocol: The RADIUS protocol to use when authenticating.This field is only available when the following conditions are met:- `type` must be equal to `'radius'` Valid values: ['MSCHAPv2', 'MSCHAPv1', 'CHAP_MD5', 'PAP']
     radius_secret: The shared secret to use when authenticating to this RADIUS server.This field is only available when the following conditions are met:- `type` must be equal to `'radius'`
     radius_timeout: The timeout (in seconds) for connections to this RADIUS authentication server.This field is only available when the following conditions are met:- `type` must be equal to `'radius'`
@@ -24360,7 +24360,7 @@ async def pfsense_create_user_group(
     description: The description to assign to this user group.
     member: The local user names to assign to this user group.
     priv: The privileges to assign to this user group.
-    scope: The scope of this user group. Use `local` for user groups that only apply to this system. use `remote` for groups that also apply to remote authentication servers. Please note the `system` scope is reserved for built-in, system-defined user groups... Valid values: ['local', 'remote', 'system']
+    scope: The scope of this user group. Use `local` for user groups that only apply to this system. use `remote` for groups that also apply to remote authentication servers. Please note the `system` scope is reserved for built-in, system-defined user groups and cannot be assigned manually. Valid values: ['local', 'remote', 'system']
     """
     if not confirm:
         return (
@@ -24402,7 +24402,7 @@ async def pfsense_update_user_group(
     member: The local user names to assign to this user group.
     name: The name for this user group.
     priv: The privileges to assign to this user group.
-    scope: The scope of this user group. Use `local` for user groups that only apply to this system. use `remote` for groups that also apply to remote authentication servers. Please note the `system` scope is reserved for built-in, system-defined user groups... Valid values: ['local', 'remote', 'system']
+    scope: The scope of this user group. Use `local` for user groups that only apply to this system. use `remote` for groups that also apply to remote authentication servers. Please note the `system` scope is reserved for built-in, system-defined user groups and cannot be assigned manually. Valid values: ['local', 'remote', 'system']
     """
     if not confirm:
         return (
@@ -24913,9 +24913,9 @@ async def pfsense_create_vpni_psec_phase1(
     mode: The IKEv1 negotiation mode this phase 1 entry will use.This field is only available when the following conditions are met:- `iketype` must be one of [ ikev1, auto ] Valid values: ['main', 'aggressive']
     myid_data: The identifier value used by the local end of the tunnel. This must be a value that corresponds with the current `myid_type` value.This field is only available when the following conditions are met:- `myid_type` must not be equal to `'myaddress'`
     myid_type: The identifier type used by the local end of the tunnel. Valid values: ['myaddress', 'address', 'fqdn', 'user_fqdn', 'asn1dn', 'keyid tag', 'dyn_dns', 'auto']
-    peerid_data: The identifier value used by the remote end of the tunnel. This must be a value that corresponds with the current `peerid_type` value.This field is only available when the following conditions are met:- `peerid_type` must not be one of [ any, peer...
+    peerid_data: The identifier value used by the remote end of the tunnel. This must be a value that corresponds with the current `peerid_type` value.This field is only available when the following conditions are met:- `peerid_type` must not be one of [ any, peeraddress ]
     peerid_type: The identifier type used by the remote end of the tunnel. Valid values: ['any', 'peeraddress', 'address', 'fqdn', 'user_fqdn', 'asn1dn', 'keyid tag', 'dyn_dns', 'auto']
-    pre_shared_key: The Pre-Shared Key (PSK) value. This key must match on both peers and should be long and random to protect the tunnel and its contents. A weak Pre-Shared Key can lead to a tunnel compromise.This field is only available when the following condition...
+    pre_shared_key: The Pre-Shared Key (PSK) value. This key must match on both peers and should be long and random to protect the tunnel and its contents. A weak Pre-Shared Key can lead to a tunnel compromise.This field is only available when the following conditions are met:- `authentication_method` must be equal to `'pre_shared_key'`
     protocol: The IP version this phase 1 entry will use. Valid values: ['inet', 'inet6', 'both']
     remote_gateway: The IP address or hostname of the remote gateway.
     closeaction: The option used to control the behavior when the remote peer unexpectedly closes a child SA (P2) Valid values: ['', 'none', 'start', 'trap']
@@ -25073,9 +25073,9 @@ async def pfsense_update_vpni_psec_phase1(
     myid_type: The identifier type used by the local end of the tunnel. Valid values: ['myaddress', 'address', 'fqdn', 'user_fqdn', 'asn1dn', 'keyid tag', 'dyn_dns', 'auto']
     nat_traversal: The option used to enable the use of NAT-T (i.e. the encapsulation of ESP in UDP packets) if needed, which can help with clients that are behind restrictive firewalls. Valid values: ['on', 'force']
     nattport: The UDP port for NAT-T on the remote gateway. Valid options are: a TCP/UDP port number
-    peerid_data: The identifier value used by the remote end of the tunnel. This must be a value that corresponds with the current `peerid_type` value.This field is only available when the following conditions are met:- `peerid_type` must not be one of [ any, peer...
+    peerid_data: The identifier value used by the remote end of the tunnel. This must be a value that corresponds with the current `peerid_type` value.This field is only available when the following conditions are met:- `peerid_type` must not be one of [ any, peeraddress ]
     peerid_type: The identifier type used by the remote end of the tunnel. Valid values: ['any', 'peeraddress', 'address', 'fqdn', 'user_fqdn', 'asn1dn', 'keyid tag', 'dyn_dns', 'auto']
-    pre_shared_key: The Pre-Shared Key (PSK) value. This key must match on both peers and should be long and random to protect the tunnel and its contents. A weak Pre-Shared Key can lead to a tunnel compromise.This field is only available when the following condition...
+    pre_shared_key: The Pre-Shared Key (PSK) value. This key must match on both peers and should be long and random to protect the tunnel and its contents. A weak Pre-Shared Key can lead to a tunnel compromise.This field is only available when the following conditions are met:- `authentication_method` must be equal to `'pre_shared_key'`
     prfselect_enable: Enables or disables manual Pseudo-Random Function (PRF) selection.
     protocol: The IP version this phase 1 entry will use. Valid values: ['inet', 'inet6', 'both']
     rand_time: A random value up to this amount will be subtracted from the `rekey_time` to avoid simultaneous renegotiation.
@@ -25533,18 +25533,18 @@ async def pfsense_create_vpni_psec_phase2(
     ikeid: The `ikeid` of the parent IPsec phase 1 entry this IPsec phase 2 entry belongs to.
     localid_address: The local network IP component of this IPsec security association.This field is only available when the following conditions are met:- `localid_type` must be one of [ address, network ]
     localid_netbits: The subnet bits of the `localid_address` network.This field is only available when the following conditions are met:- `localid_type` must be equal to `'network'`
-    localid_type: The local ID type to use for this phase 2 entry. Valid value options are: an existing interface, `address`, `network`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire su...
+    localid_type: The local ID type to use for this phase 2 entry. Valid value options are: an existing interface, `address`, `network`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.This field is only available when the following conditions are met:- `mode` must not be equal to `'transport'`
     mode: The IPsec phase 2 mode this entry will use. Valid values: ['tunnel', 'tunnel6', 'transport', 'vti']
     natlocalid_address: The NAT/BINAT local network IP component of this IPsec security association.This field is only available when the following conditions are met:- `natlocalid_type` must be one of [ address, network ]
     natlocalid_netbits: The subnet bits of the `natlocalid_address` network.This field is only available when the following conditions are met:- `natlocalid_type` must be equal to `'network'`
     remoteid_address: The remote network IP component of this IPsec security association.This field is only available when the following conditions are met:- `remoteid_type` must be one of [ address, network ]
     remoteid_netbits: The subnet bits of the `remoteid_address` network.This field is only available when the following conditions are met:- `remoteid_type` must be equal to `'network'`
-    remoteid_type: The remote ID type to use for this phase 2 entry. Valid value options are: `address`, `network`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.This field is onl...
+    remoteid_type: The remote ID type to use for this phase 2 entry. Valid value options are: `address`, `network`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.This field is only available when the following conditions are met:- `mode` must not be equal to `'transport'`
     descr: A description for this IPsec phase 2 entry.
     disabled: Disables this IPsec phase 2 entry.
-    keepalive: Enables or disables checking this P2 and initiating if disconnected; does not send traffic inside the tunnel. This check ignores the P1 option 'Child SA Start Action' and works for both VTI and tunnel mode P2s. For IKEv2 without split connections,...
+    keepalive: Enables or disables checking this P2 and initiating if disconnected; does not send traffic inside the tunnel. This check ignores the P1 option 'Child SA Start Action' and works for both VTI and tunnel mode P2s. For IKEv2 without split connections, this only needs to be enabled on one P2.
     lifetime: The hard IKE SA lifetime (in seconds) after which the IKE SA will be expired.
-    natlocalid_type: The NAT/BINAT translation type for this IPsec phase 2 entry. Leave as `null` if NAT/BINAT is not needed. Valid value options are: an existing interface, `address`, `network`. For interface values, the `:ip` modifier can be appended to the value to...
+    natlocalid_type: The NAT/BINAT translation type for this IPsec phase 2 entry. Leave as `null` if NAT/BINAT is not needed. Valid value options are: an existing interface, `address`, `network`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.This field is only available when the following conditions are met:- `mode` must not be one of [ transport, vti ]
     pfsgroup: The PFS key group this IPsec phase 2 entry should use. Note: Groups 1, 2, 5, 22, 23, and 24 provide weak security and should be avoided. Valid values: [0, 1, 2, 5, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]
     pinghost: The IP address to send an ICMP echo request to inside the tunnel. Can trigger initiation of a tunnel mode P2, but does not trigger initiation of a VTI mode P2.
     protocol: the IPsec phase 2 proposal protocol for this entry. Encapsulating Security Payload (`esp`) performs encryption and authentication, Authentication Header (`ah`) is authentication only. Valid values: ['esp', 'ah']
@@ -25646,15 +25646,15 @@ async def pfsense_update_vpni_psec_phase2(
     encryption_algorithm_option: The encryption algorithms to be used by this phase 2 entry.This field is only available when the following conditions are met:- `protocol` must be equal to `'esp'`
     hash_algorithm_option: The hashing algorithms used by this IPsec phase 2 entry. Note: Hash is ignored with GCM algorithms. SHA1 provides weak security and should be avoided.
     ikeid: The `ikeid` of the parent IPsec phase 1 entry this IPsec phase 2 entry belongs to.
-    keepalive: Enables or disables checking this P2 and initiating if disconnected; does not send traffic inside the tunnel. This check ignores the P1 option 'Child SA Start Action' and works for both VTI and tunnel mode P2s. For IKEv2 without split connections,...
+    keepalive: Enables or disables checking this P2 and initiating if disconnected; does not send traffic inside the tunnel. This check ignores the P1 option 'Child SA Start Action' and works for both VTI and tunnel mode P2s. For IKEv2 without split connections, this only needs to be enabled on one P2.
     lifetime: The hard IKE SA lifetime (in seconds) after which the IKE SA will be expired.
     localid_address: The local network IP component of this IPsec security association.This field is only available when the following conditions are met:- `localid_type` must be one of [ address, network ]
     localid_netbits: The subnet bits of the `localid_address` network.This field is only available when the following conditions are met:- `localid_type` must be equal to `'network'`
-    localid_type: The local ID type to use for this phase 2 entry. Valid value options are: an existing interface, `address`, `network`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire su...
+    localid_type: The local ID type to use for this phase 2 entry. Valid value options are: an existing interface, `address`, `network`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.This field is only available when the following conditions are met:- `mode` must not be equal to `'transport'`
     mode: The IPsec phase 2 mode this entry will use. Valid values: ['tunnel', 'tunnel6', 'transport', 'vti']
     natlocalid_address: The NAT/BINAT local network IP component of this IPsec security association.This field is only available when the following conditions are met:- `natlocalid_type` must be one of [ address, network ]
     natlocalid_netbits: The subnet bits of the `natlocalid_address` network.This field is only available when the following conditions are met:- `natlocalid_type` must be equal to `'network'`
-    natlocalid_type: The NAT/BINAT translation type for this IPsec phase 2 entry. Leave as `null` if NAT/BINAT is not needed. Valid value options are: an existing interface, `address`, `network`. For interface values, the `:ip` modifier can be appended to the value to...
+    natlocalid_type: The NAT/BINAT translation type for this IPsec phase 2 entry. Leave as `null` if NAT/BINAT is not needed. Valid value options are: an existing interface, `address`, `network`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.This field is only available when the following conditions are met:- `mode` must not be one of [ transport, vti ]
     pfsgroup: The PFS key group this IPsec phase 2 entry should use. Note: Groups 1, 2, 5, 22, 23, and 24 provide weak security and should be avoided. Valid values: [0, 1, 2, 5, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]
     pinghost: The IP address to send an ICMP echo request to inside the tunnel. Can trigger initiation of a tunnel mode P2, but does not trigger initiation of a VTI mode P2.
     protocol: the IPsec phase 2 proposal protocol for this entry. Encapsulating Security Payload (`esp`) performs encryption and authentication, Authentication Header (`ah`) is authentication only. Valid values: ['esp', 'ah']
@@ -25662,7 +25662,7 @@ async def pfsense_update_vpni_psec_phase2(
     rekey_time: The amount of time (in seconds) before an IKE SA establishes new keys.
     remoteid_address: The remote network IP component of this IPsec security association.This field is only available when the following conditions are met:- `remoteid_type` must be one of [ address, network ]
     remoteid_netbits: The subnet bits of the `remoteid_address` network.This field is only available when the following conditions are met:- `remoteid_type` must be equal to `'network'`
-    remoteid_type: The remote ID type to use for this phase 2 entry. Valid value options are: `address`, `network`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.This field is onl...
+    remoteid_type: The remote ID type to use for this phase 2 entry. Valid value options are: `address`, `network`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.This field is only available when the following conditions are met:- `mode` must not be equal to `'transport'`
     """
     if not confirm:
         return (
@@ -25911,7 +25911,7 @@ async def pfsense_create_vpn_open_vpncso(
     local_networkv6: the IPv6 server-side networks that will be accessible from this particular client.
     netbios_enable: Enables or disables NetBIOS over TCP/IP.
     netbios_ntype: The NetBIOS node type.This field is only available when the following conditions are met:- `netbios_enable` must be equal to `true` Valid values: [0, 1, 2, 4, 8]
-    netbios_scope: The NetBIOS Scope ID. This provides an extended naming service for NetBIOS over TCP/IP. The NetBIOS scope ID isolates NetBIOS traffic on a single network to only those nodes with the same NetBIOS scope ID.This field is only available when the foll...
+    netbios_scope: The NetBIOS Scope ID. This provides an extended naming service for NetBIOS over TCP/IP. The NetBIOS scope ID isolates NetBIOS traffic on a single network to only those nodes with the same NetBIOS scope ID.This field is only available when the following conditions are met:- `netbios_enable` must be equal to `true`
     ntp_server1: The primary NTP server to provide to the client.
     ntp_server2: The secondary NTP server to provide to the client.
     push_reset: Enables or disables preventing this client from receiving any server-defined client settings.
@@ -26041,7 +26041,7 @@ async def pfsense_update_vpn_open_vpncso(
     local_networkv6: the IPv6 server-side networks that will be accessible from this particular client.
     netbios_enable: Enables or disables NetBIOS over TCP/IP.
     netbios_ntype: The NetBIOS node type.This field is only available when the following conditions are met:- `netbios_enable` must be equal to `true` Valid values: [0, 1, 2, 4, 8]
-    netbios_scope: The NetBIOS Scope ID. This provides an extended naming service for NetBIOS over TCP/IP. The NetBIOS scope ID isolates NetBIOS traffic on a single network to only those nodes with the same NetBIOS scope ID.This field is only available when the foll...
+    netbios_scope: The NetBIOS Scope ID. This provides an extended naming service for NetBIOS over TCP/IP. The NetBIOS scope ID isolates NetBIOS traffic on a single network to only those nodes with the same NetBIOS scope ID.This field is only available when the following conditions are met:- `netbios_enable` must be equal to `true`
     ntp_server1: The primary NTP server to provide to the client.
     ntp_server2: The secondary NTP server to provide to the client.
     push_reset: Enables or disables preventing this client from receiving any server-defined client settings.
@@ -26255,14 +26255,14 @@ async def pfsense_create_vpn_open_vpn_client(
     dns_add: bool | None = None,
     exit_notify: str | None = 'none',
     inactive_seconds: int | None = 300,
-    keepalive_interval: int | None = 10,
-    keepalive_timeout: int | None = 60,
+    keepalive_interval: int | None = None,
+    keepalive_timeout: int | None = None,
     local_port: str | None = None,
     passtos: bool | None = None,
-    ping_action: str | None = 'ping_restart',
-    ping_action_seconds: int | None = 60,
+    ping_action: str | None = None,
+    ping_action_seconds: int | None = None,
     ping_method: str | None = 'keepalive',
-    ping_seconds: int | None = 10,
+    ping_seconds: int | None = None,
     proxy_addr: str | None = None,
     proxy_authtype: str | None = 'none',
     proxy_port: str | None = None,
@@ -26273,8 +26273,8 @@ async def pfsense_create_vpn_open_vpn_client(
     route_no_pull: bool | None = None,
     sndrcvbuf: int | None = None,
     tls: str | None = None,
-    tlsauth_keydir: str | None = 'default',
-    topology: str | None = 'subnet',
+    tlsauth_keydir: str | None = None,
+    topology: str | None = None,
     tunnel_network: str | None = None,
     tunnel_networkv6: str | None = None,
     udp_fast_io: bool | None = None,
@@ -26295,7 +26295,7 @@ async def pfsense_create_vpn_open_vpn_client(
     proxy_user: The username to use for authentication to the remote proxy.This field is only available when the following conditions are met:- `proxy_authtype` must not be equal to `'none'`
     server_addr: The IP address or hostname of the OpenVPN server this client will connect to.
     server_port: The port used by the server to receive client connections. Valid options are: a TCP/UDP port number
-    tls_type: The TLS key usage type. In `auth` mode, the TLS key is used only as HMAC authentication for the control channel, protecting the peers from unauthorized connections. The `crypt` mode encrypts the control channel communication in addition to providi... Valid values: ['auth', 'crypt']
+    tls_type: The TLS key usage type. In `auth` mode, the TLS key is used only as HMAC authentication for the control channel, protecting the peers from unauthorized connections. The `crypt` mode encrypts the control channel communication in addition to providing authentication, providing more privacy and traffic control channel obfuscation.This field is only available when the following conditions are met:- `tls` must not be equal to `NULL` Valid values: ['auth', 'crypt']
     allow_compression: The compression mode allowed by this OpenVPN client. Compression can potentially increase throughput but may allow an attacker to extract secrets if they can control compressed plaintext traversing the VPN (e.g. HTTP) Valid values: ['no', 'yes', 'asym']
     auth_pass: The password used to authenticate with the OpenVPN server.This field is only available when the following conditions are met:- `auth_user` must not be equal to `NULL`
     auth_retry_none: Disables retrying authentication if an authentication failed error is received from the server
@@ -26320,13 +26320,13 @@ async def pfsense_create_vpn_open_vpn_client(
     proxy_authtype: The type of authentication used by the proxy server. Valid values: ['none', 'basic', 'ntlm']
     proxy_port: The port used by the HTTP Proxy. Valid options are: a TCP/UDP port number
     remote_cert_tls: Enables or disables requiring hosts to have a client certificate to connect.
-    remote_network: IPv4 networks that will be routed through the tunnel, so that a site-to-site VPN can be established without manually changing the routing tables. Expressed as a list of one or more CIDR ranges or host/network type aliases. If this is a site-to-sit...
-    remote_networkv6: IPv6 networks that will be routed through the tunnel, so that a site-to-site VPN can be established without manually changing the routing tables. Expressed as a list of one or more CIDR ranges or host/network type aliases. If this is a site-to-sit...
+    remote_network: IPv4 networks that will be routed through the tunnel, so that a site-to-site VPN can be established without manually changing the routing tables. Expressed as a list of one or more CIDR ranges or host/network type aliases. If this is a site-to-site VPN, enter the remote LAN/s here. May be left empty for non site-to-site VPN.
+    remote_networkv6: IPv6 networks that will be routed through the tunnel, so that a site-to-site VPN can be established without manually changing the routing tables. Expressed as a list of one or more CIDR ranges or host/network type aliases. If this is a site-to-site VPN, enter the remote LAN/s here. May be left empty for non site-to-site VPN.
     route_no_exec: Enables or disables adding/removing routes automatically.
     route_no_pull: Enables or disables the servers ability to add routes to the client's routing table.
     sndrcvbuf: The send and receive buffer size for OpenVPN. Set to null to use the system default. Valid values: [65536, 131072, 262144, 524288, 1048576, 2097152]
     tls: The TLS key this OpenVPN client will use to sign control channel packets with an HMAC signature for authentication when establishing the tunnel.
-    tlsauth_keydir: The TLS key direction. This must be set to complementary values on the client and client. For example, if the client is set to 0, the client must be set to 1. Both may be set to omit the direction, in which case the TLS Key will be used bidirectio... Valid values: ['default', '0', '1', '2']
+    tlsauth_keydir: The TLS key direction. This must be set to complementary values on the client and client. For example, if the client is set to 0, the client must be set to 1. Both may be set to omit the direction, in which case the TLS Key will be used bidirectionally.This field is only available when the following conditions are met:- `tls` must not be equal to `NULL` Valid values: ['default', '0', '1', '2']
     topology: The method used to supply a virtual adapter IP address to clients when using TUN mode on IPv4.This field is only available when the following conditions are met:- `dev_mode` must be equal to `'tun'` Valid values: ['subnet', 'net30']
     tunnel_network: The IPv4 virtual network used for private communications between this client and client hosts.
     tunnel_networkv6: The IPv6 virtual network used for private communications between this client and client hosts.
@@ -26469,15 +26469,15 @@ async def pfsense_update_vpn_open_vpn_client(
     exit_notify: str | None = 'none',
     inactive_seconds: int | None = 300,
     interface: str | None = None,
-    keepalive_interval: int | None = 10,
-    keepalive_timeout: int | None = 60,
+    keepalive_interval: int | None = None,
+    keepalive_timeout: int | None = None,
     local_port: str | None = None,
     mode: str | None = None,
     passtos: bool | None = None,
-    ping_action: str | None = 'ping_restart',
-    ping_action_seconds: int | None = 60,
+    ping_action: str | None = None,
+    ping_action_seconds: int | None = None,
     ping_method: str | None = 'keepalive',
-    ping_seconds: int | None = 10,
+    ping_seconds: int | None = None,
     protocol: str | None = None,
     proxy_addr: str | None = None,
     proxy_authtype: str | None = 'none',
@@ -26494,8 +26494,8 @@ async def pfsense_update_vpn_open_vpn_client(
     sndrcvbuf: int | None = None,
     tls: str | None = None,
     tls_type: str | None = None,
-    tlsauth_keydir: str | None = 'default',
-    topology: str | None = 'subnet',
+    tlsauth_keydir: str | None = None,
+    topology: str | None = None,
     tunnel_network: str | None = None,
     tunnel_networkv6: str | None = None,
     udp_fast_io: bool | None = None,
@@ -26539,16 +26539,16 @@ async def pfsense_update_vpn_open_vpn_client(
     proxy_port: The port used by the HTTP Proxy. Valid options are: a TCP/UDP port number
     proxy_user: The username to use for authentication to the remote proxy.This field is only available when the following conditions are met:- `proxy_authtype` must not be equal to `'none'`
     remote_cert_tls: Enables or disables requiring hosts to have a client certificate to connect.
-    remote_network: IPv4 networks that will be routed through the tunnel, so that a site-to-site VPN can be established without manually changing the routing tables. Expressed as a list of one or more CIDR ranges or host/network type aliases. If this is a site-to-sit...
-    remote_networkv6: IPv6 networks that will be routed through the tunnel, so that a site-to-site VPN can be established without manually changing the routing tables. Expressed as a list of one or more CIDR ranges or host/network type aliases. If this is a site-to-sit...
+    remote_network: IPv4 networks that will be routed through the tunnel, so that a site-to-site VPN can be established without manually changing the routing tables. Expressed as a list of one or more CIDR ranges or host/network type aliases. If this is a site-to-site VPN, enter the remote LAN/s here. May be left empty for non site-to-site VPN.
+    remote_networkv6: IPv6 networks that will be routed through the tunnel, so that a site-to-site VPN can be established without manually changing the routing tables. Expressed as a list of one or more CIDR ranges or host/network type aliases. If this is a site-to-site VPN, enter the remote LAN/s here. May be left empty for non site-to-site VPN.
     route_no_exec: Enables or disables adding/removing routes automatically.
     route_no_pull: Enables or disables the servers ability to add routes to the client's routing table.
     server_addr: The IP address or hostname of the OpenVPN server this client will connect to.
     server_port: The port used by the server to receive client connections. Valid options are: a TCP/UDP port number
     sndrcvbuf: The send and receive buffer size for OpenVPN. Set to null to use the system default. Valid values: [65536, 131072, 262144, 524288, 1048576, 2097152]
     tls: The TLS key this OpenVPN client will use to sign control channel packets with an HMAC signature for authentication when establishing the tunnel.
-    tls_type: The TLS key usage type. In `auth` mode, the TLS key is used only as HMAC authentication for the control channel, protecting the peers from unauthorized connections. The `crypt` mode encrypts the control channel communication in addition to providi... Valid values: ['auth', 'crypt']
-    tlsauth_keydir: The TLS key direction. This must be set to complementary values on the client and client. For example, if the client is set to 0, the client must be set to 1. Both may be set to omit the direction, in which case the TLS Key will be used bidirectio... Valid values: ['default', '0', '1', '2']
+    tls_type: The TLS key usage type. In `auth` mode, the TLS key is used only as HMAC authentication for the control channel, protecting the peers from unauthorized connections. The `crypt` mode encrypts the control channel communication in addition to providing authentication, providing more privacy and traffic control channel obfuscation.This field is only available when the following conditions are met:- `tls` must not be equal to `NULL` Valid values: ['auth', 'crypt']
+    tlsauth_keydir: The TLS key direction. This must be set to complementary values on the client and client. For example, if the client is set to 0, the client must be set to 1. Both may be set to omit the direction, in which case the TLS Key will be used bidirectionally.This field is only available when the following conditions are met:- `tls` must not be equal to `NULL` Valid values: ['default', '0', '1', '2']
     topology: The method used to supply a virtual adapter IP address to clients when using TUN mode on IPv4.This field is only available when the following conditions are met:- `dev_mode` must be equal to `'tun'` Valid values: ['subnet', 'net30']
     tunnel_network: The IPv4 virtual network used for private communications between this client and client hosts.
     tunnel_networkv6: The IPv6 virtual network used for private communications between this client and client hosts.
@@ -26736,7 +26736,7 @@ async def pfsense_create_vpn_open_vpn_client_export_config(
     usepass: bool | None = None,
     usepkcs11: bool | None = None,
     useproxy: bool | None = None,
-    useproxytype: str | None = 'http',
+    useproxytype: str | None = None,
     usetoken: bool | None = None,
     verifyservercn: str | None = 'auto',
 ) -> dict[str, Any] | list[Any] | str:
@@ -26849,7 +26849,7 @@ async def pfsense_update_vpn_open_vpn_client_export_config(
     usepkcs11: bool | None = None,
     useproxy: bool | None = None,
     useproxypass: str | None = None,
-    useproxytype: str | None = 'http',
+    useproxytype: str | None = None,
     usetoken: bool | None = None,
     verifyservercn: str | None = 'auto',
 ) -> dict[str, Any] | list[Any] | str:
@@ -27075,7 +27075,7 @@ async def pfsense_create_vpn_open_vpn_client_export(
     usepkcs11: bool | None = None,
     useproxy: bool | None = None,
     useproxypass: str | None = None,
-    useproxytype: str | None = 'http',
+    useproxytype: str | None = None,
     username: str | None = None,
     usetoken: bool | None = None,
     verifyservercn: str | None = 'auto',
@@ -27276,7 +27276,7 @@ async def pfsense_create_vpn_open_vpn_server(
     tls_type: str,
     confirm: bool = False,
     allow_compression: str | None = 'no',
-    authmode: list[str] | None = ['Local Database'],
+    authmode: list[str] | None = None,
     cert_depth: int | None = 1,
     client2client: bool | None = None,
     connlimit: int | None = None,
@@ -27294,8 +27294,8 @@ async def pfsense_create_vpn_open_vpn_server(
     gwredir: bool | None = None,
     gwredir6: bool | None = None,
     inactive_seconds: int | None = 300,
-    keepalive_interval: int | None = 10,
-    keepalive_timeout: int | None = 60,
+    keepalive_interval: int | None = None,
+    keepalive_timeout: int | None = None,
     local_network: list[str] | None = None,
     local_networkv6: list[str] | None = None,
     local_port: str | None = '1194',
@@ -27306,12 +27306,12 @@ async def pfsense_create_vpn_open_vpn_server(
     ntp_server1: str | None = None,
     ntp_server2: str | None = None,
     passtos: bool | None = None,
-    ping_action: str | None = 'ping_restart',
+    ping_action: str | None = None,
     ping_action_push: bool | None = None,
-    ping_action_seconds: int | None = 60,
+    ping_action_seconds: int | None = None,
     ping_method: str | None = 'keepalive',
     ping_push: bool | None = None,
-    ping_seconds: int | None = 10,
+    ping_seconds: int | None = None,
     push_blockoutsidedns: bool | None = None,
     push_register_dns: bool | None = None,
     remote_cert_tls: bool | None = True,
@@ -27322,8 +27322,8 @@ async def pfsense_create_vpn_open_vpn_server(
     sndrcvbuf: int | None = None,
     strictusercn: bool | None = None,
     tls: str | None = None,
-    tlsauth_keydir: str | None = 'default',
-    topology: str | None = 'subnet',
+    tlsauth_keydir: str | None = None,
+    topology: str | None = None,
     tunnel_network: str | None = None,
     tunnel_networkv6: str | None = None,
     use_tls: bool | None = None,
@@ -27347,11 +27347,11 @@ async def pfsense_create_vpn_open_vpn_server(
     protocol: The protocol used by this OpenVPN server. Valid values: ['UDP4', 'UDP6', 'UDP', 'TCP4', 'TCP6', 'TCP']
     serverbridge_dhcp_end: The bridge DHCP range's end address.This field is only available when the following conditions are met:- `serverbridge_dhcp` must be equal to `true`
     serverbridge_dhcp_start: The bridge DHCP range's start address.This field is only available when the following conditions are met:- `serverbridge_dhcp` must be equal to `true`
-    serverbridge_interface: The interface to which this TAP instance will be bridged. This is not done automatically. This interface must be assigned and the bridge created separately. This setting controls which existing IP address and subnet mask are used by OpenVPN for th...
-    tls_type: The TLS key usage type. In `auth` mode, the TLS key is used only as HMAC authentication for the control channel, protecting the peers from unauthorized connections. The `crypt` mode encrypts the control channel communication in addition to providi... Valid values: ['auth', 'crypt']
+    serverbridge_interface: The interface to which this TAP instance will be bridged. This is not done automatically. This interface must be assigned and the bridge created separately. This setting controls which existing IP address and subnet mask are used by OpenVPN for the bridge.This field is only available when the following conditions are met:- `serverbridge_dhcp` must be equal to `true`
+    tls_type: The TLS key usage type. In `auth` mode, the TLS key is used only as HMAC authentication for the control channel, protecting the peers from unauthorized connections. The `crypt` mode encrypts the control channel communication in addition to providing authentication, providing more privacy and traffic control channel obfuscation.This field is only available when the following conditions are met:- `use_tls` must be equal to `true` Valid values: ['auth', 'crypt']
     allow_compression: The compression mode allowed by this OpenVPN server. Compression can potentially increase throughput but may allow an attacker to extract secrets if they can control compressed plaintext traversing the VPN (e.g. HTTP) Valid values: ['no', 'yes', 'asym']
     authmode: The name of the authentication server to use as the authentication backend for this OpenVPN serverThis field is only available when the following conditions are met:- `mode` must be one of [ server_user, server_tls_user ]
-    cert_depth: The depth of the certificate chain to check when a certificate based client signs in. Certificates below this depth are not accepted. This is useful for denying certificates made with intermediate CAs generated from the same CA as the server. Set ... Valid values: [1, 2, 3, 4, 5]
+    cert_depth: The depth of the certificate chain to check when a certificate based client signs in. Certificates below this depth are not accepted. This is useful for denying certificates made with intermediate CAs generated from the same CA as the server. Set to null to use system default. Valid values: [1, 2, 3, 4, 5]
     client2client: Enables or disables allowing communication between clients connected to this server.
     connlimit: The number of concurrent connections a single user can have.This field is only available when the following conditions are met:- `duplicate_cn` must be equal to `true`
     create_gw: The gateway type(s) that will be created when a virtual interface is assigned to this OpenVPN server Valid values: ['both', 'v4only', 'v6only']
@@ -27370,13 +27370,13 @@ async def pfsense_create_vpn_open_vpn_server(
     inactive_seconds: The amount of time (in seconds) until a client connection is closed for inactivity.
     keepalive_interval: The keepalive interval parameter.This field is only available when the following conditions are met:- `ping_method` must be equal to `'keepalive'`
     keepalive_timeout: The keepalive timeout parameter.This field is only available when the following conditions are met:- `ping_method` must be equal to `'keepalive'`
-    local_network: The IPv4 networks that will be accessible from the remote endpoint. Expressed as a list of one or more CIDR ranges or host/network type aliases. This may be left blank if not adding a route to the local network through this tunnel on the remote ma...
-    local_networkv6: The IPv6 networks that will be accessible from the remote endpoint. Expressed as a list of one or more CIDR ranges or host/network type aliases. This may be left blank if not adding a route to the local network through this tunnel on the remote ma...
+    local_network: The IPv4 networks that will be accessible from the remote endpoint. Expressed as a list of one or more CIDR ranges or host/network type aliases. This may be left blank if not adding a route to the local network through this tunnel on the remote machine. This is generally set to the LAN network.This field is only available when the following conditions are met:- `gwredir` must be equal to `false`
+    local_networkv6: The IPv6 networks that will be accessible from the remote endpoint. Expressed as a list of one or more CIDR ranges or host/network type aliases. This may be left blank if not adding a route to the local network through this tunnel on the remote machine. This is generally set to the LAN network.This field is only available when the following conditions are met:- `gwredir6` must be equal to `false`
     local_port: The port used by OpenVPN to receive client connections. Valid options are: a TCP/UDP port number
     maxclients: The maximum number of clients allowed to concurrently connect to this server.
     netbios_enable: Enables or disables NetBIOS over TCP/IP.This field is only available when the following conditions are met:- `mode` must be one of [ server_user, server_tls_user ]
     netbios_ntype: The NetBIOS node type.This field is only available when the following conditions are met:- `netbios_enable` must be equal to `true` Valid values: [0, 1, 2, 4, 8]
-    netbios_scope: The NetBIOS Scope ID. This provides an extended naming service for NetBIOS over TCP/IP. The NetBIOS scope ID isolates NetBIOS traffic on a single network to only those nodes with the same NetBIOS scope ID.This field is only available when the foll...
+    netbios_scope: The NetBIOS Scope ID. This provides an extended naming service for NetBIOS over TCP/IP. The NetBIOS scope ID isolates NetBIOS traffic on a single network to only those nodes with the same NetBIOS scope ID.This field is only available when the following conditions are met:- `netbios_enable` must be equal to `true`
     ntp_server1: The primary NTP server to provide to clients.This field is only available when the following conditions are met:- `mode` must be one of [ server_user, server_tls_user ]
     ntp_server2: The secondary NTP server to provide to clients.This field is only available when the following conditions are met:- `mode` must be one of [ server_user, server_tls_user ]
     passtos: Enables or disables setting the TOS IP header value of tunnel packets to match the encapsulated packet value.
@@ -27386,22 +27386,22 @@ async def pfsense_create_vpn_open_vpn_server(
     ping_method: The method used to define ping configuration. Valid values: ['keepalive', 'ping']
     ping_push: Enables or disables push ping to the VPN client.This field is only available when the following conditions are met:- `ping_method` must be equal to `'ping'`
     ping_seconds: The number of seconds to accept no packets before sending a ping to the remote peer over the TCP/UDP control channel.This field is only available when the following conditions are met:- `ping_method` must be equal to `'ping'`
-    push_blockoutsidedns: Enables or disables blocking Windows 10 clients' access to DNS servers except across OpenVPN while connected, forcing clients to use only VPN DNS servers.This field is only available when the following conditions are met:- `mode` must be one of [ ...
-    push_register_dns: Enables or disables running `net stop dnscache`, `net start dnscache`, `ipconfig /flushdns` and `ipconfig /registerdns` on connection initiation for Windows clients.This field is only available when the following conditions are met:- `mode` must b...
+    push_blockoutsidedns: Enables or disables blocking Windows 10 clients' access to DNS servers except across OpenVPN while connected, forcing clients to use only VPN DNS servers.This field is only available when the following conditions are met:- `mode` must be one of [ server_user, server_tls_user ]
+    push_register_dns: Enables or disables running `net stop dnscache`, `net start dnscache`, `ipconfig /flushdns` and `ipconfig /registerdns` on connection initiation for Windows clients.This field is only available when the following conditions are met:- `mode` must be one of [ server_user, server_tls_user ]
     remote_cert_tls: Enables or disables requiring hosts to have a client certificate to connect.
-    remote_network: IPv4 networks that will be routed through the tunnel, so that a site-to-site VPN can be established without manually changing the routing tables. Expressed as a list of one or more CIDR ranges or host/network type aliases. If this is a site-to-sit...
-    remote_networkv6: IPv6 networks that will be routed through the tunnel, so that a site-to-site VPN can be established without manually changing the routing tables. Expressed as a list of one or more CIDR ranges or host/network type aliases. If this is a site-to-sit...
+    remote_network: IPv4 networks that will be routed through the tunnel, so that a site-to-site VPN can be established without manually changing the routing tables. Expressed as a list of one or more CIDR ranges or host/network type aliases. If this is a site-to-site VPN, enter the remote LAN/s here. May be left empty for non site-to-site VPN.
+    remote_networkv6: IPv6 networks that will be routed through the tunnel, so that a site-to-site VPN can be established without manually changing the routing tables. Expressed as a list of one or more CIDR ranges or host/network type aliases. If this is a site-to-site VPN, enter the remote LAN/s here. May be left empty for non site-to-site VPN.
     serverbridge_dhcp: Enables or disables clients on the bridge to obtain DHCP.This field is only available when the following conditions are met:- `dev_mode` must be equal to `'tap'`
     serverbridge_routegateway: Enables or disables pushing the bridge interface's IPv4 address to connecting clients as a route gateway.This field is only available when the following conditions are met:- `serverbridge_dhcp` must be equal to `true`
     sndrcvbuf: The send and receive buffer size for OpenVPN. Set to null to use the system default. Valid values: [65536, 131072, 262144, 524288, 1048576, 2097152]
     strictusercn: Enables or disables enforcing a match between the common name of the client certificate and the username given at login.This field is only available when the following conditions are met:- `mode` must be one of [ server_user, server_tls_user ]
     tls: The TLS key this OpenVPN server will use to sign control channel packets with an HMAC signature for authentication when establishing the tunnel.This field is only available when the following conditions are met:- `use_tls` must be equal to `true`
-    tlsauth_keydir: The TLS key direction. This must be set to complementary values on the client and server. For example, if the server is set to 0, the client must be set to 1. Both may be set to omit the direction, in which case the TLS Key will be used bidirectio... Valid values: ['default', '0', '1', '2']
+    tlsauth_keydir: The TLS key direction. This must be set to complementary values on the client and server. For example, if the server is set to 0, the client must be set to 1. Both may be set to omit the direction, in which case the TLS Key will be used bidirectionally.This field is only available when the following conditions are met:- `use_tls` must be equal to `true` Valid values: ['default', '0', '1', '2']
     topology: The method used to supply a virtual adapter IP address to clients when using TUN mode on IPv4.This field is only available when the following conditions are met:- `dev_mode` must be equal to `'tun'` Valid values: ['subnet', 'net30']
     tunnel_network: The IPv4 virtual network used for private communications between this server and client hosts.
     tunnel_networkv6: The IPv6 virtual network used for private communications between this server and client hosts.
     use_tls: Enables or disables the use of a TLS key for this OpenVPN server.
-    username_as_common_name: Enables or disable the username of the client being used in place of the certificate common name for purposes such as determining Client Specific Overrides.This field is only available when the following conditions are met:- `mode` must be one of ...
+    username_as_common_name: Enables or disable the username of the client being used in place of the certificate common name for purposes such as determining Client Specific Overrides.This field is only available when the following conditions are met:- `mode` must be one of [ server_user, server_tls_user ]
     verbosity_level: The OpenVPN logging verbosity level. Valid values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     wins_server1: The primary WINS server to provide to clients.This field is only available when the following conditions are met:- `mode` must be one of [ server_user, server_tls_user ]
     wins_server2: The secondary WINS server to provide to clients.This field is only available when the following conditions are met:- `mode` must be one of [ server_user, server_tls_user ]
@@ -27566,7 +27566,7 @@ async def pfsense_update_vpn_open_vpn_server(
     id: int,
     confirm: bool = False,
     allow_compression: str | None = 'no',
-    authmode: list[str] | None = ['Local Database'],
+    authmode: list[str] | None = None,
     caref: str | None = None,
     cert_depth: int | None = 1,
     certref: str | None = None,
@@ -27593,8 +27593,8 @@ async def pfsense_update_vpn_open_vpn_server(
     gwredir6: bool | None = None,
     inactive_seconds: int | None = 300,
     interface: str | None = None,
-    keepalive_interval: int | None = 10,
-    keepalive_timeout: int | None = 60,
+    keepalive_interval: int | None = None,
+    keepalive_timeout: int | None = None,
     local_network: list[str] | None = None,
     local_networkv6: list[str] | None = None,
     local_port: str | None = '1194',
@@ -27606,12 +27606,12 @@ async def pfsense_update_vpn_open_vpn_server(
     ntp_server1: str | None = None,
     ntp_server2: str | None = None,
     passtos: bool | None = None,
-    ping_action: str | None = 'ping_restart',
+    ping_action: str | None = None,
     ping_action_push: bool | None = None,
-    ping_action_seconds: int | None = 60,
+    ping_action_seconds: int | None = None,
     ping_method: str | None = 'keepalive',
     ping_push: bool | None = None,
-    ping_seconds: int | None = 10,
+    ping_seconds: int | None = None,
     protocol: str | None = None,
     push_blockoutsidedns: bool | None = None,
     push_register_dns: bool | None = None,
@@ -27627,8 +27627,8 @@ async def pfsense_update_vpn_open_vpn_server(
     strictusercn: bool | None = None,
     tls: str | None = None,
     tls_type: str | None = None,
-    tlsauth_keydir: str | None = 'default',
-    topology: str | None = 'subnet',
+    tlsauth_keydir: str | None = None,
+    topology: str | None = None,
     tunnel_network: str | None = None,
     tunnel_networkv6: str | None = None,
     use_tls: bool | None = None,
@@ -27643,7 +27643,7 @@ async def pfsense_update_vpn_open_vpn_server(
     allow_compression: The compression mode allowed by this OpenVPN server. Compression can potentially increase throughput but may allow an attacker to extract secrets if they can control compressed plaintext traversing the VPN (e.g. HTTP) Valid values: ['no', 'yes', 'asym']
     authmode: The name of the authentication server to use as the authentication backend for this OpenVPN serverThis field is only available when the following conditions are met:- `mode` must be one of [ server_user, server_tls_user ]
     caref: The `refid` of the CA object to assume as the peer CA.
-    cert_depth: The depth of the certificate chain to check when a certificate based client signs in. Certificates below this depth are not accepted. This is useful for denying certificates made with intermediate CAs generated from the same CA as the server. Set ... Valid values: [1, 2, 3, 4, 5]
+    cert_depth: The depth of the certificate chain to check when a certificate based client signs in. Certificates below this depth are not accepted. This is useful for denying certificates made with intermediate CAs generated from the same CA as the server. Set to null to use system default. Valid values: [1, 2, 3, 4, 5]
     certref: The `refid` of the certificate object to assume as the OpenVPN server certificate.
     client2client: Enables or disables allowing communication between clients connected to this server.
     connlimit: The number of concurrent connections a single user can have.This field is only available when the following conditions are met:- `duplicate_cn` must be equal to `true`
@@ -27670,14 +27670,14 @@ async def pfsense_update_vpn_open_vpn_server(
     interface: The interface or Virtual IP address where OpenVPN will receive client connections.This field is only available when the following conditions are met:- `protocol` must not be one of [ UDP, TCP ]
     keepalive_interval: The keepalive interval parameter.This field is only available when the following conditions are met:- `ping_method` must be equal to `'keepalive'`
     keepalive_timeout: The keepalive timeout parameter.This field is only available when the following conditions are met:- `ping_method` must be equal to `'keepalive'`
-    local_network: The IPv4 networks that will be accessible from the remote endpoint. Expressed as a list of one or more CIDR ranges or host/network type aliases. This may be left blank if not adding a route to the local network through this tunnel on the remote ma...
-    local_networkv6: The IPv6 networks that will be accessible from the remote endpoint. Expressed as a list of one or more CIDR ranges or host/network type aliases. This may be left blank if not adding a route to the local network through this tunnel on the remote ma...
+    local_network: The IPv4 networks that will be accessible from the remote endpoint. Expressed as a list of one or more CIDR ranges or host/network type aliases. This may be left blank if not adding a route to the local network through this tunnel on the remote machine. This is generally set to the LAN network.This field is only available when the following conditions are met:- `gwredir` must be equal to `false`
+    local_networkv6: The IPv6 networks that will be accessible from the remote endpoint. Expressed as a list of one or more CIDR ranges or host/network type aliases. This may be left blank if not adding a route to the local network through this tunnel on the remote machine. This is generally set to the LAN network.This field is only available when the following conditions are met:- `gwredir6` must be equal to `false`
     local_port: The port used by OpenVPN to receive client connections. Valid options are: a TCP/UDP port number
     maxclients: The maximum number of clients allowed to concurrently connect to this server.
     mode: The OpenVPN server mode. Valid values: ['p2p_tls', 'server_tls', 'server_user', 'server_tls_user']
     netbios_enable: Enables or disables NetBIOS over TCP/IP.This field is only available when the following conditions are met:- `mode` must be one of [ server_user, server_tls_user ]
     netbios_ntype: The NetBIOS node type.This field is only available when the following conditions are met:- `netbios_enable` must be equal to `true` Valid values: [0, 1, 2, 4, 8]
-    netbios_scope: The NetBIOS Scope ID. This provides an extended naming service for NetBIOS over TCP/IP. The NetBIOS scope ID isolates NetBIOS traffic on a single network to only those nodes with the same NetBIOS scope ID.This field is only available when the foll...
+    netbios_scope: The NetBIOS Scope ID. This provides an extended naming service for NetBIOS over TCP/IP. The NetBIOS scope ID isolates NetBIOS traffic on a single network to only those nodes with the same NetBIOS scope ID.This field is only available when the following conditions are met:- `netbios_enable` must be equal to `true`
     ntp_server1: The primary NTP server to provide to clients.This field is only available when the following conditions are met:- `mode` must be one of [ server_user, server_tls_user ]
     ntp_server2: The secondary NTP server to provide to clients.This field is only available when the following conditions are met:- `mode` must be one of [ server_user, server_tls_user ]
     passtos: Enables or disables setting the TOS IP header value of tunnel packets to match the encapsulated packet value.
@@ -27688,26 +27688,26 @@ async def pfsense_update_vpn_open_vpn_server(
     ping_push: Enables or disables push ping to the VPN client.This field is only available when the following conditions are met:- `ping_method` must be equal to `'ping'`
     ping_seconds: The number of seconds to accept no packets before sending a ping to the remote peer over the TCP/UDP control channel.This field is only available when the following conditions are met:- `ping_method` must be equal to `'ping'`
     protocol: The protocol used by this OpenVPN server. Valid values: ['UDP4', 'UDP6', 'UDP', 'TCP4', 'TCP6', 'TCP']
-    push_blockoutsidedns: Enables or disables blocking Windows 10 clients' access to DNS servers except across OpenVPN while connected, forcing clients to use only VPN DNS servers.This field is only available when the following conditions are met:- `mode` must be one of [ ...
-    push_register_dns: Enables or disables running `net stop dnscache`, `net start dnscache`, `ipconfig /flushdns` and `ipconfig /registerdns` on connection initiation for Windows clients.This field is only available when the following conditions are met:- `mode` must b...
+    push_blockoutsidedns: Enables or disables blocking Windows 10 clients' access to DNS servers except across OpenVPN while connected, forcing clients to use only VPN DNS servers.This field is only available when the following conditions are met:- `mode` must be one of [ server_user, server_tls_user ]
+    push_register_dns: Enables or disables running `net stop dnscache`, `net start dnscache`, `ipconfig /flushdns` and `ipconfig /registerdns` on connection initiation for Windows clients.This field is only available when the following conditions are met:- `mode` must be one of [ server_user, server_tls_user ]
     remote_cert_tls: Enables or disables requiring hosts to have a client certificate to connect.
-    remote_network: IPv4 networks that will be routed through the tunnel, so that a site-to-site VPN can be established without manually changing the routing tables. Expressed as a list of one or more CIDR ranges or host/network type aliases. If this is a site-to-sit...
-    remote_networkv6: IPv6 networks that will be routed through the tunnel, so that a site-to-site VPN can be established without manually changing the routing tables. Expressed as a list of one or more CIDR ranges or host/network type aliases. If this is a site-to-sit...
+    remote_network: IPv4 networks that will be routed through the tunnel, so that a site-to-site VPN can be established without manually changing the routing tables. Expressed as a list of one or more CIDR ranges or host/network type aliases. If this is a site-to-site VPN, enter the remote LAN/s here. May be left empty for non site-to-site VPN.
+    remote_networkv6: IPv6 networks that will be routed through the tunnel, so that a site-to-site VPN can be established without manually changing the routing tables. Expressed as a list of one or more CIDR ranges or host/network type aliases. If this is a site-to-site VPN, enter the remote LAN/s here. May be left empty for non site-to-site VPN.
     serverbridge_dhcp: Enables or disables clients on the bridge to obtain DHCP.This field is only available when the following conditions are met:- `dev_mode` must be equal to `'tap'`
     serverbridge_dhcp_end: The bridge DHCP range's end address.This field is only available when the following conditions are met:- `serverbridge_dhcp` must be equal to `true`
     serverbridge_dhcp_start: The bridge DHCP range's start address.This field is only available when the following conditions are met:- `serverbridge_dhcp` must be equal to `true`
-    serverbridge_interface: The interface to which this TAP instance will be bridged. This is not done automatically. This interface must be assigned and the bridge created separately. This setting controls which existing IP address and subnet mask are used by OpenVPN for th...
+    serverbridge_interface: The interface to which this TAP instance will be bridged. This is not done automatically. This interface must be assigned and the bridge created separately. This setting controls which existing IP address and subnet mask are used by OpenVPN for the bridge.This field is only available when the following conditions are met:- `serverbridge_dhcp` must be equal to `true`
     serverbridge_routegateway: Enables or disables pushing the bridge interface's IPv4 address to connecting clients as a route gateway.This field is only available when the following conditions are met:- `serverbridge_dhcp` must be equal to `true`
     sndrcvbuf: The send and receive buffer size for OpenVPN. Set to null to use the system default. Valid values: [65536, 131072, 262144, 524288, 1048576, 2097152]
     strictusercn: Enables or disables enforcing a match between the common name of the client certificate and the username given at login.This field is only available when the following conditions are met:- `mode` must be one of [ server_user, server_tls_user ]
     tls: The TLS key this OpenVPN server will use to sign control channel packets with an HMAC signature for authentication when establishing the tunnel.This field is only available when the following conditions are met:- `use_tls` must be equal to `true`
-    tls_type: The TLS key usage type. In `auth` mode, the TLS key is used only as HMAC authentication for the control channel, protecting the peers from unauthorized connections. The `crypt` mode encrypts the control channel communication in addition to providi... Valid values: ['auth', 'crypt']
-    tlsauth_keydir: The TLS key direction. This must be set to complementary values on the client and server. For example, if the server is set to 0, the client must be set to 1. Both may be set to omit the direction, in which case the TLS Key will be used bidirectio... Valid values: ['default', '0', '1', '2']
+    tls_type: The TLS key usage type. In `auth` mode, the TLS key is used only as HMAC authentication for the control channel, protecting the peers from unauthorized connections. The `crypt` mode encrypts the control channel communication in addition to providing authentication, providing more privacy and traffic control channel obfuscation.This field is only available when the following conditions are met:- `use_tls` must be equal to `true` Valid values: ['auth', 'crypt']
+    tlsauth_keydir: The TLS key direction. This must be set to complementary values on the client and server. For example, if the server is set to 0, the client must be set to 1. Both may be set to omit the direction, in which case the TLS Key will be used bidirectionally.This field is only available when the following conditions are met:- `use_tls` must be equal to `true` Valid values: ['default', '0', '1', '2']
     topology: The method used to supply a virtual adapter IP address to clients when using TUN mode on IPv4.This field is only available when the following conditions are met:- `dev_mode` must be equal to `'tun'` Valid values: ['subnet', 'net30']
     tunnel_network: The IPv4 virtual network used for private communications between this server and client hosts.
     tunnel_networkv6: The IPv6 virtual network used for private communications between this server and client hosts.
     use_tls: Enables or disables the use of a TLS key for this OpenVPN server.
-    username_as_common_name: Enables or disable the username of the client being used in place of the certificate common name for purposes such as determining Client Specific Overrides.This field is only available when the following conditions are met:- `mode` must be one of ...
+    username_as_common_name: Enables or disable the username of the client being used in place of the certificate common name for purposes such as determining Client Specific Overrides.This field is only available when the following conditions are met:- `mode` must be one of [ server_user, server_tls_user ]
     verbosity_level: The OpenVPN logging verbosity level. Valid values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     wins_server1: The primary WINS server to provide to clients.This field is only available when the following conditions are met:- `mode` must be one of [ server_user, server_tls_user ]
     wins_server2: The secondary WINS server to provide to clients.This field is only available when the following conditions are met:- `mode` must be one of [ server_user, server_tls_user ]
@@ -28210,7 +28210,7 @@ async def pfsense_create_vpn_wire_guard_peer(
     enabled: bool | None = None,
     endpoint: str | None = None,
     persistentkeepalive: int | None = None,
-    port: str | None = '51820',
+    port: str | None = None,
     presharedkey: str | None = None,
     tun: str | None = 'unassigned',
 ) -> dict[str, Any] | list[Any] | str:
@@ -28269,7 +28269,7 @@ async def pfsense_update_vpn_wire_guard_peer(
     enabled: bool | None = None,
     endpoint: str | None = None,
     persistentkeepalive: int | None = None,
-    port: str | None = '51820',
+    port: str | None = None,
     presharedkey: str | None = None,
     publickey: str | None = None,
     tun: str | None = 'unassigned',
@@ -28463,7 +28463,7 @@ async def pfsense_update_vpn_wire_guard_settings(
     hide_secrets: bool | None = None,
     interface_group: str | None = 'all',
     keep_conf: bool | None = True,
-    resolve_interval: int | None = 300,
+    resolve_interval: int | None = None,
     resolve_interval_track: bool | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/vpn/wireguard/settings

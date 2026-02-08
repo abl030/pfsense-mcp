@@ -425,10 +425,12 @@ For each task:
 
 1. **Run the task** — `nix develop -c bash bank-tester/run-bank-test.sh <task-number>`
 2. **Read results** — check the task `.txt` file and `summary.md`
-3. **If failures**: fix the generator (`codegen.py`, `context_builder.py`, `schema_parser.py`, or task-config), regenerate (`nix develop -c python -m generator`), and re-run until the task passes
+3. **Fix EVERY failure** — no skipping, no "moving on". Every `first_attempt_failure` must be investigated and fixed, whether it's in the generator, task-config, or MCP server. Fix the root cause (generator/codegen/task-config), regenerate, and re-run until the task has 0 first-attempt failures.
 4. **Tabulate** — add any phantom 404s or API 500s to the "Bank Tester Endpoint Discovery" table below
 5. **Commit** — commit fixes + regenerated server.py after each task greens
-6. **Move to next task** — no pause needed, just keep going
+6. **Move to next task** — only after the current task is fully green
+
+**CRITICAL: NEVER skip a failure.** The entire purpose of this phase is to find and fix every issue. A failure that gets skipped is a failure that ships. If a description is truncated, fix the truncation. If a test value is wrong, fix the test value. If the generator produces bad output, fix the generator. No exceptions.
 
 Task 35 already done. Work through 10→44 sequentially.
 

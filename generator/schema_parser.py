@@ -151,6 +151,13 @@ def extract_tool_parameters(
                 if isinstance(default, int) and abs(default) >= 2**53:
                     default = None
                     has_default = False
+                # Conditional fields should default to None — sending a spec
+                # default when the condition isn't met causes validation errors
+                # (e.g., target_subnet=128 fails for IPv4 addresses)
+                desc_text = resolved_prop.get("description", "")
+                if has_default and default is not None and "only available when" in desc_text:
+                    default = None
+                    has_default = True  # still has a default (None), just not the spec's
 
                 safe = _safe_name(prop_name)
                 params.append(

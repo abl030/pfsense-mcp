@@ -30,7 +30,7 @@
     - `interface`: `wan`
     - `protocol`: `tcp`
     - `source`: `any`
-    - `destination`: `wanip`
+    - `destination`: `wan:ip`
     - `destination_port`: `8080`
     - `target`: `10.99.99.1`
     - `local_port`: `80`

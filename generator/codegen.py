@@ -84,18 +84,14 @@ def _gen_docstring(tool: ToolContext) -> str:
             desc = re.sub(r"<[^>]+>", "", desc)
             # Collapse whitespace
             desc = re.sub(r"\s+", " ", desc).strip()
-            # Truncate at 250 chars (preserves conditional field docs)
-            if len(desc) > 250:
-                desc = desc[:247] + "..."
+            # No truncation on descriptions — AI consumers handle long text fine,
+            # and truncating loses critical info (modifier syntax, conditionals)
             if p.enum:
                 enum_str = ", ".join(repr(v) for v in p.enum)
                 if desc:
                     desc += f" Valid values: [{enum_str}]"
                 else:
                     desc = f"Valid values: [{enum_str}]"
-                # Truncate if enum list made it too long
-                if len(desc) > 400:
-                    desc = desc[:397] + "..."
             doc_lines.append(f"    {p.name}: {desc}")
 
     doc_lines.append('    """')
