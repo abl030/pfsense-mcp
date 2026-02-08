@@ -47,9 +47,10 @@
 17. **Get** using `pfsense_get_system_tunable` with the ID from the create response
 18. **Update** using `pfsense_update_system_tunable` with `confirm=True` — set `descr` to `Updated tunable`
 19. **Get** again using `pfsense_get_system_tunable` — verify `descr` was updated
-20. **Get settings** using `pfsense_get_system_web_gui_settings` — note current value of `webguicss`
-21. **Update settings** using `pfsense_update_system_web_gui_settings` with `confirm=True` — set `webguicss` to `'pfSense.css'`
-22. **Get settings** again using `pfsense_get_system_web_gui_settings` — verify `webguicss` was updated
+20. **Get settings** using `pfsense_get_system_web_gui_settings` — note current value of `port`
+21. **Update settings** using `pfsense_update_system_web_gui_settings` with `confirm=True` — set `port` to `'8443'`
+22. **Get settings** again using `pfsense_get_system_web_gui_settings` — verify `port` was updated
+23. **Restore** using `pfsense_update_system_web_gui_settings` with `confirm=True` — set `port` back to `'443'`
 23. **Get settings** using `pfsense_list_system_notifications_email_settings` — note current value of `ipaddress`
 24. **Update settings** using `pfsense_update_system_notifications_email_settings` with `confirm=True` — set `ipaddress` to `'127.0.0.1'` (also include: `username=test`, `password=test`)
 25. **Get settings** again using `pfsense_list_system_notifications_email_settings` — verify `ipaddress` was updated

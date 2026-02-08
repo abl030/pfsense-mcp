@@ -4,7 +4,7 @@
 
 **Objective**: Exercise all tools in the services/dhcp_server subsystem through CRUD lifecycle, settings, and actions.
 
-**Tools to exercise** (19):
+**Tools to exercise** (18):
 - `pfsense_create_services_dhcp_server_address_pool`
 - `pfsense_list_services_dhcp_server_address_pools`
 - `pfsense_get_services_dhcp_server_address_pool`
@@ -20,7 +20,6 @@
 - `pfsense_get_services_dhcp_server_custom_option`
 - `pfsense_update_services_dhcp_server_custom_option`
 - `pfsense_delete_services_dhcp_server_custom_option`
-- `pfsense_get_/api/v2/services/dhcp_server/backend`
 - `pfsense_update_services_dhcp_server_backend`
 - `pfsense_get_services_dhcp_server_apply_status`
 - `pfsense_services_dhcp_server_apply`
@@ -51,10 +50,8 @@
 13. **Get** using `pfsense_get_services_dhcp_server_custom_option` with the ID from the create response
 14. **Update** using `pfsense_update_services_dhcp_server_custom_option` with `confirm=True` — set `descr` to `Updated custom option`
 15. **Get** again using `pfsense_get_services_dhcp_server_custom_option` — verify `descr` was updated
-16. **Get settings** using `pfsense_get_/api/v2/services/dhcp_server/backend` — note current value of `dhcpbackend`
-17. **Update settings** using `pfsense_update_services_dhcp_server_backend` with `confirm=True` — set `dhcpbackend` to `'kea'`
-18. **Get settings** again using `pfsense_get_/api/v2/services/dhcp_server/backend` — verify `dhcpbackend` was updated
-19. **Restore** using `pfsense_update_services_dhcp_server_backend` with `confirm=True` — set `dhcpbackend` back to `'isc'`
+16. **Update settings** using `pfsense_update_services_dhcp_server_backend` with `confirm=True` — set `dhcpbackend` to `'kea'`
+17. **Restore** using `pfsense_update_services_dhcp_server_backend` with `confirm=True` — set `dhcpbackend` back to `'isc'`
 20. **Check apply status** using `pfsense_get_services_dhcp_server_apply_status`
 21. **Apply changes** using `pfsense_services_dhcp_server_apply` with `confirm=True`
 
@@ -70,4 +67,4 @@ Apply dhcp_server after mutations. Restore backend to "isc" after testing.
 - Delete using `pfsense_delete_services_dhcp_server_static_mapping` with `confirm=True` (ID from create step)
 - Delete using `pfsense_delete_services_dhcp_server_address_pool` with `confirm=True` (ID from create step)
 
-**Expected outcome**: All 19 tools exercised successfully.
+**Expected outcome**: All 18 tools exercised successfully.

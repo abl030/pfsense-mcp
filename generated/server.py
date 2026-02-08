@@ -647,7 +647,7 @@ async def pfsense_get_firewall_advanced_settings(
 async def pfsense_update_firewall_advanced_settings(
     confirm: bool = False,
     aliasesresolveinterval: int | None = None,
-    checkaliasesurlcert: bool | None = True,
+    checkaliasesurlcert: bool | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/firewall/advanced_settings
 
@@ -1017,7 +1017,7 @@ async def pfsense_update_firewall_nat_one_to_one_mapping(
     disabled: bool | None = None,
     external: str | None = None,
     interface: str | None = None,
-    ipprotocol: str | None = 'inet',
+    ipprotocol: str | None = None,
     natreflection: str | None = None,
     nobinat: bool | None = None,
     source: str | None = None,
@@ -1658,7 +1658,7 @@ async def pfsense_update_firewall_nat_port_forward(
     destination_port: str | None = None,
     disabled: bool | None = None,
     interface: str | None = None,
-    ipprotocol: str | None = 'inet',
+    ipprotocol: str | None = None,
     local_port: str | None = None,
     natreflection: str | None = None,
     nordr: bool | None = None,
@@ -2025,7 +2025,7 @@ async def pfsense_update_firewall_rule(
     sched: str | None = None,
     source: str | None = None,
     source_port: str | None = None,
-    statetype: str | None = 'keep state',
+    statetype: str | None = None,
     tag: str | None = None,
     tcp_flags_any: bool | None = None,
     tcp_flags_out_of: list[str] | None = None,
@@ -2395,7 +2395,7 @@ async def pfsense_create_firewall_schedule_time_range(
     day: list[int],
     hour: str,
     month: list[int],
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     position: list[int] | None = None,
     rangedescr: str | None = None,
@@ -2440,7 +2440,7 @@ async def pfsense_create_firewall_schedule_time_range(
 @mcp.tool()
 async def pfsense_update_firewall_schedule_time_range(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     day: list[int] | None = None,
     hour: str | None = None,
@@ -2801,7 +2801,7 @@ async def pfsense_get_firewall_states_size(
 @mcp.tool()
 async def pfsense_update_firewall_states_size(
     confirm: bool = False,
-    maximumstates: int | None = 398000,
+    maximumstates: int | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/firewall/states/size
 
@@ -2904,7 +2904,7 @@ async def pfsense_update_firewall_traffic_shaper(
     confirm: bool = False,
     bandwidth: int | None = None,
     bandwidthtype: str | None = None,
-    enabled: bool | None = True,
+    enabled: bool | None = None,
     interface: str | None = None,
     qlimit: int | None = None,
     queue: list[dict[str, Any]] | None = None,
@@ -3014,7 +3014,7 @@ async def pfsense_get_firewall_traffic_shaper_limiter_bandwidth(
 async def pfsense_create_firewall_traffic_shaper_limiter_bandwidth(
     bw: int,
     bwscale: str,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     bwsched: str | None = 'none',
 ) -> dict[str, Any] | list[Any] | str:
@@ -3052,11 +3052,11 @@ async def pfsense_create_firewall_traffic_shaper_limiter_bandwidth(
 @mcp.tool()
 async def pfsense_update_firewall_traffic_shaper_limiter_bandwidth(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     bw: int | None = None,
     bwscale: str | None = None,
-    bwsched: str | None = 'none',
+    bwsched: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/firewall/traffic_shaper/limiter/bandwidth
 
@@ -3436,7 +3436,7 @@ async def pfsense_update_firewall_traffic_shaper_limiter(
     description: str | None = None,
     ecn: bool | None = None,
     enabled: bool | None = None,
-    mask: str | None = 'none',
+    mask: str | None = None,
     maskbits: int | None = None,
     maskbitsv6: int | None = None,
     name: str | None = None,
@@ -3705,7 +3705,7 @@ async def pfsense_get_firewall_traffic_shaper_limiter_queue(
 async def pfsense_create_firewall_traffic_shaper_limiter_queue(
     aqm: str,
     name: str,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     buckets: int | None = None,
     description: str | None = None,
@@ -3859,14 +3859,14 @@ async def pfsense_create_firewall_traffic_shaper_limiter_queue(
 @mcp.tool()
 async def pfsense_update_firewall_traffic_shaper_limiter_queue(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     aqm: str | None = None,
     buckets: int | None = None,
     description: str | None = None,
     ecn: bool | None = None,
     enabled: bool | None = None,
-    mask: str | None = 'none',
+    mask: str | None = None,
     maskbits: int | None = None,
     maskbitsv6: int | None = None,
     name: str | None = None,
@@ -4201,7 +4201,7 @@ async def pfsense_create_firewall_traffic_shaper_queue(
     bandwidth: int,
     linkshare_m2: str,
     name: str,
-    parent_id: int,
+    parent_id: str | int,
     qlimit: int,
     realtime_m2: str,
     upperlimit_m2: str,
@@ -4334,7 +4334,7 @@ async def pfsense_create_firewall_traffic_shaper_queue(
 @mcp.tool()
 async def pfsense_update_firewall_traffic_shaper_queue(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     bandwidth: int | None = None,
     bandwidthtype: str | None = None,
@@ -4796,7 +4796,7 @@ async def pfsense_update_firewall_virtual_ip(
     password: str | None = None,
     subnet: str | None = None,
     subnet_bits: int | None = None,
-    type_: str | None = 'single',
+    type_: str | None = None,
     vhid: int | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/firewall/virtual_ip
@@ -6756,8 +6756,8 @@ async def pfsense_update_routing_gateway(
     id: int,
     confirm: bool = False,
     action_disable: bool | None = None,
-    alert_interval: int | None = 1000,
-    data_payload: int | None = 1,
+    alert_interval: int | None = None,
+    data_payload: int | None = None,
     descr: str | None = None,
     disabled: bool | None = None,
     dpinger_dont_add_static_route: bool | None = None,
@@ -6765,19 +6765,19 @@ async def pfsense_update_routing_gateway(
     gateway: str | None = None,
     gw_down_kill_states: str | None = None,
     interface: str | None = None,
-    interval: int | None = 500,
+    interval: int | None = None,
     ipprotocol: str | None = None,
-    latencyhigh: int | None = 500,
-    latencylow: int | None = 200,
-    loss_interval: int | None = 2000,
-    losshigh: int | None = 20,
-    losslow: int | None = 10,
+    latencyhigh: int | None = None,
+    latencylow: int | None = None,
+    loss_interval: int | None = None,
+    losshigh: int | None = None,
+    losslow: int | None = None,
     monitor: str | None = None,
     monitor_disable: bool | None = None,
     name: str | None = None,
-    nonlocalgateway: bool | None = True,
-    time_period: int | None = 60000,
-    weight: int | None = 1,
+    nonlocalgateway: bool | None = None,
+    time_period: int | None = None,
+    weight: int | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/routing/gateway
 
@@ -6965,7 +6965,7 @@ async def pfsense_update_routing_gateway_group(
     descr: str | None = None,
     name: str | None = None,
     priorities: list[dict[str, Any]] | None = None,
-    trigger: str | None = 'down',
+    trigger: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/routing/gateway/group
 
@@ -7122,7 +7122,7 @@ async def pfsense_get_routing_gateway_group_priority(
 @mcp.tool()
 async def pfsense_create_routing_gateway_group_priority(
     gateway: str,
-    parent_id: int,
+    parent_id: str | int,
     tier: int,
     confirm: bool = False,
     virtual_ip: str | None = 'address',
@@ -7161,11 +7161,11 @@ async def pfsense_create_routing_gateway_group_priority(
 @mcp.tool()
 async def pfsense_update_routing_gateway_group_priority(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     gateway: str | None = None,
     tier: int | None = None,
-    virtual_ip: str | None = 'address',
+    virtual_ip: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/routing/gateway/group/priority
 
@@ -7856,7 +7856,7 @@ async def pfsense_get_services_acme_certificate_action(
 async def pfsense_create_services_acme_certificate_action(
     command: str,
     method: str,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     status: str | None = 'active',
 ) -> dict[str, Any] | list[Any] | str:
@@ -7891,11 +7891,11 @@ async def pfsense_create_services_acme_certificate_action(
 @mcp.tool()
 async def pfsense_update_services_acme_certificate_action(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     command: str | None = None,
     method: str | None = None,
-    status: str | None = 'active',
+    status: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/acme/certificate/action
 
@@ -7982,7 +7982,7 @@ async def pfsense_get_services_acme_certificate_domain(
 async def pfsense_create_services_acme_certificate_domain(
     method: str,
     name: str,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     ULTRA_PWD: str | None = None,
     acmedns_password: str | None = None,
@@ -9185,7 +9185,7 @@ async def pfsense_create_services_acme_certificate_domain(
 @mcp.tool()
 async def pfsense_update_services_acme_certificate_domain(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     ULTRA_PWD: str | None = None,
     acmedns_password: str | None = None,
@@ -9446,7 +9446,7 @@ async def pfsense_update_services_acme_certificate_domain(
     standaloneipv6: bool | None = None,
     standaloneport: str | None = None,
     standalonetlsport: str | None = None,
-    status: str | None = 'enable',
+    status: str | None = None,
     tele3_key: str | None = None,
     tele3_secret: str | None = None,
     tencent_secretid: str | None = None,
@@ -10513,13 +10513,13 @@ async def pfsense_update_services_acme_certificate(
     acmeaccount: str | None = None,
     descr: str | None = None,
     dnssleep: int | None = None,
-    keylength: str | None = '2048',
+    keylength: str | None = None,
     keypaste: str | None = None,
     name: str | None = None,
     oscpstaple: bool | None = None,
     preferredchain: str | None = None,
-    renewafter: int | None = 60,
-    status: str | None = 'active',
+    renewafter: int | None = None,
+    status: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/acme/certificate
 
@@ -11035,7 +11035,7 @@ async def pfsense_get_services_bind_access_list_entry(
 
 @mcp.tool()
 async def pfsense_create_services_bind_access_list_entry(
-    parent_id: int,
+    parent_id: str | int,
     value: str,
     confirm: bool = False,
     description: str | None = None,
@@ -11068,7 +11068,7 @@ async def pfsense_create_services_bind_access_list_entry(
 @mcp.tool()
 async def pfsense_update_services_bind_access_list_entry(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     description: str | None = None,
     value: str | None = None,
@@ -11229,21 +11229,21 @@ async def pfsense_update_services_bind_settings(
     bind_forwarder_ips: list[str],
     confirm: bool = False,
     bind_custom_options: str | None = None,
-    bind_dnssec_validation: str | None = 'auto',
+    bind_dnssec_validation: str | None = None,
     bind_forwarder: bool | None = None,
     bind_global_settings: str | None = None,
     bind_hide_version: bool | None = None,
     bind_ip_version: str | None = None,
     bind_logging: bool | None = None,
     bind_notify: bool | None = None,
-    bind_ram_limit: str | None = '256M',
-    controlport: str | None = '953',
+    bind_ram_limit: str | None = None,
+    controlport: str | None = None,
     enable_bind: bool | None = None,
-    listenon: list[str] | None = ['All'],
-    listenport: str | None = '53',
+    listenon: list[str] | None = None,
+    listenport: str | None = None,
     log_only: bool | None = None,
-    log_options: list[str] | None = ['default'],
-    log_severity: str | None = 'critical',
+    log_options: list[str] | None = None,
+    log_severity: str | None = None,
     rate_enabled: bool | None = None,
     rate_limit: int | None = None,
 ) -> dict[str, Any] | list[Any] | str:
@@ -11554,7 +11554,7 @@ async def pfsense_update_services_bind_sync_settings(
     masterip: str,
     synconchanges: str,
     confirm: bool = False,
-    synctimeout: int | None = 30,
+    synctimeout: int | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/bind/sync/settings
 
@@ -11988,7 +11988,7 @@ async def pfsense_update_services_bind_zone(
     serial: int | None = None,
     slaveip: str | None = None,
     ttl: int | None = None,
-    type_: str | None = 'master',
+    type_: str | None = None,
     updatepolicy: str | None = None,
     view: list[str] | None = None,
 ) -> dict[str, Any] | list[Any] | str:
@@ -12150,7 +12150,7 @@ async def pfsense_get_services_bind_zone_record(
 @mcp.tool()
 async def pfsense_create_services_bind_zone_record(
     name: str,
-    parent_id: int,
+    parent_id: str | int,
     priority: int,
     rdata: str,
     type_: str,
@@ -12190,7 +12190,7 @@ async def pfsense_create_services_bind_zone_record(
 @mcp.tool()
 async def pfsense_update_services_bind_zone_record(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     name: str | None = None,
     priority: int | None = None,
@@ -12585,7 +12585,7 @@ async def pfsense_update_services_dhcp_relay(
     server: list[str],
     confirm: bool = False,
     agentoption: bool | None = None,
-    carpstatusvip: str | None = 'none',
+    carpstatusvip: str | None = None,
     enable: bool | None = None,
     interface: list[str] | None = None,
 ) -> dict[str, Any] | list[Any] | str:
@@ -12644,7 +12644,7 @@ async def pfsense_get_services_dhcp_server_address_pool(
 
 @mcp.tool()
 async def pfsense_create_services_dhcp_server_address_pool(
-    parent_id: int,
+    parent_id: str | int,
     range_from: str,
     range_to: str,
     confirm: bool = False,
@@ -12732,9 +12732,9 @@ async def pfsense_create_services_dhcp_server_address_pool(
 @mcp.tool()
 async def pfsense_update_services_dhcp_server_address_pool(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
-    defaultleasetime: int | None = 7200,
+    defaultleasetime: int | None = None,
     denyunknown: str | None = None,
     dnsserver: list[str] | None = None,
     domain: str | None = None,
@@ -12744,7 +12744,7 @@ async def pfsense_update_services_dhcp_server_address_pool(
     ignoreclientuids: bool | None = None,
     mac_allow: list[str] | None = None,
     mac_deny: list[str] | None = None,
-    maxleasetime: int | None = 86400,
+    maxleasetime: int | None = None,
     ntpserver: list[str] | None = None,
     range_from: str | None = None,
     range_to: str | None = None,
@@ -12951,7 +12951,7 @@ async def pfsense_services_dhcp_server_apply(
 @mcp.tool()
 async def pfsense_update_services_dhcp_server_backend(
     confirm: bool = False,
-    dhcpbackend: str | None = 'isc',
+    dhcpbackend: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/dhcp_server/backend
 
@@ -13000,7 +13000,7 @@ async def pfsense_get_services_dhcp_server_custom_option(
 @mcp.tool()
 async def pfsense_create_services_dhcp_server_custom_option(
     number: int,
-    parent_id: int,
+    parent_id: str | int,
     type_: str,
     value: str,
     confirm: bool = False,
@@ -13039,7 +13039,7 @@ async def pfsense_create_services_dhcp_server_custom_option(
 @mcp.tool()
 async def pfsense_update_services_dhcp_server_custom_option(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     number: int | None = None,
     type_: str | None = None,
@@ -13328,7 +13328,7 @@ async def pfsense_create_services_dhcp_server(
 async def pfsense_update_services_dhcp_server(
     id: int,
     confirm: bool = False,
-    defaultleasetime: int | None = 7200,
+    defaultleasetime: int | None = None,
     denyunknown: str | None = None,
     dhcpleaseinlocaltime: bool | None = None,
     disablepingcheck: bool | None = None,
@@ -13343,7 +13343,7 @@ async def pfsense_update_services_dhcp_server(
     interface: str | None = None,
     mac_allow: list[str] | None = None,
     mac_deny: list[str] | None = None,
-    maxleasetime: int | None = 86400,
+    maxleasetime: int | None = None,
     nonak: bool | None = None,
     ntpserver: list[str] | None = None,
     numberoptions: list[dict[str, Any]] | None = None,
@@ -13511,7 +13511,7 @@ async def pfsense_get_services_dhcp_server_static_mapping(
 @mcp.tool()
 async def pfsense_create_services_dhcp_server_static_mapping(
     mac: str,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     arp_table_static_entry: bool | None = None,
     cid: str | None = None,
@@ -13594,11 +13594,11 @@ async def pfsense_create_services_dhcp_server_static_mapping(
 @mcp.tool()
 async def pfsense_update_services_dhcp_server_static_mapping(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     arp_table_static_entry: bool | None = None,
     cid: str | None = None,
-    defaultleasetime: int | None = 7200,
+    defaultleasetime: int | None = None,
     descr: str | None = None,
     dnsserver: list[str] | None = None,
     domain: str | None = None,
@@ -13607,7 +13607,7 @@ async def pfsense_update_services_dhcp_server_static_mapping(
     hostname: str | None = None,
     ipaddr: str | None = None,
     mac: str | None = None,
-    maxleasetime: int | None = 86400,
+    maxleasetime: int | None = None,
     ntpserver: list[str] | None = None,
     winsserver: list[str] | None = None,
 ) -> dict[str, Any] | list[Any] | str:
@@ -13888,7 +13888,7 @@ async def pfsense_get_services_dns_forwarder_host_override_alias(
 async def pfsense_create_services_dns_forwarder_host_override_alias(
     domain: str,
     host: str,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     description: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
@@ -13926,7 +13926,7 @@ async def pfsense_create_services_dns_forwarder_host_override_alias(
 @mcp.tool()
 async def pfsense_update_services_dns_forwarder_host_override_alias(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     description: str | None = None,
     domain: str | None = None,
@@ -14452,7 +14452,7 @@ async def pfsense_get_services_dns_resolver_access_list_network(
 async def pfsense_create_services_dns_resolver_access_list_network(
     mask: int,
     network: str,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     description: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
@@ -14490,7 +14490,7 @@ async def pfsense_create_services_dns_resolver_access_list_network(
 @mcp.tool()
 async def pfsense_update_services_dns_resolver_access_list_network(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     description: str | None = None,
     mask: int | None = None,
@@ -15003,7 +15003,7 @@ async def pfsense_get_services_dns_resolver_host_override_alias(
 async def pfsense_create_services_dns_resolver_host_override_alias(
     domain: str,
     host: str,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     descr: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
@@ -15041,7 +15041,7 @@ async def pfsense_create_services_dns_resolver_host_override_alias(
 @mcp.tool()
 async def pfsense_update_services_dns_resolver_host_override_alias(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     descr: str | None = None,
     domain: str | None = None,
@@ -15432,7 +15432,7 @@ async def pfsense_update_services_dns_resolver_settings(
     enablessl: bool | None = None,
     forwarding: bool | None = None,
     outgoing_interface: list[str] | None = None,
-    port: str | None = '53',
+    port: str | None = None,
     python: bool | None = None,
     python_order: str | None = None,
     python_script: str | None = None,
@@ -15440,7 +15440,7 @@ async def pfsense_update_services_dns_resolver_settings(
     regdhcpstatic: bool | None = None,
     regovpnclients: bool | None = None,
     strictout: bool | None = None,
-    system_domain_local_zone_type: str | None = 'transparent',
+    system_domain_local_zone_type: str | None = None,
     tlsport: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/dns_resolver/settings
@@ -15604,13 +15604,13 @@ async def pfsense_update_services_free_radius_client(
     confirm: bool = False,
     addr: str | None = None,
     description: str | None = None,
-    ip_version: str | None = 'ipaddr',
-    maxconn: int | None = 16,
+    ip_version: str | None = None,
+    maxconn: int | None = None,
     msgauth: bool | None = None,
     naslogin: str | None = None,
     naspassword: str | None = None,
-    nastype: str | None = 'other',
-    proto: str | None = 'udp',
+    nastype: str | None = None,
+    proto: str | None = None,
     secret: str | None = None,
     shortname: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
@@ -15839,8 +15839,8 @@ async def pfsense_update_services_free_radius_interface(
     addr: str | None = None,
     description: str | None = None,
     ip_version: str | None = None,
-    port: str | None = '1812',
-    type_: str | None = 'auth',
+    port: str | None = None,
+    type_: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/freeradius/interface
 
@@ -16296,7 +16296,7 @@ async def pfsense_get_services_ha_proxy_backend_acl(
 async def pfsense_create_services_ha_proxy_backend_acl(
     expression: str,
     name: str,
-    parent_id: int,
+    parent_id: str | int,
     value: str,
     confirm: bool = False,
     casesensitive: bool | None = None,
@@ -16342,7 +16342,7 @@ async def pfsense_create_services_ha_proxy_backend_acl(
 @mcp.tool()
 async def pfsense_update_services_ha_proxy_backend_acl(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     casesensitive: bool | None = None,
     expression: str | None = None,
@@ -16518,7 +16518,7 @@ async def pfsense_create_services_ha_proxy_backend_action(
     fmt: str,
     lua_function: str,
     name: str,
-    parent_id: int,
+    parent_id: str | int,
     path: str,
     realm: str,
     reason: str,
@@ -16598,7 +16598,7 @@ async def pfsense_create_services_ha_proxy_backend_action(
 @mcp.tool()
 async def pfsense_update_services_ha_proxy_backend_action(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     acl: str | None = None,
     action: str | None = None,
@@ -17066,9 +17066,9 @@ async def pfsense_update_services_ha_proxy_backend(
     balance_uridepth: int | None = None,
     balance_urilen: int | None = None,
     balance_uriwhole: bool | None = None,
-    check_type: str | None = 'none',
+    check_type: str | None = None,
     checkinter: int | None = None,
-    connection_timeout: int | None = 30000,
+    connection_timeout: int | None = None,
     cookie_attribute_secure: bool | None = None,
     email_level: str | None = None,
     email_to: str | None = None,
@@ -17095,9 +17095,9 @@ async def pfsense_update_services_ha_proxy_backend(
     persist_stick_expire: str | None = None,
     persist_stick_length: int | None = None,
     persist_stick_tablesize: str | None = None,
-    persist_sticky_type: str | None = 'none',
+    persist_sticky_type: str | None = None,
     retries: int | None = None,
-    server_timeout: int | None = 30000,
+    server_timeout: int | None = None,
     servers: list[dict[str, Any]] | None = None,
     stats_admin: str | None = None,
     stats_desc: str | None = None,
@@ -17359,7 +17359,7 @@ async def pfsense_get_services_ha_proxy_backend_error_file(
 async def pfsense_create_services_ha_proxy_backend_error_file(
     errorcode: int,
     errorfile: str,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/haproxy/backend/error_file
@@ -17393,7 +17393,7 @@ async def pfsense_create_services_ha_proxy_backend_error_file(
 @mcp.tool()
 async def pfsense_update_services_ha_proxy_backend_error_file(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     errorcode: int | None = None,
     errorfile: str | None = None,
@@ -17551,7 +17551,7 @@ async def pfsense_get_services_ha_proxy_backend_server(
 async def pfsense_create_services_ha_proxy_backend_server(
     address: str,
     name: str,
-    parent_id: int,
+    parent_id: str | int,
     port: str,
     confirm: bool = False,
     advanced: str | None = None,
@@ -17609,7 +17609,7 @@ async def pfsense_create_services_ha_proxy_backend_server(
 @mcp.tool()
 async def pfsense_update_services_ha_proxy_backend_server(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     address: str | None = None,
     advanced: str | None = None,
@@ -17617,8 +17617,8 @@ async def pfsense_update_services_ha_proxy_backend_server(
     port: str | None = None,
     ssl: bool | None = None,
     sslserververify: bool | None = None,
-    status: str | None = 'active',
-    weight: int | None = 1,
+    status: str | None = None,
+    weight: int | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/haproxy/backend/server
 
@@ -18090,7 +18090,7 @@ async def pfsense_get_services_ha_proxy_frontend_acl(
 async def pfsense_create_services_ha_proxy_frontend_acl(
     expression: str,
     name: str,
-    parent_id: int,
+    parent_id: str | int,
     value: str,
     confirm: bool = False,
     casesensitive: bool | None = None,
@@ -18136,7 +18136,7 @@ async def pfsense_create_services_ha_proxy_frontend_acl(
 @mcp.tool()
 async def pfsense_update_services_ha_proxy_frontend_acl(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     casesensitive: bool | None = None,
     expression: str | None = None,
@@ -18313,7 +18313,7 @@ async def pfsense_create_services_ha_proxy_frontend_action(
     fmt: str,
     lua_function: str,
     name: str,
-    parent_id: int,
+    parent_id: str | int,
     path: str,
     realm: str,
     reason: str,
@@ -18392,7 +18392,7 @@ async def pfsense_create_services_ha_proxy_frontend_action(
 @mcp.tool()
 async def pfsense_update_services_ha_proxy_frontend_action(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     acl: str | None = None,
     action: str | None = None,
@@ -18602,7 +18602,7 @@ async def pfsense_get_services_ha_proxy_frontend_address(
 async def pfsense_create_services_ha_proxy_frontend_address(
     extaddr: str,
     extaddr_custom: str,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     exaddr_advanced: str | None = None,
     extaddr_port: str | None = None,
@@ -18648,7 +18648,7 @@ async def pfsense_create_services_ha_proxy_frontend_address(
 @mcp.tool()
 async def pfsense_update_services_ha_proxy_frontend_address(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     exaddr_advanced: str | None = None,
     extaddr: str | None = None,
@@ -18816,7 +18816,7 @@ async def pfsense_get_services_ha_proxy_frontend_certificate(
 
 @mcp.tool()
 async def pfsense_create_services_ha_proxy_frontend_certificate(
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     ssl_certificate: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
@@ -18848,7 +18848,7 @@ async def pfsense_create_services_ha_proxy_frontend_certificate(
 @mcp.tool()
 async def pfsense_update_services_ha_proxy_frontend_certificate(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     ssl_certificate: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
@@ -19115,21 +19115,21 @@ async def pfsense_update_services_ha_proxy_frontend(
     advanced: str | None = None,
     advanced_bind: str | None = None,
     backend_serverpool: str | None = None,
-    client_timeout: int | None = 30000,
+    client_timeout: int | None = None,
     descr: str | None = None,
     dontlog_normal: bool | None = None,
     dontlognull: bool | None = None,
     forwardfor: bool | None = None,
     ha_acls: list[dict[str, Any]] | None = None,
     ha_certificates: list[dict[str, Any]] | None = None,
-    httpclose: str | None = 'http-keep-alive',
+    httpclose: str | None = None,
     log_detailed: bool | None = None,
     log_separate_errors: bool | None = None,
     max_connections: int | None = None,
     name: str | None = None,
     socket_stats: bool | None = None,
     ssloffloadcert: str | None = None,
-    status: str | None = 'active',
+    status: str | None = None,
     type_: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/haproxy/frontend
@@ -19273,7 +19273,7 @@ async def pfsense_get_services_ha_proxy_frontend_error_file(
 async def pfsense_create_services_ha_proxy_frontend_error_file(
     errorcode: int,
     errorfile: str,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/haproxy/frontend/error_file
@@ -19307,7 +19307,7 @@ async def pfsense_create_services_ha_proxy_frontend_error_file(
 @mcp.tool()
 async def pfsense_update_services_ha_proxy_frontend_error_file(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     errorcode: int | None = None,
     errorfile: str | None = None,
@@ -19587,7 +19587,7 @@ async def pfsense_update_services_ha_proxy_settings_dns_resolver(
     id: int,
     confirm: bool = False,
     name: str | None = None,
-    port: str | None = '53',
+    port: str | None = None,
     server: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/haproxy/settings/dns_resolver
@@ -19771,7 +19771,7 @@ async def pfsense_update_services_ha_proxy_settings_email_mailer(
     id: int,
     confirm: bool = False,
     mailserver: str | None = None,
-    mailserverport: str | None = '53',
+    mailserverport: str | None = None,
     name: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/haproxy/settings/email_mailer
@@ -19921,21 +19921,21 @@ async def pfsense_update_services_ha_proxy_settings(
     email_to: str | None = None,
     enable: bool | None = None,
     enablesync: bool | None = None,
-    hard_stop_after: str | None = '15m',
+    hard_stop_after: str | None = None,
     localstats_refreshtime: int | None = None,
     localstats_sticktable_refreshtime: int | None = None,
     localstatsport: str | None = None,
     log_send_hostname: str | None = None,
-    logfacility: str | None = 'syslog',
-    loglevel: str | None = 'warning',
+    logfacility: str | None = None,
+    loglevel: str | None = None,
     maxconn: int | None = None,
-    nbthread: int | None = 1,
+    nbthread: int | None = None,
     remotesyslog: str | None = None,
-    resolver_holdvalid: str | None = '1s',
-    resolver_retries: int | None = 3,
-    resolver_timeoutretry: str | None = '1s',
-    sslcompatibilitymode: str | None = 'auto',
-    ssldefaultdhparam: int | None = 1024,
+    resolver_holdvalid: str | None = None,
+    resolver_retries: int | None = None,
+    resolver_timeoutretry: str | None = None,
+    sslcompatibilitymode: str | None = None,
+    ssldefaultdhparam: int | None = None,
     terminate_on_reload: bool | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/haproxy/settings
@@ -20051,20 +20051,20 @@ async def pfsense_update_services_ntp_settings(
     serverauthkey: str,
     confirm: bool = False,
     clockstats: bool | None = None,
-    dnsresolv: str | None = 'auto',
-    enable: bool | None = True,
+    dnsresolv: str | None = None,
+    enable: bool | None = None,
     interface: list[str] | None = None,
     leapsec: str | None = None,
     logpeer: bool | None = None,
     logsys: bool | None = None,
     loopstats: bool | None = None,
-    ntpmaxpeers: int | None = 5,
+    ntpmaxpeers: int | None = None,
     ntpmaxpoll: str | None = None,
     ntpminpoll: str | None = None,
-    orphan: int | None = 12,
+    orphan: int | None = None,
     peerstats: bool | None = None,
     serverauth: bool | None = None,
-    serverauthalgo: str | None = 'md5',
+    serverauthalgo: str | None = None,
     statsgraph: bool | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/ntp/settings
@@ -20195,7 +20195,7 @@ async def pfsense_update_services_ntp_time_server(
     noselect: bool | None = None,
     prefer: bool | None = None,
     timeserver: str | None = None,
-    type_: str | None = 'server',
+    type_: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/ntp/time_server
 
@@ -20351,7 +20351,7 @@ async def pfsense_get_services_ssh(
 async def pfsense_update_services_ssh(
     confirm: bool = False,
     enable: bool | None = None,
-    port: str | None = '22',
+    port: str | None = None,
     sshdagentforwarding: bool | None = None,
     sshdkeyonly: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
@@ -21047,14 +21047,14 @@ async def pfsense_update_status_logs_settings(
     enableremotelogging: bool | None = None,
     filter: bool | None = None,
     filterdescriptions: int | None = None,
-    format: str | None = 'rfc3164',
+    format: str | None = None,
     hostapd: bool | None = None,
     ipprotocol: str | None = None,
     logall: bool | None = None,
-    logcompressiontype: str | None = 'bzip2',
+    logcompressiontype: str | None = None,
     logconfigchanges: bool | None = None,
-    logfilesize: int | None = 512000,
-    nentries: int | None = 500,
+    logfilesize: int | None = None,
+    nentries: int | None = None,
     nologbogons: bool | None = None,
     nologdefaultblock: bool | None = None,
     nologdefaultpass: bool | None = None,
@@ -21069,7 +21069,7 @@ async def pfsense_update_status_logs_settings(
     remoteserver3: str | None = None,
     resolver: bool | None = None,
     reverseorder: bool | None = None,
-    rotatecount: int | None = 5,
+    rotatecount: int | None = None,
     routing: bool | None = None,
     sourceip: str | None = None,
     system: bool | None = None,
@@ -21703,7 +21703,7 @@ async def pfsense_get_system_crl_revoked_certificate(
 @mcp.tool()
 async def pfsense_create_system_crl_revoked_certificate(
     certref: str,
-    parent_id: int,
+    parent_id: str | int,
     revoke_time: int,
     confirm: bool = False,
     caref: str | None = None,
@@ -21763,7 +21763,7 @@ async def pfsense_create_system_crl_revoked_certificate(
 @mcp.tool()
 async def pfsense_update_system_crl_revoked_certificate(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     caref: str | None = None,
     certref: str | None = None,
@@ -22046,7 +22046,7 @@ async def pfsense_update_system_certificate_authority(
     descr: str | None = None,
     prv: str | None = None,
     randomserial: bool | None = None,
-    serial: int | None = 1,
+    serial: int | None = None,
     trust: bool | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/system/certificate_authority
@@ -22291,7 +22291,7 @@ async def pfsense_update_system_certificate(
     crt: str | None = None,
     descr: str | None = None,
     prv: str | None = None,
-    type_: str | None = 'server',
+    type_: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/system/certificate
 
@@ -22859,15 +22859,15 @@ async def pfsense_update_system_notifications_email_settings(
     password: str,
     username: str,
     confirm: bool = False,
-    authentication_mechanism: str | None = 'PLAIN',
+    authentication_mechanism: str | None = None,
     disable: bool | None = None,
     fromaddress: str | None = None,
     ipaddress: str | None = None,
     notifyemailaddress: str | None = None,
-    port: str | None = '25',
+    port: str | None = None,
     ssl: bool | None = None,
-    sslvalidate: bool | None = True,
-    timeout: int | None = 20,
+    sslvalidate: bool | None = None,
+    timeout: int | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/system/notifications/email_settings
 
@@ -23233,9 +23233,9 @@ async def pfsense_update_system_restapi_access_list_entry(
     descr: str | None = None,
     network: str | None = None,
     sched: str | None = None,
-    type_: str | None = 'allow',
+    type_: str | None = None,
     users: list[str] | None = None,
-    weight: int | None = 1,
+    weight: int | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/system/restapi/access_list/entry
 
@@ -23314,23 +23314,23 @@ async def pfsense_update_system_restapi_settings(
     confirm: bool = False,
     allow_pre_releases: bool | None = None,
     allowed_interfaces: list[str] | None = None,
-    auth_methods: list[str] | None = ['BasicAuth'],
-    enabled: bool | None = True,
+    auth_methods: list[str] | None = None,
+    enabled: bool | None = None,
     expose_sensitive_fields: bool | None = None,
     ha_sync: bool | None = None,
     ha_sync_hosts: list[str] | None = None,
     ha_sync_password: str | None = None,
     ha_sync_username: str | None = None,
-    ha_sync_validate_certs: bool | None = True,
+    ha_sync_validate_certs: bool | None = None,
     hateoas: bool | None = None,
-    jwt_exp: int | None = 3600,
-    keep_backup: bool | None = True,
-    log_level: str | None = 'LOG_WARNING',
+    jwt_exp: int | None = None,
+    keep_backup: bool | None = None,
+    log_level: str | None = None,
     log_successful_auth: bool | None = None,
-    login_protection: bool | None = True,
+    login_protection: bool | None = None,
     override_sensitive_fields: list[str] | None = None,
     read_only: bool | None = None,
-    represent_interfaces_as: str | None = 'descr',
+    represent_interfaces_as: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/system/restapi/settings
 
@@ -23478,7 +23478,7 @@ async def pfsense_get_system_timezone(
 @mcp.tool()
 async def pfsense_update_system_timezone(
     confirm: bool = False,
-    timezone: str | None = 'UTC',
+    timezone: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/system/timezone
 
@@ -23723,8 +23723,8 @@ async def pfsense_get_system_web_gui_settings(
 async def pfsense_update_system_web_gui_settings(
     sslcertref: str,
     confirm: bool = False,
-    port: str | None = '443',
-    protocol: str | None = 'https',
+    port: str | None = None,
+    protocol: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/system/webgui/settings
 
@@ -24393,7 +24393,7 @@ async def pfsense_update_user_group(
     member: list[str] | None = None,
     name: str | None = None,
     priv: list[str] | None = None,
-    scope: str | None = 'local',
+    scope: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/user/group
 
@@ -24655,7 +24655,7 @@ async def pfsense_create_vpni_psec_phase1_encryption(
     encryption_algorithm_keylen: int,
     encryption_algorithm_name: str,
     hash_algorithm: str,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     prf_algorithm: str | None = 'sha256',
 ) -> dict[str, Any] | list[Any] | str:
@@ -24699,13 +24699,13 @@ async def pfsense_create_vpni_psec_phase1_encryption(
 @mcp.tool()
 async def pfsense_update_vpni_psec_phase1_encryption(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     dhgroup: int | None = None,
     encryption_algorithm_keylen: int | None = None,
     encryption_algorithm_name: str | None = None,
     hash_algorithm: str | None = None,
-    prf_algorithm: str | None = 'sha256',
+    prf_algorithm: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/vpn/ipsec/phase1/encryption
 
@@ -25022,28 +25022,28 @@ async def pfsense_update_vpni_psec_phase1(
     closeaction: str | None = None,
     descr: str | None = None,
     disabled: bool | None = None,
-    dpd_delay: int | None = 10,
-    dpd_maxfail: int | None = 5,
+    dpd_delay: int | None = None,
+    dpd_maxfail: int | None = None,
     encryption: list[dict[str, Any]] | None = None,
     gw_duplicates: bool | None = None,
-    ikeport: str | None = '500',
+    ikeport: str | None = None,
     iketype: str | None = None,
     interface: str | None = None,
-    lifetime: int | None = 28800,
+    lifetime: int | None = None,
     mobike: bool | None = None,
     mode: str | None = None,
     myid_data: str | None = None,
     myid_type: str | None = None,
-    nat_traversal: str | None = 'on',
-    nattport: str | None = '4500',
+    nat_traversal: str | None = None,
+    nattport: str | None = None,
     peerid_data: str | None = None,
     peerid_type: str | None = None,
     pre_shared_key: str | None = None,
     prfselect_enable: bool | None = None,
     protocol: str | None = None,
-    rand_time: int | None = 2880,
+    rand_time: int | None = None,
     reauth_time: int | None = None,
-    rekey_time: int | None = 25920,
+    rekey_time: int | None = None,
     remote_gateway: str | None = None,
     splitconn: bool | None = None,
     startaction: str | None = None,
@@ -25310,7 +25310,7 @@ async def pfsense_get_vpni_psec_phase2_encryption(
 async def pfsense_create_vpni_psec_phase2_encryption(
     keylen: int,
     name: str,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/vpn/ipsec/phase2/encryption
@@ -25344,7 +25344,7 @@ async def pfsense_create_vpni_psec_phase2_encryption(
 @mcp.tool()
 async def pfsense_update_vpni_psec_phase2_encryption(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     keylen: int | None = None,
     name: str | None = None,
@@ -25619,7 +25619,7 @@ async def pfsense_update_vpni_psec_phase2(
     hash_algorithm_option: list[str] | None = None,
     ikeid: int | None = None,
     keepalive: bool | None = None,
-    lifetime: int | None = 3600,
+    lifetime: int | None = None,
     localid_address: str | None = None,
     localid_netbits: int | None = None,
     localid_type: str | None = None,
@@ -25627,11 +25627,11 @@ async def pfsense_update_vpni_psec_phase2(
     natlocalid_address: str | None = None,
     natlocalid_netbits: int | None = None,
     natlocalid_type: str | None = None,
-    pfsgroup: int | None = 14,
+    pfsgroup: int | None = None,
     pinghost: str | None = None,
-    protocol: str | None = 'esp',
-    rand_time: int | None = 360,
-    rekey_time: int | None = 3240,
+    protocol: str | None = None,
+    rand_time: int | None = None,
+    rekey_time: int | None = None,
     remoteid_address: str | None = None,
     remoteid_netbits: int | None = None,
     remoteid_type: str | None = None,
@@ -26451,13 +26451,13 @@ async def pfsense_create_vpn_open_vpn_client(
 async def pfsense_update_vpn_open_vpn_client(
     id: int,
     confirm: bool = False,
-    allow_compression: str | None = 'no',
+    allow_compression: str | None = None,
     auth_pass: str | None = None,
     auth_retry_none: bool | None = None,
     auth_user: str | None = None,
     caref: str | None = None,
     certref: str | None = None,
-    create_gw: str | None = 'both',
+    create_gw: str | None = None,
     custom_options: list[str] | None = None,
     data_ciphers: list[str] | None = None,
     data_ciphers_fallback: str | None = None,
@@ -26466,8 +26466,8 @@ async def pfsense_update_vpn_open_vpn_client(
     digest: str | None = None,
     disable: bool | None = None,
     dns_add: bool | None = None,
-    exit_notify: str | None = 'none',
-    inactive_seconds: int | None = 300,
+    exit_notify: str | None = None,
+    inactive_seconds: int | None = None,
     interface: str | None = None,
     keepalive_interval: int | None = None,
     keepalive_timeout: int | None = None,
@@ -26476,15 +26476,15 @@ async def pfsense_update_vpn_open_vpn_client(
     passtos: bool | None = None,
     ping_action: str | None = None,
     ping_action_seconds: int | None = None,
-    ping_method: str | None = 'keepalive',
+    ping_method: str | None = None,
     ping_seconds: int | None = None,
     protocol: str | None = None,
     proxy_addr: str | None = None,
-    proxy_authtype: str | None = 'none',
+    proxy_authtype: str | None = None,
     proxy_passwd: str | None = None,
     proxy_port: str | None = None,
     proxy_user: str | None = None,
-    remote_cert_tls: bool | None = True,
+    remote_cert_tls: bool | None = None,
     remote_network: list[str] | None = None,
     remote_networkv6: list[str] | None = None,
     route_no_exec: bool | None = None,
@@ -26500,7 +26500,7 @@ async def pfsense_update_vpn_open_vpn_client(
     tunnel_networkv6: str | None = None,
     udp_fast_io: bool | None = None,
     use_shaper: int | None = None,
-    verbosity_level: int | None = 1,
+    verbosity_level: int | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/vpn/openvpn/client
 
@@ -26830,10 +26830,10 @@ async def pfsense_update_vpn_open_vpn_client_export_config(
     id: int,
     confirm: bool = False,
     advancedoptions: str | None = None,
-    bindmode: str | None = 'nobind',
+    bindmode: str | None = None,
     blockoutsidedns: bool | None = None,
     legacy: bool | None = None,
-    p12encryption: str | None = 'high',
+    p12encryption: str | None = None,
     pass_: str | None = None,
     pkcs11id: str | None = None,
     pkcs11providers: list[str] | None = None,
@@ -26843,7 +26843,7 @@ async def pfsense_update_vpn_open_vpn_client_export_config(
     proxyuser: str | None = None,
     server: int | None = None,
     silent: bool | None = None,
-    useaddr: str | None = 'serveraddr',
+    useaddr: str | None = None,
     useaddr_hostname: str | None = None,
     usepass: bool | None = None,
     usepkcs11: bool | None = None,
@@ -26851,7 +26851,7 @@ async def pfsense_update_vpn_open_vpn_client_export_config(
     useproxypass: str | None = None,
     useproxytype: str | None = None,
     usetoken: bool | None = None,
-    verifyservercn: str | None = 'auto',
+    verifyservercn: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/vpn/openvpn/client_export/config
 
@@ -27565,14 +27565,14 @@ async def pfsense_create_vpn_open_vpn_server(
 async def pfsense_update_vpn_open_vpn_server(
     id: int,
     confirm: bool = False,
-    allow_compression: str | None = 'no',
+    allow_compression: str | None = None,
     authmode: list[str] | None = None,
     caref: str | None = None,
-    cert_depth: int | None = 1,
+    cert_depth: int | None = None,
     certref: str | None = None,
     client2client: bool | None = None,
     connlimit: int | None = None,
-    create_gw: str | None = 'both',
+    create_gw: str | None = None,
     custom_options: list[str] | None = None,
     data_ciphers: list[str] | None = None,
     data_ciphers_fallback: str | None = None,
@@ -27591,13 +27591,13 @@ async def pfsense_update_vpn_open_vpn_server(
     ecdh_curve: str | None = None,
     gwredir: bool | None = None,
     gwredir6: bool | None = None,
-    inactive_seconds: int | None = 300,
+    inactive_seconds: int | None = None,
     interface: str | None = None,
     keepalive_interval: int | None = None,
     keepalive_timeout: int | None = None,
     local_network: list[str] | None = None,
     local_networkv6: list[str] | None = None,
-    local_port: str | None = '1194',
+    local_port: str | None = None,
     maxclients: int | None = None,
     mode: str | None = None,
     netbios_enable: bool | None = None,
@@ -27609,13 +27609,13 @@ async def pfsense_update_vpn_open_vpn_server(
     ping_action: str | None = None,
     ping_action_push: bool | None = None,
     ping_action_seconds: int | None = None,
-    ping_method: str | None = 'keepalive',
+    ping_method: str | None = None,
     ping_push: bool | None = None,
     ping_seconds: int | None = None,
     protocol: str | None = None,
     push_blockoutsidedns: bool | None = None,
     push_register_dns: bool | None = None,
-    remote_cert_tls: bool | None = True,
+    remote_cert_tls: bool | None = None,
     remote_network: list[str] | None = None,
     remote_networkv6: list[str] | None = None,
     serverbridge_dhcp: bool | None = None,
@@ -27633,7 +27633,7 @@ async def pfsense_update_vpn_open_vpn_server(
     tunnel_networkv6: str | None = None,
     use_tls: bool | None = None,
     username_as_common_name: bool | None = None,
-    verbosity_level: int | None = 1,
+    verbosity_level: int | None = None,
     wins_server1: str | None = None,
     wins_server2: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
@@ -28009,7 +28009,7 @@ async def pfsense_get_vpn_wire_guard_peer_allowed_ip(
 async def pfsense_create_vpn_wire_guard_peer_allowed_ip(
     address: str,
     mask: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     descr: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
@@ -28047,7 +28047,7 @@ async def pfsense_create_vpn_wire_guard_peer_allowed_ip(
 @mcp.tool()
 async def pfsense_update_vpn_wire_guard_peer_allowed_ip(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     address: str | None = None,
     descr: str | None = None,
@@ -28272,7 +28272,7 @@ async def pfsense_update_vpn_wire_guard_peer(
     port: str | None = None,
     presharedkey: str | None = None,
     publickey: str | None = None,
-    tun: str | None = 'unassigned',
+    tun: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/vpn/wireguard/peer
 
@@ -28461,8 +28461,8 @@ async def pfsense_update_vpn_wire_guard_settings(
     enable: bool | None = None,
     hide_peers: bool | None = None,
     hide_secrets: bool | None = None,
-    interface_group: str | None = 'all',
-    keep_conf: bool | None = True,
+    interface_group: str | None = None,
+    keep_conf: bool | None = None,
     resolve_interval: int | None = None,
     resolve_interval_track: bool | None = None,
 ) -> dict[str, Any] | list[Any] | str:
@@ -28532,7 +28532,7 @@ async def pfsense_get_vpn_wire_guard_tunnel_address(
 async def pfsense_create_vpn_wire_guard_tunnel_address(
     address: str,
     mask: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     descr: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
@@ -28570,7 +28570,7 @@ async def pfsense_create_vpn_wire_guard_tunnel_address(
 @mcp.tool()
 async def pfsense_update_vpn_wire_guard_tunnel_address(
     id: int,
-    parent_id: int,
+    parent_id: str | int,
     confirm: bool = False,
     address: str | None = None,
     descr: str | None = None,
@@ -28777,9 +28777,9 @@ async def pfsense_update_vpn_wire_guard_tunnel(
     confirm: bool = False,
     addresses: list[dict[str, Any]] | None = None,
     descr: str | None = None,
-    enabled: bool | None = True,
-    listenport: str | None = '51820',
-    mtu: int | None = 1420,
+    enabled: bool | None = None,
+    listenport: str | None = None,
+    mtu: int | None = None,
     privatekey: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/vpn/wireguard/tunnel

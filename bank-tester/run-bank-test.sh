@@ -206,7 +206,7 @@ for task_file in "${TASK_FILES[@]}"; do
     task_content="$(cat "$task_file")"
 
     # Log the claude CLI invocation (without the full prompt, just the flags)
-    CLAUDE_CMD="claude -p --mcp-config $LIVE_MCP_CONFIG --strict-mcp-config --permission-mode bypassPermissions --output-format text --model sonnet --max-budget-usd 2.00"
+    CLAUDE_CMD="claude -p --mcp-config $LIVE_MCP_CONFIG --strict-mcp-config --permission-mode bypassPermissions --output-format text --model sonnet --max-budget-usd 200.00"
     logf "  cmd: $CLAUDE_CMD"
     logf "  task file: $task_file ($(wc -c < "$task_file") bytes)"
 
@@ -235,7 +235,7 @@ for task_file in "${TASK_FILES[@]}"; do
         --permission-mode bypassPermissions \
         --output-format text \
         --model sonnet \
-        --max-budget-usd 2.00 \
+        --max-budget-usd 200.00 \
         --append-system-prompt "$TESTER_SYSTEM_PROMPT" \
         "$task_content" \
         2> "${RESULTS_DIR}/${task_name}.stderr" \

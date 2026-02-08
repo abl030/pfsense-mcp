@@ -163,6 +163,12 @@ def extract_tool_parameters(
                 if isinstance(default, int) and abs(default) >= 2**53:
                     default = None
                     has_default = False
+                # PATCH operations: non-required fields must default to None so they
+                # are excluded from the request body. Using spec defaults would overwrite
+                # existing values (e.g., auth_methods=["BasicAuth"] would remove KeyAuth).
+                if operation.method == "patch" and not is_required and has_default and default is not None:
+                    default = None
+                    has_default = True
                 # Conditional fields should default to None — sending a spec
                 # default when the condition isn't met causes validation errors
                 # (e.g., target_subnet=128 fails for IPv4 addresses)
@@ -172,10 +178,16 @@ def extract_tool_parameters(
                     has_default = True  # still has a default (None), just not the spec's
 
                 safe = _safe_name(prop_name)
+                python_type = _openapi_type_to_python(resolved_prop)
+                # parent_id in request bodies is typed as "integer" in the spec,
+                # but the API actually accepts string interface names (e.g., "lan")
+                # for DHCP and other sub-resources. Normalize to match query params.
+                if prop_name == "parent_id" and python_type == "int":
+                    python_type = "str | int"
                 params.append(
                     ToolParameter(
                         name=safe,
-                        python_type=_openapi_type_to_python(resolved_prop),
+                        python_type=python_type,
                         required=is_required,
                         default=default,
                         has_default=has_default,

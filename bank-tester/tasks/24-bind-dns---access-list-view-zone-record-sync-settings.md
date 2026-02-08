@@ -4,7 +4,7 @@
 
 **Objective**: Exercise all tools in the services/bind subsystem through CRUD lifecycle, settings, and actions.
 
-**Tools to exercise** (24):
+**Tools to exercise** (28):
 - `pfsense_get_services_bind_settings`
 - `pfsense_update_services_bind_settings`
 - `pfsense_create_services_bind_access_list`
@@ -28,7 +28,11 @@
 - `pfsense_create_services_bind_zone_record`
 - `pfsense_get_services_bind_zone_record`
 - `pfsense_delete_services_bind_zone_record`
-- `pfsense_post_/api/v2/services/bind/sync`
+- `pfsense_get_services_bind_sync_settings`
+- `pfsense_update_services_bind_sync_settings`
+- `pfsense_create_services_bind_sync_remote_host`
+- `pfsense_get_services_bind_sync_remote_host`
+- `pfsense_delete_services_bind_sync_remote_host`
 
 **Steps**:
 1. **Get settings** using `pfsense_get_services_bind_settings` — note current value of `enable_bind`
@@ -68,8 +72,17 @@
     - `rdata`: `10.99.99.1`
     - `priority`: `0`
 22. **Get** using `pfsense_get_services_bind_zone_record` with the ID from the create response
-23. **Execute** `pfsense_post_/api/v2/services/bind/sync` with `confirm=True`:
-(no parameters needed)
+23. **Get sync settings** using `pfsense_get_services_bind_sync_settings`
+24. **Update sync settings** using `pfsense_update_services_bind_sync_settings` with `confirm=True` — set `synconchanges` to `manual`
+25. **Create** sync remote host using `pfsense_create_services_bind_sync_remote_host` with `confirm=True`:
+    - `syncdestinenable`: `false`
+    - `syncprotocol`: `http`
+    - `ipaddress`: `10.99.99.99`
+    - `syncport`: `80`
+    - `username`: `admin`
+    - `password`: `test123`
+26. **Get** using `pfsense_get_services_bind_sync_remote_host` with the ID from the create response
+27. **Delete** using `pfsense_delete_services_bind_sync_remote_host` with `confirm=True` (ID from create step)
 
 **Important notes**:
 Enable BIND in settings first. Access list entry and zone record are sub-resources.
@@ -82,4 +95,4 @@ Cleanup: record → zone, entry → access_list, view.
 - Delete using `pfsense_delete_services_bind_access_list_entry` with `confirm=True` (ID from create step)
 - Delete using `pfsense_delete_services_bind_access_list` with `confirm=True` (ID from create step)
 
-**Expected outcome**: All 24 tools exercised successfully.
+**Expected outcome**: All 28 tools exercised successfully.

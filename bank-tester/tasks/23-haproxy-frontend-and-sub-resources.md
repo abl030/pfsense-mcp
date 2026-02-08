@@ -40,7 +40,8 @@
     - `name`: `bt_sys23_be`
     - `agent_port`: `0`
     - `persist_cookie_name`: `SRVID`
-    - `descr`: `Parent backend for frontend`
+    - `stats_enabled`: `true`
+    - `stats_desc`: `Parent backend for frontend`
 2. **Create** using `pfsense_create_services_ha_proxy_frontend` with `confirm=True`:
     - `name`: `bt_sys23_fe`
     - `type_`: `http`
@@ -69,7 +70,7 @@
 16. **List** using `pfsense_list_services_ha_proxy_frontend_addresses` — verify the created resource appears
 17. **Get** using `pfsense_get_services_ha_proxy_frontend_address` with the ID from the create response
 18. **Create** using `pfsense_create_services_ha_proxy_frontend_certificate` with `confirm=True` (use the `parent_id` from the parent resource created earlier):
-(no parameters needed)
+    - `ssl_certificate`: (use a cert refid if available, otherwise leave empty — note: certificate may not persist without a valid cert refid, which is a known API limitation)
 19. **List** using `pfsense_list_services_ha_proxy_frontend_certificates` — verify the created resource appears
 20. **Get** using `pfsense_get_services_ha_proxy_frontend_certificate` with the ID from the create response
 21. **Create** using `pfsense_create_services_ha_proxy_frontend_error_file` with `confirm=True` (use the `parent_id` from the parent resource created earlier):
