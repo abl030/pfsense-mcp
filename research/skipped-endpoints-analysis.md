@@ -31,6 +31,18 @@ After this, PATCH the parent settings to populate it, then POST the sub-resource
 
 **Confidence:** Medium. The config initialization should resolve the parent construction error, but the user reports trying PATCH already. If it still fails after GUI/shell initialization, this is likely a deeper framework bug that needs an upstream fix. **File a GitHub issue** referencing the `MODEL_CANNOT_GET_CONFIG_PATH_WITHOUT_PARENT_MODEL` error with HAProxy sub-resources.
 
+### Sprint 4 Result: BLOCKED
+
+Tried the PHP init approach via `diagnostics/command_prompt`:
+
+```json
+{"shell_cmd": "php -r \"require_once('config.inc'); init_config_arr(array('installedpackages', 'haproxy')); $config['installedpackages']['haproxy']['enableoption'] = 'yes'; write_config('Initialize HAProxy config');\""}
+```
+
+**Results:** CREATE (POST) returns 200 after config.xml initialization — the sub-resources can be created. However, GET and DELETE both fail with the same `MODEL_CANNOT_GET_CONFIG_PATH_WITHOUT_PARENT_MODEL` error. The bug is inconsistent: POST uses a different code path that can construct the parent model, but GET/DELETE cannot. This appears to be a genuine framework bug where the Model base class fails to re-resolve the singleton parent during read/delete operations even when the config.xml section exists.
+
+**Decision:** Stays skipped. This is a confirmed REST API v2.7.1 framework bug. CREATE works but GET/DELETE are broken, making the endpoint unusable for full CRUD. The `delete_may_fail` pattern was prototyped but doesn't add real test value since we can't verify the created resource.
+
 ---
 
 ## 2. PKCS12 export requires the right Accept header
@@ -67,6 +79,14 @@ openssl pkcs12 -export -in cert.pem -inkey key.pem -out cert.p12 -passout pass:t
 ```
 
 **Confidence:** Medium for the `Accept: application/octet-stream` fix (the infrastructure exists but may not be wired to this endpoint). High for the client-side PKCS12 generation workaround.
+
+### Sprint 3 Result: DONE
+
+The `Accept: application/octet-stream` header works perfectly. This was never a bug — just incorrect content negotiation on our side. The previous test sent `Accept: */*` which returns 406 because pfrest's `BinaryContentHandler` requires an exact MIME type match. With the correct header, the endpoint returns raw PKCS12 binary data with status 200.
+
+**Test added:** `test_action_system_certificate_pkcs12_export` — generates CA + cert, exports as PKCS12 with `Accept: application/octet-stream`, asserts 200 and non-empty response body. Cleanup deletes cert and CA. Works on both v2.4.3 and v2.7.1.
+
+**Decision:** Unblocked. The fallback workaround (client-side PKCS12 generation) was never needed.
 
 ---
 
@@ -116,6 +136,14 @@ A small, fast-installing package like `pfSense-pkg-cron` may complete within the
 
 **Confidence:** High for pre-install approach. Medium-high for the 504-polling pattern with a small package.
 
+### Sprint 5 Result: BLOCKED
+
+Attempted the 504-polling pattern with `pfSense-pkg-cron`. The POST returned 404 with `FOREIGN_MODEL_FIELD_VALUE_NOT_FOUND` — the package `pfSense-pkg-cron` does not exist in the pfSense 2.8.1 package repository. The actual package name in the repo is `pfSense-pkg-Cron` (capital C), which is already pre-installed in our golden image.
+
+Even with a valid uninstalled package, the approach is inherently flaky: QEMU NAT is slow/unreliable for package downloads, and nginx's hardcoded 60s `fastcgi_read_timeout` means the test would depend on package download speed. The GET endpoints (`/api/v2/system/package` and `/api/v2/system/package/available`) are already tested via read-only tests.
+
+**Decision:** Stays skipped. The 504-polling pattern is too fragile for CI. GET endpoints are already covered. Package install/delete should only be tested manually with a direct network connection.
+
 ---
 
 ## 4. Interface CRUD is safe with VLANs on the spare NIC
@@ -162,6 +190,14 @@ POST /api/v2/interface/apply
 Note that issue #536 (fixed in v2.1.0) previously caused the API to miss VLAN and GIF interfaces during enumeration, but this is resolved in v2.7.1. Also, issue #162 documents gateway timeouts when applying changes with bridge interfaces — avoid creating bridge interfaces in tests.
 
 **Confidence:** High. VLANs on a spare NIC are a standard, well-tested pattern for interface testing.
+
+### Sprint 1 Result: DONE
+
+The VLAN-on-em2 approach works exactly as described. Added as a `_CHAINED_CRUD` entry with one parent (VLAN on em2, tag 999) that injects its `vlanif` field (`em2.999`) as the child interface's `if` field.
+
+**Test added:** `test_crud_interface` — creates VLAN parent (em2:999), assigns as interface with static IPv4 (10.99.99.1/24), tests GET and PATCH (descr update), then cleans up interface and VLAN in reverse order. No collision with existing VLAN test (which uses em0:100) or LAGG test (which uses bare em2).
+
+**Decision:** Unblocked. The safety concern was overly conservative — VLAN on a spare NIC is completely isolated from WAN/LAN.
 
 ---
 
@@ -223,6 +259,22 @@ Use `mode: "server_tls"` (TLS only, no user auth) to avoid issue #561, where `au
 
 **Confidence:** High. This is well-documented, actively maintained, and has test cases in the repo's own test suite (`APIModelsOpenVPNClientExportTestCase.inc`).
 
+### Sprint 6 Result: DONE
+
+Successfully implemented as a custom test with a 7-step chain (one more step than the research predicted). Key learnings:
+
+1. **`local_port` must be a string**, not integer — the API returns `FIELD_INVALID_TYPE` otherwise.
+2. **`ecdh_curve` is required** — not mentioned in the research's minimal config. Must include `"ecdh_curve": "prime256v1"`.
+3. **`server_tls` mode produces log output before JSON** — the OVPN server creation response includes `"Starting DNS Resolver..."` prefixed to the JSON body. Parsed with `text.find("{")` to skip the prefix.
+4. **The research's call sequence is wrong** — `POST /api/v2/vpn/openvpn/client_export` does NOT create an export from scratch. It requires an existing `client_export/config` object (created via `POST /api/v2/vpn/openvpn/client_export/config`). The correct sequence is:
+   - Create CA → server cert → OVPN server → user cert → **export config** → export
+5. **Export config POST requires many fields** — `server`, `pkcs11providers`, `pkcs11id`, `pass`, `proxyaddr`, `proxyport`, `useproxypass`, `proxyuser`, `proxypass` (most can be empty strings/arrays).
+6. **Export `type` is `confinline`**, not `inline` — the API has specific type codes like `confzip`, `confinline`, `confinlinedroid`, etc.
+
+**Test added:** `test_action_vpn_openvpn_client_export` — custom test covering both `client_export` (POST action) and `client_export/config` (CRUD skip via custom coverage). Full cleanup in nested try/finally blocks.
+
+**Decision:** Unblocked. The `pfSense-pkg-openvpn-client-export` package was already pre-installed in the golden image.
+
 ---
 
 ## 6. DHCP server POST returns 400 by design
@@ -246,6 +298,12 @@ PATCH /api/v2/services/dhcp_server
 If you need to test POST-like behavior, create a new interface (Category 4 above) with a static IP, then PATCH its auto-created DHCP server entry. The interface creation triggers DHCP server initialization.
 
 **Confidence:** High. This is confirmed by the framework design (`many=false` singletons don't support POST/create), release notes, and multiple GitHub discussions (#520, #616).
+
+### Sprint 2 Result: DONE (docs only)
+
+Confirmed as by-design. Re-categorized the skip reason from "per-interface singleton, POST not supported" to "per-interface singleton — POST not supported by design, PATCH tested via singleton". The `services/dhcp_server/backend` singleton test already exercises the GET/PATCH lifecycle.
+
+**Decision:** Stays skipped for CRUD, but the skip is now correctly categorized as "not applicable" rather than a limitation. No new tests needed.
 
 ---
 
