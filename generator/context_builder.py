@@ -182,9 +182,9 @@ def build_tool_contexts(spec: dict[str, Any]) -> list[ToolContext]:
     contexts: list[ToolContext] = []
 
     for op in operations:
-        # Skip phantom plural routes that don't exist on the real server
-        if op.path in _PHANTOM_PLURAL_ROUTES:
-            continue
+        # NOTE: Phantom plural routes are intentionally included in the MCP server
+        # so the bank tester can rediscover which ones actually 404 on the real API.
+        # They are still skipped in test_generator.py (pytest tests).
 
         # Get parameter names for naming
         param_names = [p.name for p in op.parameters]

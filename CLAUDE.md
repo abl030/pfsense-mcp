@@ -317,7 +317,7 @@ Exclude from generation or add extra warnings:
 
 ## Phase 2 Status: Test Coverage
 
-**Current: 208 tests, 208 passing** against 217 active API paths (599 tools; 41 phantom plural routes filtered out)
+**Current: 208 tests, 208 passing** against 217 active API paths (677 tools total; 41 phantom plural routes included in MCP server but skipped in pytest)
 
 ### Coverage summary
 
@@ -361,7 +361,9 @@ Every skip is documented in `_SKIP_CRUD_PATHS`, `_SKIP_ACTION`, `_SKIP_SINGLETON
 
 ### Phantom plural routes (41)
 
-Routes present in the OpenAPI spec but return nginx 404 on the real server. These are sub-resource plural endpoints whose singular forms require `parent_id`. The pfSense REST API simply doesn't register these routes. All are tested via their singular CRUD endpoints instead.
+Routes present in the OpenAPI spec but return nginx 404 on the real server. These are sub-resource plural endpoints whose singular forms require `parent_id`. The pfSense REST API simply doesn't register these routes. All are tested via their singular CRUD endpoints in pytest. These routes are **intentionally included** in the MCP server (677 tools) so the bank tester can rediscover them naturally — they will 404 when called.
+
+Listed in `_PHANTOM_PLURAL_ROUTES` in `context_builder.py`. Skipped in `test_generator.py` only.
 
 ### Key test patterns
 
@@ -389,14 +391,16 @@ The dev shell includes jinja2, pytest, qemu, and curl for generator development 
 
 ## Phase 3: Bank Tester Integration Testing
 
-Test the MCP server end-to-end by having a "tester Claude" use it as a real consumer. The tester attempts 9 realistic pfSense tasks of escalating complexity, records every friction point, and produces an aggregate report. Use findings to improve tool docstrings, parameter hints, and error messages.
+Test the MCP server end-to-end by having a "tester Claude" use it as a real consumer. 43 task files (9 workflow + 28 systematic + 5 adversarial + 1 destructive) cover all 677 tools. Use findings to improve tool docstrings, parameter hints, and error messages.
 
 ### Running the bank tester
 
 ```bash
-nix develop -c bash bank-tester/run-bank-test.sh              # all 9 tasks
+nix develop -c bash bank-tester/run-bank-test.sh              # all tasks (except destructive)
 nix develop -c bash bank-tester/run-bank-test.sh 01            # single task
 nix develop -c bash bank-tester/run-bank-test.sh "01 03 05"    # subset
+nix develop -c bash bank-tester/run-bank-test.sh 35            # recommended: start with read-only
+INCLUDE_DESTRUCTIVE=1 nix develop -c bash bank-tester/run-bank-test.sh  # include task 99
 ```
 
 ### Bank tester structure
@@ -406,24 +410,41 @@ bank-tester/
   run-bank-test.sh          # Orchestrator: boot VM → run tasks → collect results
   mcp-config.json           # MCP config template (placeholders for key/path)
   TESTER-CLAUDE.md          # System prompt for the tester Claude
-  tasks/                    # 9 task files, escalating complexity
-  analyze-results.py        # Parse tester output, aggregate failure categories
-  results/run-*/            # Per-run results (JSONL + summary.md)
+  generate-tasks.py         # Auto-generate task files from OpenAPI spec + task-config.yaml
+  task-config.yaml           # Per-subsystem test values, deps, skip reasons
+  tasks/                    # 43 task files (01-09 workflow, 10-37 systematic, 40-44 adversarial, 99 destructive)
+  analyze-results.py        # Parse tester output, aggregate failure categories + tool coverage
+  results/run-*/            # Per-run results (txt + summary.md + live.log)
 ```
 
-### Work order
+### Phase 3.2 Work Order: Iterative Test-Fix-Regenerate
 
-1. **Run the bank tester** — `nix develop -c bash bank-tester/run-bank-test.sh` against a fresh VM. Start with task 01 alone to validate the setup, then run all 9.
-2. **Read the summary** — `bank-tester/results/run-*/summary.md` shows failure categories and per-task results.
-3. **Fix the generator** — for each high-frequency failure category, fix `codegen.py`, `context_builder.py`, or `templates/server.py.j2`. Common predicted fixes:
-   - `missing_enum_values`: render `p.enum` values in parameter descriptions (`codegen.py`)
-   - `type_confusion`: add example values for `list[str]` params in docstrings
-   - `dependency_unknown`: add "Requires: ..." notes to dependent resource docstrings (`context_builder.py`)
-   - `missing_required_field`: mark required fields more clearly in descriptions
-4. **Regenerate** — `nix develop -c python -m generator`
-5. **Re-run bank tester** — confirm fixes reduce first-attempt failures
-6. **Run full pytest suite** — `nix develop -c bash vm/run-tests.sh -v` to ensure generator changes don't break existing tests
-7. **Iterate** — repeat steps 2-6 until first-attempt success rate is acceptable
+Work through each bank tester task one at a time. For each task:
+
+1. **Run the task** — `nix develop -c bash bank-tester/run-bank-test.sh <task-number>`
+2. **Read results** — check `results/run-*/summary.md` and the task `.txt` file
+3. **Fix the generator** — for each failure, fix `codegen.py`, `context_builder.py`, or `schema_parser.py`:
+   - `missing_enum_values` → already fixed (enum values rendered in param descriptions)
+   - `dependency_unknown` → add "Requires: ..." notes to dependent resource docstrings
+   - `parameter_format` → add format examples (CIDR vs plain IP, etc.)
+   - `type_confusion` → add example values for list-typed params
+   - Truncated conditional docs → already fixed (250-char limit, HTML stripped)
+4. **Tabulate phantom/broken endpoints** — add any 404s or 500s to the "Bank Tester Endpoint Discovery" table below
+5. **Regenerate** — `nix develop -c python -m generator`
+6. **Re-run the task** — confirm fixes resolved the failures
+7. **Commit** — commit generator fix + regenerated server.py
+
+Task execution order: 35 (read-only, done) → 37 → 36 → 10-34 → 40-44
+
+### Bank Tester Endpoint Discovery
+
+Endpoints discovered as phantom or broken during bank tester runs. Compare against `_PHANTOM_PLURAL_ROUTES` in `context_builder.py`.
+
+| Task | Endpoint / Tool | Issue | Category |
+|------|----------------|-------|----------|
+| 35 | `pfsense_list_status_logs_auth` | 404 — phantom plural route (in `_PHANTOM_PLURAL_ROUTES`) | phantom |
+
+*This table grows as tasks are run. Every 404 or 500 discovered by the bank tester gets added here.*
 
 ---
 
@@ -462,7 +483,7 @@ See `examples/nixosconfig-integration.md` for deploying into the homelab NixOS f
 
 **IMPORTANT: Always add new learnings to this section as they are discovered during bank tester runs, generator fixes, or any MCP-related debugging. Every fix, workaround, or surprise should be captured here as a numbered best practice. This section is the living record of what we've learned — don't let findings get lost in commit messages or memory files.**
 
-Findings from building a 599-tool MCP server and testing it with an AI consumer (bank tester). These are hard-won lessons applicable to any MCP server project.
+Findings from building a 677-tool MCP server and testing it with an AI consumer (bank tester). These are hard-won lessons applicable to any MCP server project.
 
 ### Tool Schema Constraints
 
@@ -482,7 +503,7 @@ Findings from building a 599-tool MCP server and testing it with an AI consumer 
 
 ### Tool Count Challenges
 
-7. **599 tools is at the edge of API limits.** With this many tools, some API calls intermittently fail due to serialization or token budget constraints. Consider: grouping related tools, lazy-loading tool subsets, or offering a "tool catalog" meta-tool that returns available tools for a subsystem.
+7. **677 tools is at the edge of API limits.** With this many tools, some API calls intermittently fail due to serialization or token budget constraints. Consider: grouping related tools, lazy-loading tool subsets, or offering a "tool catalog" meta-tool that returns available tools for a subsystem.
 
 ### Error Handling
 
@@ -507,6 +528,10 @@ Findings from building a 599-tool MCP server and testing it with an AI consumer 
 ### Conditional Required Fields
 
 15. **Unconditionally required fields that are actually conditional confuse consumers.** When an OpenAPI spec marks fields like `ecname` (only needed for ECDSA keys) or `caref` (only needed for intermediate CAs) as always-required, the consumer must guess to pass empty strings. Docstrings should document which "required" fields can be empty and under what conditions.
+
+### Description Quality
+
+16. **Strip HTML and increase truncation limits for conditional field docs.** OpenAPI descriptions often contain `<br>` tags and conditional availability notes (e.g., "only available when enableremotelogging is true"). A 120-char truncation limit cuts these off mid-sentence, hiding critical dependency information from the consumer. Fix: strip HTML tags, collapse whitespace, increase limit to 250 chars. This fixed a `dependency_unknown` failure in bank tester task 35 where the tester couldn't see that `logall` requires `enableremotelogging`.
 
 ### Bank Tester Run 1 Results (pre-fix baseline)
 

@@ -8,6 +8,7 @@ programmatically for precise formatting control.
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Any
 
@@ -77,7 +78,15 @@ def _gen_docstring(tool: ToolContext) -> str:
             if not has_param_docs:
                 doc_lines.append("")
                 has_param_docs = True
-            desc = p.description[:120] if p.description else ""
+            desc = p.description or ""
+            # Strip HTML tags from OpenAPI descriptions
+            desc = re.sub(r"<br\s*/?>", " ", desc)
+            desc = re.sub(r"<[^>]+>", "", desc)
+            # Collapse whitespace
+            desc = re.sub(r"\s+", " ", desc).strip()
+            # Truncate at 250 chars (preserves conditional field docs)
+            if len(desc) > 250:
+                desc = desc[:247] + "..."
             if p.enum:
                 enum_str = ", ".join(repr(v) for v in p.enum)
                 if desc:
@@ -85,8 +94,8 @@ def _gen_docstring(tool: ToolContext) -> str:
                 else:
                     desc = f"Valid values: [{enum_str}]"
                 # Truncate if enum list made it too long
-                if len(desc) > 300:
-                    desc = desc[:297] + "..."
+                if len(desc) > 400:
+                    desc = desc[:397] + "..."
             doc_lines.append(f"    {p.name}: {desc}")
 
     doc_lines.append('    """')

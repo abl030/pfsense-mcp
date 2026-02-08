@@ -4959,6 +4959,8 @@ def test_read_diagnostics_table(client: httpx.Client):
     assert resp.status_code in (200, 400, 404), f"Unexpected: {resp.status_code}"
 
 
+# SKIP /api/v2/diagnostics/tables: phantom plural route (spec-only, not registered on server)
+
 def test_read_firewall_aliases(client: httpx.Client):
     """Read-only: /api/v2/firewall/aliases"""
     resp = client.get("/api/v2/firewall/aliases")
@@ -4994,6 +4996,8 @@ def test_read_firewall_rules(client: httpx.Client):
     assert data is not None
 
 
+# SKIP /api/v2/firewall/schedule/time_ranges: phantom plural route (spec-only, not registered on server)
+
 def test_read_firewall_schedules(client: httpx.Client):
     """Read-only: /api/v2/firewall/schedules"""
     resp = client.get("/api/v2/firewall/schedules")
@@ -5016,12 +5020,18 @@ def test_read_firewall_states(client: httpx.Client):
     assert data is not None
 
 
+# SKIP /api/v2/firewall/traffic_shaper/limiter/bandwidths: phantom plural route (spec-only, not registered on server)
+
+# SKIP /api/v2/firewall/traffic_shaper/limiter/queues: phantom plural route (spec-only, not registered on server)
+
 def test_read_firewall_traffic_shaper_limiters(client: httpx.Client):
     """Read-only: /api/v2/firewall/traffic_shaper/limiters"""
     resp = client.get("/api/v2/firewall/traffic_shaper/limiters", params={"limit": 5})
     data = _ok(resp)
     assert isinstance(data, list)
 
+
+# SKIP /api/v2/firewall/traffic_shaper/queues: phantom plural route (spec-only, not registered on server)
 
 def test_read_firewall_traffic_shapers(client: httpx.Client):
     """Read-only: /api/v2/firewall/traffic_shapers"""
@@ -5086,6 +5096,8 @@ def test_read_interfaces(client: httpx.Client):
     assert data is not None
 
 
+# SKIP /api/v2/routing/gateway/group/priorities: phantom plural route (spec-only, not registered on server)
+
 def test_read_routing_gateway_groups(client: httpx.Client):
     """Read-only: /api/v2/routing/gateway/groups"""
     resp = client.get("/api/v2/routing/gateway/groups")
@@ -5142,6 +5154,8 @@ def test_read_services_acme_certificates(client: httpx.Client):
     assert data is not None
 
 
+# SKIP /api/v2/services/bind/access_list/entries: phantom plural route (spec-only, not registered on server)
+
 def test_read_services_bind_access_lists(client: httpx.Client):
     """Read-only: /api/v2/services/bind/access_lists"""
     resp = client.get("/api/v2/services/bind/access_lists")
@@ -5177,6 +5191,12 @@ def test_read_services_cron_jobs(client: httpx.Client):
     assert data is not None
 
 
+# SKIP /api/v2/services/dhcp_server/address_pools: phantom plural route (spec-only, not registered on server)
+
+# SKIP /api/v2/services/dhcp_server/custom_options: phantom plural route (spec-only, not registered on server)
+
+# SKIP /api/v2/services/dhcp_server/static_mappings: phantom plural route (spec-only, not registered on server)
+
 def test_read_services_dhcp_servers(client: httpx.Client):
     """Read-only: /api/v2/services/dhcp_servers"""
     resp = client.get("/api/v2/services/dhcp_servers", params={"limit": 5})
@@ -5184,12 +5204,16 @@ def test_read_services_dhcp_servers(client: httpx.Client):
     assert isinstance(data, list)
 
 
+# SKIP /api/v2/services/dns_forwarder/host_override/aliases: phantom plural route (spec-only, not registered on server)
+
 def test_read_services_dns_forwarder_host_overrides(client: httpx.Client):
     """Read-only: /api/v2/services/dns_forwarder/host_overrides"""
     resp = client.get("/api/v2/services/dns_forwarder/host_overrides")
     data = _ok(resp)
     assert data is not None
 
+
+# SKIP /api/v2/services/dns_resolver/access_list/networks: phantom plural route (spec-only, not registered on server)
 
 def test_read_services_dns_resolver_access_lists(client: httpx.Client):
     """Read-only: /api/v2/services/dns_resolver/access_lists"""
@@ -5205,12 +5229,28 @@ def test_read_services_dns_resolver_domain_overrides(client: httpx.Client):
     assert data is not None
 
 
+# SKIP /api/v2/services/dns_resolver/host_override/aliases: phantom plural route (spec-only, not registered on server)
+
 def test_read_services_dns_resolver_host_overrides(client: httpx.Client):
     """Read-only: /api/v2/services/dns_resolver/host_overrides"""
     resp = client.get("/api/v2/services/dns_resolver/host_overrides")
     data = _ok(resp)
     assert data is not None
 
+
+# SKIP /api/v2/services/freeradius/clients: phantom plural route (spec-only, not registered on server)
+
+# SKIP /api/v2/services/freeradius/interfaces: phantom plural route (spec-only, not registered on server)
+
+# SKIP /api/v2/services/freeradius/users: phantom plural route (spec-only, not registered on server)
+
+# SKIP /api/v2/services/haproxy/backend/acls: phantom plural route (spec-only, not registered on server)
+
+# SKIP /api/v2/services/haproxy/backend/actions: phantom plural route (spec-only, not registered on server)
+
+# SKIP /api/v2/services/haproxy/backend/errorfiles: phantom plural route (spec-only, not registered on server)
+
+# SKIP /api/v2/services/haproxy/backend/servers: phantom plural route (spec-only, not registered on server)
 
 def test_read_services_haproxy_backends(client: httpx.Client):
     """Read-only: /api/v2/services/haproxy/backends"""
@@ -5226,12 +5266,26 @@ def test_read_services_haproxy_files(client: httpx.Client):
     assert data is not None
 
 
+# SKIP /api/v2/services/haproxy/frontend/acls: phantom plural route (spec-only, not registered on server)
+
+# SKIP /api/v2/services/haproxy/frontend/actions: phantom plural route (spec-only, not registered on server)
+
+# SKIP /api/v2/services/haproxy/frontend/addresses: phantom plural route (spec-only, not registered on server)
+
+# SKIP /api/v2/services/haproxy/frontend/certificates: phantom plural route (spec-only, not registered on server)
+
+# SKIP /api/v2/services/haproxy/frontend/error_files: phantom plural route (spec-only, not registered on server)
+
 def test_read_services_haproxy_frontends(client: httpx.Client):
     """Read-only: /api/v2/services/haproxy/frontends"""
     resp = client.get("/api/v2/services/haproxy/frontends")
     data = _ok(resp)
     assert data is not None
 
+
+# SKIP /api/v2/services/haproxy/settings/dns_resolvers: phantom plural route (spec-only, not registered on server)
+
+# SKIP /api/v2/services/haproxy/settings/email_mailers: phantom plural route (spec-only, not registered on server)
 
 def test_read_services_ntp_time_servers(client: httpx.Client):
     """Read-only: /api/v2/services/ntp/time_servers"""
@@ -5268,12 +5322,18 @@ def test_read_status_interfaces(client: httpx.Client):
     assert isinstance(data, list)
 
 
+# SKIP /api/v2/status/ipsec/child_sa: phantom plural route (spec-only, not registered on server)
+
+# SKIP /api/v2/status/ipsec/child_sas: phantom plural route (spec-only, not registered on server)
+
 def test_read_status_ipsec_sas(client: httpx.Client):
     """Read-only: /api/v2/status/ipsec/sas"""
     resp = client.get("/api/v2/status/ipsec/sas", params={"limit": 5})
     data = _ok(resp)
     assert isinstance(data, list)
 
+
+# SKIP /api/v2/status/logs/auth: phantom plural route (spec-only, not registered on server)
 
 def test_read_status_logs_dhcp(client: httpx.Client):
     """Read-only: /api/v2/status/logs/dhcp"""
@@ -5289,6 +5349,10 @@ def test_read_status_logs_firewall(client: httpx.Client):
     assert isinstance(data, list)
 
 
+# SKIP /api/v2/status/logs/openvpn: phantom plural route (spec-only, not registered on server)
+
+# SKIP /api/v2/status/logs/packages/restapi: phantom plural route (spec-only, not registered on server)
+
 def test_read_status_logs_system(client: httpx.Client):
     """Read-only: /api/v2/status/logs/system"""
     resp = client.get("/api/v2/status/logs/system", params={"limit": 5})
@@ -5302,6 +5366,14 @@ def test_read_status_openvpn_clients(client: httpx.Client):
     data = _ok(resp)
     assert isinstance(data, list)
 
+
+# SKIP /api/v2/status/openvpn/server/connection: phantom plural route (spec-only, not registered on server)
+
+# SKIP /api/v2/status/openvpn/server/connections: phantom plural route (spec-only, not registered on server)
+
+# SKIP /api/v2/status/openvpn/server/route: phantom plural route (spec-only, not registered on server)
+
+# SKIP /api/v2/status/openvpn/server/routes: phantom plural route (spec-only, not registered on server)
 
 def test_read_status_openvpn_servers(client: httpx.Client):
     """Read-only: /api/v2/status/openvpn/servers"""
@@ -5401,6 +5473,8 @@ def test_read_users(client: httpx.Client):
     assert data is not None
 
 
+# SKIP /api/v2/vpn/ipsec/phase1/encryptions: phantom plural route (spec-only, not registered on server)
+
 def test_read_vpn_ipsec_phase1s(client: httpx.Client):
     """Read-only: /api/v2/vpn/ipsec/phase1s"""
     resp = client.get("/api/v2/vpn/ipsec/phase1s")
@@ -5408,12 +5482,16 @@ def test_read_vpn_ipsec_phase1s(client: httpx.Client):
     assert data is not None
 
 
+# SKIP /api/v2/vpn/ipsec/phase2/encryptions: phantom plural route (spec-only, not registered on server)
+
 def test_read_vpn_ipsec_phase2s(client: httpx.Client):
     """Read-only: /api/v2/vpn/ipsec/phase2s"""
     resp = client.get("/api/v2/vpn/ipsec/phase2s")
     data = _ok(resp)
     assert data is not None
 
+
+# SKIP /api/v2/vpn/openvpn/client_export/configs: phantom plural route (spec-only, not registered on server)
 
 def test_read_vpn_openvpn_clients(client: httpx.Client):
     """Read-only: /api/v2/vpn/openvpn/clients"""
@@ -5436,12 +5514,16 @@ def test_read_vpn_openvpn_servers(client: httpx.Client):
     assert data is not None
 
 
+# SKIP /api/v2/vpn/wireguard/peer/allowed_ips: phantom plural route (spec-only, not registered on server)
+
 def test_read_vpn_wireguard_peers(client: httpx.Client):
     """Read-only: /api/v2/vpn/wireguard/peers"""
     resp = client.get("/api/v2/vpn/wireguard/peers")
     data = _ok(resp)
     assert data is not None
 
+
+# SKIP /api/v2/vpn/wireguard/tunnel/addresses: phantom plural route (spec-only, not registered on server)
 
 def test_read_vpn_wireguard_tunnels(client: httpx.Client):
     """Read-only: /api/v2/vpn/wireguard/tunnels"""
