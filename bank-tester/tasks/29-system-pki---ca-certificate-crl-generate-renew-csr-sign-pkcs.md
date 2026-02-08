@@ -10,7 +10,7 @@
 - `pfsense_update_system_certificate_authority`
 - `pfsense_delete_system_certificate_authority`
 - `pfsense_create_system_certificate`
-- `pfsense_list_system_certificate_authorities`
+- `pfsense_list_system_certificates`
 - `pfsense_get_system_certificate`
 - `pfsense_update_system_certificate`
 - `pfsense_delete_system_certificate`
@@ -35,7 +35,7 @@
     - `descr`: `bt_sys29_cert`
     - `crt`: `__CERT_PEM__`
     - `prv`: `__CERT_KEY_PEM__`
-6. **List** using `pfsense_list_system_certificate_authorities` — verify the created resource appears
+6. **List** using `pfsense_list_system_certificates` — verify the created resource appears
 7. **Get** using `pfsense_get_system_certificate` with the ID from the create response
 8. **Update** using `pfsense_update_system_certificate` with `confirm=True` — set `descr` to `Updated cert`
 9. **Get** again using `pfsense_get_system_certificate` — verify `descr` was updated

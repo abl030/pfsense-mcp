@@ -4,13 +4,14 @@
 
 **Objective**: Exercise all tools in the routing subsystem through CRUD lifecycle, settings, and actions.
 
-**Tools to exercise** (18):
+**Tools to exercise** (19):
 - `pfsense_create_routing_gateway`
-- `pfsense_list_routing_gateway_group_priorities`
+- `pfsense_list_routing_gateways`
 - `pfsense_get_routing_gateway`
 - `pfsense_update_routing_gateway`
 - `pfsense_delete_routing_gateway`
 - `pfsense_create_routing_gateway_group`
+- `pfsense_list_routing_gateway_groups`
 - `pfsense_get_routing_gateway_group`
 - `pfsense_update_routing_gateway_group`
 - `pfsense_delete_routing_gateway_group`
@@ -39,7 +40,7 @@
     - `time_period`: `60000`
     - `interval`: `500`
     - `alert_interval`: `1000`
-2. **List** using `pfsense_list_routing_gateway_group_priorities` — verify the created resource appears
+2. **List** using `pfsense_list_routing_gateways` — verify the created resource appears
 3. **Get** using `pfsense_get_routing_gateway` with the ID from the create response
 4. **Update** using `pfsense_update_routing_gateway` with `confirm=True` — set `descr` to `Updated gateway`
 5. **Get** again using `pfsense_get_routing_gateway` — verify `descr` was updated
@@ -47,7 +48,7 @@
     - `name`: `bt_sys17_gg`
     - `descr`: `Bank tester gateway group`
     - `priorities`: `[{'gateway': 'bt_sys17_gw', 'tier': 1}]`
-7. **List** using `pfsense_list_routing_gateway_group_priorities` — verify the created resource appears
+7. **List** using `pfsense_list_routing_gateway_groups` — verify the created resource appears
 8. **Get** using `pfsense_get_routing_gateway_group` with the ID from the create response
 9. **Update** using `pfsense_update_routing_gateway_group` with `confirm=True` — set `descr` to `Updated group`
 10. **Get** again using `pfsense_get_routing_gateway_group` — verify `descr` was updated
@@ -74,4 +75,4 @@ Cleanup: delete route → group → gateway. Apply after each mutation.
 - Delete using `pfsense_delete_routing_gateway_group` with `confirm=True` (ID from create step)
 - Delete using `pfsense_delete_routing_gateway` with `confirm=True` (ID from create step)
 
-**Expected outcome**: All 18 tools exercised successfully.
+**Expected outcome**: All 19 tools exercised successfully.

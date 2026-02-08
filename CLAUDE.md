@@ -319,10 +319,9 @@ Exclude from generation or add extra warnings:
 
 OpenAPI spec: 258 paths, 677 operations. Generated MCP server: 677 tools.
 
-Bank tester (`run-20260208-192434`): **42/42 tasks PASS**.
-- 448/677 tools invoked (66.2%)
-- 665 tool calls, 97.9% first-attempt success rate
-- 14 first-attempt failures, all self-corrected
+Previous run (`run-20260208-192434`): **42/42 tasks PASS**, 448/677 tools (66.2%).
+
+**Current task: coverage expansion run**. 45 tasks (was 42), 533/677 tools referenced statically (78.7%), targeting ~90%+ at runtime. Changes: list-tool discovery fix, +16 PATCH update_fields, +18 read-only endpoints (task 38), +38 PUT/replace operations (task 39), +2 destructive (task 99).
 
 Testing is done via the bank tester (`bank-tester/run-bank-test.sh`), which boots a VM, runs Claude against the MCP server, and validates results. See the Phase 3 section for details.
 
@@ -344,7 +343,7 @@ The dev shell includes jinja2, qemu, and curl for generator development and VM t
 
 ## Phase 3: Bank Tester Integration Testing
 
-Test the MCP server end-to-end by having a "tester Claude" use it as a real consumer. 42 task files (9 workflow + 28 systematic + 5 adversarial) cover 448/677 tools (66.2%). Use findings to improve tool docstrings, parameter hints, and error messages. Next goal: expand task-config.yaml to reach 100% tool coverage.
+Test the MCP server end-to-end by having a "tester Claude" use it as a real consumer. 45 task files (9 workflow + 30 systematic + 5 adversarial + 1 destructive) reference 533/677 tools (78.7%) statically. Use findings to improve tool docstrings, parameter hints, and error messages.
 
 ### Running the bank tester
 
@@ -365,7 +364,7 @@ bank-tester/
   TESTER-CLAUDE.md          # System prompt for the tester Claude
   generate-tasks.py         # Auto-generate task files from OpenAPI spec + task-config.yaml
   task-config.yaml           # Per-subsystem test values, deps, skip reasons
-  tasks/                    # 42 task files (01-09 workflow, 10-37 systematic, 40-44 adversarial)
+  tasks/                    # 45 task files (01-09 workflow, 10-39 systematic, 40-44 adversarial, 99 destructive)
   analyze-results.py        # Parse tester output, aggregate failure categories + tool coverage
   results/run-*/            # Per-run results (txt + summary.md + live.log)
 ```
@@ -458,9 +457,49 @@ Findings from building a 677-tool MCP server and testing it with an AI consumer 
 
 ### Bank Tester Results
 
-**Final run** (`run-20260208-192434`): **42/42 tasks PASS**
+**Previous baseline** (`run-20260208-192434`): **42/42 tasks PASS**
 - 665 total tool calls, 14 first-attempt failures, **97.9% first-attempt success rate**
 - 448/677 tools invoked (**66.2% tool coverage**)
 - All 14 first-attempt failures self-corrected (conditional required fields, cascade deletes, encryption field names)
 - Runtime: ~66 minutes end-to-end
 - Failure categories: `missing_required_field` (6), `dependency_unknown` (5), `parameter_format` (3)
+
+### Current Task: Coverage Expansion Run
+
+**Goal**: Run the expanded 45-task suite (was 42), fix any failures, re-run until all green.
+
+**What changed**:
+- Fixed list-tool discovery bug in `generate-tasks.py` (shortest path match, not first match)
+- Added `update_field` to 16 CRUD entries that lacked PATCH coverage
+- New task 38: 18 read-only plural endpoints (status, diagnostics, certs, ACME, interfaces, users)
+- New task 39: 38 PUT/replace endpoints (GET→PUT same data→verify pattern, safe no-op)
+- Task 99 expanded: +ARP table clear, +firewall states clear
+- Added `replace` step type to `generate-tasks.py`
+- Static tool references: 533/677 (78.7%), runtime target: ~90%+
+
+**Run procedure**:
+1. `nix develop -c bash bank-tester/run-bank-test.sh` — full suite
+2. Monitor: `tail -f bank-tester/results/run-*/live.log` — watch for stalls or failures
+3. On failure: read the task output, fix generator/templates/task-config, regenerate, re-run failed task(s)
+4. Repeat until all 45 tasks PASS (excluding task 99 destructive unless INCLUDE_DESTRUCTIVE=1)
+5. Run `nix develop -c python bank-tester/analyze-results.py bank-tester/results/run-*/` for final coverage
+
+**Permanently untestable** (~7 tools):
+- `pfsense_post_diagnostics_halt_system` — shuts down VM
+- `pfsense_post_diagnostics_reboot` — reboots VM (task 99 only)
+- `pfsense_update_system_restapi_version` — breaks API connectivity
+- `pfsense_update_system_web_gui_settings` — breaks API connectivity
+- `pfsense_get_services_ha_proxy_settings_dns_resolver` — 500 bug in pfSense
+- `pfsense_get_services_ha_proxy_settings_email_mailer` — 500 bug in pfSense
+- `pfsense_create_system_restapi_settings_sync` — requires BasicAuth + HA setup
+
+### Known Self-Correcting Failures (Partial Run `run-20260208-222134`)
+
+First 23/44 tasks ran before rate limit. 7 first-attempt failures, all self-corrected. 3 were task-config bugs (now fixed). The remaining 4 are expected and tolerable:
+
+| Task | Tool | Category | Root Cause | Fixable? |
+|------|------|----------|------------|----------|
+| 13 | `update_firewall_traffic_shaper_limiter_queue` | `unexpected_error` | pfSense API bug: limiter queue conditional validation references non-existent `sched` field from parent limiter | No — pfSense bug. Tester updates `name` instead of `aqm`. |
+| 18 | `update_services_dns_resolver_settings` | `missing_required_field` | `sslcertref` marked required in spec but is conditional (only when `enablessl=true`) | Generator limitation — conditional required fields on PATCH. Tester passes empty string. |
+| 23 | `create_services_ha_proxy_frontend_action` | `missing_required_field` | Spec marks all conditional fields required for frontend actions regardless of action type | Spec limitation — polymorphic schemas. Tester passes empty strings for irrelevant fields. |
+| 23 | `create_services_ha_proxy_frontend_certificate` | `dependency_unknown` | Frontend cert needs valid `ssl_certificate` refid; without one, object not persisted (404 on GET) | Could add CA+cert setup chain, but complex. Tool works correctly with valid input. |

@@ -1,4 +1,4 @@
-## Task 99: Destructive — Halt & Reboot (opt-in)
+## Task 99: Destructive — Halt, Reboot, Bulk Clear (opt-in)
 
 **task_id**: 99-destructive
 
@@ -11,7 +11,9 @@
 4. Call `pfsense_post_diagnostics_halt_system` with `confirm=True`
 
 **Important notes**:
-ONLY run with INCLUDE_DESTRUCTIVE=1. Reboot first, wait for API, then halt.
+ONLY run with INCLUDE_DESTRUCTIVE=1.
+First clear ARP table and firewall states (non-critical bulk clears).
+Then reboot, wait for API, then halt (last step — VM won't recover).
 These will terminate the VM.
 
 **Cleanup**: None (VM will be destroyed after halt).

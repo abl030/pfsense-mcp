@@ -4,15 +4,16 @@
 
 **Objective**: Exercise all tools in the services/haproxy/frontend subsystem through CRUD lifecycle, settings, and actions.
 
-**Tools to exercise** (29):
+**Tools to exercise** (31):
 - `pfsense_create_services_ha_proxy_backend`
 - `pfsense_delete_services_ha_proxy_backend`
 - `pfsense_create_services_ha_proxy_frontend`
-- `pfsense_list_services_ha_proxy_frontend_ac_ls`
+- `pfsense_list_services_ha_proxy_frontends`
 - `pfsense_get_services_ha_proxy_frontend`
 - `pfsense_update_services_ha_proxy_frontend`
 - `pfsense_delete_services_ha_proxy_frontend`
 - `pfsense_create_services_ha_proxy_frontend_acl`
+- `pfsense_list_services_ha_proxy_frontend_ac_ls`
 - `pfsense_get_services_ha_proxy_frontend_acl`
 - `pfsense_update_services_ha_proxy_frontend_acl`
 - `pfsense_delete_services_ha_proxy_frontend_acl`
@@ -31,6 +32,7 @@
 - `pfsense_create_services_ha_proxy_frontend_error_file`
 - `pfsense_list_services_ha_proxy_frontend_error_files`
 - `pfsense_get_services_ha_proxy_frontend_error_file`
+- `pfsense_update_services_ha_proxy_frontend_error_file`
 - `pfsense_delete_services_ha_proxy_frontend_error_file`
 - `pfsense_get_services_ha_proxy_apply_status`
 - `pfsense_services_ha_proxy_apply`
@@ -40,13 +42,12 @@
     - `name`: `bt_sys23_be`
     - `agent_port`: `0`
     - `persist_cookie_name`: `SRVID`
-    - `stats_enabled`: `true`
-    - `stats_desc`: `Parent backend for frontend`
+    - `descr`: `Parent backend for frontend`
 2. **Create** using `pfsense_create_services_ha_proxy_frontend` with `confirm=True`:
     - `name`: `bt_sys23_fe`
     - `type_`: `http`
     - `descr`: `Bank tester frontend`
-3. **List** using `pfsense_list_services_ha_proxy_frontend_ac_ls` — verify the created resource appears
+3. **List** using `pfsense_list_services_ha_proxy_frontends` — verify the created resource appears
 4. **Get** using `pfsense_get_services_ha_proxy_frontend` with the ID from the create response
 5. **Update** using `pfsense_update_services_ha_proxy_frontend` with `confirm=True` — set `descr` to `Updated frontend`
 6. **Get** again using `pfsense_get_services_ha_proxy_frontend` — verify `descr` was updated
@@ -70,7 +71,7 @@
 16. **List** using `pfsense_list_services_ha_proxy_frontend_addresses` — verify the created resource appears
 17. **Get** using `pfsense_get_services_ha_proxy_frontend_address` with the ID from the create response
 18. **Create** using `pfsense_create_services_ha_proxy_frontend_certificate` with `confirm=True` (use the `parent_id` from the parent resource created earlier):
-    - `ssl_certificate`: (use a cert refid if available, otherwise leave empty — note: certificate may not persist without a valid cert refid, which is a known API limitation)
+(no parameters needed)
 19. **List** using `pfsense_list_services_ha_proxy_frontend_certificates` — verify the created resource appears
 20. **Get** using `pfsense_get_services_ha_proxy_frontend_certificate` with the ID from the create response
 21. **Create** using `pfsense_create_services_ha_proxy_frontend_error_file` with `confirm=True` (use the `parent_id` from the parent resource created earlier):
@@ -78,8 +79,10 @@
     - `errorfile`: `bt_sys23_file`
 22. **List** using `pfsense_list_services_ha_proxy_frontend_error_files` — verify the created resource appears
 23. **Get** using `pfsense_get_services_ha_proxy_frontend_error_file` with the ID from the create response
-24. **Check apply status** using `pfsense_get_services_ha_proxy_apply_status`
-25. **Apply changes** using `pfsense_services_ha_proxy_apply` with `confirm=True`
+24. **Update** using `pfsense_update_services_ha_proxy_frontend_error_file` with `confirm=True` — set `errorcode` to `502`
+25. **Get** again using `pfsense_get_services_ha_proxy_frontend_error_file` — verify `errorcode` was updated
+26. **Check apply status** using `pfsense_get_services_ha_proxy_apply_status`
+27. **Apply changes** using `pfsense_services_ha_proxy_apply` with `confirm=True`
 
 **Important notes**:
 Frontend requires a backend to exist. All frontend sub-resources need parent_id.
@@ -95,4 +98,4 @@ Cleanup: sub-resources → frontend → backend.
 - Delete using `pfsense_delete_services_ha_proxy_frontend` with `confirm=True` (ID from create step)
 - Delete setup resource at `/api/v2/services/haproxy/backend` using `pfsense_delete_services_ha_proxy_backend` with `confirm=True`
 
-**Expected outcome**: All 29 tools exercised successfully.
+**Expected outcome**: All 31 tools exercised successfully.

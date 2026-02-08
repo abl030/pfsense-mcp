@@ -4,7 +4,7 @@
 
 **Objective**: Exercise all tools in the system subsystem through CRUD lifecycle, settings, and actions.
 
-**Tools to exercise** (17):
+**Tools to exercise** (18):
 - `pfsense_get_system_dns`
 - `pfsense_update_system_dns`
 - `pfsense_get_system_hostname`
@@ -19,12 +19,10 @@
 - `pfsense_update_system_tunable`
 - `pfsense_delete_system_tunable`
 - `pfsense_get_system_web_gui_settings`
+- `pfsense_update_system_web_gui_settings`
 - `pfsense_list_system_notifications_email_settings`
 - `pfsense_update_system_notifications_email_settings`
 - `pfsense_get_system_version`
-
-**Skipped** (1 — destructive in test environment):
-- `pfsense_update_system_web_gui_settings` — all mutable fields (port, protocol, sslcertref) change the API listening endpoint, making subsequent tests unreachable
 
 **Steps**:
 1. **Get settings** using `pfsense_get_system_dns` — note current value of `dnsallowoverride`
@@ -49,11 +47,13 @@
 17. **Get** using `pfsense_get_system_tunable` with the ID from the create response
 18. **Update** using `pfsense_update_system_tunable` with `confirm=True` — set `descr` to `Updated tunable`
 19. **Get** again using `pfsense_get_system_tunable` — verify `descr` was updated
-20. **Get settings** using `pfsense_get_system_web_gui_settings` — note current values (read-only, do NOT update port/protocol/sslcertref as it breaks API connectivity)
-21. **Get settings** using `pfsense_list_system_notifications_email_settings` — note current value of `ipaddress`
-22. **Update settings** using `pfsense_update_system_notifications_email_settings` with `confirm=True` — set `ipaddress` to `'127.0.0.1'` (also include: `username=test`, `password=test`)
-23. **Get settings** again using `pfsense_list_system_notifications_email_settings` — verify `ipaddress` was updated
-24. **Read** using `pfsense_get_system_version`
+20. **Get settings** using `pfsense_get_system_web_gui_settings` — note current value of `webguicss`
+21. **Update settings** using `pfsense_update_system_web_gui_settings` with `confirm=True` — set `webguicss` to `'pfSense.css'`
+22. **Get settings** again using `pfsense_get_system_web_gui_settings` — verify `webguicss` was updated
+23. **Get settings** using `pfsense_list_system_notifications_email_settings` — note current value of `ipaddress`
+24. **Update settings** using `pfsense_update_system_notifications_email_settings` with `confirm=True` — set `ipaddress` to `'127.0.0.1'` (also include: `username=test`, `password=test`)
+25. **Get settings** again using `pfsense_list_system_notifications_email_settings` — verify `ipaddress` was updated
+26. **Read** using `pfsense_get_system_version`
 
 **Important notes**:
 Timezone PATCH response may have text prefix before JSON — handle carefully.
@@ -62,4 +62,4 @@ Restore hostname and timezone after testing.
 **Cleanup** (reverse order):
 - Delete using `pfsense_delete_system_tunable` with `confirm=True` (ID from create step)
 
-**Expected outcome**: All 17 tools exercised successfully.
+**Expected outcome**: All 18 tools exercised successfully.

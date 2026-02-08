@@ -47,6 +47,12 @@ tasks:
         settings: true
         patch_field: aliasesresolveinterval
         patch_value: 600
+      - path: /api/v2/firewall/states
+        read_only: true
+        notes: "List all firewall states"
+      - path: /api/v2/firewall/state
+        read_only: true
+        notes: "Get singular firewall state — may return empty if no matching state"
       - path: /api/v2/firewall/apply
         apply: true
     notes: |
@@ -83,7 +89,7 @@ tasks:
           protocol: tcp
           source: any
           destination: any
-          target: ""
+          target: "wan:ip"
           descr: bt_sys11_outbound
         update_field: descr
         update_value: "Updated outbound"
@@ -131,6 +137,8 @@ tasks:
           month: [4, 5, 6]
           day: [10, 11, 12]
           hour: "8:00-17:00"
+        update_field: hour
+        update_value: "9:00-18:00"
       - path: /api/v2/firewall/apply
         apply: true
     notes: |
@@ -165,6 +173,8 @@ tasks:
           upperlimit_m2: ""
           realtime_m2: ""
           linkshare_m2: "10%"
+        update_field: qlimit
+        update_value: 100
       - path: /api/v2/firewall/traffic_shaper/limiter
         crud: true
         create_values:
@@ -182,6 +192,8 @@ tasks:
           maskbits: 1
           maskbitsv6: 1
           queue: []
+        update_field: buckets
+        update_value: 32
       - path: /api/v2/firewall/traffic_shaper/limiter/bandwidth
         crud: true
         parent: /api/v2/firewall/traffic_shaper/limiter
@@ -189,6 +201,8 @@ tasks:
         create_values:
           bw: 50
           bwscale: "Mb"
+        update_field: bw
+        update_value: 100
       - path: /api/v2/firewall/traffic_shaper/limiter/queue
         crud: true
         parent: /api/v2/firewall/traffic_shaper/limiter
@@ -196,6 +210,8 @@ tasks:
         create_values:
           name: bt_sys13_limq
           aqm: droptail
+        update_field: aqm
+        update_value: codel
       - path: /api/v2/firewall/apply
         apply: true
     notes: |
@@ -223,13 +239,19 @@ tasks:
       Apply virtual_ip changes separately from regular firewall apply.
 
   - number: 15
-    title: "Firewall States"
+    title: "Firewall States & Virtual IPs"
     subsystem: firewall/state
     endpoints:
       - path: /api/v2/firewall/states/size
         settings: true
         patch_field: maximumstates
         patch_value: 500000
+      - path: /api/v2/firewall/virtual_ips
+        read_only: true
+        notes: "List all virtual IPs (plural endpoint)"
+      - path: /api/v2/firewall/schedules
+        read_only: true
+        notes: "List all schedules (plural endpoint)"
     notes: |
       States are read-only (listing current state table). States/size is a singleton.
       List states, read states/size, patch states/size.
@@ -366,6 +388,8 @@ tasks:
         create_values:
           network: "10.1.0.0"
           mask: 16
+        update_field: mask
+        update_value: 24
       - path: /api/v2/services/dns_resolver/host_override
         crud: true
         create_values:
@@ -383,6 +407,8 @@ tasks:
         create_values:
           host: testalias
           domain: alias.example.com
+        update_field: domain
+        update_value: updated.alias.example.com
       - path: /api/v2/services/dns_resolver/domain_override
         crud: true
         create_values:
@@ -419,6 +445,8 @@ tasks:
         create_values:
           host: testalias
           domain: alias.example.com
+        update_field: domain
+        update_value: updated.alias.example.com
       - path: /api/v2/services/dns_forwarder/apply
         apply: true
     notes: |
@@ -434,10 +462,9 @@ tasks:
         create_values:
           range_from: "192.168.1.201"
           range_to: "192.168.1.210"
-          descr: bt_sys20_pool
         static_parent_id: lan
-        update_field: descr
-        update_value: "Updated pool"
+        update_field: range_to
+        update_value: "192.168.1.215"
       - path: /api/v2/services/dhcp_server/static_mapping
         crud: true
         create_values:
@@ -459,6 +486,7 @@ tasks:
         update_value: "Updated custom option"
       - path: /api/v2/services/dhcp_server/backend
         settings: true
+        patch_only: true
         patch_field: dhcpbackend
         patch_value: kea
         restore_value: isc
@@ -631,6 +659,8 @@ tasks:
         create_values:
           errorcode: 503
           errorfile: bt_sys23_file
+        update_field: errorcode
+        update_value: 502
         setup:
           - path: /api/v2/services/haproxy/file
             create_values:
@@ -666,6 +696,8 @@ tasks:
         parent_id_field: parent_id
         create_values:
           value: "10.1.0.0/16"
+        update_field: value
+        update_value: "10.2.0.0/16"
       - path: /api/v2/services/bind/view
         crud: true
         create_values:
@@ -693,6 +725,8 @@ tasks:
           type_: A
           rdata: "10.99.99.1"
           priority: 0
+        update_field: rdata
+        update_value: "10.99.99.2"
       - path: /api/v2/services/bind/sync
         action: true
     notes: |
@@ -731,6 +765,8 @@ tasks:
         create_values:
           name: test.example.com
           method: standalone
+        update_field: name
+        update_value: updated.example.com
       - path: /api/v2/services/acme/certificate/action
         crud: true
         parent: /api/v2/services/acme/certificate
@@ -738,6 +774,8 @@ tasks:
         create_values:
           status: active
           command: /bin/true
+        update_field: command
+        update_value: "/bin/echo updated"
       - path: /api/v2/services/acme/account_key/register
         action: true
         notes: "Async — returns 200 with status=pending. Uses the created account key."
@@ -1070,6 +1108,8 @@ tasks:
           encryption_algorithm_keylen: 256
           hash_algorithm: sha256
           dhgroup: 14
+        update_field: encryption_algorithm_keylen
+        update_value: 128
       - path: /api/v2/vpn/ipsec/phase2
         crud: true
         create_values:
@@ -1095,6 +1135,8 @@ tasks:
           encryption_algorithm_name: aes
           encryption_algorithm_keylen: 256
           hash_algorithm: sha256
+        update_field: hash_algorithm
+        update_value: sha512
       - path: /api/v2/vpn/ipsec/apply
         apply: true
     notes: |
@@ -1139,6 +1181,15 @@ tasks:
           descr: bt_sys33_cso
         update_field: descr
         update_value: "Updated CSO"
+      - path: /api/v2/status/openvpn/server/route
+        read_only: true
+        notes: "Get singular OpenVPN server route"
+      - path: /api/v2/status/openvpn/server/routes
+        read_only: true
+        notes: "List OpenVPN server routes"
+      - path: /api/v2/status/openvpn/server/connections
+        read_only: true
+        notes: "List OpenVPN server connections"
     notes: |
       OpenVPN server in TLS mode may produce log prefix before JSON response.
       local_port must be string, not int.
@@ -1170,6 +1221,8 @@ tasks:
         create_values:
           address: "10.100.0.1"
           mask: 24
+        update_field: mask
+        update_value: 32
       - path: /api/v2/vpn/wireguard/peer
         crud: true
         parent: /api/v2/vpn/wireguard/tunnel
@@ -1187,6 +1240,8 @@ tasks:
         create_values:
           address: "10.200.0.0"
           mask: 24
+        update_field: mask
+        update_value: 32
         dependency_chain:
           - /api/v2/vpn/wireguard/tunnel
           - /api/v2/vpn/wireguard/peer
@@ -1196,6 +1251,67 @@ tasks:
       Tunnel addresses and peer allowed_ips are sub-resources (NOT inline arrays).
       Peer needs tunnel name (tun field). Allowed IP needs peer parent_id.
       Cleanup: allowed_ip → peer → address → tunnel. Apply after each mutation.
+
+  - number: 38
+    title: "Additional Status & Read-Only Endpoints"
+    subsystem: status
+    endpoints:
+      - path: /api/v2/status/ipsec/child_sa
+        read_only: true
+        notes: "Get singular IPsec child SA"
+      - path: /api/v2/status/ipsec/child_sas
+        read_only: true
+        notes: "List IPsec child SAs"
+      - path: /api/v2/status/logs/openvpn
+        read_only: true
+        notes: "OpenVPN logs — use limit parameter"
+      - path: /api/v2/status/logs/packages/restapi
+        read_only: true
+        notes: "REST API package logs"
+      - path: /api/v2/status/dhcp_server/leases
+        read_only: true
+        notes: "DHCP server leases (also tested in task 35)"
+      - path: /api/v2/interface/bridges
+        read_only: true
+        notes: "List bridges (plural, read-only)"
+      - path: /api/v2/auth/keys
+        read_only: true
+        notes: "List API keys (read-only plural)"
+      - path: /api/v2/system/packages
+        read_only: true
+        notes: "List installed packages (plural)"
+      - path: /api/v2/system/certificates
+        read_only: true
+        notes: "List all certificates (plural)"
+      - path: /api/v2/system/certificate_authorities
+        read_only: true
+        notes: "List all CAs (plural)"
+      - path: /api/v2/system/crls
+        read_only: true
+        notes: "List all CRLs (plural)"
+      - path: /api/v2/diagnostics/tables
+        read_only: true
+        notes: "List pf tables (plural)"
+      - path: /api/v2/diagnostics/config_history/revisions
+        read_only: true
+        notes: "List config history revisions (plural)"
+      - path: /api/v2/interfaces
+        read_only: true
+        notes: "List all network interfaces (top-level plural)"
+      - path: /api/v2/users
+        read_only: true
+        notes: "List all users (top-level plural)"
+      - path: /api/v2/services/acme/account_key/registrations
+        read_only: true
+        notes: "List ACME registrations"
+      - path: /api/v2/services/acme/certificate/issuances
+        read_only: true
+        notes: "List ACME certificate issuances"
+      - path: /api/v2/services/acme/certificate/renewals
+        read_only: true
+        notes: "List ACME certificate renewals"
+    notes: |
+      All read-only endpoints. Use limit parameter on log endpoints.
 
   - number: 35
     title: "Status Endpoints — All Read-Only"
@@ -1302,6 +1418,97 @@ tasks:
       - path: /api/v2/system/package
         method: DELETE
         reason: "nginx 504 timeout via QEMU NAT"
+
+  - number: 39
+    title: "PUT Replace — All Plural Collection Replacements"
+    subsystem: all
+    endpoints:
+      # Firewall
+      - path: /api/v2/firewall/aliases
+        replace: true
+      - path: /api/v2/firewall/rules
+        replace: true
+      - path: /api/v2/firewall/nat/port_forwards
+        replace: true
+      - path: /api/v2/firewall/nat/outbound/mappings
+        replace: true
+      - path: /api/v2/firewall/nat/one_to_one/mappings
+        replace: true
+      - path: /api/v2/firewall/schedules
+        replace: true
+      - path: /api/v2/firewall/traffic_shapers
+        replace: true
+      - path: /api/v2/firewall/traffic_shaper/limiters
+        replace: true
+      # Interface
+      - path: /api/v2/interface/groups
+        replace: true
+      # Services
+      - path: /api/v2/services/acme/account_keys
+        replace: true
+      - path: /api/v2/services/acme/certificates
+        replace: true
+      - path: /api/v2/services/bind/access_lists
+        replace: true
+      - path: /api/v2/services/bind/views
+        replace: true
+      - path: /api/v2/services/bind/zones
+        replace: true
+      - path: /api/v2/services/bind/sync/remote_hosts
+        replace: true
+      - path: /api/v2/services/cron/jobs
+        replace: true
+      - path: /api/v2/services/dhcp_servers
+        replace: true
+      - path: /api/v2/services/dns_forwarder/host_overrides
+        replace: true
+      - path: /api/v2/services/dns_resolver/access_lists
+        replace: true
+      - path: /api/v2/services/dns_resolver/domain_overrides
+        replace: true
+      - path: /api/v2/services/dns_resolver/host_overrides
+        replace: true
+      - path: /api/v2/services/freeradius/clients
+        replace: true
+      - path: /api/v2/services/freeradius/interfaces
+        replace: true
+      - path: /api/v2/services/freeradius/users
+        replace: true
+      - path: /api/v2/services/haproxy/backends
+        replace: true
+      - path: /api/v2/services/haproxy/files
+        replace: true
+      - path: /api/v2/services/haproxy/frontends
+        replace: true
+      - path: /api/v2/services/ntp/time_servers
+        replace: true
+      - path: /api/v2/services/service_watchdogs
+        replace: true
+      # System
+      - path: /api/v2/system/tunables
+        replace: true
+      - path: /api/v2/system/restapi/access_list
+        replace: true
+      # User
+      - path: /api/v2/user/auth_servers
+        replace: true
+      - path: /api/v2/user/groups
+        replace: true
+      # VPN
+      - path: /api/v2/vpn/ipsec/phase1s
+        replace: true
+      - path: /api/v2/vpn/ipsec/phase2s
+        replace: true
+      - path: /api/v2/vpn/openvpn/client_export/configs
+        replace: true
+      - path: /api/v2/vpn/wireguard/peers
+        replace: true
+      - path: /api/v2/vpn/wireguard/tunnels
+        replace: true
+    notes: |
+      PUT replace operations: GET current → PUT same data back → verify (safe no-op).
+      Each replace call replaces the ENTIRE collection, so always fetch first.
+      Do NOT pass empty arrays — that would delete all resources.
 
   # ── Adversarial tasks (40-44) ──────────────────────────────────────────────
 
@@ -1421,9 +1628,17 @@ tasks:
   # ── Destructive task (opt-in only) ─────────────────────────────────────────
 
   - number: 99
-    title: "Destructive — Halt & Reboot (opt-in)"
+    title: "Destructive — Halt, Reboot, Bulk Clear (opt-in)"
     destructive: true
     endpoints:
+      - path: /api/v2/diagnostics/arp_table
+        action: true
+        action_body: {}
+        notes: "DELETE all ARP entries — non-critical, regenerates quickly"
+      - path: /api/v2/firewall/states
+        action: true
+        action_body: {}
+        notes: "DELETE all firewall states — non-critical, connections re-establish"
       - path: /api/v2/diagnostics/reboot
         action: true
         action_body: {}
@@ -1431,5 +1646,7 @@ tasks:
         action: true
         action_body: {}
     notes: |
-      ONLY run with INCLUDE_DESTRUCTIVE=1. Reboot first, wait for API, then halt.
+      ONLY run with INCLUDE_DESTRUCTIVE=1.
+      First clear ARP table and firewall states (non-critical bulk clears).
+      Then reboot, wait for API, then halt (last step — VM won't recover).
       These will terminate the VM.

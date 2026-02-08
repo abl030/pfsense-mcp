@@ -4,9 +4,9 @@
 
 **Objective**: Exercise all tools in the user subsystem through CRUD lifecycle, settings, and actions.
 
-**Tools to exercise** (14):
+**Tools to exercise** (15):
 - `pfsense_create_user`
-- `pfsense_list_user_auth_servers`
+- `pfsense_list_users`
 - `pfsense_get_user`
 - `pfsense_update_user`
 - `pfsense_delete_user`
@@ -16,6 +16,7 @@
 - `pfsense_update_user_group`
 - `pfsense_delete_user_group`
 - `pfsense_create_user_auth_server`
+- `pfsense_list_user_auth_servers`
 - `pfsense_get_user_auth_server`
 - `pfsense_update_user_auth_server`
 - `pfsense_delete_user_auth_server`
@@ -25,7 +26,7 @@
     - `username`: `bt_sys31_user`
     - `password`: `Testpass123!Abc`
     - `descr`: `Bank tester user`
-2. **List** using `pfsense_list_user_auth_servers` — verify the created resource appears
+2. **List** using `pfsense_list_users` — verify the created resource appears
 3. **Get** using `pfsense_get_user` with the ID from the create response
 4. **Update** using `pfsense_update_user` with `confirm=True` — set `descr` to `Updated user`
 5. **Get** again using `pfsense_get_user` — verify `descr` was updated
@@ -67,4 +68,4 @@ Auth server type_ must be 'ldap' or 'radius'. LDAP needs many required fields.
 - Delete using `pfsense_delete_user_group` with `confirm=True` (ID from create step)
 - Delete using `pfsense_delete_user` with `confirm=True` (ID from create step)
 
-**Expected outcome**: All 14 tools exercised successfully.
+**Expected outcome**: All 15 tools exercised successfully.

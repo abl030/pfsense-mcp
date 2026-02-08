@@ -28,11 +28,10 @@
 1. **Create** using `pfsense_create_services_dhcp_server_address_pool` with `confirm=True` (use `parent_id="lan"`):
     - `range_from`: `192.168.1.201`
     - `range_to`: `192.168.1.210`
-    - `descr`: `bt_sys20_pool`
 2. **List** using `pfsense_list_services_dhcp_server_address_pools` — verify the created resource appears
 3. **Get** using `pfsense_get_services_dhcp_server_address_pool` with the ID from the create response
-4. **Update** using `pfsense_update_services_dhcp_server_address_pool` with `confirm=True` — set `descr` to `Updated pool`
-5. **Get** again using `pfsense_get_services_dhcp_server_address_pool` — verify `descr` was updated
+4. **Update** using `pfsense_update_services_dhcp_server_address_pool` with `confirm=True` — set `range_to` to `192.168.1.215`
+5. **Get** again using `pfsense_get_services_dhcp_server_address_pool` — verify `range_to` was updated
 6. **Create** using `pfsense_create_services_dhcp_server_static_mapping` with `confirm=True` (use `parent_id="lan"`):
     - `mac`: `00:11:22:33:44:55`
     - `ipaddr`: `192.168.1.250`
@@ -52,8 +51,8 @@
 15. **Get** again using `pfsense_get_services_dhcp_server_custom_option` — verify `descr` was updated
 16. **Update settings** using `pfsense_update_services_dhcp_server_backend` with `confirm=True` — set `dhcpbackend` to `'kea'`
 17. **Restore** using `pfsense_update_services_dhcp_server_backend` with `confirm=True` — set `dhcpbackend` back to `'isc'`
-20. **Check apply status** using `pfsense_get_services_dhcp_server_apply_status`
-21. **Apply changes** using `pfsense_services_dhcp_server_apply` with `confirm=True`
+18. **Check apply status** using `pfsense_get_services_dhcp_server_apply_status`
+19. **Apply changes** using `pfsense_services_dhcp_server_apply` with `confirm=True`
 
 **Important notes**:
 All DHCP sub-resources use static parent_id="lan" (the LAN interface name in pfSense).

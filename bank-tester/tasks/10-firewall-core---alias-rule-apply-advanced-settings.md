@@ -4,7 +4,7 @@
 
 **Objective**: Exercise all tools in the firewall subsystem through CRUD lifecycle, settings, and actions.
 
-**Tools to exercise** (14):
+**Tools to exercise** (16):
 - `pfsense_create_firewall_alias`
 - `pfsense_list_firewall_aliases`
 - `pfsense_get_firewall_alias`
@@ -17,6 +17,8 @@
 - `pfsense_delete_firewall_rule`
 - `pfsense_get_firewall_advanced_settings`
 - `pfsense_update_firewall_advanced_settings`
+- `pfsense_list_firewall_states`
+- `pfsense_get_firewall_state`
 - `pfsense_get_firewall_apply_status`
 - `pfsense_firewall_apply`
 
@@ -45,12 +47,14 @@
 11. **Get settings** using `pfsense_get_firewall_advanced_settings` — note current value of `aliasesresolveinterval`
 12. **Update settings** using `pfsense_update_firewall_advanced_settings` with `confirm=True` — set `aliasesresolveinterval` to `600`
 13. **Get settings** again using `pfsense_get_firewall_advanced_settings` — verify `aliasesresolveinterval` was updated
-14. **Check apply status** using `pfsense_get_firewall_apply_status`
-15. **Apply changes** using `pfsense_firewall_apply` with `confirm=True`
+14. **Read** using `pfsense_list_firewall_states` (List all firewall states)
+15. **Read** using `pfsense_get_firewall_state` (Get singular firewall state — may return empty if no matching state)
+16. **Check apply status** using `pfsense_get_firewall_apply_status`
+17. **Apply changes** using `pfsense_firewall_apply` with `confirm=True`
 
 **Adversarial subtasks** (attempt once, record error quality):
-17. Create alias without type_ field — expect error about required field
-18. Create rule with protocol='bogus' — expect enum validation error
+19. Create alias without type_ field — expect error about required field
+20. Create rule with protocol='bogus' — expect enum validation error
 
 **Important notes**:
 Create alias first, then rule (rule may reference alias).
@@ -60,4 +64,4 @@ Apply after each mutation. Read advanced_settings and patch one field.
 - Delete using `pfsense_delete_firewall_rule` with `confirm=True` (ID from create step)
 - Delete using `pfsense_delete_firewall_alias` with `confirm=True` (ID from create step)
 
-**Expected outcome**: All 14 tools exercised successfully.
+**Expected outcome**: All 16 tools exercised successfully.

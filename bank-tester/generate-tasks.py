@@ -101,14 +101,17 @@ def generate_crud_steps(
     delete_tool = get_tool_name(tool_map, path, "delete")
 
     # Check for list tool (plural path)
-    # Find the plural path by looking for the path + 's' or similar
+    # Find the shortest matching path to avoid picking sub-resource plurals
+    # e.g., /firewall/aliases (shorter) wins over /firewall/alias/sub_resource (longer)
     list_tool = None
+    best_path = None
     for p in tool_map:
         if p.startswith(path) and p != path and "get" in tool_map[p]:
             candidate = get_tool_name(tool_map, p, "get")
             if "list_" in candidate:
-                list_tool = candidate
-                break
+                if best_path is None or len(p) < len(best_path):
+                    best_path = p
+                    list_tool = candidate
 
     # Parent reference
     parent_note = ""
@@ -184,15 +187,17 @@ def generate_settings_steps(
     restore_value = ep.get("restore_value")
     extra_fields = ep.get("extra_fields", {})
 
-    get_tool = get_tool_name(tool_map, path, "get")
+    patch_only = ep.get("patch_only", False)
     patch_tool = get_tool_name(tool_map, path, "patch")
 
-    # Get current settings
-    all_steps.append(
-        f"{step_num}. **Get settings** using `{get_tool}` — note current value of `{patch_field}`"
-    )
-    tools_exercised.append(get_tool)
-    step_num += 1
+    # Get current settings (skip if patch_only — no GET endpoint exists)
+    if not patch_only:
+        get_tool = get_tool_name(tool_map, path, "get")
+        all_steps.append(
+            f"{step_num}. **Get settings** using `{get_tool}` — note current value of `{patch_field}`"
+        )
+        tools_exercised.append(get_tool)
+        step_num += 1
 
     # Patch
     if patch_field:
@@ -205,11 +210,12 @@ def generate_settings_steps(
         tools_exercised.append(patch_tool)
         step_num += 1
 
-        # Verify
-        all_steps.append(
-            f"{step_num}. **Get settings** again using `{get_tool}` — verify `{patch_field}` was updated"
-        )
-        step_num += 1
+        # Verify (only if GET exists)
+        if not patch_only:
+            all_steps.append(
+                f"{step_num}. **Get settings** again using `{get_tool}` — verify `{patch_field}` was updated"
+            )
+            step_num += 1
 
         # Restore
         if restore_value is not None:
@@ -298,6 +304,45 @@ def generate_read_only_steps(
     return step_num
 
 
+def generate_replace_steps(
+    ep: dict,
+    tool_map: dict,
+    step_num: int,
+    all_steps: list[str],
+    tools_exercised: list[str],
+) -> int:
+    """Generate PUT (replace) steps: GET current → PUT back → verify. Returns next step number."""
+    path = ep["path"]
+    notes = ep.get("notes", "")
+
+    replace_tool = get_tool_name(tool_map, path, "put")
+    list_tool = get_tool_name(tool_map, path, "get")
+
+    extra_note = f" ({notes})" if notes else ""
+
+    # GET current collection
+    all_steps.append(
+        f"{step_num}. **List** current resources using `{list_tool}`{extra_note}"
+    )
+    tools_exercised.append(list_tool)
+    step_num += 1
+
+    # PUT the same data back (safe no-op)
+    all_steps.append(
+        f"{step_num}. **Replace** using `{replace_tool}` with `confirm=True` — PUT the same data back (safe no-op). Pass the full list from the previous step as the request body."
+    )
+    tools_exercised.append(replace_tool)
+    step_num += 1
+
+    # GET again to verify
+    all_steps.append(
+        f"{step_num}. **List** again using `{list_tool}` — verify nothing changed"
+    )
+    step_num += 1
+
+    return step_num
+
+
 def generate_adversarial_task(task: dict, task_num: str) -> str:
     """Generate an adversarial task file."""
     title = task["title"]
@@ -366,6 +411,8 @@ def generate_systematic_task(task: dict, tool_map: dict, task_num: str) -> str:
             ep_type = "action"
         elif ep.get("read_only", False):
             ep_type = "read_only"
+        elif ep.get("replace", False):
+            ep_type = "replace"
         elif ep.get("setup_only", False):
             ep_type = "crud"  # Use CRUD generator but with setup_only flag
 
@@ -387,6 +434,10 @@ def generate_systematic_task(task: dict, tool_map: dict, task_num: str) -> str:
             )
         elif ep_type == "read_only":
             step_num = generate_read_only_steps(
+                ep, tool_map, step_num, all_steps, tools_exercised
+            )
+        elif ep_type == "replace":
+            step_num = generate_replace_steps(
                 ep, tool_map, step_num, all_steps, tools_exercised
             )
 

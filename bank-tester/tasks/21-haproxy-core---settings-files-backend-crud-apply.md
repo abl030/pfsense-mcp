@@ -13,7 +13,7 @@
 - `pfsense_update_services_ha_proxy_file`
 - `pfsense_delete_services_ha_proxy_file`
 - `pfsense_create_services_ha_proxy_backend`
-- `pfsense_list_services_ha_proxy_backend_ac_ls`
+- `pfsense_list_services_ha_proxy_backends`
 - `pfsense_get_services_ha_proxy_backend`
 - `pfsense_update_services_ha_proxy_backend`
 - `pfsense_delete_services_ha_proxy_backend`
@@ -35,12 +35,11 @@
     - `name`: `bt_sys21_be`
     - `agent_port`: `0`
     - `persist_cookie_name`: `SRVID`
-    - `stats_enabled`: `true`
-    - `stats_desc`: `Bank tester backend`
-10. **List** using `pfsense_list_services_ha_proxy_backend_ac_ls` — verify the created resource appears
+    - `descr`: `Bank tester backend`
+10. **List** using `pfsense_list_services_ha_proxy_backends` — verify the created resource appears
 11. **Get** using `pfsense_get_services_ha_proxy_backend` with the ID from the create response
-12. **Update** using `pfsense_update_services_ha_proxy_backend` with `confirm=True` — set `stats_desc` to `Updated backend` (requires `stats_enabled=true`)
-13. **Get** again using `pfsense_get_services_ha_proxy_backend` — verify `stats_desc` was updated
+12. **Update** using `pfsense_update_services_ha_proxy_backend` with `confirm=True` — set `descr` to `Updated backend`
+13. **Get** again using `pfsense_get_services_ha_proxy_backend` — verify `descr` was updated
 14. **Check apply status** using `pfsense_get_services_ha_proxy_apply_status`
 15. **Apply changes** using `pfsense_services_ha_proxy_apply` with `confirm=True`
 
