@@ -18,61 +18,8 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Any
 
-from .context_builder import ToolContext, _DANGEROUS_ENDPOINTS
+from .context_builder import ToolContext, _DANGEROUS_ENDPOINTS, _PHANTOM_PLURAL_ROUTES
 from .schema_parser import ToolParameter
-
-# Plural routes that exist in the OpenAPI spec but return nginx 404 on the real server.
-# These are sub-resource plural endpoints whose singular forms require parent_id.
-# The pfSense REST API simply doesn't register these routes.
-_PHANTOM_PLURAL_ROUTES = {
-    "/api/v2/diagnostics/tables",
-    "/api/v2/firewall/schedule/time_ranges",
-    "/api/v2/firewall/traffic_shaper/limiter/bandwidths",
-    "/api/v2/firewall/traffic_shaper/limiter/queues",
-    "/api/v2/firewall/traffic_shaper/queues",
-    "/api/v2/routing/gateway/group/priorities",
-    "/api/v2/services/dns_forwarder/host_override/aliases",
-    "/api/v2/services/dns_resolver/host_override/aliases",
-    "/api/v2/services/dns_resolver/access_list/networks",
-    "/api/v2/vpn/wireguard/tunnel/addresses",
-    "/api/v2/vpn/wireguard/peer/allowed_ips",
-    "/api/v2/vpn/ipsec/phase1/encryptions",
-    "/api/v2/vpn/ipsec/phase2/encryptions",
-    "/api/v2/vpn/openvpn/client_export/configs",
-    # DHCP sub-resource plurals: singular CRUD works (chained with parent_id=lan), but plurals 404
-    "/api/v2/services/dhcp_server/address_pools",
-    "/api/v2/services/dhcp_server/custom_options",
-    "/api/v2/services/dhcp_server/static_mappings",
-    "/api/v2/status/openvpn/server/connections",
-    "/api/v2/status/openvpn/server/routes",
-    "/api/v2/status/ipsec/child_sas",
-    "/api/v2/status/logs/auth",
-    "/api/v2/status/logs/openvpn",
-    "/api/v2/status/logs/packages/restapi",
-    # HAProxy sub-resource plurals (require parent_id on singular form)
-    "/api/v2/services/haproxy/settings/dns_resolvers",
-    "/api/v2/services/haproxy/settings/email_mailers",
-    "/api/v2/services/haproxy/frontend/certificates",
-    "/api/v2/services/haproxy/backend/acls",
-    "/api/v2/services/haproxy/backend/actions",
-    "/api/v2/services/haproxy/backend/errorfiles",
-    "/api/v2/services/haproxy/backend/servers",
-    "/api/v2/services/haproxy/frontend/acls",
-    "/api/v2/services/haproxy/frontend/actions",
-    "/api/v2/services/haproxy/frontend/addresses",
-    "/api/v2/services/haproxy/frontend/error_files",
-    # BIND sub-resource plurals
-    "/api/v2/services/bind/access_list/entries",
-    # bind/sync/domains removed — corresponding singular does not exist in OpenAPI spec
-    # FreeRADIUS plural routes — singular forms tested via CRUD
-    "/api/v2/services/freeradius/clients",
-    "/api/v2/services/freeradius/interfaces",
-    "/api/v2/services/freeradius/users",
-    # Status endpoints for unconfigured services
-    "/api/v2/status/openvpn/server/connection",
-    "/api/v2/status/openvpn/server/route",
-    "/api/v2/status/ipsec/child_sa",
-}
 
 # Test value generators by field name pattern
 _TEST_VALUES: dict[str, str] = {

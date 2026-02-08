@@ -1,6 +1,6 @@
 # pfSense MCP Server
 
-An MCP (Model Context Protocol) server that gives AI agents full control over pfSense firewalls via the REST API v2. 677 tools covering firewall rules, NAT, VPN (IPsec, WireGuard, OpenVPN), services (DHCP, DNS, HAProxy), routing, certificates, users, and more.
+An MCP (Model Context Protocol) server that gives AI agents full control over pfSense firewalls via the REST API v2. 599 tools covering firewall rules, NAT, VPN (IPsec, WireGuard, OpenVPN), services (DHCP, DNS, HAProxy), routing, certificates, users, and more.
 
 This entire project — the generator, the server, the test suite, and this README — was built by AI (Claude) and is designed to be installed and used by AI agents.
 
@@ -62,7 +62,7 @@ uv sync
 uv run python -m generator
 ```
 
-This produces `generated/server.py` — the MCP server with 677 tools.
+This produces `generated/server.py` — the MCP server with 599 tools.
 
 ### Configure Your MCP Client
 
@@ -110,7 +110,7 @@ claude mcp add pfsense -- \
 
 Requires the [pfSense REST API v2](https://github.com/jaredhendrickson13/pfsense-api) package installed on your pfSense firewall. Tested with REST API v2.7.1 on pfSense CE 2.8.1.
 
-## What You Get: 677 Tools
+## What You Get: 599 Tools
 
 ### Firewall (99 tools)
 
@@ -244,12 +244,12 @@ This repo contains a **generator** that reads the pfSense REST API v2 OpenAPI sp
 
 ### Why a generator?
 
-The pfSense REST API has 258 paths and 677 operations. Rather than hand-writing 677 tool functions, we wrote a generator that reads the official OpenAPI 3.0.0 spec and produces the server automatically. When pfSense updates their API, pull a new spec and re-run the generator.
+The pfSense REST API spec has 258 paths and 677 operations, but 41 paths (78 operations) are phantom plural routes that don't exist on the real server. Rather than hand-writing 599 tool functions, we wrote a generator that reads the official OpenAPI 3.0.0 spec, filters out the phantom routes, and produces the server automatically. When pfSense updates their API, pull a new spec and re-run the generator.
 
 ### Architecture
 
 ```
-openapi-spec.json            # OpenAPI 3.0.0 spec (258 paths, 677 operations)
+openapi-spec.json            # OpenAPI 3.0.0 spec (258 paths, 217 active, 599 tools)
 generator/                   # Python generator that builds the server
   loader.py                  # Load and parse the OpenAPI spec
   naming.py                  # Convert operationIds to tool names
@@ -300,10 +300,11 @@ The golden image build is fully automated: download pfSense installer, install v
 
 | Metric | Count | % |
 |--------|-------|---|
+| Active paths (tools generated) | 217 | 84.1% |
 | Paths with active tests | 203 | 78.7% |
-| Paths with documented skip | 16 | 6.2% |
-| Phantom plural routes (spec-only, 404 on server) | 39 | 15.1% |
-| **Total accounted** | **258** | **100%** |
+| Paths with documented skip | 14 | 5.4% |
+| Phantom plural routes (removed from generator) | 41 | 15.9% |
+| **Total in spec** | **258** | **100%** |
 
 Every untested path has a documented reason. Zero silent skips.
 
@@ -323,9 +324,56 @@ Every untested path has a documented reason. Zero silent skips.
 | `system/restapi/settings/sync` | Requires HA peer |
 | `system/restapi/version` (PATCH) | Destructive: changes API version |
 
-### Phantom plural routes (39 paths)
+### Phantom plural routes (41 paths, removed from generator)
 
-The OpenAPI spec includes 39 plural sub-resource endpoints (e.g., `/api/v2/firewall/schedule/time_ranges`) that return nginx 404 on the real server. These are spec-only artifacts — pfSense doesn't register them. Their singular CRUD counterparts all work and are fully tested. These phantom routes are excluded from the test count but documented in the generator source.
+The OpenAPI spec includes 41 plural sub-resource endpoints that return nginx 404 on the real pfSense server. These are spec-only artifacts — pfSense doesn't register them. Their singular CRUD counterparts all work and are fully tested. We chose to filter these out during code generation so the MCP server only exposes tools that actually work. This may be revisited if a future pfSense REST API version registers these routes.
+
+<details>
+<summary>Full list of removed paths</summary>
+
+- `/api/v2/diagnostics/tables`
+- `/api/v2/firewall/schedule/time_ranges`
+- `/api/v2/firewall/traffic_shaper/limiter/bandwidths`
+- `/api/v2/firewall/traffic_shaper/limiter/queues`
+- `/api/v2/firewall/traffic_shaper/queues`
+- `/api/v2/routing/gateway/group/priorities`
+- `/api/v2/services/bind/access_list/entries`
+- `/api/v2/services/dhcp_server/address_pools`
+- `/api/v2/services/dhcp_server/custom_options`
+- `/api/v2/services/dhcp_server/static_mappings`
+- `/api/v2/services/dns_forwarder/host_override/aliases`
+- `/api/v2/services/dns_resolver/access_list/networks`
+- `/api/v2/services/dns_resolver/host_override/aliases`
+- `/api/v2/services/freeradius/clients`
+- `/api/v2/services/freeradius/interfaces`
+- `/api/v2/services/freeradius/users`
+- `/api/v2/services/haproxy/backend/acls`
+- `/api/v2/services/haproxy/backend/actions`
+- `/api/v2/services/haproxy/backend/errorfiles`
+- `/api/v2/services/haproxy/backend/servers`
+- `/api/v2/services/haproxy/frontend/acls`
+- `/api/v2/services/haproxy/frontend/actions`
+- `/api/v2/services/haproxy/frontend/addresses`
+- `/api/v2/services/haproxy/frontend/certificates`
+- `/api/v2/services/haproxy/frontend/error_files`
+- `/api/v2/services/haproxy/settings/dns_resolvers`
+- `/api/v2/services/haproxy/settings/email_mailers`
+- `/api/v2/status/ipsec/child_sa`
+- `/api/v2/status/ipsec/child_sas`
+- `/api/v2/status/logs/auth`
+- `/api/v2/status/logs/openvpn`
+- `/api/v2/status/logs/packages/restapi`
+- `/api/v2/status/openvpn/server/connection`
+- `/api/v2/status/openvpn/server/connections`
+- `/api/v2/status/openvpn/server/route`
+- `/api/v2/status/openvpn/server/routes`
+- `/api/v2/vpn/ipsec/phase1/encryptions`
+- `/api/v2/vpn/ipsec/phase2/encryptions`
+- `/api/v2/vpn/openvpn/client_export/configs`
+- `/api/v2/vpn/wireguard/peer/allowed_ips`
+- `/api/v2/vpn/wireguard/tunnel/addresses`
+
+</details>
 
 ### Contributing
 

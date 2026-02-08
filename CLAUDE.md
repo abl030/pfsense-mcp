@@ -2,7 +2,7 @@
 
 ## Goal
 
-Build a **self-contained, auto-generated MCP server** for the pfSense REST API v2. The server is generated from `openapi-spec.json` (the official OpenAPI 3.0.0 spec, 258 paths, 178 schemas, 677 operations). When pfSense updates their API, pull a new spec and re-run the generator.
+Build a **self-contained, auto-generated MCP server** for the pfSense REST API v2. The server is generated from `openapi-spec.json` (the official OpenAPI 3.0.0 spec, 258 paths, 178 schemas, 677 operations). 41 phantom plural routes (78 operations) are filtered out during generation, producing 599 tools. When pfSense updates their API, pull a new spec and re-run the generator.
 
 ## Work Order
 
@@ -317,7 +317,7 @@ Exclude from generation or add extra warnings:
 
 ## Phase 2 Status: Test Coverage
 
-**Current: 203 tests, 203 passing** against 258 API paths (677 operations)
+**Current: 203 tests, 203 passing** against 217 active API paths (599 tools; 41 phantom plural routes filtered out)
 
 ### Coverage summary
 
@@ -367,7 +367,7 @@ Every skip is documented in `_SKIP_CRUD_PATHS`, `_SKIP_ACTION`, `_SKIP_SINGLETON
 - `vpn/openvpn/client_export` — requires functioning OpenVPN server
 - `system/restapi/version` — PATCH triggers API version change (destructive)
 
-### Phantom plural routes (39)
+### Phantom plural routes (41)
 
 Routes present in the OpenAPI spec but return nginx 404 on the real server. These are sub-resource plural endpoints whose singular forms require `parent_id`. The pfSense REST API simply doesn't register these routes. All are tested via their singular CRUD endpoints instead.
 
@@ -384,7 +384,7 @@ Deep research on all skipped endpoints is in `research/skipped-endpoints-analysi
 
 | Sprint | Endpoints | Approach | Status |
 |--------|-----------|----------|--------|
-| 0 | Phantom plural routes (39 paths) | Remove from MCP server generator (`codegen.py`/`context_builder.py`) using `_PHANTOM_PLURAL_ROUTES` set. Update tool count in `README.md` and `flake.nix`. | **TODO** |
+| 0 | Phantom plural routes (41 paths) | Remove from MCP server generator (`codegen.py`/`context_builder.py`) using `_PHANTOM_PLURAL_ROUTES` set. Update tool count in `README.md` and `flake.nix`. | **DONE** — 41 paths (78 ops) filtered in `context_builder.py`. 677→599 tools. |
 | 1 | `interface` CRUD (+3 tests) | Create VLAN on em2, assign as opt1, PATCH, delete. Safe — doesn't touch WAN/LAN. | **TODO** |
 | 2 | `services/dhcp_server` POST | Confirm by-design limitation. Re-categorize skip reason from "singleton" to "not applicable — POST not supported, PATCH tested". No new tests needed. | **TODO** |
 | 3 | `system/certificate/pkcs12/export` (+1 test) | Try `Accept: application/octet-stream` header. If still 406, use client-side PKCS12 generation as fallback proof. | **TODO** |

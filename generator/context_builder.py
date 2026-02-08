@@ -14,6 +14,53 @@ from .loader import Operation, load_spec, parse_operations
 from .naming import operation_id_to_tool_name
 from .schema_parser import ToolParameter, extract_tool_parameters
 
+# Plural routes that exist in the OpenAPI spec but return nginx 404 on the real server.
+# These are sub-resource plural endpoints whose singular forms require parent_id.
+# The pfSense REST API simply doesn't register these routes.
+_PHANTOM_PLURAL_ROUTES = {
+    "/api/v2/diagnostics/tables",
+    "/api/v2/firewall/schedule/time_ranges",
+    "/api/v2/firewall/traffic_shaper/limiter/bandwidths",
+    "/api/v2/firewall/traffic_shaper/limiter/queues",
+    "/api/v2/firewall/traffic_shaper/queues",
+    "/api/v2/routing/gateway/group/priorities",
+    "/api/v2/services/dns_forwarder/host_override/aliases",
+    "/api/v2/services/dns_resolver/host_override/aliases",
+    "/api/v2/services/dns_resolver/access_list/networks",
+    "/api/v2/vpn/wireguard/tunnel/addresses",
+    "/api/v2/vpn/wireguard/peer/allowed_ips",
+    "/api/v2/vpn/ipsec/phase1/encryptions",
+    "/api/v2/vpn/ipsec/phase2/encryptions",
+    "/api/v2/vpn/openvpn/client_export/configs",
+    "/api/v2/services/dhcp_server/address_pools",
+    "/api/v2/services/dhcp_server/custom_options",
+    "/api/v2/services/dhcp_server/static_mappings",
+    "/api/v2/status/openvpn/server/connections",
+    "/api/v2/status/openvpn/server/routes",
+    "/api/v2/status/ipsec/child_sas",
+    "/api/v2/status/logs/auth",
+    "/api/v2/status/logs/openvpn",
+    "/api/v2/status/logs/packages/restapi",
+    "/api/v2/services/haproxy/settings/dns_resolvers",
+    "/api/v2/services/haproxy/settings/email_mailers",
+    "/api/v2/services/haproxy/frontend/certificates",
+    "/api/v2/services/haproxy/backend/acls",
+    "/api/v2/services/haproxy/backend/actions",
+    "/api/v2/services/haproxy/backend/errorfiles",
+    "/api/v2/services/haproxy/backend/servers",
+    "/api/v2/services/haproxy/frontend/acls",
+    "/api/v2/services/haproxy/frontend/actions",
+    "/api/v2/services/haproxy/frontend/addresses",
+    "/api/v2/services/haproxy/frontend/error_files",
+    "/api/v2/services/bind/access_list/entries",
+    "/api/v2/services/freeradius/clients",
+    "/api/v2/services/freeradius/interfaces",
+    "/api/v2/services/freeradius/users",
+    "/api/v2/status/openvpn/server/connection",
+    "/api/v2/status/openvpn/server/route",
+    "/api/v2/status/ipsec/child_sa",
+}
+
 # Subsystem prefixes that require an explicit "apply" call after mutations.
 _APPLY_SUBSYSTEMS = [
     "/api/v2/firewall/virtual_ip",
@@ -135,6 +182,10 @@ def build_tool_contexts(spec: dict[str, Any]) -> list[ToolContext]:
     contexts: list[ToolContext] = []
 
     for op in operations:
+        # Skip phantom plural routes that don't exist on the real server
+        if op.path in _PHANTOM_PLURAL_ROUTES:
+            continue
+
         # Get parameter names for naming
         param_names = [p.name for p in op.parameters]
 

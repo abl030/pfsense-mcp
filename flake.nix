@@ -1,5 +1,5 @@
 {
-  description = "AI-generated MCP server for the pfSense REST API v2 — 677 tools";
+  description = "AI-generated MCP server for the pfSense REST API v2 — 599 tools";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
