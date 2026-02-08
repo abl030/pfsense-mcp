@@ -49,7 +49,7 @@ def _gen_signature(tool: ToolContext) -> str:
             else:
                 lines.append(f"    {p.name}: {p.python_type} | None = None,")
 
-    lines.append(") -> dict[str, Any] | str:")
+    lines.append(") -> dict[str, Any] | list[Any] | str:")
 
     return "\n".join(lines)
 
@@ -73,11 +73,20 @@ def _gen_docstring(tool: ToolContext) -> str:
     # Parameter descriptions (brief)
     has_param_docs = False
     for p in tool.parameters:
-        if p.description:
+        if p.description or p.enum:
             if not has_param_docs:
                 doc_lines.append("")
                 has_param_docs = True
-            desc = p.description[:120]
+            desc = p.description[:120] if p.description else ""
+            if p.enum:
+                enum_str = ", ".join(repr(v) for v in p.enum)
+                if desc:
+                    desc += f" Valid values: [{enum_str}]"
+                else:
+                    desc = f"Valid values: [{enum_str}]"
+                # Truncate if enum list made it too long
+                if len(desc) > 300:
+                    desc = desc[:297] + "..."
             doc_lines.append(f"    {p.name}: {desc}")
 
     doc_lines.append('    """')

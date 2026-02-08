@@ -14,6 +14,9 @@ import sys
 from collections import Counter
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parent.parent
+SERVER_PY = REPO_ROOT / "generated" / "server.py"
+
 
 def extract_reports_from_text(filepath: Path) -> list[dict]:
     """Extract task reports from a plain text output file."""
@@ -81,6 +84,25 @@ def parse_report(text: str) -> dict | None:
                 report["details"] = details
                 continue
 
+            elif key == "tools_invoked":
+                # Parse tool list
+                tools = []
+                i += 1
+                while i < len(lines):
+                    tline = lines[i].strip()
+                    if tline.startswith("```") or tline.startswith("---"):
+                        break
+                    if tline.startswith("- "):
+                        tool_name = tline.lstrip("- ").strip()
+                        if tool_name:
+                            tools.append(tool_name)
+                    elif tline and ":" in tline and not tline.startswith("-"):
+                        # Left the tools block
+                        break
+                    i += 1
+                report["tools_invoked"] = tools
+                continue
+
             elif key == "notes":
                 # Multiline notes block
                 notes_lines = []
@@ -99,6 +121,23 @@ def parse_report(text: str) -> dict | None:
         i += 1
 
     return report if report else None
+
+
+def extract_all_tool_names() -> set[str]:
+    """Extract all pfsense_* tool names from generated/server.py."""
+    if not SERVER_PY.exists():
+        return set()
+    text = SERVER_PY.read_text()
+    return set(re.findall(r"async def (pfsense_\w+)\(", text))
+
+
+def collect_invoked_tools(reports: list[dict]) -> set[str]:
+    """Collect all tools invoked across all reports."""
+    tools: set[str] = set()
+    for r in reports:
+        for t in r.get("tools_invoked", []):
+            tools.add(t)
+    return tools
 
 
 def generate_summary(results_dir: Path, reports: list[dict]) -> str:
@@ -185,6 +224,28 @@ def generate_summary(results_dir: Path, reports: list[dict]) -> str:
         notes = r.get("notes", "")
         if notes:
             lines.append(f"- **Notes**: {notes}")
+        lines.append("")
+
+    # Tool coverage
+    all_tools = extract_all_tool_names()
+    invoked_tools = collect_invoked_tools(reports)
+    if all_tools:
+        covered = invoked_tools & all_tools
+        not_covered = sorted(all_tools - invoked_tools)
+        pct = len(covered) / len(all_tools) * 100 if all_tools else 0
+
+        lines.append("## Tool Coverage\n")
+        lines.append(f"- **Total tools**: {len(all_tools)}")
+        lines.append(f"- **Tools invoked**: {len(covered)}")
+        lines.append(f"- **Coverage**: {pct:.1f}%")
+
+        if not_covered:
+            lines.append(f"- **Not covered** ({len(not_covered)}):")
+            # Show first 50 uncovered tools
+            for t in not_covered[:50]:
+                lines.append(f"  - `{t}`")
+            if len(not_covered) > 50:
+                lines.append(f"  - ... and {len(not_covered) - 50} more")
         lines.append("")
 
     # Actionable findings

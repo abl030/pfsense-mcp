@@ -1,0 +1,1435 @@
+# Bank Tester Task Configuration
+#
+# Drives generate-tasks.py to produce task markdown files.
+# Test values borrowed from generator/test_generator.py.
+#
+# Structure per task:
+#   number: task number (10-44, 99)
+#   title: human-readable title
+#   subsystem: API path prefix(es)
+#   endpoints: list of endpoint paths to exercise (auto-populated from spec if omitted)
+#   test_values: per-endpoint create/update values
+#   dependencies: parent resources needed before CRUD
+#   skip: endpoints to skip with reasons
+#   notes: special instructions for the tester
+#   adversarial: adversarial subtasks to include
+
+tasks:
+
+  # ── Systematic subsystem coverage (10-37) ──────────────────────────────────
+
+  - number: 10
+    title: "Firewall Core — Alias, Rule, Apply, Advanced Settings"
+    subsystem: firewall
+    endpoints:
+      - path: /api/v2/firewall/alias
+        crud: true
+        create_values:
+          name: bt_sys10_alias
+          type_: host
+          address: ["10.0.10.1", "10.0.10.2"]
+          descr: Bank tester alias
+        update_field: descr
+        update_value: "Updated by bank tester"
+      - path: /api/v2/firewall/rule
+        crud: true
+        create_values:
+          type_: pass
+          interface: wan
+          ipprotocol: inet
+          protocol: tcp
+          source: any
+          destination: any
+          descr: bt_sys10_rule
+        update_field: descr
+        update_value: "Updated rule"
+      - path: /api/v2/firewall/advanced_settings
+        settings: true
+        patch_field: aliasesresolveinterval
+        patch_value: 600
+      - path: /api/v2/firewall/apply
+        apply: true
+    notes: |
+      Create alias first, then rule (rule may reference alias).
+      Apply after each mutation. Read advanced_settings and patch one field.
+    adversarial:
+      - action: create_alias_missing_type
+        description: "Create alias without type_ field — expect error about required field"
+      - action: create_rule_bad_protocol
+        description: "Create rule with protocol='bogus' — expect enum validation error"
+
+  - number: 11
+    title: "Firewall NAT — Port Forward, Outbound, One-to-One"
+    subsystem: firewall/nat
+    endpoints:
+      - path: /api/v2/firewall/nat/port_forward
+        crud: true
+        create_values:
+          interface: wan
+          protocol: tcp
+          source: any
+          destination: "wanip"
+          destination_port: "8080"
+          target: "10.99.99.1"
+          local_port: "80"
+          associated_rule_id: ""
+          descr: bt_sys11_pf
+        update_field: descr
+        update_value: "Updated port forward"
+      - path: /api/v2/firewall/nat/outbound/mapping
+        crud: true
+        create_values:
+          interface: wan
+          protocol: tcp
+          source: any
+          destination: any
+          target: ""
+          descr: bt_sys11_outbound
+        update_field: descr
+        update_value: "Updated outbound"
+      - path: /api/v2/firewall/nat/outbound/mode
+        settings: true
+        patch_field: mode
+        patch_value: hybrid
+      - path: /api/v2/firewall/nat/one_to_one/mapping
+        crud: true
+        create_values:
+          interface: wan
+          external: "10.99.99.1"
+          source: "10.0.0.0/8"
+          destination: any
+          descr: bt_sys11_1to1
+        update_field: descr
+        update_value: "Updated 1:1"
+      - path: /api/v2/firewall/apply
+        apply: true
+    notes: |
+      NAT outbound mode must be set to hybrid before creating outbound mappings.
+      Apply firewall after each mutation.
+
+  - number: 12
+    title: "Firewall Schedule & Time Range"
+    subsystem: firewall/schedule
+    endpoints:
+      - path: /api/v2/firewall/schedule
+        crud: true
+        create_values:
+          name: bt_sys12_sched
+          timerange:
+            - month: "1,2,3"
+              day: "1,2,3"
+              hour: "0:00-23:59"
+              position: []
+          descr: Bank tester schedule
+        update_field: descr
+        update_value: "Updated schedule"
+      - path: /api/v2/firewall/schedule/time_range
+        crud: true
+        parent: /api/v2/firewall/schedule
+        parent_id_field: parent_id
+        create_values:
+          month: [4, 5, 6]
+          day: [10, 11, 12]
+          hour: "8:00-17:00"
+      - path: /api/v2/firewall/apply
+        apply: true
+    notes: |
+      Time range is a sub-resource of schedule — needs parent_id from the schedule.
+      Cleanup time_range before schedule.
+
+  - number: 13
+    title: "Firewall Traffic Shaper, Limiter, Queues"
+    subsystem: firewall/traffic_shaper
+    endpoints:
+      - path: /api/v2/firewall/traffic_shaper
+        crud: true
+        create_values:
+          bandwidth: 100
+          bandwidthtype: "Mb"
+          interface: wan
+          scheduler: HFSC
+          enabled: false
+          qlimit: 50
+          queue: []
+          tbrconfig: 1
+        update_field: bandwidth
+        update_value: 200
+      - path: /api/v2/firewall/traffic_shaper/queue
+        crud: true
+        parent: /api/v2/firewall/traffic_shaper
+        parent_id_field: parent_id
+        create_values:
+          name: bt_sys13_tsq
+          qlimit: 50
+          bandwidth: 100
+          upperlimit_m2: ""
+          realtime_m2: ""
+          linkshare_m2: "10%"
+      - path: /api/v2/firewall/traffic_shaper/limiter
+        crud: true
+        create_values:
+          aqm: droptail
+          name: bt_sys13_lim
+          sched: "wf2q+"
+          bandwidth:
+            - bw: 100
+              bwscale: Mb
+              schedule: none
+          buckets: 16
+          ecn: false
+          enabled: false
+          mask: none
+          maskbits: 1
+          maskbitsv6: 1
+          queue: []
+      - path: /api/v2/firewall/traffic_shaper/limiter/bandwidth
+        crud: true
+        parent: /api/v2/firewall/traffic_shaper/limiter
+        parent_id_field: parent_id
+        create_values:
+          bw: 50
+          bwscale: "Mb"
+      - path: /api/v2/firewall/traffic_shaper/limiter/queue
+        crud: true
+        parent: /api/v2/firewall/traffic_shaper/limiter
+        parent_id_field: parent_id
+        create_values:
+          name: bt_sys13_limq
+          aqm: droptail
+      - path: /api/v2/firewall/apply
+        apply: true
+    notes: |
+      Create shaper → queue (sub-resource). Create limiter → bandwidth + limiter/queue (sub-resources).
+      All sub-resources need parent_id from their parent. Cleanup in reverse order.
+
+  - number: 14
+    title: "Firewall Virtual IP & Apply"
+    subsystem: firewall/virtual_ip
+    endpoints:
+      - path: /api/v2/firewall/virtual_ip
+        crud: true
+        create_values:
+          mode: ipalias
+          interface: wan
+          subnet: "10.99.99.100"
+          subnet_bits: 32
+          descr: bt_sys14_vip
+        update_field: descr
+        update_value: "Updated VIP"
+      - path: /api/v2/firewall/virtual_ip/apply
+        apply: true
+    notes: |
+      Virtual IP 'subnet' field is an IP address, not prefix length.
+      Apply virtual_ip changes separately from regular firewall apply.
+
+  - number: 15
+    title: "Firewall States"
+    subsystem: firewall/state
+    endpoints:
+      - path: /api/v2/firewall/states/size
+        settings: true
+        patch_field: maximumstates
+        patch_value: 500000
+    notes: |
+      States are read-only (listing current state table). States/size is a singleton.
+      List states, read states/size, patch states/size.
+      Do NOT delete all states (destructive).
+
+  - number: 16
+    title: "Interface — Interface, VLAN, Bridge, GRE, Group, LAGG, Apply"
+    subsystem: interface
+    endpoints:
+      - path: /api/v2/interface/vlan
+        crud: true
+        create_values:
+          if: em0
+          tag: 100
+          pcp: 0
+          descr: bt_sys16_vlan
+        update_field: descr
+        update_value: "Updated VLAN"
+      - path: /api/v2/interface/bridge
+        crud: true
+        create_values:
+          members: ["lan"]
+          descr: bt_sys16_bridge
+        update_field: descr
+        update_value: "Updated bridge"
+      - path: /api/v2/interface/gre
+        crud: true
+        create_values:
+          if: wan
+          remote_addr: "198.51.100.1"
+          tunnel_local_addr: "10.255.0.1"
+          tunnel_remote_addr: "10.255.0.2"
+          tunnel_remote_addr6: ""
+          descr: bt_sys16_gre
+        update_field: descr
+        update_value: "Updated GRE"
+      - path: /api/v2/interface/group
+        crud: true
+        create_values:
+          ifname: bt16grp
+          members: ["wan"]
+          descr: bt_sys16_group
+        update_field: descr
+        update_value: "Updated group"
+      - path: /api/v2/interface/lagg
+        crud: true
+        create_values:
+          members: ["em2"]
+          proto: none
+          descr: bt_sys16_lagg
+        update_field: descr
+        update_value: "Updated LAGG"
+      - path: /api/v2/interface/available_interfaces
+        read_only: true
+      - path: /api/v2/interface/apply
+        apply: true
+    notes: |
+      LAGG uses em2 (spare NIC). GRE needs remote_addr as routable IP.
+      Bridge members must reference existing interfaces by pfSense name.
+      Apply interface after mutations.
+
+  - number: 17
+    title: "Routing — Gateway, Gateway Group, Priority, Static Route, Apply"
+    subsystem: routing
+    endpoints:
+      - path: /api/v2/routing/gateway
+        crud: true
+        create_values:
+          name: bt_sys17_gw
+          gateway: "10.0.2.1"
+          interface: wan
+          ipprotocol: inet
+          descr: Bank tester gateway
+          latencylow: 200
+          latencyhigh: 500
+          losslow: 10
+          losshigh: 20
+          loss_interval: 2000
+          time_period: 60000
+          interval: 500
+          alert_interval: 1000
+        update_field: descr
+        update_value: "Updated gateway"
+      - path: /api/v2/routing/gateway/group
+        crud: true
+        create_values:
+          name: bt_sys17_gg
+          descr: Bank tester gateway group
+          priorities:
+            - gateway: bt_sys17_gw
+              tier: 1
+        update_field: descr
+        update_value: "Updated group"
+        dependency: /api/v2/routing/gateway
+      - path: /api/v2/routing/gateway/default
+        settings: true
+        patch_field: defaultgw4
+        patch_value: ""
+      - path: /api/v2/routing/static_route
+        crud: true
+        create_values:
+          network: "10.200.0.0/24"
+          gateway: bt_sys17_gw
+          descr: bt_sys17_sr
+        update_field: descr
+        update_value: "Updated route"
+        dependency: /api/v2/routing/gateway
+      - path: /api/v2/routing/apply
+        apply: true
+    notes: |
+      Create gateway first. Gateway group and static route both reference it by name.
+      Cleanup: delete route → group → gateway. Apply after each mutation.
+
+  - number: 18
+    title: "DNS Resolver — Settings, Access Lists, Host Overrides"
+    subsystem: services/dns_resolver
+    endpoints:
+      - path: /api/v2/services/dns_resolver/settings
+        settings: true
+        patch_field: port
+        patch_value: "5353"
+      - path: /api/v2/services/dns_resolver/access_list
+        crud: true
+        create_values:
+          action: allow
+          name: bt_sys18_dnsacl
+          networks: []
+        update_field: name
+        update_value: bt_sys18_dnsacl_upd
+      - path: /api/v2/services/dns_resolver/access_list/network
+        crud: true
+        parent: /api/v2/services/dns_resolver/access_list
+        parent_id_field: parent_id
+        create_values:
+          network: "10.1.0.0"
+          mask: 16
+      - path: /api/v2/services/dns_resolver/host_override
+        crud: true
+        create_values:
+          host: bt-sys18-ho
+          domain: example.com
+          ip: ["10.99.99.2"]
+          aliases: []
+          descr: Bank tester host override
+        update_field: descr
+        update_value: "Updated override"
+      - path: /api/v2/services/dns_resolver/host_override/alias
+        crud: true
+        parent: /api/v2/services/dns_resolver/host_override
+        parent_id_field: parent_id
+        create_values:
+          host: testalias
+          domain: alias.example.com
+      - path: /api/v2/services/dns_resolver/domain_override
+        crud: true
+        create_values:
+          domain: bt-sys18.example.com
+          ip: "10.99.99.3"
+          descr: Bank tester domain override
+        update_field: descr
+        update_value: "Updated domain override"
+      - path: /api/v2/services/dns_resolver/apply
+        apply: true
+    notes: |
+      Access list network is sub-resource of access_list.
+      Host override alias is sub-resource of host_override.
+      Apply dns_resolver after mutations.
+
+  - number: 19
+    title: "DNS Forwarder — Host Overrides & Aliases"
+    subsystem: services/dns_forwarder
+    endpoints:
+      - path: /api/v2/services/dns_forwarder/host_override
+        crud: true
+        create_values:
+          domain: example.com
+          host: bt-sys19-ho
+          ip: "10.99.99.2"
+          aliases: []
+          descr: Bank tester forwarder host override
+        update_field: descr
+        update_value: "Updated forwarder override"
+      - path: /api/v2/services/dns_forwarder/host_override/alias
+        crud: true
+        parent: /api/v2/services/dns_forwarder/host_override
+        parent_id_field: parent_id
+        create_values:
+          host: testalias
+          domain: alias.example.com
+      - path: /api/v2/services/dns_forwarder/apply
+        apply: true
+    notes: |
+      Host override alias is sub-resource of host_override.
+      Apply dns_forwarder after mutations.
+
+  - number: 20
+    title: "DHCP Server — Address Pool, Static Mapping, Custom Options"
+    subsystem: services/dhcp_server
+    endpoints:
+      - path: /api/v2/services/dhcp_server/address_pool
+        crud: true
+        create_values:
+          range_from: "192.168.1.201"
+          range_to: "192.168.1.210"
+          descr: bt_sys20_pool
+        static_parent_id: lan
+        update_field: descr
+        update_value: "Updated pool"
+      - path: /api/v2/services/dhcp_server/static_mapping
+        crud: true
+        create_values:
+          mac: "00:11:22:33:44:55"
+          ipaddr: "192.168.1.250"
+          descr: bt_sys20_static
+        static_parent_id: lan
+        update_field: descr
+        update_value: "Updated static mapping"
+      - path: /api/v2/services/dhcp_server/custom_option
+        crud: true
+        create_values:
+          number: 252
+          type_: text
+          value: "http://wpad.example.com/wpad.dat"
+          descr: bt_sys20_opt
+        static_parent_id: lan
+        update_field: descr
+        update_value: "Updated custom option"
+      - path: /api/v2/services/dhcp_server/backend
+        settings: true
+        patch_field: dhcpbackend
+        patch_value: kea
+        restore_value: isc
+      - path: /api/v2/services/dhcp_server/apply
+        apply: true
+    notes: |
+      All DHCP sub-resources use static parent_id="lan" (the LAN interface name in pfSense).
+      Apply dhcp_server after mutations. Restore backend to "isc" after testing.
+    skip:
+      - path: /api/v2/services/dhcp_server
+        reason: "Per-interface singleton — POST not supported by design"
+
+  - number: 21
+    title: "HAProxy Core — Settings, Files, Backend CRUD, Apply"
+    subsystem: services/haproxy
+    endpoints:
+      - path: /api/v2/services/haproxy/settings
+        settings: true
+        patch_field: maxconn
+        patch_value: 100
+      - path: /api/v2/services/haproxy/file
+        crud: true
+        create_values:
+          name: bt_sys21_file
+          content: "PCFET0NUWVBFIGh0bWw+"
+        update_field: content
+        update_value: "VXBkYXRlZA=="
+      - path: /api/v2/services/haproxy/backend
+        crud: true
+        create_values:
+          name: bt_sys21_be
+          agent_port: "0"
+          persist_cookie_name: SRVID
+          descr: Bank tester backend
+        update_field: descr
+        update_value: "Updated backend"
+      - path: /api/v2/services/haproxy/apply
+        apply: true
+    notes: |
+      Apply haproxy after mutations.
+    skip:
+      - path: /api/v2/services/haproxy/settings/dns_resolver
+        reason: "500 parent Model not constructed (v2.7.1 bug)"
+      - path: /api/v2/services/haproxy/settings/email_mailer
+        reason: "500 parent Model not constructed (v2.7.1 bug)"
+
+  - number: 22
+    title: "HAProxy Backend Sub-Resources — ACL, Action, Server, Error File"
+    subsystem: services/haproxy/backend
+    endpoints:
+      - path: /api/v2/services/haproxy/backend
+        crud: false
+        setup_only: true
+        create_values:
+          name: bt_sys22_be
+          agent_port: "0"
+          persist_cookie_name: SRVID
+          descr: Parent backend for sub-resources
+      - path: /api/v2/services/haproxy/backend/acl
+        crud: true
+        parent: /api/v2/services/haproxy/backend
+        parent_id_field: parent_id
+        create_values:
+          name: bt_sys22_bacl
+          expression: host_starts_with
+          value: test.example.com
+        update_field: value
+        update_value: "updated.example.com"
+      - path: /api/v2/services/haproxy/backend/server
+        crud: true
+        parent: /api/v2/services/haproxy/backend
+        parent_id_field: parent_id
+        create_values:
+          name: bt_sys22_bsrv
+          address: "10.99.99.50"
+          port: "8080"
+        update_field: address
+        update_value: "10.99.99.51"
+      - path: /api/v2/services/haproxy/backend/error_file
+        crud: true
+        parent: /api/v2/services/haproxy/backend
+        parent_id_field: parent_id
+        create_values:
+          errorcode: 503
+          errorfile: bt_sys22_file
+        setup:
+          - path: /api/v2/services/haproxy/file
+            create_values:
+              name: bt_sys22_file
+              content: "PCFET0NUWVBFIGh0bWw+"
+      - path: /api/v2/services/haproxy/backend/action
+        crud: true
+        parent: /api/v2/services/haproxy/backend
+        parent_id_field: parent_id
+        create_values:
+          action: http-request_lua
+          name: bt_sys22_bact
+          acl: bt_sys22_bacl
+        sibling_acl:
+          name: bt_sys22_bacl_sib
+          expression: host_starts_with
+          value: sib.example.com
+      - path: /api/v2/services/haproxy/apply
+        apply: true
+    notes: |
+      All sub-resources need parent_id from the backend.
+      Backend action requires an ACL — create a sibling ACL under the same backend first.
+      Error file needs a HAProxy file resource created first.
+      Cleanup sub-resources before backend.
+
+  - number: 23
+    title: "HAProxy Frontend & Sub-Resources"
+    subsystem: services/haproxy/frontend
+    endpoints:
+      - path: /api/v2/services/haproxy/backend
+        crud: false
+        setup_only: true
+        create_values:
+          name: bt_sys23_be
+          agent_port: "0"
+          persist_cookie_name: SRVID
+          descr: Parent backend for frontend
+      - path: /api/v2/services/haproxy/frontend
+        crud: true
+        parent: null
+        create_values:
+          name: bt_sys23_fe
+          type_: http
+          descr: Bank tester frontend
+        update_field: descr
+        update_value: "Updated frontend"
+      - path: /api/v2/services/haproxy/frontend/acl
+        crud: true
+        parent: /api/v2/services/haproxy/frontend
+        parent_id_field: parent_id
+        create_values:
+          name: bt_sys23_facl
+          expression: host_starts_with
+          value: test.example.com
+        update_field: value
+        update_value: "updated.example.com"
+      - path: /api/v2/services/haproxy/frontend/action
+        crud: true
+        parent: /api/v2/services/haproxy/frontend
+        parent_id_field: parent_id
+        create_values:
+          action: http-request_lua
+          name: bt_sys23_fact
+          acl: bt_sys23_facl_sib
+        sibling_acl:
+          name: bt_sys23_facl_sib
+          expression: host_starts_with
+          value: sib.example.com
+      - path: /api/v2/services/haproxy/frontend/address
+        crud: true
+        parent: /api/v2/services/haproxy/frontend
+        parent_id_field: parent_id
+        create_values:
+          extaddr: custom
+          extaddr_custom: "10.99.99.80:80"
+      - path: /api/v2/services/haproxy/frontend/certificate
+        crud: true
+        parent: /api/v2/services/haproxy/frontend
+        parent_id_field: parent_id
+        create_values: {}
+      - path: /api/v2/services/haproxy/frontend/error_file
+        crud: true
+        parent: /api/v2/services/haproxy/frontend
+        parent_id_field: parent_id
+        create_values:
+          errorcode: 503
+          errorfile: bt_sys23_file
+        setup:
+          - path: /api/v2/services/haproxy/file
+            create_values:
+              name: bt_sys23_file
+              content: "PCFET0NUWVBFIGh0bWw+"
+      - path: /api/v2/services/haproxy/apply
+        apply: true
+    notes: |
+      Frontend requires a backend to exist. All frontend sub-resources need parent_id.
+      Frontend action requires ACL (create sibling). Error file needs HAProxy file.
+      Cleanup: sub-resources → frontend → backend.
+
+  - number: 24
+    title: "BIND DNS — Access List, View, Zone, Record, Sync, Settings"
+    subsystem: services/bind
+    endpoints:
+      - path: /api/v2/services/bind/settings
+        settings: true
+        patch_field: enable_bind
+        patch_value: true
+      - path: /api/v2/services/bind/access_list
+        crud: true
+        create_values:
+          entries:
+            - value: "10.0.0.0/8"
+              description: test entry
+          name: bt_sys24_bacl
+        update_field: name
+        update_value: bt_sys24_bacl_upd
+      - path: /api/v2/services/bind/access_list/entry
+        crud: true
+        parent: /api/v2/services/bind/access_list
+        parent_id_field: parent_id
+        create_values:
+          value: "10.1.0.0/16"
+      - path: /api/v2/services/bind/view
+        crud: true
+        create_values:
+          name: bt_sys24_view
+          descr: Bank tester view
+        update_field: descr
+        update_value: "Updated view"
+      - path: /api/v2/services/bind/zone
+        crud: true
+        create_values:
+          name: bt-sys24.example.com
+          nameserver: ns1.example.com
+          mail: admin.example.com
+          serial: 2024010101
+          forwarders: []
+          baseip: "10.99.99.0"
+        update_field: mail
+        update_value: admin2.example.com
+      - path: /api/v2/services/bind/zone/record
+        crud: true
+        parent: /api/v2/services/bind/zone
+        parent_id_field: parent_id
+        create_values:
+          name: testrec
+          type_: A
+          rdata: "10.99.99.1"
+          priority: 0
+      - path: /api/v2/services/bind/sync
+        action: true
+    notes: |
+      Enable BIND in settings first. Access list entry and zone record are sub-resources.
+      Cleanup: record → zone, entry → access_list, view.
+
+  - number: 25
+    title: "ACME — Account Key, Certificate, Domain, Issue/Renew/Register"
+    subsystem: services/acme
+    endpoints:
+      - path: /api/v2/services/acme/settings
+        settings: true
+        patch_field: enable
+        patch_value: true
+      - path: /api/v2/services/acme/account_key
+        crud: true
+        create_values:
+          name: bt_sys25_acme_key
+          descr: Bank tester ACME key
+          email: "test@example.com"
+          acmeserver: "letsencrypt-staging-2"
+        update_field: descr
+        update_value: "Updated ACME key"
+      - path: /api/v2/services/acme/certificate
+        crud: true
+        create_values:
+          name: bt_sys25_acme_cert
+          descr: Bank tester ACME cert
+          acmeserver: "letsencrypt-staging-2"
+        update_field: descr
+        update_value: "Updated ACME cert"
+      - path: /api/v2/services/acme/certificate/domain
+        crud: true
+        parent: /api/v2/services/acme/certificate
+        parent_id_field: parent_id
+        create_values:
+          name: test.example.com
+          method: standalone
+      - path: /api/v2/services/acme/certificate/action
+        crud: true
+        parent: /api/v2/services/acme/certificate
+        parent_id_field: parent_id
+        create_values:
+          status: active
+          command: /bin/true
+      - path: /api/v2/services/acme/account_key/register
+        action: true
+        notes: "Async — returns 200 with status=pending. Uses the created account key."
+      - path: /api/v2/services/acme/certificate/issue
+        action: true
+        notes: "Async — returns 200 with status=pending."
+      - path: /api/v2/services/acme/certificate/renew
+        action: true
+        notes: "Async — returns 200 with status=pending."
+    notes: |
+      ACME register/issue/renew are async (return status=pending immediately).
+      acmeserver must be one of the fixed enum values (e.g., letsencrypt-staging-2).
+      Cleanup: domain → certificate, account key.
+
+  - number: 26
+    title: "Small Services — NTP, SSH, Cron, Service Watchdog, WoL, DHCP Relay, Syslog"
+    subsystem: services
+    endpoints:
+      - path: /api/v2/services/ntp/settings
+        settings: true
+        patch_field: orphan
+        patch_value: "12"
+      - path: /api/v2/services/ntp/time_server
+        crud: true
+        create_values:
+          timeserver: time.example.com
+          type_: server
+          prefer: false
+          noselect: false
+          ispool: false
+        update_field: timeserver
+        update_value: time2.example.com
+      - path: /api/v2/services/ssh
+        settings: true
+        patch_field: port
+        patch_value: "2222"
+        restore_value: "22"
+      - path: /api/v2/services/cron/job
+        crud: true
+        create_values:
+          command: "/bin/echo bt_sys26_cron"
+          who: root
+          minute: "0"
+          hour: "0"
+          mday: "*"
+          month: "*"
+          wday: "*"
+        update_field: command
+        update_value: "/bin/echo bt_sys26_cron_updated"
+      - path: /api/v2/services/service_watchdog
+        crud: true
+        create_values:
+          name: sshd
+          descr: bt_sys26_watchdog
+        update_field: descr
+        update_value: "Updated watchdog"
+      - path: /api/v2/services/wake_on_lan/send
+        action: true
+        action_body:
+          interface: lan
+          mac_addr: "00:11:22:33:44:55"
+      - path: /api/v2/services/dhcp_relay
+        settings: true
+        patch_field: enable
+        patch_value: false
+        extra_fields:
+          server: ["10.0.2.1"]
+      - path: /api/v2/services/syslog/settings
+        settings: true
+        patch_field: logall
+        patch_value: true
+    notes: |
+      WoL uses interface name "lan" (not physical NIC).
+      Service watchdog name must reference an existing service (e.g., sshd).
+      Restore SSH port to 22 after testing.
+
+  - number: 27
+    title: "FreeRADIUS — Client, Interface, User"
+    subsystem: services/freeradius
+    endpoints:
+      - path: /api/v2/services/freeradius/client
+        crud: true
+        create_values:
+          addr: "10.99.99.90"
+          shortname: bt_sys27_frcl
+          secret: TestSecret123
+          descr: Bank tester FR client
+        update_field: descr
+        update_value: "Updated FR client"
+      - path: /api/v2/services/freeradius/interface
+        crud: true
+        create_values:
+          addr: "127.0.0.1"
+          ip_version: ipaddr
+          descr: bt_sys27_fri
+        update_field: descr
+        update_value: "Updated FR interface"
+      - path: /api/v2/services/freeradius/user
+        crud: true
+        create_values:
+          username: bt_sys27_fruser
+          password: TestPass123
+          motp_secret: ""
+          motp_pin: ""
+          descr: bt_sys27_fruser
+        update_field: descr
+        update_value: "Updated FR user"
+    notes: |
+      FreeRADIUS client addr needs plain IP (no CIDR).
+      All three endpoints are straightforward CRUD.
+
+  - number: 28
+    title: "System Core — DNS, Hostname, Console, Timezone, Tunables, WebGUI, Notifications"
+    subsystem: system
+    endpoints:
+      - path: /api/v2/system/dns
+        settings: true
+        patch_field: dnsallowoverride
+        patch_value: false
+      - path: /api/v2/system/hostname
+        settings: true
+        patch_field: hostname
+        patch_value: bttesthost
+        extra_fields:
+          domain: home.arpa
+        restore_value: pfSense
+      - path: /api/v2/system/console
+        settings: true
+        patch_field: passwd_protect_console
+        patch_value: true
+      - path: /api/v2/system/timezone
+        settings: true
+        patch_field: timezone
+        patch_value: "America/Chicago"
+        restore_value: "Etc/UTC"
+        notes: "PATCH response may have 'Setting timezone...done.' prefix before JSON"
+      - path: /api/v2/system/tunable
+        crud: true
+        create_values:
+          tunable: net.inet.tcp.tso
+          value: "0"
+          descr: bt_sys28_tunable
+        update_field: descr
+        update_value: "Updated tunable"
+      - path: /api/v2/system/webgui/settings
+        settings: true
+        patch_field: webguicss
+        patch_value: pfSense.css
+      - path: /api/v2/system/notifications/email_settings
+        settings: true
+        patch_field: ipaddress
+        patch_value: "127.0.0.1"
+        extra_fields:
+          username: test
+          password: test
+      - path: /api/v2/system/version
+        read_only: true
+    notes: |
+      Timezone PATCH response may have text prefix before JSON — handle carefully.
+      Restore hostname and timezone after testing.
+
+  - number: 29
+    title: "System PKI — CA, Certificate, CRL, Generate, Renew, CSR, Sign, PKCS12"
+    subsystem: system/certificate
+    endpoints:
+      - path: /api/v2/system/certificate_authority
+        crud: true
+        create_values:
+          descr: bt_sys29_ca
+          crt: "__CA_CERT_PEM__"
+          prv: "__CA_KEY_PEM__"
+        update_field: descr
+        update_value: "Updated CA"
+      - path: /api/v2/system/certificate
+        crud: true
+        create_values:
+          descr: bt_sys29_cert
+          crt: "__CERT_PEM__"
+          prv: "__CERT_KEY_PEM__"
+        update_field: descr
+        update_value: "Updated cert"
+      - path: /api/v2/system/crl
+        crud: true
+        parent: /api/v2/system/certificate_authority
+        inject_field: caref
+        inject_from: refid
+        create_values:
+          descr: bt_sys29_crl
+          method: internal
+          text: ""
+      - path: /api/v2/system/certificate_authority/generate
+        action: true
+        action_body:
+          descr: bt_sys29_gen_ca
+          keytype: RSA
+          keylen: 2048
+          digest_alg: sha256
+          dn_commonname: "BT Gen CA"
+          dn_country: US
+          dn_state: California
+          dn_city: "San Francisco"
+          dn_organization: pfSense Test
+          dn_organizationalunit: Testing
+          lifetime: 3650
+        cleanup_path: /api/v2/system/certificate_authority
+      - path: /api/v2/system/certificate/generate
+        action: true
+        action_body:
+          descr: bt_sys29_gen_cert
+          keytype: RSA
+          keylen: 2048
+          digest_alg: sha256
+          dn_commonname: gen-cert.test
+          lifetime: 365
+          type_: server
+        needs_ca: true
+        cleanup_path: /api/v2/system/certificate
+        notes: "Needs a CA to sign — use generated CA's refid as caref."
+      - path: /api/v2/system/certificate/signing_request
+        action: true
+        action_body:
+          descr: bt_sys29_csr
+          keytype: RSA
+          keylen: 2048
+          digest_alg: sha256
+          dn_commonname: test-csr.example.com
+        cleanup_path: /api/v2/system/certificate
+      - path: /api/v2/system/certificate/pkcs12/export
+        action: true
+        notes: "Needs a certificate. Returns binary (application/octet-stream)."
+    notes: |
+      CA generate needs full DN fields (country, state, city, org, OU).
+      CRL needs caref from a CA. Certificate generate needs caref from a CA.
+      PKCS12 export returns binary data.
+
+  - number: 30
+    title: "REST API — Settings, Access List, Version"
+    subsystem: system/restapi
+    endpoints:
+      - path: /api/v2/system/restapi/settings
+        settings: true
+        patch_field: ha_sync_hosts
+        patch_value: []
+      - path: /api/v2/system/restapi/access_list/entry
+        crud: true
+        create_values:
+          type_: allow
+          network: "10.0.0.0/8"
+          descr: bt_sys30_acl
+        update_field: descr
+        update_value: "Updated ACL entry"
+      - path: /api/v2/system/restapi/version
+        read_only: true
+    notes: |
+      Be careful with access list — don't lock yourself out.
+      Version PATCH is destructive (skipped).
+    skip:
+      - path: /api/v2/system/restapi/version
+        method: PATCH
+        reason: "PATCH triggers API version change (destructive)"
+
+  - number: 31
+    title: "User Management — User, Group, Auth Server"
+    subsystem: user
+    endpoints:
+      - path: /api/v2/user
+        crud: true
+        create_values:
+          username: bt_sys31_user
+          password: Testpass123!Abc
+          descr: Bank tester user
+        update_field: descr
+        update_value: "Updated user"
+      - path: /api/v2/user/group
+        crud: true
+        create_values:
+          name: bt_sys31_group
+          scope: local
+          descr: Bank tester group
+        update_field: descr
+        update_value: "Updated group"
+      - path: /api/v2/user/auth_server
+        crud: true
+        create_values:
+          type_: ldap
+          name: bt_sys31_ldap
+          host: "10.99.99.7"
+          ldap_port: "389"
+          ldap_urltype: "Standard TCP"
+          ldap_protver: 3
+          ldap_scope: one
+          ldap_basedn: "dc=example,dc=com"
+          ldap_authcn: "ou=people,dc=example,dc=com"
+          ldap_extended_enabled: false
+          ldap_attr_user: uid
+          ldap_attr_group: cn
+          ldap_attr_member: member
+          ldap_attr_groupobj: posixGroup
+          ldap_timeout: 25
+          descr: Bank tester LDAP
+        update_field: descr
+        update_value: "Updated LDAP"
+    notes: |
+      Auth server type_ must be 'ldap' or 'radius'. LDAP needs many required fields.
+
+  - number: 32
+    title: "VPN IPsec — Phase 1, Phase 2, Encryption, Apply"
+    subsystem: vpn/ipsec
+    endpoints:
+      - path: /api/v2/vpn/ipsec/phase1
+        crud: true
+        create_values:
+          iketype: ikev2
+          protocol: inet
+          interface: wan
+          remote_gateway: "10.99.99.20"
+          authentication_method: pre_shared_key
+          pre_shared_key: TestPSK123456
+          myid_type: myaddress
+          peerid_type: peeraddress
+          descr: bt_sys32_p1
+        update_field: descr
+        update_value: "Updated P1"
+      - path: /api/v2/vpn/ipsec/phase1/encryption
+        crud: true
+        parent: /api/v2/vpn/ipsec/phase1
+        parent_id_field: parent_id
+        create_values:
+          encryption_algorithm_name: aes
+          encryption_algorithm_keylen: 256
+          hash_algorithm: sha256
+          dhgroup: 14
+      - path: /api/v2/vpn/ipsec/phase2
+        crud: true
+        create_values:
+          mode: tunnel
+          localid_type: network
+          localid_address: "10.0.0.0"
+          localid_netbits: 24
+          remoteid_type: network
+          remoteid_address: "10.200.0.0"
+          remoteid_netbits: 24
+          protocol: esp
+          descr: bt_sys32_p2
+        parent: /api/v2/vpn/ipsec/phase1
+        inject_field: ikeid
+        inject_from: ikeid
+        update_field: descr
+        update_value: "Updated P2"
+      - path: /api/v2/vpn/ipsec/phase2/encryption
+        crud: true
+        parent: /api/v2/vpn/ipsec/phase2
+        parent_id_field: parent_id
+        create_values:
+          encryption_algorithm_name: aes
+          encryption_algorithm_keylen: 256
+          hash_algorithm: sha256
+      - path: /api/v2/vpn/ipsec/apply
+        apply: true
+    notes: |
+      Phase 2 references Phase 1 via ikeid. Encryption sub-resources reference their parent.
+      Use aes (AES-CBC) with keylen=256, NOT aes256gcm.
+      Cleanup: P2 enc → P2 → P1 enc → P1. Apply after each mutation.
+
+  - number: 33
+    title: "VPN OpenVPN — Server, Client, CSO"
+    subsystem: vpn/openvpn
+    endpoints:
+      - path: /api/v2/vpn/openvpn/server
+        crud: true
+        create_values:
+          mode: p2p_tls
+          protocol: UDP4
+          dev_mode: tun
+          interface: wan
+          local_port: "1194"
+          tunnel_network: "10.100.0.0/24"
+          descr: bt_sys33_ovpn
+        update_field: descr
+        update_value: "Updated OVPN server"
+        notes: "May need a CA/cert first for TLS mode."
+      - path: /api/v2/vpn/openvpn/client
+        crud: true
+        create_values:
+          mode: p2p_tls
+          protocol: UDP4
+          dev_mode: tun
+          interface: wan
+          server_addr: "10.99.99.30"
+          server_port: "1194"
+          descr: bt_sys33_ovpn_cl
+        update_field: descr
+        update_value: "Updated OVPN client"
+      - path: /api/v2/vpn/openvpn/cso
+        crud: true
+        create_values:
+          common_name: bt_sys33_cso
+          tunnel_network: "10.101.0.0/24"
+          descr: bt_sys33_cso
+        update_field: descr
+        update_value: "Updated CSO"
+    notes: |
+      OpenVPN server in TLS mode may produce log prefix before JSON response.
+      local_port must be string, not int.
+    skip:
+      - path: /api/v2/vpn/openvpn/client_export/config
+        reason: "Tested via existing task 09 workflow (7-step chain)"
+
+  - number: 34
+    title: "VPN WireGuard — Tunnel, Peer, Allowed IP, Address, Settings, Apply"
+    subsystem: vpn/wireguard
+    endpoints:
+      - path: /api/v2/vpn/wireguard/settings
+        settings: true
+        patch_field: enable
+        patch_value: true
+      - path: /api/v2/vpn/wireguard/tunnel
+        crud: true
+        create_values:
+          name: bt_sys34_tun
+          listenport: "51820"
+          privatekey: "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY="
+          addresses: []
+        update_field: listenport
+        update_value: "51821"
+      - path: /api/v2/vpn/wireguard/tunnel/address
+        crud: true
+        parent: /api/v2/vpn/wireguard/tunnel
+        parent_id_field: parent_id
+        create_values:
+          address: "10.100.0.1"
+          mask: 24
+      - path: /api/v2/vpn/wireguard/peer
+        crud: true
+        parent: /api/v2/vpn/wireguard/tunnel
+        inject_field: tun
+        inject_from: name
+        create_values:
+          publickey: "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY="
+          descr: bt_sys34_peer
+        update_field: descr
+        update_value: "Updated peer"
+      - path: /api/v2/vpn/wireguard/peer/allowed_ip
+        crud: true
+        parent: /api/v2/vpn/wireguard/peer
+        parent_id_field: parent_id
+        create_values:
+          address: "10.200.0.0"
+          mask: 24
+        dependency_chain:
+          - /api/v2/vpn/wireguard/tunnel
+          - /api/v2/vpn/wireguard/peer
+      - path: /api/v2/vpn/wireguard/apply
+        apply: true
+    notes: |
+      Tunnel addresses and peer allowed_ips are sub-resources (NOT inline arrays).
+      Peer needs tunnel name (tun field). Allowed IP needs peer parent_id.
+      Cleanup: allowed_ip → peer → address → tunnel. Apply after each mutation.
+
+  - number: 35
+    title: "Status Endpoints — All Read-Only"
+    subsystem: status
+    endpoints:
+      - path: /api/v2/status/system
+        read_only: true
+      - path: /api/v2/status/services
+        read_only: true
+      - path: /api/v2/status/gateways
+        read_only: true
+      - path: /api/v2/status/interfaces
+        read_only: true
+      - path: /api/v2/status/carp
+        settings: true
+        patch_field: maintenance_mode
+        patch_value: true
+        extra_fields:
+          enable: true
+        restore_value: false
+      - path: /api/v2/status/dhcp_server/leases
+        read_only: true
+      - path: /api/v2/status/ipsec/sas
+        read_only: true
+      - path: /api/v2/status/openvpn/servers
+        read_only: true
+      - path: /api/v2/status/openvpn/clients
+        read_only: true
+      - path: /api/v2/status/logs/system
+        read_only: true
+        notes: "Use limit parameter to avoid huge responses"
+      - path: /api/v2/status/logs/firewall
+        read_only: true
+      - path: /api/v2/status/logs/dhcp
+        read_only: true
+      - path: /api/v2/status/logs/auth
+        read_only: true
+      - path: /api/v2/status/logs/settings
+        settings: true
+        patch_field: logall
+        patch_value: true
+    notes: |
+      All status endpoints are read-only (GET only), except CARP (PATCH) and log settings (PATCH).
+      Use limit parameter on log endpoints.
+
+  - number: 36
+    title: "Auth & GraphQL"
+    subsystem: auth
+    endpoints:
+      - path: /api/v2/auth/key
+        action: true
+        action_body:
+          descr: "bt_sys36_key"
+          length_bytes: 16
+        needs_basic_auth: true
+        notes: "Requires BasicAuth (admin:pfsense), not API key"
+      - path: /api/v2/auth/jwt
+        action: true
+        action_body: {}
+        needs_basic_auth: true
+        notes: "Requires BasicAuth (admin:pfsense), not API key"
+      - path: /api/v2/graphql
+        action: true
+        action_body:
+          query: "{ __schema { queryType { name } } }"
+        notes: "Returns raw {data: ...} — NOT standard response envelope"
+    notes: |
+      Auth endpoints need BasicAuth, not API key.
+      GraphQL returns raw response (not standard envelope).
+
+  - number: 37
+    title: "Diagnostics & Miscellaneous"
+    subsystem: diagnostics
+    endpoints:
+      - path: /api/v2/diagnostics/arp_table
+        read_only: true
+      - path: /api/v2/diagnostics/arp_table/entry
+        read_only: true
+      - path: /api/v2/diagnostics/config_history/revision
+        read_only: true
+      - path: /api/v2/diagnostics/table
+        read_only: true
+      - path: /api/v2/diagnostics/command_prompt
+        action: true
+        action_body:
+          command: "echo bt_sys37_test"
+      - path: /api/v2/diagnostics/ping
+        action: true
+        action_body:
+          host: "127.0.0.1"
+          count: 1
+      - path: /api/v2/system/package/available
+        read_only: true
+      - path: /api/v2/system/package
+        read_only: true
+        notes: "GET only — POST/DELETE trigger 504 timeout"
+    notes: |
+      Do NOT use diagnostics/halt_system or diagnostics/reboot (destructive).
+      Do NOT delete all ARP entries or config history (destructive).
+    skip:
+      - path: /api/v2/system/package
+        method: POST
+        reason: "nginx 504 timeout via QEMU NAT"
+      - path: /api/v2/system/package
+        method: DELETE
+        reason: "nginx 504 timeout via QEMU NAT"
+
+  # ── Adversarial tasks (40-44) ──────────────────────────────────────────────
+
+  - number: 40
+    title: "Adversarial — Wrong Types"
+    adversarial_only: true
+    test_cases:
+      - tool: pfsense_create_firewall_alias
+        description: "Send integer where string expected for 'name'"
+        params: {name: 12345, type_: host, address: ["10.0.0.1"], confirm: true}
+        expected: error about type
+      - tool: pfsense_create_firewall_rule
+        description: "Send string where boolean expected for 'disabled'"
+        params: {type_: pass, interface: wan, ipprotocol: inet, protocol: tcp, source: any, destination: any, disabled: "yes", confirm: true}
+        expected: error about type
+      - tool: pfsense_update_system_dns
+        description: "Send string where list expected for 'dnsserver'"
+        params: {dnsserver: "8.8.8.8", confirm: true}
+        expected: error about type
+      - tool: pfsense_create_user
+        description: "Send boolean where string expected for 'username'"
+        params: {username: true, password: "test", confirm: true}
+        expected: error about type
+      - tool: pfsense_create_routing_gateway
+        description: "Send list where string expected for 'gateway'"
+        params: {name: bt_adv40_gw, gateway: ["10.0.2.1"], interface: wan, ipprotocol: inet, confirm: true}
+        expected: error about type
+
+  - number: 41
+    title: "Adversarial — Missing Required Fields"
+    adversarial_only: true
+    test_cases:
+      - tool: pfsense_create_firewall_alias
+        description: "Omit required 'name' field"
+        params: {type_: host, address: ["10.0.0.1"], confirm: true}
+        expected: error about missing required field
+      - tool: pfsense_create_firewall_rule
+        description: "Omit required 'type_' field"
+        params: {interface: wan, protocol: tcp, source: any, destination: any, confirm: true}
+        expected: error about missing required field
+      - tool: pfsense_create_user
+        description: "Omit required 'password' field"
+        params: {username: bt_adv41_user, confirm: true}
+        expected: error about missing required field
+      - tool: pfsense_create_routing_gateway
+        description: "Omit required 'interface' field"
+        params: {name: bt_adv41_gw, gateway: "10.0.2.1", ipprotocol: inet, confirm: true}
+        expected: error about missing required field
+      - tool: pfsense_create_vpn_ipsec_phase1
+        description: "Omit required 'iketype' field"
+        params: {protocol: inet, interface: wan, remote_gateway: "10.0.2.1", confirm: true}
+        expected: error about missing required field
+
+  - number: 42
+    title: "Adversarial — Invalid Enum Values"
+    adversarial_only: true
+    test_cases:
+      - tool: pfsense_create_firewall_alias
+        description: "Use invalid alias type"
+        params: {name: bt_adv42_alias, type_: bogus_type, confirm: true}
+        expected: error listing valid enum values
+      - tool: pfsense_create_firewall_rule
+        description: "Use invalid protocol"
+        params: {type_: pass, interface: wan, ipprotocol: inet, protocol: bogus_protocol, source: any, destination: any, confirm: true}
+        expected: error listing valid enum values
+      - tool: pfsense_create_vpn_ipsec_phase1
+        description: "Use invalid iketype"
+        params: {iketype: ikev99, protocol: inet, interface: wan, remote_gateway: "10.0.2.1", confirm: true}
+        expected: error listing valid enum values
+      - tool: pfsense_create_user_auth_server
+        description: "Use invalid auth server type"
+        params: {name: bt_adv42_auth, type_: "kerberos", host: "10.0.0.1", confirm: true}
+        expected: error listing valid enum values
+      - tool: pfsense_update_firewall_nat_outbound_mode
+        description: "Use invalid NAT outbound mode"
+        params: {mode: "turbo", confirm: true}
+        expected: error listing valid enum values
+
+  - number: 43
+    title: "Adversarial — Confirm Gate Behavior"
+    adversarial_only: true
+    test_cases:
+      - tool: pfsense_create_firewall_alias
+        description: "Call without confirm=True — should return preview, not execute"
+        params: {name: bt_adv43_alias, type_: host, address: ["10.0.0.1"]}
+        expected: preview message mentioning POST and confirm=True
+      - tool: pfsense_delete_firewall_alias
+        description: "Call delete without confirm=True — should return preview"
+        params: {id: 99999}
+        expected: preview message mentioning DELETE and confirm=True
+      - tool: pfsense_update_system_dns
+        description: "Call update without confirm=True — should return preview"
+        params: {dnsallowoverride: false}
+        expected: preview message mentioning PATCH and confirm=True
+      - tool: pfsense_apply_firewall
+        description: "Call apply without confirm=True — should return preview"
+        params: {}
+        expected: preview message mentioning POST and confirm=True
+
+  - number: 44
+    title: "Adversarial — Boundary Values"
+    adversarial_only: true
+    test_cases:
+      - tool: pfsense_create_firewall_alias
+        description: "Create alias with empty name"
+        params: {name: "", type_: host, address: ["10.0.0.1"], confirm: true}
+        expected: validation error
+      - tool: pfsense_create_firewall_alias
+        description: "Create alias with very long name (200 chars)"
+        params: {name: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", type_: host, address: ["10.0.0.1"], confirm: true}
+        expected: validation error or truncation
+      - tool: pfsense_create_firewall_rule
+        description: "Create rule with special chars in descr"
+        params: {type_: pass, interface: wan, ipprotocol: inet, protocol: tcp, source: any, destination: any, descr: "<script>alert('xss')</script>", confirm: true}
+        expected: either sanitized or error
+
+  # ── Destructive task (opt-in only) ─────────────────────────────────────────
+
+  - number: 99
+    title: "Destructive — Halt & Reboot (opt-in)"
+    destructive: true
+    endpoints:
+      - path: /api/v2/diagnostics/reboot
+        action: true
+        action_body: {}
+      - path: /api/v2/diagnostics/halt_system
+        action: true
+        action_body: {}
+    notes: |
+      ONLY run with INCLUDE_DESTRUCTIVE=1. Reboot first, wait for API, then halt.
+      These will terminate the VM.

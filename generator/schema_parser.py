@@ -146,6 +146,11 @@ def extract_tool_parameters(
 
                 default = resolved_prop.get("default")
                 has_default = "default" in resolved_prop
+                # Sanitize int64 max/min sentinel values — they mean "no limit"
+                # and are too large for the Anthropic API to serialize
+                if isinstance(default, int) and abs(default) >= 2**53:
+                    default = None
+                    has_default = False
 
                 safe = _safe_name(prop_name)
                 params.append(

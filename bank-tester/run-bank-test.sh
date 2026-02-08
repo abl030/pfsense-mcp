@@ -6,9 +6,10 @@
 #   nix develop -c bash bank-tester/run-bank-test.sh [task-filter]
 #
 # Examples:
-#   bash bank-tester/run-bank-test.sh              # run all 9 tasks
+#   bash bank-tester/run-bank-test.sh              # run all tasks (except destructive)
 #   bash bank-tester/run-bank-test.sh 01           # run only task 01
 #   bash bank-tester/run-bank-test.sh "01 03 05"   # run tasks 01, 03, 05
+#   INCLUDE_DESTRUCTIVE=1 bash bank-tester/run-bank-test.sh  # include task 99
 #
 # Requires: vm/golden.qcow2 (built by vm/setup.sh), claude CLI on PATH
 #
@@ -26,6 +27,7 @@ MCP_CONFIG_TEMPLATE="bank-tester/mcp-config.json"
 TESTER_PROMPT="bank-tester/TESTER-CLAUDE.md"
 TASKS_DIR="bank-tester/tasks"
 TASK_FILTER="${1:-}"
+INCLUDE_DESTRUCTIVE="${INCLUDE_DESTRUCTIVE:-0}"
 
 # --- Preflight checks ---
 [[ -f "$GOLDEN" ]] || { echo "FATAL: $GOLDEN not found. Run vm/setup.sh first."; exit 1; }
@@ -124,10 +126,19 @@ sed -e "s|FASTMCP_PATH_PLACEHOLDER|${FASTMCP_PATH}|g" \
 echo "==> Live MCP config written to $LIVE_MCP_CONFIG"
 
 # --- Collect task files ---
+# Default ordering: 01-09 (workflow) → 35,37 (read-only) → 10-34 (systematic) → 36 → 40-44 (adversarial) → 99 (destructive)
+# Destructive task 99 only included with INCLUDE_DESTRUCTIVE=1
 TASK_FILES=()
 for task_file in "$TASKS_DIR"/*.md; do
+    task_basename="$(basename "$task_file" .md)"
+
+    # Skip destructive tasks unless opted in
+    if [[ "$task_basename" == 99-* ]] && [[ "$INCLUDE_DESTRUCTIVE" != "1" ]]; then
+        echo "==> Skipping destructive task: $task_basename (set INCLUDE_DESTRUCTIVE=1 to include)"
+        continue
+    fi
+
     if [[ -n "$TASK_FILTER" ]]; then
-        task_basename="$(basename "$task_file" .md)"
         match=false
         for pattern in $TASK_FILTER; do
             if [[ "$task_basename" == *"$pattern"* ]]; then

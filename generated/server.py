@@ -89,7 +89,7 @@ _client = PfSenseClient()
 @mcp.tool()
 async def pfsense_post_auth_jwt(
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/auth/jwt
     """
     if not confirm:
@@ -111,14 +111,14 @@ async def pfsense_create_auth_key(
     hash_algo: str | None = 'sha256',
     key: str | None = None,
     length_bytes: int | None = 24,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/auth/key
 
     descr: Sets a description for this API key. This is used to identify the key's purpose and cannot be changed once created.
     hash: The hash of the generated API key
-    hash_algo: The hash algorithm used for this API key. It is recommended to increase the strength of the algorithm for keys assigned 
+    hash_algo: The hash algorithm used for this API key. It is recommended to increase the strength of the algorithm for keys assigned  Valid values: ['sha256', 'sha384', 'sha512']
     key: The real API key. This value is not stored internally and cannot be recovered if lost.
-    length_bytes: The length of the API key (in bytes). Greater key lengths provide greater security, but also increase the number of char
+    length_bytes: The length of the API key (in bytes). Greater key lengths provide greater security, but also increase the number of char Valid values: [16, 24, 32, 64]
     """
     if not confirm:
         return (
@@ -147,7 +147,7 @@ async def pfsense_create_auth_key(
 async def pfsense_delete_auth_key(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/auth/key
 
     id: The ID of the object to target.
@@ -174,14 +174,14 @@ async def pfsense_list_auth_keys(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/auth/keys
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -206,7 +206,7 @@ async def pfsense_delete_auth_keys(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/auth/keys
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -236,14 +236,14 @@ async def pfsense_list_diagnostics_arp_table(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/diagnostics/arp_table
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -268,7 +268,7 @@ async def pfsense_delete_diagnostics_arp_table(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/diagnostics/arp_table
 
     WARNING: DANGEROUS: Clears the entire ARP table.
@@ -297,7 +297,7 @@ async def pfsense_delete_diagnostics_arp_table(
 @mcp.tool()
 async def pfsense_get_diagnostics_arp_table_entry(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/diagnostics/arp_table/entry
 
     id: The ID of the object to target.
@@ -316,7 +316,7 @@ async def pfsense_get_diagnostics_arp_table_entry(
 async def pfsense_delete_diagnostics_arp_table_entry(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/diagnostics/arp_table/entry
 
     id: The ID of the object to target.
@@ -340,7 +340,7 @@ async def pfsense_delete_diagnostics_arp_table_entry(
 async def pfsense_post_diagnostics_command_prompt(
     command: str,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/diagnostics/command_prompt
 
     WARNING: DANGEROUS: Executes arbitrary shell commands.
@@ -366,7 +366,7 @@ async def pfsense_post_diagnostics_command_prompt(
 @mcp.tool()
 async def pfsense_get_diagnostics_config_history_revision(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/diagnostics/config_history/revision
 
     id: The ID of the object to target.
@@ -385,7 +385,7 @@ async def pfsense_get_diagnostics_config_history_revision(
 async def pfsense_delete_diagnostics_config_history_revision(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/diagnostics/config_history/revision
 
     id: The ID of the object to target.
@@ -412,14 +412,14 @@ async def pfsense_list_diagnostics_config_history_revisions(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/diagnostics/config_history/revisions
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -444,7 +444,7 @@ async def pfsense_delete_diagnostics_config_history_revisions(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/diagnostics/config_history/revisions
 
     WARNING: DANGEROUS: Deletes all config history.
@@ -474,7 +474,7 @@ async def pfsense_delete_diagnostics_config_history_revisions(
 async def pfsense_post_diagnostics_halt_system(
     confirm: bool = False,
     dry_run: bool | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/diagnostics/halt_system
 
     WARNING: DANGEROUS: Halts the pfSense system.
@@ -503,7 +503,7 @@ async def pfsense_post_diagnostics_ping(
     confirm: bool = False,
     count: int | None = 3,
     source_address: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/diagnostics/ping
 
     host: The IP address or hostname to ping.
@@ -533,7 +533,7 @@ async def pfsense_post_diagnostics_ping(
 async def pfsense_post_diagnostics_reboot(
     confirm: bool = False,
     dry_run: bool | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/diagnostics/reboot
 
     WARNING: DANGEROUS: Reboots the pfSense system.
@@ -559,7 +559,7 @@ async def pfsense_post_diagnostics_reboot(
 @mcp.tool()
 async def pfsense_get_diagnostics_table(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/diagnostics/table
 
     id: The ID of the object to target.
@@ -578,7 +578,7 @@ async def pfsense_get_diagnostics_table(
 async def pfsense_delete_diagnostics_table(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/diagnostics/table
 
     id: The ID of the object to target.
@@ -600,7 +600,7 @@ async def pfsense_delete_diagnostics_table(
 
 @mcp.tool()
 async def pfsense_get_firewall_advanced_settings(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/advanced_settings
     """
     return await _client.request(
@@ -612,9 +612,9 @@ async def pfsense_get_firewall_advanced_settings(
 @mcp.tool()
 async def pfsense_update_firewall_advanced_settings(
     confirm: bool = False,
-    aliasesresolveinterval: int | None = 9223372036854775807,
+    aliasesresolveinterval: int | None = None,
     checkaliasesurlcert: bool | None = True,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/firewall/advanced_settings
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -643,7 +643,7 @@ async def pfsense_update_firewall_advanced_settings(
 @mcp.tool()
 async def pfsense_get_firewall_alias(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/alias
 
     id: The ID of the object to target.
@@ -666,13 +666,13 @@ async def pfsense_create_firewall_alias(
     address: list[str] | None = None,
     descr: str | None = None,
     detail: list[str] | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/firewall/alias
 
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     name: Sets the name for the alias. This name must be unique from all other aliases.
-    type_: Sets the type of alias this object will be. This directly impacts what values can be specified in the `address` field.
+    type_: Sets the type of alias this object will be. This directly impacts what values can be specified in the `address` field. Valid values: ['host', 'network', 'port']
     address: Sets the host, network or port entries for the alias. When `type` is set to `host`, each entry must be a valid IP addres
     descr: Sets a description to help specify the purpose or contents of the alias.
     detail: Sets descriptions for each alias `address`. Values must match the order of the `address` value it relates to. For exampl
@@ -710,7 +710,7 @@ async def pfsense_update_firewall_alias(
     detail: list[str] | None = None,
     name: str | None = None,
     type_: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/firewall/alias
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -720,7 +720,7 @@ async def pfsense_update_firewall_alias(
     descr: Sets a description to help specify the purpose or contents of the alias.
     detail: Sets descriptions for each alias `address`. Values must match the order of the `address` value it relates to. For exampl
     name: Sets the name for the alias. This name must be unique from all other aliases.
-    type_: Sets the type of alias this object will be. This directly impacts what values can be specified in the `address` field.
+    type_: Sets the type of alias this object will be. This directly impacts what values can be specified in the `address` field. Valid values: ['host', 'network', 'port']
     """
     if not confirm:
         return (
@@ -753,7 +753,7 @@ async def pfsense_delete_firewall_alias(
     id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/alias
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -786,14 +786,14 @@ async def pfsense_list_firewall_aliases(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/aliases
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -817,7 +817,7 @@ async def pfsense_list_firewall_aliases(
 async def pfsense_replace_firewall_aliases(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/firewall/aliases
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -843,7 +843,7 @@ async def pfsense_delete_firewall_aliases(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/aliases
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -871,7 +871,7 @@ async def pfsense_delete_firewall_aliases(
 
 @mcp.tool()
 async def pfsense_get_firewall_apply_status(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/apply
     """
     return await _client.request(
@@ -883,7 +883,7 @@ async def pfsense_get_firewall_apply_status(
 @mcp.tool()
 async def pfsense_firewall_apply(
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/firewall/apply
     """
     if not confirm:
@@ -900,7 +900,7 @@ async def pfsense_firewall_apply(
 @mcp.tool()
 async def pfsense_get_firewall_nat_one_to_one_mapping(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/nat/one_to_one/mapping
 
     id: The ID of the object to target.
@@ -927,7 +927,7 @@ async def pfsense_create_firewall_nat_one_to_one_mapping(
     ipprotocol: str | None = 'inet',
     natreflection: str | None = None,
     nobinat: bool | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/firewall/nat/one_to_one/mapping
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -938,8 +938,8 @@ async def pfsense_create_firewall_nat_one_to_one_mapping(
     source: The source IP address or subnet that traffic must match to apply this mapping. Valid value options are: an existing inte
     descr: A description for this 1:1 NAT mapping
     disabled: Disables this 1:1 NAT mapping.
-    ipprotocol: The IP version this mapping applies to.
-    natreflection: Enables or disables NAT reflection for traffic matching this mapping. Set to `null` to use the system default.
+    ipprotocol: The IP version this mapping applies to. Valid values: ['inet', 'inet6']
+    natreflection: Enables or disables NAT reflection for traffic matching this mapping. Set to `null` to use the system default. Valid values: ['enable', 'disable']
     nobinat: Exclude traffic matching this mapping from a later, more general, mapping.
     """
     if not confirm:
@@ -987,7 +987,7 @@ async def pfsense_update_firewall_nat_one_to_one_mapping(
     natreflection: str | None = None,
     nobinat: bool | None = None,
     source: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/firewall/nat/one_to_one/mapping
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -998,8 +998,8 @@ async def pfsense_update_firewall_nat_one_to_one_mapping(
     disabled: Disables this 1:1 NAT mapping.
     external: The external IP address or interface for the 1:1 mapping. Valid value options are: an IP address. For interface values, 
     interface: The interface this 1:1 NAT mapping applies to.
-    ipprotocol: The IP version this mapping applies to.
-    natreflection: Enables or disables NAT reflection for traffic matching this mapping. Set to `null` to use the system default.
+    ipprotocol: The IP version this mapping applies to. Valid values: ['inet', 'inet6']
+    natreflection: Enables or disables NAT reflection for traffic matching this mapping. Set to `null` to use the system default. Valid values: ['enable', 'disable']
     nobinat: Exclude traffic matching this mapping from a later, more general, mapping.
     source: The source IP address or subnet that traffic must match to apply this mapping. Valid value options are: an existing inte
     """
@@ -1042,7 +1042,7 @@ async def pfsense_delete_firewall_nat_one_to_one_mapping(
     id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/nat/one_to_one/mapping
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -1075,14 +1075,14 @@ async def pfsense_list_firewall_nat_one_to_one_mappings(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/nat/one_to_one/mappings
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -1106,7 +1106,7 @@ async def pfsense_list_firewall_nat_one_to_one_mappings(
 async def pfsense_replace_firewall_nat_one_to_one_mappings(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/firewall/nat/one_to_one/mappings
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -1132,7 +1132,7 @@ async def pfsense_delete_firewall_nat_one_to_one_mappings(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/nat/one_to_one/mappings
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -1161,7 +1161,7 @@ async def pfsense_delete_firewall_nat_one_to_one_mappings(
 @mcp.tool()
 async def pfsense_get_firewall_nat_outbound_mapping(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/nat/outbound/mapping
 
     id: The ID of the object to target.
@@ -1195,7 +1195,7 @@ async def pfsense_create_firewall_nat_outbound_mapping(
     source_port: str | None = None,
     static_nat_port: bool | None = None,
     target_subnet: int | None = 128,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/firewall/nat/outbound/mapping
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -1210,8 +1210,8 @@ async def pfsense_create_firewall_nat_outbound_mapping(
     nat_port: The external source port or port range used for rewriting the original source port on connections matching the rule. Val
     nonat: Do not NAT traffic matching this rule.
     nosync: Do not sync this rule to HA peers.
-    poolopts: The pool option used to load balance external IP mapping when `target` is set to a subnet or alias of many addresses. Se
-    protocol: The protocol this rule should match. Use `null` for any protocol.
+    poolopts: The pool option used to load balance external IP mapping when `target` is set to a subnet or alias of many addresses. Se Valid values: ['round-robin', 'round-robin sticky-address', 'random', 'random sticky-address', 'source-hash', 'bitmask']
+    protocol: The protocol this rule should match. Use `null` for any protocol. Valid values: ['tcp', 'udp', 'tcp/udp', 'icmp', 'esp', 'ah', 'gre', 'ipv6', 'igmp', 'pim', 'ospf']
     source_hash_key: The key that is fed to the hashing algorithm in hex format. This must be a 16 byte (32 character) hex string prefixed wi
     source_port: The source port this rule should match. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`,
     static_nat_port: Do not rewrite source port for traffic matching this rule.This field is only available when the following conditions are
@@ -1283,7 +1283,7 @@ async def pfsense_update_firewall_nat_outbound_mapping(
     static_nat_port: bool | None = None,
     target: str | None = None,
     target_subnet: int | None = 128,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/firewall/nat/outbound/mapping
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -1297,8 +1297,8 @@ async def pfsense_update_firewall_nat_outbound_mapping(
     nat_port: The external source port or port range used for rewriting the original source port on connections matching the rule. Val
     nonat: Do not NAT traffic matching this rule.
     nosync: Do not sync this rule to HA peers.
-    poolopts: The pool option used to load balance external IP mapping when `target` is set to a subnet or alias of many addresses. Se
-    protocol: The protocol this rule should match. Use `null` for any protocol.
+    poolopts: The pool option used to load balance external IP mapping when `target` is set to a subnet or alias of many addresses. Se Valid values: ['round-robin', 'round-robin sticky-address', 'random', 'random sticky-address', 'source-hash', 'bitmask']
+    protocol: The protocol this rule should match. Use `null` for any protocol. Valid values: ['tcp', 'udp', 'tcp/udp', 'icmp', 'esp', 'ah', 'gre', 'ipv6', 'igmp', 'pim', 'ospf']
     source: The source network this rule should match. Valid value options are: an existing interface, a subnet CIDR, an existing al
     source_hash_key: The key that is fed to the hashing algorithm in hex format. This must be a 16 byte (32 character) hex string prefixed wi
     source_port: The source port this rule should match. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`,
@@ -1359,7 +1359,7 @@ async def pfsense_delete_firewall_nat_outbound_mapping(
     id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/nat/outbound/mapping
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -1392,14 +1392,14 @@ async def pfsense_list_firewall_nat_outbound_mappings(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/nat/outbound/mappings
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -1423,7 +1423,7 @@ async def pfsense_list_firewall_nat_outbound_mappings(
 async def pfsense_replace_firewall_nat_outbound_mappings(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/firewall/nat/outbound/mappings
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -1449,7 +1449,7 @@ async def pfsense_delete_firewall_nat_outbound_mappings(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/nat/outbound/mappings
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -1477,7 +1477,7 @@ async def pfsense_delete_firewall_nat_outbound_mappings(
 
 @mcp.tool()
 async def pfsense_get_firewall_nat_outbound_mode(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/nat/outbound/mode
     """
     return await _client.request(
@@ -1490,12 +1490,12 @@ async def pfsense_get_firewall_nat_outbound_mode(
 async def pfsense_update_firewall_nat_outbound_mode(
     mode: str,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/firewall/nat/outbound/mode
 
     Note: Call pfsense_firewall_apply after this to apply changes.
 
-    mode: The outbound NAT mode to assign this system. Set to `automatic` to have this system automatically generate NAT rules thi
+    mode: The outbound NAT mode to assign this system. Set to `automatic` to have this system automatically generate NAT rules thi Valid values: ['automatic', 'hybrid', 'advanced', 'disabled']
     """
     if not confirm:
         return (
@@ -1516,7 +1516,7 @@ async def pfsense_update_firewall_nat_outbound_mode(
 @mcp.tool()
 async def pfsense_get_firewall_nat_port_forward(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/nat/port_forward
 
     id: The ID of the object to target.
@@ -1549,7 +1549,7 @@ async def pfsense_create_firewall_nat_port_forward(
     nordr: bool | None = None,
     nosync: bool | None = None,
     source_port: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/firewall/nat/port_forward
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -1557,15 +1557,15 @@ async def pfsense_create_firewall_nat_port_forward(
     destination: The destination address this rule applies to. Valid value options are: an existing interface, an IP address, a subnet CI
     interface: The interface this port forward rule applies to.
     local_port: The port on the internal host to forward matching traffic to. In most cases, this must match the `destination_port` valu
-    protocol: The IP/transport protocol this port forward rule should match.
+    protocol: The IP/transport protocol this port forward rule should match. Valid values: ['any', 'tcp', 'udp', 'tcp/udp', 'icmp', 'esp', 'ah', 'gre', 'ipv6', 'igmp', 'pim', 'ospf']
     source: The source address this port forward rule applies to. Valid value options are: an existing interface, an IP address, a s
     target: The IP address or alias of the internal host to forward matching traffic to. Valid value options are: an IP address, an 
     associated_rule_id: The associated firewall rule mode. Use an empty string to require a separate firewall rule to be created to pass traffic
     descr: A description for this port forward rule.
     destination_port: The destination port this port forward rule applies to. Set to `null` to allow any destination port. Valid options are: 
     disabled: Disables this port forward rule.
-    ipprotocol: The IP protocol this port forward rule should match.
-    natreflection: The NAT reflection mode to use for traffic matching this port forward rule. Set to `null` to use the system default.
+    ipprotocol: The IP protocol this port forward rule should match. Valid values: ['inet', 'inet6', 'inet46']
+    natreflection: The NAT reflection mode to use for traffic matching this port forward rule. Set to `null` to use the system default. Valid values: ['enable', 'disable', 'purenat']
     nordr: Disables redirection for traffic matching this rule.
     nosync: Prevents this port forward rule from being synced to non-primary CARP members.
     source_port: The source port this port forward rule applies to. Set to `null` to allow any source port. Valid options are: a TCP/UDP 
@@ -1633,7 +1633,7 @@ async def pfsense_update_firewall_nat_port_forward(
     source: str | None = None,
     source_port: str | None = None,
     target: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/firewall/nat/port_forward
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -1645,12 +1645,12 @@ async def pfsense_update_firewall_nat_port_forward(
     destination_port: The destination port this port forward rule applies to. Set to `null` to allow any destination port. Valid options are: 
     disabled: Disables this port forward rule.
     interface: The interface this port forward rule applies to.
-    ipprotocol: The IP protocol this port forward rule should match.
+    ipprotocol: The IP protocol this port forward rule should match. Valid values: ['inet', 'inet6', 'inet46']
     local_port: The port on the internal host to forward matching traffic to. In most cases, this must match the `destination_port` valu
-    natreflection: The NAT reflection mode to use for traffic matching this port forward rule. Set to `null` to use the system default.
+    natreflection: The NAT reflection mode to use for traffic matching this port forward rule. Set to `null` to use the system default. Valid values: ['enable', 'disable', 'purenat']
     nordr: Disables redirection for traffic matching this rule.
     nosync: Prevents this port forward rule from being synced to non-primary CARP members.
-    protocol: The IP/transport protocol this port forward rule should match.
+    protocol: The IP/transport protocol this port forward rule should match. Valid values: ['any', 'tcp', 'udp', 'tcp/udp', 'icmp', 'esp', 'ah', 'gre', 'ipv6', 'igmp', 'pim', 'ospf']
     source: The source address this port forward rule applies to. Valid value options are: an existing interface, an IP address, a s
     source_port: The source port this port forward rule applies to. Set to `null` to allow any source port. Valid options are: a TCP/UDP 
     target: The IP address or alias of the internal host to forward matching traffic to. Valid value options are: an IP address, an 
@@ -1706,7 +1706,7 @@ async def pfsense_delete_firewall_nat_port_forward(
     id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/nat/port_forward
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -1739,14 +1739,14 @@ async def pfsense_list_firewall_nat_port_forwards(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/nat/port_forwards
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -1770,7 +1770,7 @@ async def pfsense_list_firewall_nat_port_forwards(
 async def pfsense_replace_firewall_nat_port_forwards(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/firewall/nat/port_forwards
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -1796,7 +1796,7 @@ async def pfsense_delete_firewall_nat_port_forwards(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/nat/port_forwards
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -1825,7 +1825,7 @@ async def pfsense_delete_firewall_nat_port_forwards(
 @mcp.tool()
 async def pfsense_get_firewall_rule(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/rule
 
     id: The ID of the object to target.
@@ -1869,21 +1869,21 @@ async def pfsense_create_firewall_rule(
     tcp_flags_any: bool | None = None,
     tcp_flags_out_of: list[str] | None = None,
     tcp_flags_set: list[str] | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/firewall/rule
 
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     destination: The destination address this rule applies to. Valid value options are: an existing interface, an IP address, a subnet CI
     interface: The interface where packets must originate to match this rule.
-    ipprotocol: The IP version(s) this rule applies to.
+    ipprotocol: The IP version(s) this rule applies to. Valid values: ['inet', 'inet6', 'inet46']
     source: The source address this rule applies to. Valid value options are: an existing interface, an IP address, a subnet CIDR, a
-    type_: The action to take against traffic that matches this rule.
+    type_: The action to take against traffic that matches this rule. Valid values: ['pass', 'block', 'reject']
     ackqueue: The name of the traffic shaper queue to assume as the ACK queue for ACK traffic matching this rule.
     defaultqueue: The name of the traffic shaper queue to assume as the default queue for traffic matching this rule.
     descr: A description detailing the purpose or justification of this firewall rule.
     destination_port: The destination port this rule applies to. Set to `null` to allow any destination port. Valid options are: a TCP/UDP por
-    direction: The direction of traffic this firewall rule applies to. This field only applies to floating firewall rules.This field is
+    direction: The direction of traffic this firewall rule applies to. This field only applies to floating firewall rules.This field is Valid values: ['any', 'in', 'out']
     disabled: Enable or disable this firewall rule.
     dnpipe: The name of the traffic shaper limiter pipe or queue to use for incoming traffic.
     floating: Mark this rule as a floating firewall rule.
@@ -1891,11 +1891,11 @@ async def pfsense_create_firewall_rule(
     icmptype: Th ICMP subtypes this rule applies to. This field is only applicable when `ipprotocol` is `inet` and `protocol` is `icmp
     log: Enable or disable logging of traffic that matches this rule.
     pdnpipe: The name of the traffic shaper limiter pipe or queue to use for outgoing traffic.
-    protocol: The IP/transport protocol this rule should match.
+    protocol: The IP/transport protocol this rule should match. Valid values: ['tcp', 'udp', 'tcp/udp', 'icmp', 'esp', 'ah', 'gre', 'ipv6', 'igmp', 'pim', 'ospf', 'carp', 'pfsync']
     quick: Apply this action to traffic that matches this rule immediately. This field only applies to floating firewall rules.This
     sched: The name of an existing firewall schedule to assign to this firewall rule.
     source_port: The source port this rule applies to. Set to `null` to allow any source port. Valid options are: a TCP/UDP port number, 
-    statetype: The state mechanism to use for this firewall rule.
+    statetype: The state mechanism to use for this firewall rule. Valid values: ['keep state', 'sloppy state', 'synproxy state', 'none']
     tag: A packet matching this rule can be marked and this mark used to match on other NAT/filter rules. It is called
     tcp_flags_any: Allow any TCP flags.
     tcp_flags_out_of: The TCP flags that can be set for this rule to match.This field is only available when the following conditions are met:
@@ -1997,7 +1997,7 @@ async def pfsense_update_firewall_rule(
     tcp_flags_out_of: list[str] | None = None,
     tcp_flags_set: list[str] | None = None,
     type_: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/firewall/rule
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -2008,27 +2008,27 @@ async def pfsense_update_firewall_rule(
     descr: A description detailing the purpose or justification of this firewall rule.
     destination: The destination address this rule applies to. Valid value options are: an existing interface, an IP address, a subnet CI
     destination_port: The destination port this rule applies to. Set to `null` to allow any destination port. Valid options are: a TCP/UDP por
-    direction: The direction of traffic this firewall rule applies to. This field only applies to floating firewall rules.This field is
+    direction: The direction of traffic this firewall rule applies to. This field only applies to floating firewall rules.This field is Valid values: ['any', 'in', 'out']
     disabled: Enable or disable this firewall rule.
     dnpipe: The name of the traffic shaper limiter pipe or queue to use for incoming traffic.
     floating: Mark this rule as a floating firewall rule.
     gateway: The gateway traffic matching this rule will be routed to. Set to `null` to use default.
     icmptype: Th ICMP subtypes this rule applies to. This field is only applicable when `ipprotocol` is `inet` and `protocol` is `icmp
     interface: The interface where packets must originate to match this rule.
-    ipprotocol: The IP version(s) this rule applies to.
+    ipprotocol: The IP version(s) this rule applies to. Valid values: ['inet', 'inet6', 'inet46']
     log: Enable or disable logging of traffic that matches this rule.
     pdnpipe: The name of the traffic shaper limiter pipe or queue to use for outgoing traffic.
-    protocol: The IP/transport protocol this rule should match.
+    protocol: The IP/transport protocol this rule should match. Valid values: ['tcp', 'udp', 'tcp/udp', 'icmp', 'esp', 'ah', 'gre', 'ipv6', 'igmp', 'pim', 'ospf', 'carp', 'pfsync']
     quick: Apply this action to traffic that matches this rule immediately. This field only applies to floating firewall rules.This
     sched: The name of an existing firewall schedule to assign to this firewall rule.
     source: The source address this rule applies to. Valid value options are: an existing interface, an IP address, a subnet CIDR, a
     source_port: The source port this rule applies to. Set to `null` to allow any source port. Valid options are: a TCP/UDP port number, 
-    statetype: The state mechanism to use for this firewall rule.
+    statetype: The state mechanism to use for this firewall rule. Valid values: ['keep state', 'sloppy state', 'synproxy state', 'none']
     tag: A packet matching this rule can be marked and this mark used to match on other NAT/filter rules. It is called
     tcp_flags_any: Allow any TCP flags.
     tcp_flags_out_of: The TCP flags that can be set for this rule to match.This field is only available when the following conditions are met:
     tcp_flags_set: The TCP flags that must be set for this rule to match.This field is only available when the following conditions are met
-    type_: The action to take against traffic that matches this rule.
+    type_: The action to take against traffic that matches this rule. Valid values: ['pass', 'block', 'reject']
     """
     if not confirm:
         return (
@@ -2102,7 +2102,7 @@ async def pfsense_update_firewall_rule(
 async def pfsense_delete_firewall_rule(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/rule
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -2132,14 +2132,14 @@ async def pfsense_list_firewall_rules(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/rules
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -2163,7 +2163,7 @@ async def pfsense_list_firewall_rules(
 async def pfsense_replace_firewall_rules(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/firewall/rules
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -2189,7 +2189,7 @@ async def pfsense_delete_firewall_rules(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/rules
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -2218,7 +2218,7 @@ async def pfsense_delete_firewall_rules(
 @mcp.tool()
 async def pfsense_get_firewall_schedule(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/schedule
 
     id: The ID of the object to target.
@@ -2239,7 +2239,7 @@ async def pfsense_create_firewall_schedule(
     timerange: list[str],
     confirm: bool = False,
     descr: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/firewall/schedule
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -2275,7 +2275,7 @@ async def pfsense_update_firewall_schedule(
     descr: str | None = None,
     name: str | None = None,
     timerange: list[str] | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/firewall/schedule
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -2311,7 +2311,7 @@ async def pfsense_update_firewall_schedule(
 async def pfsense_delete_firewall_schedule(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/schedule
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -2338,7 +2338,7 @@ async def pfsense_delete_firewall_schedule(
 async def pfsense_get_firewall_schedule_time_range(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/schedule/time_range
 
     id: The ID of the object to target.
@@ -2365,7 +2365,7 @@ async def pfsense_create_firewall_schedule_time_range(
     confirm: bool = False,
     position: list[int] | None = None,
     rangedescr: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/firewall/schedule/time_range
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -2413,7 +2413,7 @@ async def pfsense_update_firewall_schedule_time_range(
     month: list[int] | None = None,
     position: list[int] | None = None,
     rangedescr: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/firewall/schedule/time_range
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -2459,7 +2459,7 @@ async def pfsense_delete_firewall_schedule_time_range(
     id: str | int,
     parent_id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/schedule/time_range
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -2492,14 +2492,14 @@ async def pfsense_list_firewall_schedules(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/schedules
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -2523,7 +2523,7 @@ async def pfsense_list_firewall_schedules(
 async def pfsense_replace_firewall_schedules(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/firewall/schedules
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -2549,7 +2549,7 @@ async def pfsense_delete_firewall_schedules(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/schedules
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -2578,7 +2578,7 @@ async def pfsense_delete_firewall_schedules(
 @mcp.tool()
 async def pfsense_get_firewall_state(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/state
 
     id: The ID of the object to target.
@@ -2597,7 +2597,7 @@ async def pfsense_get_firewall_state(
 async def pfsense_delete_firewall_state(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/state
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -2627,14 +2627,14 @@ async def pfsense_list_firewall_states(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/states
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -2659,7 +2659,7 @@ async def pfsense_delete_firewall_states(
     confirm: bool = False,
     limit: int | None = 100,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/states
 
     WARNING: DANGEROUS: Clears all firewall states.
@@ -2690,7 +2690,7 @@ async def pfsense_delete_firewall_states(
 
 @mcp.tool()
 async def pfsense_get_firewall_states_size(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/states/size
     """
     return await _client.request(
@@ -2703,7 +2703,7 @@ async def pfsense_get_firewall_states_size(
 async def pfsense_update_firewall_states_size(
     confirm: bool = False,
     maximumstates: int | None = 398000,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/firewall/states/size
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -2729,7 +2729,7 @@ async def pfsense_update_firewall_states_size(
 @mcp.tool()
 async def pfsense_get_firewall_traffic_shaper(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/traffic_shaper
 
     id: The ID of the object to target.
@@ -2755,15 +2755,15 @@ async def pfsense_create_firewall_traffic_shaper(
     qlimit: int | None = 50,
     queue: list[str] | None = None,
     tbrconfig: int | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/firewall/traffic_shaper
 
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     bandwidth: The total bandwidth amount allowed by this traffic shaper.
-    bandwidthtype: The scale type of the `bandwidth` field's value.
+    bandwidthtype: The scale type of the `bandwidth` field's value. Valid values: ['%', 'b', 'Kb', 'Mb', 'Gb']
     interface: The interface this traffic shaper will be applied to.
-    scheduler: The scheduler type to use for this traffic shaper. Changing this value will automatically update any child queues assign
+    scheduler: The scheduler type to use for this traffic shaper. Changing this value will automatically update any child queues assign Valid values: ['HFSC', 'CBQ', 'FAIRQ', 'CODELQ', 'PRIQ']
     enabled: Enables or disables this traffic shaper.
     qlimit: The number of packets that can be held in a queue waiting to be transmitted by the shaper.This field is only available w
     queue: The child queues assigned to this traffic shaper.
@@ -2811,19 +2811,19 @@ async def pfsense_update_firewall_traffic_shaper(
     queue: list[str] | None = None,
     scheduler: str | None = None,
     tbrconfig: int | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/firewall/traffic_shaper
 
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     id: The ID of the object or resource to interact with.
     bandwidth: The total bandwidth amount allowed by this traffic shaper.
-    bandwidthtype: The scale type of the `bandwidth` field's value.
+    bandwidthtype: The scale type of the `bandwidth` field's value. Valid values: ['%', 'b', 'Kb', 'Mb', 'Gb']
     enabled: Enables or disables this traffic shaper.
     interface: The interface this traffic shaper will be applied to.
     qlimit: The number of packets that can be held in a queue waiting to be transmitted by the shaper.This field is only available w
     queue: The child queues assigned to this traffic shaper.
-    scheduler: The scheduler type to use for this traffic shaper. Changing this value will automatically update any child queues assign
+    scheduler: The scheduler type to use for this traffic shaper. Changing this value will automatically update any child queues assign Valid values: ['HFSC', 'CBQ', 'FAIRQ', 'CODELQ', 'PRIQ']
     tbrconfig: The size, in bytes, of the token bucket regulator. If `null`, heuristics based on the interface bandwidth are used to de
     """
     if not confirm:
@@ -2863,7 +2863,7 @@ async def pfsense_delete_firewall_traffic_shaper(
     id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/traffic_shaper
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -2893,7 +2893,7 @@ async def pfsense_delete_firewall_traffic_shaper(
 async def pfsense_get_firewall_traffic_shaper_limiter_bandwidth(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/traffic_shaper/limiter/bandwidth
 
     id: The ID of the object to target.
@@ -2918,13 +2918,13 @@ async def pfsense_create_firewall_traffic_shaper_limiter_bandwidth(
     parent_id: int,
     confirm: bool = False,
     bwsched: str | None = 'none',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/firewall/traffic_shaper/limiter/bandwidth
 
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     bw: The amount of bandwidth this profile allows.
-    bwscale: The scale factor of the `bw` fields value.
+    bwscale: The scale factor of the `bw` fields value. Valid values: ['b', 'Kb', 'Mb']
     parent_id: The ID of the parent this object is nested under.
     bwsched: The schedule to assign this bandwidth profile. When this firewall schedule is active, this bandwidth profile will be use
     """
@@ -2958,7 +2958,7 @@ async def pfsense_update_firewall_traffic_shaper_limiter_bandwidth(
     bw: int | None = None,
     bwscale: str | None = None,
     bwsched: str | None = 'none',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/firewall/traffic_shaper/limiter/bandwidth
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -2966,7 +2966,7 @@ async def pfsense_update_firewall_traffic_shaper_limiter_bandwidth(
     id: The ID of the object or resource to interact with.
     parent_id: The ID of the parent this object is nested under.
     bw: The amount of bandwidth this profile allows.
-    bwscale: The scale factor of the `bw` fields value.
+    bwscale: The scale factor of the `bw` fields value. Valid values: ['b', 'Kb', 'Mb']
     bwsched: The schedule to assign this bandwidth profile. When this firewall schedule is active, this bandwidth profile will be use
     """
     if not confirm:
@@ -2998,7 +2998,7 @@ async def pfsense_delete_firewall_traffic_shaper_limiter_bandwidth(
     id: str | int,
     parent_id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/traffic_shaper/limiter/bandwidth
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -3027,7 +3027,7 @@ async def pfsense_delete_firewall_traffic_shaper_limiter_bandwidth(
 @mcp.tool()
 async def pfsense_get_firewall_traffic_shaper_limiter(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/traffic_shaper/limiter
 
     id: The ID of the object to target.
@@ -3094,21 +3094,21 @@ async def pfsense_create_firewall_traffic_shaper_limiter(
     plr: float | None = None,
     qlimit: int | None = None,
     queue: list[str] | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/firewall/traffic_shaper/limiter
 
     Note: Call pfsense_firewall_apply after this to apply changes.
 
-    aqm: The Active Queue Management (AQM) algorithm to use for this limiter. AQM is the intelligent drop of network packets insi
+    aqm: The Active Queue Management (AQM) algorithm to use for this limiter. AQM is the intelligent drop of network packets insi Valid values: ['droptail', 'codel', 'pie', 'red', 'gred']
     name: The unique name for this limiter.
-    sched: The scheduler to use for this limiter. The scheduler manages the sequence of network packets in the limiter's queue.
+    sched: The scheduler to use for this limiter. The scheduler manages the sequence of network packets in the limiter's queue. Valid values: ['wf2q+', 'fifo', 'qfq', 'rr', 'prio', 'fq_codel', 'fq_pie']
     bandwidth: The bandwidth profiles for this limiter.
     buckets: The limiter's bucket size (slots).
     delay: The amount of delay (in milliseconds) added to traffic passing through this limiter.
     description: The verbose description for this limiter.
     ecn: Enable or disable ECN. ECN sets a reserved TCP flag when the queue is nearing or exceeding capacity. Not all AQMs or sch
     enabled: Enables or disables this limiter and its child queues.
-    mask: If `source` or `destination` slots is chosen a dynamic pipe with the bandwidth, delay, packet loss and queue size given 
+    mask: If `source` or `destination` slots is chosen a dynamic pipe with the bandwidth, delay, packet loss and queue size given  Valid values: ['none', 'srcaddress', 'dstaddress']
     maskbits: The IPv4 mask bits to use when determine the scope of the dynamic pipe for IPv4 traffic.This field is only available whe
     maskbitsv6: The IPv6 mask bits to use when determine the scope of the dynamic pipe for IPv4 traffic.This field is only available whe
     param_codel_interval: The value for the CoDel interval parameter.This field is only available when the following conditions are met:- `aqm` mu
@@ -3314,20 +3314,20 @@ async def pfsense_update_firewall_traffic_shaper_limiter(
     qlimit: int | None = None,
     queue: list[str] | None = None,
     sched: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/firewall/traffic_shaper/limiter
 
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     id: The ID of the object or resource to interact with.
-    aqm: The Active Queue Management (AQM) algorithm to use for this limiter. AQM is the intelligent drop of network packets insi
+    aqm: The Active Queue Management (AQM) algorithm to use for this limiter. AQM is the intelligent drop of network packets insi Valid values: ['droptail', 'codel', 'pie', 'red', 'gred']
     bandwidth: The bandwidth profiles for this limiter.
     buckets: The limiter's bucket size (slots).
     delay: The amount of delay (in milliseconds) added to traffic passing through this limiter.
     description: The verbose description for this limiter.
     ecn: Enable or disable ECN. ECN sets a reserved TCP flag when the queue is nearing or exceeding capacity. Not all AQMs or sch
     enabled: Enables or disables this limiter and its child queues.
-    mask: If `source` or `destination` slots is chosen a dynamic pipe with the bandwidth, delay, packet loss and queue size given 
+    mask: If `source` or `destination` slots is chosen a dynamic pipe with the bandwidth, delay, packet loss and queue size given  Valid values: ['none', 'srcaddress', 'dstaddress']
     maskbits: The IPv4 mask bits to use when determine the scope of the dynamic pipe for IPv4 traffic.This field is only available whe
     maskbitsv6: The IPv6 mask bits to use when determine the scope of the dynamic pipe for IPv4 traffic.This field is only available whe
     name: The unique name for this limiter.
@@ -3368,7 +3368,7 @@ async def pfsense_update_firewall_traffic_shaper_limiter(
     plr: The amount of packet loss (in percentage) added to traffic passing through the limiter.
     qlimit: The length of the limiter's queue which the scheduler and AQM are responsible for. Set to `null` to assume default.
     queue: The child queues for this limiter.
-    sched: The scheduler to use for this limiter. The scheduler manages the sequence of network packets in the limiter's queue.
+    sched: The scheduler to use for this limiter. The scheduler manages the sequence of network packets in the limiter's queue. Valid values: ['wf2q+', 'fifo', 'qfq', 'rr', 'prio', 'fq_codel', 'fq_pie']
     """
     if not confirm:
         return (
@@ -3489,7 +3489,7 @@ async def pfsense_delete_firewall_traffic_shaper_limiter(
     id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/traffic_shaper/limiter
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -3519,7 +3519,7 @@ async def pfsense_delete_firewall_traffic_shaper_limiter(
 async def pfsense_get_firewall_traffic_shaper_limiter_queue(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/traffic_shaper/limiter/queue
 
     id: The ID of the object to target.
@@ -3573,19 +3573,19 @@ async def pfsense_create_firewall_traffic_shaper_limiter_queue(
     plr: float | None = None,
     qlimit: int | None = None,
     weight: int | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/firewall/traffic_shaper/limiter/queue
 
     Note: Call pfsense_firewall_apply after this to apply changes.
 
-    aqm: The Active Queue Management (AQM) algorithm to use for this queue. AQM is the intelligent drop of network packets inside
+    aqm: The Active Queue Management (AQM) algorithm to use for this queue. AQM is the intelligent drop of network packets inside Valid values: ['droptail', 'codel', 'pie', 'red', 'gred']
     name: The unique name for this limiter queue.
     parent_id: The ID of the parent this object is nested under.
     buckets: The limiter queue's bucket size (slots).
     description: The verbose description for this limiter queue.
     ecn: Enable or disable ECN. ECN sets a reserved TCP flag when the queue is nearing or exceeding capacity. Not all AQMs or sch
     enabled: Enables or disables this limiter queue.
-    mask: If `source` or `destination` slots is chosen a dynamic pipe with the bandwidth, delay, packet loss and queue size given 
+    mask: If `source` or `destination` slots is chosen a dynamic pipe with the bandwidth, delay, packet loss and queue size given  Valid values: ['none', 'srcaddress', 'dstaddress']
     maskbits: The IPv4 mask bits to use when determine the scope of the dynamic pipe for IPv4 traffic.This field is only available whe
     maskbitsv6: The IPv6 mask bits to use when determine the scope of the dynamic pipe for IPv4 traffic.This field is only available whe
     param_codel_interval: The value for the CoDel interval parameter.This field is only available when the following conditions are met:- `aqm` mu
@@ -3729,19 +3729,19 @@ async def pfsense_update_firewall_traffic_shaper_limiter_queue(
     plr: float | None = None,
     qlimit: int | None = None,
     weight: int | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/firewall/traffic_shaper/limiter/queue
 
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     id: The ID of the object or resource to interact with.
     parent_id: The ID of the parent this object is nested under.
-    aqm: The Active Queue Management (AQM) algorithm to use for this queue. AQM is the intelligent drop of network packets inside
+    aqm: The Active Queue Management (AQM) algorithm to use for this queue. AQM is the intelligent drop of network packets inside Valid values: ['droptail', 'codel', 'pie', 'red', 'gred']
     buckets: The limiter queue's bucket size (slots).
     description: The verbose description for this limiter queue.
     ecn: Enable or disable ECN. ECN sets a reserved TCP flag when the queue is nearing or exceeding capacity. Not all AQMs or sch
     enabled: Enables or disables this limiter queue.
-    mask: If `source` or `destination` slots is chosen a dynamic pipe with the bandwidth, delay, packet loss and queue size given 
+    mask: If `source` or `destination` slots is chosen a dynamic pipe with the bandwidth, delay, packet loss and queue size given  Valid values: ['none', 'srcaddress', 'dstaddress']
     maskbits: The IPv4 mask bits to use when determine the scope of the dynamic pipe for IPv4 traffic.This field is only available whe
     maskbitsv6: The IPv6 mask bits to use when determine the scope of the dynamic pipe for IPv4 traffic.This field is only available whe
     name: The unique name for this limiter queue.
@@ -3857,7 +3857,7 @@ async def pfsense_delete_firewall_traffic_shaper_limiter_queue(
     parent_id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/traffic_shaper/limiter/queue
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -3893,14 +3893,14 @@ async def pfsense_list_firewall_traffic_shaper_limiters(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/traffic_shaper/limiters
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -3924,7 +3924,7 @@ async def pfsense_list_firewall_traffic_shaper_limiters(
 async def pfsense_replace_firewall_traffic_shaper_limiters(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/firewall/traffic_shaper/limiters
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -3949,7 +3949,7 @@ async def pfsense_replace_firewall_traffic_shaper_limiters(
 async def pfsense_get_firewall_traffic_shaper_queue(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/traffic_shaper/queue
 
     id: The ID of the object to target.
@@ -3998,7 +3998,7 @@ async def pfsense_create_firewall_traffic_shaper_queue(
     upperlimit: bool | None = None,
     upperlimit_d: int | None = None,
     upperlimit_m1: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/firewall/traffic_shaper/queue
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -4010,7 +4010,7 @@ async def pfsense_create_firewall_traffic_shaper_queue(
     qlimit: The number of packets that can be held in a queue waiting to be transmitted by the shaper.
     realtime_m2: The maximum bandwidth this traffic shaper queue is allowed to use. Note: This value should not exceed 30% of parent queu
     upperlimit_m2: The normal bandwidth limit for this traffic shaper queue. If `upperlimit_m1` is not defined, this limit will always be i
-    bandwidthtype: The scale type of the `bandwidth` field's value.This field is only available when the following conditions are met:- Par
+    bandwidthtype: The scale type of the `bandwidth` field's value.This field is only available when the following conditions are met:- Par Valid values: ['%', 'b', 'Kb', 'Mb', 'Gb']
     borrow: Allow this queue to borrow from other queues when available.This field is only available when the following conditions a
     buckets: This field is only available when the following conditions are met:- Parent field `scheduler` must be equal to `'FAIRQ'`
     codel: Use the 'Codel Active Queue' scheduler option for this traffic shaper queue.
@@ -4134,7 +4134,7 @@ async def pfsense_update_firewall_traffic_shaper_queue(
     upperlimit_d: int | None = None,
     upperlimit_m1: str | None = None,
     upperlimit_m2: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/firewall/traffic_shaper/queue
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -4142,7 +4142,7 @@ async def pfsense_update_firewall_traffic_shaper_queue(
     id: The ID of the object or resource to interact with.
     parent_id: The ID of the parent this object is nested under.
     bandwidth: The total bandwidth amount allowed by this traffic shaper.This field is only available when the following conditions are
-    bandwidthtype: The scale type of the `bandwidth` field's value.This field is only available when the following conditions are met:- Par
+    bandwidthtype: The scale type of the `bandwidth` field's value.This field is only available when the following conditions are met:- Par Valid values: ['%', 'b', 'Kb', 'Mb', 'Gb']
     borrow: Allow this queue to borrow from other queues when available.This field is only available when the following conditions a
     buckets: This field is only available when the following conditions are met:- Parent field `scheduler` must be equal to `'FAIRQ'`
     codel: Use the 'Codel Active Queue' scheduler option for this traffic shaper queue.
@@ -4247,7 +4247,7 @@ async def pfsense_delete_firewall_traffic_shaper_queue(
     parent_id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/traffic_shaper/queue
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -4283,14 +4283,14 @@ async def pfsense_list_firewall_traffic_shapers(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/traffic_shapers
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -4314,7 +4314,7 @@ async def pfsense_list_firewall_traffic_shapers(
 async def pfsense_replace_firewall_traffic_shapers(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/firewall/traffic_shapers
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -4340,7 +4340,7 @@ async def pfsense_delete_firewall_traffic_shapers(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/traffic_shapers
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -4368,7 +4368,7 @@ async def pfsense_delete_firewall_traffic_shapers(
 
 @mcp.tool()
 async def pfsense_get_firewall_virtual_ip_apply_status(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/virtual_ip/apply
     """
     return await _client.request(
@@ -4380,7 +4380,7 @@ async def pfsense_get_firewall_virtual_ip_apply_status(
 @mcp.tool()
 async def pfsense_firewall_virtual_ip_apply(
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/firewall/virtual_ip/apply
     """
     if not confirm:
@@ -4397,7 +4397,7 @@ async def pfsense_firewall_virtual_ip_apply(
 @mcp.tool()
 async def pfsense_get_firewall_virtual_ip(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/virtual_ip
 
     id: The ID of the object to target.
@@ -4428,24 +4428,24 @@ async def pfsense_create_firewall_virtual_ip(
     descr: str | None = None,
     noexpand: bool | None = None,
     type_: str | None = 'single',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/firewall/virtual_ip
 
     Note: Call pfsense_firewall_virtual_ip_apply after this to apply changes.
 
     carp_peer: The IP address of the CARP peer. Please note this field is exclusive to pfSense Plus and has no effect on CE.This field 
     interface: The interface this virtual IP will apply to.
-    mode: The virtual IP mode to use for this virtual IP.
+    mode: The virtual IP mode to use for this virtual IP. Valid values: ['ipalias', 'proxyarp', 'carp', 'other']
     password: The VHID group password shared by all CARP members.This field is only available when the following conditions are met:- 
     subnet: The address for this virtual IP.
     subnet_bits: The subnet bits for this virtual IP. For `proxyarp` and `other` virtual IPs, this value specifies a block of many IP add
     vhid: The VHID group that the machines will share.This field is only available when the following conditions are met:- `mode` 
     advbase: The base frequency that this machine will advertise.This field is only available when the following conditions are met:-
     advskew: The frequency skew that this machine will advertise.This field is only available when the following conditions are met:-
-    carp_mode: The CARP mode to use for this virtual IP. Please note this field is exclusive to pfSense Plus and has no effect on CE.Th
+    carp_mode: The CARP mode to use for this virtual IP. Please note this field is exclusive to pfSense Plus and has no effect on CE.Th Valid values: ['mcast', 'ucast']
     descr: A description for administrative reference
     noexpand: Disable expansion of this entry into IPs on NAT lists (e.g. 192.168.1.0/24 expands to 256 entries.)This field is only av
-    type_: The virtual IP scope type. The `network` option is only applicable to the `proxyarp` and `other` virtual IP modes.
+    type_: The virtual IP scope type. The `network` option is only applicable to the `proxyarp` and `other` virtual IP modes. Valid values: ['single', 'network']
     """
     if not confirm:
         return (
@@ -4504,7 +4504,7 @@ async def pfsense_update_firewall_virtual_ip(
     subnet_bits: int | None = None,
     type_: str | None = 'single',
     vhid: int | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/firewall/virtual_ip
 
     Note: Call pfsense_firewall_virtual_ip_apply after this to apply changes.
@@ -4512,16 +4512,16 @@ async def pfsense_update_firewall_virtual_ip(
     id: The ID of the object or resource to interact with.
     advbase: The base frequency that this machine will advertise.This field is only available when the following conditions are met:-
     advskew: The frequency skew that this machine will advertise.This field is only available when the following conditions are met:-
-    carp_mode: The CARP mode to use for this virtual IP. Please note this field is exclusive to pfSense Plus and has no effect on CE.Th
+    carp_mode: The CARP mode to use for this virtual IP. Please note this field is exclusive to pfSense Plus and has no effect on CE.Th Valid values: ['mcast', 'ucast']
     carp_peer: The IP address of the CARP peer. Please note this field is exclusive to pfSense Plus and has no effect on CE.This field 
     descr: A description for administrative reference
     interface: The interface this virtual IP will apply to.
-    mode: The virtual IP mode to use for this virtual IP.
+    mode: The virtual IP mode to use for this virtual IP. Valid values: ['ipalias', 'proxyarp', 'carp', 'other']
     noexpand: Disable expansion of this entry into IPs on NAT lists (e.g. 192.168.1.0/24 expands to 256 entries.)This field is only av
     password: The VHID group password shared by all CARP members.This field is only available when the following conditions are met:- 
     subnet: The address for this virtual IP.
     subnet_bits: The subnet bits for this virtual IP. For `proxyarp` and `other` virtual IPs, this value specifies a block of many IP add
-    type_: The virtual IP scope type. The `network` option is only applicable to the `proxyarp` and `other` virtual IP modes.
+    type_: The virtual IP scope type. The `network` option is only applicable to the `proxyarp` and `other` virtual IP modes. Valid values: ['single', 'network']
     vhid: The VHID group that the machines will share.This field is only available when the following conditions are met:- `mode` 
     """
     if not confirm:
@@ -4571,7 +4571,7 @@ async def pfsense_delete_firewall_virtual_ip(
     id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/virtual_ip
 
     Note: Call pfsense_firewall_virtual_ip_apply after this to apply changes.
@@ -4604,14 +4604,14 @@ async def pfsense_list_firewall_virtual_i_ps(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/virtual_ips
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -4636,7 +4636,7 @@ async def pfsense_delete_firewall_virtual_i_ps(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/virtual_ips
 
     Note: Call pfsense_firewall_apply after this to apply changes.
@@ -4667,7 +4667,7 @@ async def pfsense_create_graph_ql(
     confirm: bool = False,
     query: str | None = None,
     variables: dict[str, Any] | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/graphql
 
     WARNING: DANGEROUS: Executes raw GraphQL queries.
@@ -4695,7 +4695,7 @@ async def pfsense_create_graph_ql(
 
 @mcp.tool()
 async def pfsense_get_interface_apply_status(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/interface/apply
     """
     return await _client.request(
@@ -4707,7 +4707,7 @@ async def pfsense_get_interface_apply_status(
 @mcp.tool()
 async def pfsense_interface_apply(
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/interface/apply
     """
     if not confirm:
@@ -4728,14 +4728,14 @@ async def pfsense_list_interface_available_interfaces(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/interface/available_interfaces
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -4758,7 +4758,7 @@ async def pfsense_list_interface_available_interfaces(
 @mcp.tool()
 async def pfsense_get_interface_bridge(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/interface/bridge
 
     id: The ID of the object to target.
@@ -4778,7 +4778,7 @@ async def pfsense_create_interface_bridge(
     members: list[str],
     confirm: bool = False,
     descr: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/interface/bridge
 
     Note: Call pfsense_interface_apply after this to apply changes.
@@ -4810,7 +4810,7 @@ async def pfsense_update_interface_bridge(
     confirm: bool = False,
     descr: str | None = None,
     members: list[str] | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/interface/bridge
 
     Note: Call pfsense_interface_apply after this to apply changes.
@@ -4843,7 +4843,7 @@ async def pfsense_update_interface_bridge(
 async def pfsense_delete_interface_bridge(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/interface/bridge
 
     Note: Call pfsense_interface_apply after this to apply changes.
@@ -4873,14 +4873,14 @@ async def pfsense_list_interface_bridges(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/interface/bridges
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -4903,7 +4903,7 @@ async def pfsense_list_interface_bridges(
 @mcp.tool()
 async def pfsense_get_interface_gre(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/interface/gre
 
     id: The ID of the object to target.
@@ -4931,7 +4931,7 @@ async def pfsense_create_interface_gre(
     tunnel_local_addr6: str | None = None,
     tunnel_remote_net: int | None = 32,
     tunnel_remote_net6: int | None = 128,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/interface/gre
 
     Note: Call pfsense_interface_apply after this to apply changes.
@@ -4995,7 +4995,7 @@ async def pfsense_update_interface_gre(
     tunnel_remote_addr6: str | None = None,
     tunnel_remote_net: int | None = 32,
     tunnel_remote_net6: int | None = 128,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/interface/gre
 
     Note: Call pfsense_interface_apply after this to apply changes.
@@ -5052,7 +5052,7 @@ async def pfsense_update_interface_gre(
 async def pfsense_delete_interface_gre(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/interface/gre
 
     Note: Call pfsense_interface_apply after this to apply changes.
@@ -5082,14 +5082,14 @@ async def pfsense_list_interface_gr_es(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/interface/gres
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -5114,7 +5114,7 @@ async def pfsense_delete_interface_gr_es(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/interface/gres
 
     Note: Call pfsense_interface_apply after this to apply changes.
@@ -5143,7 +5143,7 @@ async def pfsense_delete_interface_gr_es(
 @mcp.tool()
 async def pfsense_get_interface_group(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/interface/group
 
     id: The ID of the object to target.
@@ -5164,7 +5164,7 @@ async def pfsense_create_interface_group(
     confirm: bool = False,
     descr: str | None = None,
     members: list[str] | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/interface/group
 
     Note: Call pfsense_interface_apply after this to apply changes.
@@ -5200,7 +5200,7 @@ async def pfsense_update_interface_group(
     descr: str | None = None,
     ifname: str | None = None,
     members: list[str] | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/interface/group
 
     Note: Call pfsense_interface_apply after this to apply changes.
@@ -5236,7 +5236,7 @@ async def pfsense_update_interface_group(
 async def pfsense_delete_interface_group(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/interface/group
 
     Note: Call pfsense_interface_apply after this to apply changes.
@@ -5266,14 +5266,14 @@ async def pfsense_list_interface_groups(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/interface/groups
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -5297,7 +5297,7 @@ async def pfsense_list_interface_groups(
 async def pfsense_replace_interface_groups(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/interface/groups
 
     Note: Call pfsense_interface_apply after this to apply changes.
@@ -5323,7 +5323,7 @@ async def pfsense_delete_interface_groups(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/interface/groups
 
     Note: Call pfsense_interface_apply after this to apply changes.
@@ -5352,7 +5352,7 @@ async def pfsense_delete_interface_groups(
 @mcp.tool()
 async def pfsense_get_interface_lagg(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/interface/lagg
 
     id: The ID of the object to target.
@@ -5376,17 +5376,17 @@ async def pfsense_create_interface_lagg(
     failovermaster: str | None = 'auto',
     lacptimeout: str | None = 'slow',
     lagghash: str | None = 'l2,l3,l4',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/interface/lagg
 
     Note: Call pfsense_interface_apply after this to apply changes.
 
     members: A list of member interfaces to include in the LAGG.
-    proto: The LAGG protocol to use.
+    proto: The LAGG protocol to use. Valid values: ['lacp', 'failover', 'loadbalance', 'roundrobin', 'none']
     descr: A description to help document the purpose of this LAGG interface.
     failovermaster: The failover master interface to use.This field is only available when the following conditions are met:- `proto` must b
-    lacptimeout: The LACP timeout mode to use.This field is only available when the following conditions are met:- `proto` must be equal 
-    lagghash: The LAGG hash algorithm to use.This field is only available when the following conditions are met:- `proto` must be one 
+    lacptimeout: The LACP timeout mode to use.This field is only available when the following conditions are met:- `proto` must be equal  Valid values: ['slow', 'fast']
+    lagghash: The LAGG hash algorithm to use.This field is only available when the following conditions are met:- `proto` must be one  Valid values: ['l2', 'l3', 'l4', 'l2,l3', 'l2,l4', 'l3,l4', 'l2,l3,l4']
     """
     if not confirm:
         return (
@@ -5424,7 +5424,7 @@ async def pfsense_update_interface_lagg(
     lagghash: str | None = 'l2,l3,l4',
     members: list[str] | None = None,
     proto: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/interface/lagg
 
     Note: Call pfsense_interface_apply after this to apply changes.
@@ -5432,10 +5432,10 @@ async def pfsense_update_interface_lagg(
     id: The ID of the object or resource to interact with.
     descr: A description to help document the purpose of this LAGG interface.
     failovermaster: The failover master interface to use.This field is only available when the following conditions are met:- `proto` must b
-    lacptimeout: The LACP timeout mode to use.This field is only available when the following conditions are met:- `proto` must be equal 
-    lagghash: The LAGG hash algorithm to use.This field is only available when the following conditions are met:- `proto` must be one 
+    lacptimeout: The LACP timeout mode to use.This field is only available when the following conditions are met:- `proto` must be equal  Valid values: ['slow', 'fast']
+    lagghash: The LAGG hash algorithm to use.This field is only available when the following conditions are met:- `proto` must be one  Valid values: ['l2', 'l3', 'l4', 'l2,l3', 'l2,l4', 'l3,l4', 'l2,l3,l4']
     members: A list of member interfaces to include in the LAGG.
-    proto: The LAGG protocol to use.
+    proto: The LAGG protocol to use. Valid values: ['lacp', 'failover', 'loadbalance', 'roundrobin', 'none']
     """
     if not confirm:
         return (
@@ -5469,7 +5469,7 @@ async def pfsense_update_interface_lagg(
 async def pfsense_delete_interface_lagg(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/interface/lagg
 
     Note: Call pfsense_interface_apply after this to apply changes.
@@ -5499,14 +5499,14 @@ async def pfsense_list_interface_lag_gs(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/interface/laggs
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -5531,7 +5531,7 @@ async def pfsense_delete_interface_lag_gs(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/interface/laggs
 
     Note: Call pfsense_interface_apply after this to apply changes.
@@ -5560,7 +5560,7 @@ async def pfsense_delete_interface_lag_gs(
 @mcp.tool()
 async def pfsense_get_interface_vlan(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/interface/vlan
 
     id: The ID of the object to target.
@@ -5582,7 +5582,7 @@ async def pfsense_create_interface_vlan(
     confirm: bool = False,
     descr: str | None = None,
     pcp: int | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/interface/vlan
 
     Note: Call pfsense_interface_apply after this to apply changes.
@@ -5622,7 +5622,7 @@ async def pfsense_update_interface_vlan(
     if_: str | None = None,
     pcp: int | None = None,
     tag: int | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/interface/vlan
 
     Note: Call pfsense_interface_apply after this to apply changes.
@@ -5661,7 +5661,7 @@ async def pfsense_update_interface_vlan(
 async def pfsense_delete_interface_vlan(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/interface/vlan
 
     Note: Call pfsense_interface_apply after this to apply changes.
@@ -5691,14 +5691,14 @@ async def pfsense_list_interface_vla_ns(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/interface/vlans
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -5723,7 +5723,7 @@ async def pfsense_delete_interface_vla_ns(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/interface/vlans
 
     Note: Call pfsense_interface_apply after this to apply changes.
@@ -5752,7 +5752,7 @@ async def pfsense_delete_interface_vla_ns(
 @mcp.tool()
 async def pfsense_get_network_interface(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/interface
 
     id: The ID of the object to target.
@@ -5813,7 +5813,7 @@ async def pfsense_create_network_interface(
     spoofmac: str | None = None,
     track6_prefix_id_hex: str | None = None,
     typev6: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/interface
 
     Note: Call pfsense_interface_apply after this to apply changes.
@@ -5828,7 +5828,7 @@ async def pfsense_create_network_interface(
     subnet: Sets the subnet bit count to assign this interface.This field is only available when the following conditions are met:- 
     subnetv6: Sets the subnet bit count to assign this interface.This field is only available when the following conditions are met:- 
     track6_interface: Sets the dynamic IPv6 WAN interface to track for configuration.This field is only available when the following condition
-    typev4: Selects the IPv4 address type to assign this interface.
+    typev4: Selects the IPv4 address type to assign this interface. Valid values: ['static', 'dhcp', 'none']
     adv_dhcp_config_advanced: Enables or disables the advanced DHCP settings on this interface.This field is only available when the following conditi
     adv_dhcp_config_file_override: Enables or disables overriding the entire DHCP configuration file for this interface.This field is only available when t
     adv_dhcp_config_file_override_path: Sets the local file path of the custom DHCP configuration file.This field is only available when the following condition
@@ -5839,7 +5839,7 @@ async def pfsense_create_network_interface(
     adv_dhcp_pt_retry: Manually sets the retry timing value used when requested DHCP leases on this interface.This field is only available when
     adv_dhcp_pt_select_timeout: Manually sets the select timing value used when requested DHCP leases on this interface.This field is only available whe
     adv_dhcp_pt_timeout: Manually sets the timeout timing value used when requested DHCP leases on this interface.This field is only available wh
-    adv_dhcp_pt_values: Selects the advanced DHCP timing preset.This field is only available when the following conditions are met:- `typev4` mu
+    adv_dhcp_pt_values: Selects the advanced DHCP timing preset.This field is only available when the following conditions are met:- `typev4` mu Valid values: ['SavedCfg']
     adv_dhcp_request_options: Sets DHCP option 55 values to be sent when requesting a DHCP lease for this interface.This field is only available when 
     adv_dhcp_required_options: Sets DHCP options required by the client when requesting a DHCP lease for this interface.This field is only available wh
     adv_dhcp_send_options: Sets DHCP options to be sent when requesting a DHCP lease for this interface.This field is only available when the follo
@@ -5860,7 +5860,7 @@ async def pfsense_create_network_interface(
     slaacusev4iface: Enable or disable IPv6 using the IPv4 connectivity link (PPPoE).This field is only available when the following conditio
     spoofmac: Assigns (spoofs) the MAC address for this interface instead of using the interface's real MAC.
     track6_prefix_id_hex: Sets the hexadecimal IPv6 prefix ID. This determines the configurable network ID based on the dynamic IPv6 connection.Th
-    typev6: Selects the IPv6 address type to assign this interface.
+    typev6: Selects the IPv6 address type to assign this interface. Valid values: ['staticv6', 'dhcp6', 'slaac', '6rd', 'track6', '6to4', 'none']
     """
     if not confirm:
         return (
@@ -6009,7 +6009,7 @@ async def pfsense_update_network_interface(
     track6_prefix_id_hex: str | None = None,
     typev4: str | None = None,
     typev6: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/interface
 
     Note: Call pfsense_interface_apply after this to apply changes.
@@ -6025,7 +6025,7 @@ async def pfsense_update_network_interface(
     adv_dhcp_pt_retry: Manually sets the retry timing value used when requested DHCP leases on this interface.This field is only available when
     adv_dhcp_pt_select_timeout: Manually sets the select timing value used when requested DHCP leases on this interface.This field is only available whe
     adv_dhcp_pt_timeout: Manually sets the timeout timing value used when requested DHCP leases on this interface.This field is only available wh
-    adv_dhcp_pt_values: Selects the advanced DHCP timing preset.This field is only available when the following conditions are met:- `typev4` mu
+    adv_dhcp_pt_values: Selects the advanced DHCP timing preset.This field is only available when the following conditions are met:- `typev4` mu Valid values: ['SavedCfg']
     adv_dhcp_request_options: Sets DHCP option 55 values to be sent when requesting a DHCP lease for this interface.This field is only available when 
     adv_dhcp_required_options: Sets DHCP options required by the client when requesting a DHCP lease for this interface.This field is only available wh
     adv_dhcp_send_options: Sets DHCP options to be sent when requesting a DHCP lease for this interface.This field is only available when the follo
@@ -6056,8 +6056,8 @@ async def pfsense_update_network_interface(
     subnetv6: Sets the subnet bit count to assign this interface.This field is only available when the following conditions are met:- 
     track6_interface: Sets the dynamic IPv6 WAN interface to track for configuration.This field is only available when the following condition
     track6_prefix_id_hex: Sets the hexadecimal IPv6 prefix ID. This determines the configurable network ID based on the dynamic IPv6 connection.Th
-    typev4: Selects the IPv4 address type to assign this interface.
-    typev6: Selects the IPv6 address type to assign this interface.
+    typev4: Selects the IPv4 address type to assign this interface. Valid values: ['static', 'dhcp', 'none']
+    typev6: Selects the IPv6 address type to assign this interface. Valid values: ['staticv6', 'dhcp6', 'slaac', '6rd', 'track6', '6to4', 'none']
     """
     if not confirm:
         return (
@@ -6166,7 +6166,7 @@ async def pfsense_delete_network_interface(
     id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/interface
 
     Note: Call pfsense_interface_apply after this to apply changes.
@@ -6199,14 +6199,14 @@ async def pfsense_list_network_interfaces(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/interfaces
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -6231,7 +6231,7 @@ async def pfsense_delete_network_interfaces(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/interfaces
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -6256,7 +6256,7 @@ async def pfsense_delete_network_interfaces(
 
 @mcp.tool()
 async def pfsense_get_routing_apply_status(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/routing/apply
     """
     return await _client.request(
@@ -6268,7 +6268,7 @@ async def pfsense_get_routing_apply_status(
 @mcp.tool()
 async def pfsense_routing_apply(
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/routing/apply
     """
     if not confirm:
@@ -6284,7 +6284,7 @@ async def pfsense_routing_apply(
 
 @mcp.tool()
 async def pfsense_get_routing_gateway_default(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/routing/gateway/default
     """
     return await _client.request(
@@ -6298,7 +6298,7 @@ async def pfsense_update_routing_gateway_default(
     confirm: bool = False,
     defaultgw4: str | None = None,
     defaultgw6: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/routing/gateway/default
 
     Note: Call pfsense_routing_apply after this to apply changes.
@@ -6327,7 +6327,7 @@ async def pfsense_update_routing_gateway_default(
 @mcp.tool()
 async def pfsense_get_routing_gateway(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/routing/gateway
 
     id: The ID of the object to target.
@@ -6368,14 +6368,14 @@ async def pfsense_create_routing_gateway(
     nonlocalgateway: bool | None = True,
     time_period: int | None = 60000,
     weight: int | None = 1,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/routing/gateway
 
     Note: Call pfsense_routing_apply after this to apply changes.
 
     gateway: Sets the IP address of the remote gateway.
     interface: Sets the interface this gateway will apply to.
-    ipprotocol: Sets the Internet Protocol version this gateway uses.
+    ipprotocol: Sets the Internet Protocol version this gateway uses. Valid values: ['inet', 'inet6']
     name: Sets a name for the gateway.
     action_disable: Disable actions from taking place when gateway events occur. The gateway will always be considered up.
     alert_interval: Sets the time interval in milliseconds between checking for an alert conditions.
@@ -6384,7 +6384,7 @@ async def pfsense_create_routing_gateway(
     disabled: Disable this gateway.
     dpinger_dont_add_static_route: Prevents gateway monitoring from adding a static route for this gateway's monitor IP.
     force_down: Always consider this gateway to be up.
-    gw_down_kill_states: Controls the state killing behavior when this specific gateway goes down. Killing states for specific down gateways only
+    gw_down_kill_states: Controls the state killing behavior when this specific gateway goes down. Killing states for specific down gateways only Valid values: ['', 'none', 'down']
     interval: Sets how often ICMP probes will be sent in milliseconds.
     latencyhigh: Sets the threshold to consider latency as high. This value must be greater than `latencylow`.
     latencylow: Sets the threshold to consider latency as low.
@@ -6484,7 +6484,7 @@ async def pfsense_update_routing_gateway(
     nonlocalgateway: bool | None = True,
     time_period: int | None = 60000,
     weight: int | None = 1,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/routing/gateway
 
     Note: Call pfsense_routing_apply after this to apply changes.
@@ -6498,10 +6498,10 @@ async def pfsense_update_routing_gateway(
     dpinger_dont_add_static_route: Prevents gateway monitoring from adding a static route for this gateway's monitor IP.
     force_down: Always consider this gateway to be up.
     gateway: Sets the IP address of the remote gateway.
-    gw_down_kill_states: Controls the state killing behavior when this specific gateway goes down. Killing states for specific down gateways only
+    gw_down_kill_states: Controls the state killing behavior when this specific gateway goes down. Killing states for specific down gateways only Valid values: ['', 'none', 'down']
     interface: Sets the interface this gateway will apply to.
     interval: Sets how often ICMP probes will be sent in milliseconds.
-    ipprotocol: Sets the Internet Protocol version this gateway uses.
+    ipprotocol: Sets the Internet Protocol version this gateway uses. Valid values: ['inet', 'inet6']
     latencyhigh: Sets the threshold to consider latency as high. This value must be greater than `latencylow`.
     latencylow: Sets the threshold to consider latency as low.
     loss_interval: Sets the time interval in milliseconds before packets are treated as lost.
@@ -6581,7 +6581,7 @@ async def pfsense_delete_routing_gateway(
     id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/routing/gateway
 
     Note: Call pfsense_routing_apply after this to apply changes.
@@ -6610,7 +6610,7 @@ async def pfsense_delete_routing_gateway(
 @mcp.tool()
 async def pfsense_get_routing_gateway_group(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/routing/gateway/group
 
     id: The ID of the object to target.
@@ -6632,7 +6632,7 @@ async def pfsense_create_routing_gateway_group(
     confirm: bool = False,
     descr: str | None = None,
     trigger: str | None = 'down',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/routing/gateway/group
 
     Note: Call pfsense_routing_apply after this to apply changes.
@@ -6640,7 +6640,7 @@ async def pfsense_create_routing_gateway_group(
     name: The name of the gateway group.
     priorities: The priorities of the gateways in this group.
     descr: A description of the gateway group.
-    trigger: The trigger that will cause a gateway to be excluded from the group.
+    trigger: The trigger that will cause a gateway to be excluded from the group. Valid values: ['down', 'downloss', 'downlatency', 'downlosslatency']
     """
     if not confirm:
         return (
@@ -6672,7 +6672,7 @@ async def pfsense_update_routing_gateway_group(
     name: str | None = None,
     priorities: list[str] | None = None,
     trigger: str | None = 'down',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/routing/gateway/group
 
     Note: Call pfsense_routing_apply after this to apply changes.
@@ -6681,7 +6681,7 @@ async def pfsense_update_routing_gateway_group(
     descr: A description of the gateway group.
     name: The name of the gateway group.
     priorities: The priorities of the gateways in this group.
-    trigger: The trigger that will cause a gateway to be excluded from the group.
+    trigger: The trigger that will cause a gateway to be excluded from the group. Valid values: ['down', 'downloss', 'downlatency', 'downlosslatency']
     """
     if not confirm:
         return (
@@ -6712,7 +6712,7 @@ async def pfsense_delete_routing_gateway_group(
     id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/routing/gateway/group
 
     Note: Call pfsense_routing_apply after this to apply changes.
@@ -6742,7 +6742,7 @@ async def pfsense_delete_routing_gateway_group(
 async def pfsense_get_routing_gateway_group_priority(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/routing/gateway/group/priority
 
     id: The ID of the object to target.
@@ -6767,7 +6767,7 @@ async def pfsense_create_routing_gateway_group_priority(
     tier: int,
     confirm: bool = False,
     virtual_ip: str | None = 'address',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/routing/gateway/group/priority
 
     Note: Call pfsense_routing_apply after this to apply changes.
@@ -6807,7 +6807,7 @@ async def pfsense_update_routing_gateway_group_priority(
     gateway: str | None = None,
     tier: int | None = None,
     virtual_ip: str | None = 'address',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/routing/gateway/group/priority
 
     Note: Call pfsense_routing_apply after this to apply changes.
@@ -6848,7 +6848,7 @@ async def pfsense_delete_routing_gateway_group_priority(
     parent_id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/routing/gateway/group/priority
 
     Note: Call pfsense_routing_apply after this to apply changes.
@@ -6884,14 +6884,14 @@ async def pfsense_list_routing_gateway_groups(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/routing/gateway/groups
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -6916,7 +6916,7 @@ async def pfsense_delete_routing_gateway_groups(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/routing/gateway/groups
 
     Note: Call pfsense_routing_apply after this to apply changes.
@@ -6949,14 +6949,14 @@ async def pfsense_list_routing_gateways(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/routing/gateways
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -6981,7 +6981,7 @@ async def pfsense_delete_routing_gateways(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/routing/gateways
 
     Note: Call pfsense_routing_apply after this to apply changes.
@@ -7010,7 +7010,7 @@ async def pfsense_delete_routing_gateways(
 @mcp.tool()
 async def pfsense_get_routing_static_route(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/routing/static_route
 
     id: The ID of the object to target.
@@ -7032,7 +7032,7 @@ async def pfsense_create_routing_static_route(
     confirm: bool = False,
     descr: str | None = None,
     disabled: bool | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/routing/static_route
 
     Note: Call pfsense_routing_apply after this to apply changes.
@@ -7072,7 +7072,7 @@ async def pfsense_update_routing_static_route(
     disabled: bool | None = None,
     gateway: str | None = None,
     network: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/routing/static_route
 
     Note: Call pfsense_routing_apply after this to apply changes.
@@ -7112,7 +7112,7 @@ async def pfsense_delete_routing_static_route(
     id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/routing/static_route
 
     Note: Call pfsense_routing_apply after this to apply changes.
@@ -7145,14 +7145,14 @@ async def pfsense_list_routing_static_routes(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/routing/static_routes
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -7177,7 +7177,7 @@ async def pfsense_delete_routing_static_routes(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/routing/static_routes
 
     Note: Call pfsense_routing_apply after this to apply changes.
@@ -7206,7 +7206,7 @@ async def pfsense_delete_routing_static_routes(
 @mcp.tool()
 async def pfsense_get_services_acme_account_key(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/acme/account_key
 
     id: The ID of the object to target.
@@ -7229,7 +7229,7 @@ async def pfsense_create_services_acme_account_key(
     accountkey: str | None = None,
     descr: str | None = None,
     email: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/acme/account_key
 
     acmeserver: The ACME server this account key will belong to.
@@ -7270,7 +7270,7 @@ async def pfsense_update_services_acme_account_key(
     descr: str | None = None,
     email: str | None = None,
     name: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/acme/account_key
 
     id: The ID of the object or resource to interact with.
@@ -7309,7 +7309,7 @@ async def pfsense_update_services_acme_account_key(
 async def pfsense_delete_services_acme_account_key(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/acme/account_key
 
     id: The ID of the object to target.
@@ -7333,7 +7333,7 @@ async def pfsense_delete_services_acme_account_key(
 async def pfsense_create_services_acme_account_key_register(
     name: str,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/acme/account_key/register
 
     name: The name of the ACME account key to register.
@@ -7360,14 +7360,14 @@ async def pfsense_list_services_acme_account_key_registrations(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/acme/account_key/registrations
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -7394,14 +7394,14 @@ async def pfsense_list_services_acme_account_keys(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/acme/account_keys
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -7425,7 +7425,7 @@ async def pfsense_list_services_acme_account_keys(
 async def pfsense_replace_services_acme_account_keys(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/services/acme/account_keys
 
     items: List of objects for bulk replacement.
@@ -7448,7 +7448,7 @@ async def pfsense_delete_services_acme_account_keys(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/acme/account_keys
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -7475,7 +7475,7 @@ async def pfsense_delete_services_acme_account_keys(
 async def pfsense_get_services_acme_certificate_action(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/acme/certificate/action
 
     id: The ID of the object to target.
@@ -7500,13 +7500,13 @@ async def pfsense_create_services_acme_certificate_action(
     parent_id: int,
     confirm: bool = False,
     status: str | None = 'active',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/acme/certificate/action
 
     command: The command to execute on the ACME certificate.
-    method: The action method that should be used to run the command.
+    method: The action method that should be used to run the command. Valid values: ['shellcommand', 'php_command', 'servicerestart', 'xmlrpcservicerestart']
     parent_id: The ID of the parent this object is nested under.
-    status: The activation status of the ACME certificate.
+    status: The activation status of the ACME certificate. Valid values: ['active', 'disabled']
     """
     if not confirm:
         return (
@@ -7537,14 +7537,14 @@ async def pfsense_update_services_acme_certificate_action(
     command: str | None = None,
     method: str | None = None,
     status: str | None = 'active',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/acme/certificate/action
 
     id: The ID of the object or resource to interact with.
     parent_id: The ID of the parent this object is nested under.
     command: The command to execute on the ACME certificate.
-    method: The action method that should be used to run the command.
-    status: The activation status of the ACME certificate.
+    method: The action method that should be used to run the command. Valid values: ['shellcommand', 'php_command', 'servicerestart', 'xmlrpcservicerestart']
+    status: The activation status of the ACME certificate. Valid values: ['active', 'disabled']
     """
     if not confirm:
         return (
@@ -7574,7 +7574,7 @@ async def pfsense_delete_services_acme_certificate_action(
     id: str | int,
     parent_id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/acme/certificate/action
 
     id: The ID of the object to target.
@@ -7601,7 +7601,7 @@ async def pfsense_delete_services_acme_certificate_action(
 async def pfsense_get_services_acme_certificate_domain(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/acme/certificate/domain
 
     id: The ID of the object to target.
@@ -7918,7 +7918,7 @@ async def pfsense_create_services_acme_certificate_domain(
     zm_key: str | None = None,
     zone_key: str | None = None,
     zone_username: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/acme/certificate/domain
 
     method: The method to use to validate this domain.
@@ -8122,11 +8122,11 @@ async def pfsense_create_services_acme_certificate_domain(
     nm_user: namemaster.de API usernameThis field is only available when the following conditions are met:- `method` must be equal to
     ns1_key: NS1 API KeyThis field is only available when the following conditions are met:- `method` must be equal to `'dns_nsone'`
     nsupdate_key: The key which authenticates updates for this zoneThis field is only available when the following conditions are met:- `m
-    nsupdate_keyalgo: Algorithm used to generate the authentication Key for this zoneThis field is only available when the following condition
+    nsupdate_keyalgo: Algorithm used to generate the authentication Key for this zoneThis field is only available when the following condition Valid values: ['', '157', '165', '164', '163', '162', '161']
     nsupdate_keyname: (Optional) A name for the key, if it is different than _acme-challenge.[DomainName]This field is only available when the
     nsupdate_server: The DNS server to which updates are sent (IP address or hostname)This field is only available when the following conditi
     nsupdate_zone: (Optional) Explicitly set the zone name for updates.This field is only available when the following conditions are met:-
-    nw_api_endpoint: Choose the NW API EndpointThis field is only available when the following conditions are met:- `method` must be equal to
+    nw_api_endpoint: Choose the NW API EndpointThis field is only available when the following conditions are met:- `method` must be equal to Valid values: ['', 'https:\\/\\/portal.nexcess.net', 'https:\\/\\/core.thermo.io', 'https:\\/\\/my.futurehosting.com']
     nw_api_token: NW API TokenThis field is only available when the following conditions are met:- `method` must be equal to `'dns_nw'`
     oci_cli_key: The private API signing key in PEM format. Using an encrypted private key that needs a passphrase is not supported.This 
     oci_cli_region: Tenancy home regionThis field is only available when the following conditions are met:- `method` must be equal to `'dns_
@@ -8142,7 +8142,7 @@ async def pfsense_create_services_acme_certificate_domain(
     ovh_ak: OVH Application KeyThis field is only available when the following conditions are met:- `method` must be equal to `'dns_
     ovh_as: OVH Application SecretThis field is only available when the following conditions are met:- `method` must be equal to `'d
     ovh_ck: OVH Consumer KeyThis field is only available when the following conditions are met:- `method` must be equal to `'dns_ovh
-    ovh_end_point: Choose the OVH API Endpoint / RegionThis field is only available when the following conditions are met:- `method` must b
+    ovh_end_point: Choose the OVH API Endpoint / RegionThis field is only available when the following conditions are met:- `method` must b Valid values: ['', 'ovh-eu', 'ovh-ca', 'kimsufi-eu', 'kimsufi-ca', 'soyoustart-eu', 'soyoustart-ca', 'runabove-ca']
     pdd_token: Yandex PDD Token, generate at https://pddimp.yandex.ru/api2/admin/get_tokenThis field is only available when the followi
     pdns_serverid: PowerDNS ServerId (e.g. localhost )This field is only available when the following conditions are met:- `method` must be
     pdns_token: PowerDNS Token (e.g. 0123456789ABCDEF )This field is only available when the following conditions are met:- `method` mus
@@ -8181,7 +8181,7 @@ async def pfsense_create_services_acme_certificate_domain(
     standaloneipv6: Bind to IPv6 instead of IPv4.This field is only available when the following conditions are met:- `method` must be equal
     standaloneport: HTTP listen port for stand-alone server. Must be 80 or have port 80 on WAN forwarded to this port. Firewall rules must a
     standalonetlsport: TLS listen port for stand-alone server. Must be 443 or have port 443 on WAN forwarded to this port. Firewall rules must 
-    status: The activation status of the ACME certificate.
+    status: The activation status of the ACME certificate. Valid values: ['enable', 'disable']
     tele3_key: Tele3 KeyThis field is only available when the following conditions are met:- `method` must be equal to `'dns_tele3'`
     tele3_secret: Tele3 SecretThis field is only available when the following conditions are met:- `method` must be equal to `'dns_tele3'`
     tencent_secretid: Tencent Secret IDThis field is only available when the following conditions are met:- `method` must be equal to `'dns_te
@@ -9123,7 +9123,7 @@ async def pfsense_update_services_acme_certificate_domain(
     zm_key: str | None = None,
     zone_key: str | None = None,
     zone_username: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/acme/certificate/domain
 
     id: The ID of the object or resource to interact with.
@@ -9328,11 +9328,11 @@ async def pfsense_update_services_acme_certificate_domain(
     nm_user: namemaster.de API usernameThis field is only available when the following conditions are met:- `method` must be equal to
     ns1_key: NS1 API KeyThis field is only available when the following conditions are met:- `method` must be equal to `'dns_nsone'`
     nsupdate_key: The key which authenticates updates for this zoneThis field is only available when the following conditions are met:- `m
-    nsupdate_keyalgo: Algorithm used to generate the authentication Key for this zoneThis field is only available when the following condition
+    nsupdate_keyalgo: Algorithm used to generate the authentication Key for this zoneThis field is only available when the following condition Valid values: ['', '157', '165', '164', '163', '162', '161']
     nsupdate_keyname: (Optional) A name for the key, if it is different than _acme-challenge.[DomainName]This field is only available when the
     nsupdate_server: The DNS server to which updates are sent (IP address or hostname)This field is only available when the following conditi
     nsupdate_zone: (Optional) Explicitly set the zone name for updates.This field is only available when the following conditions are met:-
-    nw_api_endpoint: Choose the NW API EndpointThis field is only available when the following conditions are met:- `method` must be equal to
+    nw_api_endpoint: Choose the NW API EndpointThis field is only available when the following conditions are met:- `method` must be equal to Valid values: ['', 'https:\\/\\/portal.nexcess.net', 'https:\\/\\/core.thermo.io', 'https:\\/\\/my.futurehosting.com']
     nw_api_token: NW API TokenThis field is only available when the following conditions are met:- `method` must be equal to `'dns_nw'`
     oci_cli_key: The private API signing key in PEM format. Using an encrypted private key that needs a passphrase is not supported.This 
     oci_cli_region: Tenancy home regionThis field is only available when the following conditions are met:- `method` must be equal to `'dns_
@@ -9348,7 +9348,7 @@ async def pfsense_update_services_acme_certificate_domain(
     ovh_ak: OVH Application KeyThis field is only available when the following conditions are met:- `method` must be equal to `'dns_
     ovh_as: OVH Application SecretThis field is only available when the following conditions are met:- `method` must be equal to `'d
     ovh_ck: OVH Consumer KeyThis field is only available when the following conditions are met:- `method` must be equal to `'dns_ovh
-    ovh_end_point: Choose the OVH API Endpoint / RegionThis field is only available when the following conditions are met:- `method` must b
+    ovh_end_point: Choose the OVH API Endpoint / RegionThis field is only available when the following conditions are met:- `method` must b Valid values: ['', 'ovh-eu', 'ovh-ca', 'kimsufi-eu', 'kimsufi-ca', 'soyoustart-eu', 'soyoustart-ca', 'runabove-ca']
     pdd_token: Yandex PDD Token, generate at https://pddimp.yandex.ru/api2/admin/get_tokenThis field is only available when the followi
     pdns_serverid: PowerDNS ServerId (e.g. localhost )This field is only available when the following conditions are met:- `method` must be
     pdns_token: PowerDNS Token (e.g. 0123456789ABCDEF )This field is only available when the following conditions are met:- `method` mus
@@ -9387,7 +9387,7 @@ async def pfsense_update_services_acme_certificate_domain(
     standaloneipv6: Bind to IPv6 instead of IPv4.This field is only available when the following conditions are met:- `method` must be equal
     standaloneport: HTTP listen port for stand-alone server. Must be 80 or have port 80 on WAN forwarded to this port. Firewall rules must a
     standalonetlsport: TLS listen port for stand-alone server. Must be 443 or have port 443 on WAN forwarded to this port. Firewall rules must 
-    status: The activation status of the ACME certificate.
+    status: The activation status of the ACME certificate. Valid values: ['enable', 'disable']
     tele3_key: Tele3 KeyThis field is only available when the following conditions are met:- `method` must be equal to `'dns_tele3'`
     tele3_secret: Tele3 SecretThis field is only available when the following conditions are met:- `method` must be equal to `'dns_tele3'`
     tencent_secretid: Tencent Secret IDThis field is only available when the following conditions are met:- `method` must be equal to `'dns_te
@@ -10036,7 +10036,7 @@ async def pfsense_delete_services_acme_certificate_domain(
     id: str | int,
     parent_id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/acme/certificate/domain
 
     id: The ID of the object to target.
@@ -10062,7 +10062,7 @@ async def pfsense_delete_services_acme_certificate_domain(
 @mcp.tool()
 async def pfsense_get_services_acme_certificate(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/acme/certificate
 
     id: The ID of the object to target.
@@ -10092,7 +10092,7 @@ async def pfsense_create_services_acme_certificate(
     preferredchain: str | None = None,
     renewafter: int | None = 60,
     status: str | None = 'active',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/acme/certificate
 
     a_domainlist: The list of domain verifications to include in the ACME certificate.
@@ -10102,11 +10102,11 @@ async def pfsense_create_services_acme_certificate(
     a_actionlist: The list of actions to perform on the ACME certificate after being issued/renewed.
     descr: A description of the ACME certificate.
     dnssleep: The number of seconds to wait for DNS propagation before requesting verification.
-    keylength: The length of the private key to use for the ACME certificate.
+    keylength: The length of the private key to use for the ACME certificate. Valid values: ['2048', '3072', '4096', 'ec-256', 'ec-384', 'custom']
     oscpstaple: Whether to enable OCSP Stapling for the ACME certificate.
     preferredchain: The preferred certificate chain to use for the ACME certificate.
     renewafter: The number of days before expiration to renew the ACME certificate.
-    status: The activation status of the ACME certificate.
+    status: The activation status of the ACME certificate. Valid values: ['active', 'disabled']
     """
     if not confirm:
         return (
@@ -10161,7 +10161,7 @@ async def pfsense_update_services_acme_certificate(
     preferredchain: str | None = None,
     renewafter: int | None = 60,
     status: str | None = 'active',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/acme/certificate
 
     id: The ID of the object or resource to interact with.
@@ -10170,13 +10170,13 @@ async def pfsense_update_services_acme_certificate(
     acmeaccount: The ACME account key to use for the ACME certificate.
     descr: A description of the ACME certificate.
     dnssleep: The number of seconds to wait for DNS propagation before requesting verification.
-    keylength: The length of the private key to use for the ACME certificate.
+    keylength: The length of the private key to use for the ACME certificate. Valid values: ['2048', '3072', '4096', 'ec-256', 'ec-384', 'custom']
     keypaste: The custom private key to use for the ACME certificate.This field is only available when the following conditions are me
     name: The name of the ACME certificate.
     oscpstaple: Whether to enable OCSP Stapling for the ACME certificate.
     preferredchain: The preferred certificate chain to use for the ACME certificate.
     renewafter: The number of days before expiration to renew the ACME certificate.
-    status: The activation status of the ACME certificate.
+    status: The activation status of the ACME certificate. Valid values: ['active', 'disabled']
     """
     if not confirm:
         return (
@@ -10221,7 +10221,7 @@ async def pfsense_update_services_acme_certificate(
 async def pfsense_delete_services_acme_certificate(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/acme/certificate
 
     id: The ID of the object to target.
@@ -10248,14 +10248,14 @@ async def pfsense_list_services_acme_certificate_issuances(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/acme/certificate/issuances
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -10279,7 +10279,7 @@ async def pfsense_list_services_acme_certificate_issuances(
 async def pfsense_create_services_acme_certificate_issue(
     certificate: str,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/acme/certificate/issue
 
     certificate: The name of the ACME certificate to be issued.
@@ -10303,7 +10303,7 @@ async def pfsense_create_services_acme_certificate_issue(
 async def pfsense_create_services_acme_certificate_renew(
     certificate: str,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/acme/certificate/renew
 
     certificate: The name of the ACME certificate to be renewed.
@@ -10330,14 +10330,14 @@ async def pfsense_list_services_acme_certificate_renewals(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/acme/certificate/renewals
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -10364,14 +10364,14 @@ async def pfsense_list_services_acme_certificates(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/acme/certificates
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -10395,7 +10395,7 @@ async def pfsense_list_services_acme_certificates(
 async def pfsense_replace_services_acme_certificates(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/services/acme/certificates
 
     items: List of objects for bulk replacement.
@@ -10418,7 +10418,7 @@ async def pfsense_delete_services_acme_certificates(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/acme/certificates
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -10443,7 +10443,7 @@ async def pfsense_delete_services_acme_certificates(
 
 @mcp.tool()
 async def pfsense_get_services_acme_settings(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/acme/settings
     """
     return await _client.request(
@@ -10457,7 +10457,7 @@ async def pfsense_update_services_acme_settings(
     confirm: bool = False,
     enable: bool | None = None,
     writecerts: bool | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/acme/settings
 
     enable: Enables or disables the ACME renewal job.
@@ -10483,7 +10483,7 @@ async def pfsense_update_services_acme_settings(
 @mcp.tool()
 async def pfsense_get_services_bind_access_list(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/bind/access_list
 
     id: The ID of the object to target.
@@ -10504,7 +10504,7 @@ async def pfsense_create_services_bind_access_list(
     name: str,
     confirm: bool = False,
     description: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/bind/access_list
 
     entries: The network entries for this access list.
@@ -10537,7 +10537,7 @@ async def pfsense_update_services_bind_access_list(
     description: str | None = None,
     entries: list[str] | None = None,
     name: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/bind/access_list
 
     id: The ID of the object or resource to interact with.
@@ -10570,7 +10570,7 @@ async def pfsense_update_services_bind_access_list(
 async def pfsense_delete_services_bind_access_list(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/bind/access_list
 
     id: The ID of the object to target.
@@ -10594,7 +10594,7 @@ async def pfsense_delete_services_bind_access_list(
 async def pfsense_get_services_bind_access_list_entry(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/bind/access_list/entry
 
     id: The ID of the object to target.
@@ -10618,7 +10618,7 @@ async def pfsense_create_services_bind_access_list_entry(
     value: str,
     confirm: bool = False,
     description: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/bind/access_list/entry
 
     parent_id: The ID of the parent this object is nested under.
@@ -10651,7 +10651,7 @@ async def pfsense_update_services_bind_access_list_entry(
     confirm: bool = False,
     description: str | None = None,
     value: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/bind/access_list/entry
 
     id: The ID of the object or resource to interact with.
@@ -10685,7 +10685,7 @@ async def pfsense_delete_services_bind_access_list_entry(
     id: str | int,
     parent_id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/bind/access_list/entry
 
     id: The ID of the object to target.
@@ -10715,14 +10715,14 @@ async def pfsense_list_services_bind_access_lists(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/bind/access_lists
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -10746,7 +10746,7 @@ async def pfsense_list_services_bind_access_lists(
 async def pfsense_replace_services_bind_access_lists(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/services/bind/access_lists
 
     items: List of objects for bulk replacement.
@@ -10769,7 +10769,7 @@ async def pfsense_delete_services_bind_access_lists(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/bind/access_lists
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -10794,7 +10794,7 @@ async def pfsense_delete_services_bind_access_lists(
 
 @mcp.tool()
 async def pfsense_get_services_bind_settings(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/bind/settings
     """
     return await _client.request(
@@ -10825,16 +10825,16 @@ async def pfsense_update_services_bind_settings(
     log_severity: str | None = 'critical',
     rate_enabled: bool | None = None,
     rate_limit: int | None = 15,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/bind/settings
 
     bind_forwarder_ips: The IP addresses of the DNS servers to forward queries to.This field is only available when the following conditions are
     bind_custom_options: Custom BIND options to include in the configuration file.
-    bind_dnssec_validation: Enable DNSSEC validation when BIND is acting as a recursive resolver.
+    bind_dnssec_validation: Enable DNSSEC validation when BIND is acting as a recursive resolver. Valid values: ['auto', 'on', 'off']
     bind_forwarder: Enable forwarding queries to other DNS servers listed below rather than this server performing its own recursion.
     bind_global_settings: Global BIND settings to include in the configuration file.
     bind_hide_version: Hide the BIND version in responses.
-    bind_ip_version: The IP version to use for the BIND service. Leave empty to use both IPv4 and IPv6.
+    bind_ip_version: The IP version to use for the BIND service. Leave empty to use both IPv4 and IPv6. Valid values: ['', '-4', '-6']
     bind_logging: Enable logging for the BIND service.
     bind_notify: Notify slave server after any update on master.
     bind_ram_limit: The maximum amount of RAM to use for the BIND service.
@@ -10844,7 +10844,7 @@ async def pfsense_update_services_bind_settings(
     listenport: The TCP and UDP port to listen on for DNS requests. Valid options are: a TCP/UDP port number
     log_only: When rate limiting, only log that the query limit has been exceeded. If disabled, the query will be dropped instead.
     log_options: The categories to log.
-    log_severity: The minimum severity of events to log.
+    log_severity: The minimum severity of events to log. Valid values: ['critical', 'error', 'warning', 'notice', 'info', 'debug 1', 'debug 3', 'debug 5', 'dynamic']
     rate_enabled: Enable rate limiting for the BIND service.
     rate_limit: The maximum number of queries per second to allow.This field is only available when the following conditions are met:- `
     """
@@ -10902,7 +10902,7 @@ async def pfsense_update_services_bind_settings(
 @mcp.tool()
 async def pfsense_get_services_bind_sync_remote_host(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/bind/sync/remote_host
 
     id: The ID of the object to target.
@@ -10926,13 +10926,13 @@ async def pfsense_create_services_bind_sync_remote_host(
     username: str,
     confirm: bool = False,
     syncdestinenable: bool | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/bind/sync/remote_host
 
     ipaddress: The IP address/hostname of the remote host.
     password: The password to use to authenticate when syncing.
     syncport: The remote host port to use for syncing. Valid options are: a TCP/UDP port number
-    syncprotocol: The protocol to use for syncing.
+    syncprotocol: The protocol to use for syncing. Valid values: ['http', 'https']
     username: The username to use to authenticate when syncing.
     syncdestinenable: Enable this remote host for syncing.
     """
@@ -10971,7 +10971,7 @@ async def pfsense_update_services_bind_sync_remote_host(
     syncport: str | None = None,
     syncprotocol: str | None = None,
     username: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/bind/sync/remote_host
 
     id: The ID of the object or resource to interact with.
@@ -10979,7 +10979,7 @@ async def pfsense_update_services_bind_sync_remote_host(
     password: The password to use to authenticate when syncing.
     syncdestinenable: Enable this remote host for syncing.
     syncport: The remote host port to use for syncing. Valid options are: a TCP/UDP port number
-    syncprotocol: The protocol to use for syncing.
+    syncprotocol: The protocol to use for syncing. Valid values: ['http', 'https']
     username: The username to use to authenticate when syncing.
     """
     if not confirm:
@@ -11013,7 +11013,7 @@ async def pfsense_update_services_bind_sync_remote_host(
 async def pfsense_delete_services_bind_sync_remote_host(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/bind/sync/remote_host
 
     id: The ID of the object to target.
@@ -11040,14 +11040,14 @@ async def pfsense_list_services_bind_sync_remote_hosts(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/bind/sync/remote_hosts
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -11071,7 +11071,7 @@ async def pfsense_list_services_bind_sync_remote_hosts(
 async def pfsense_replace_services_bind_sync_remote_hosts(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/services/bind/sync/remote_hosts
 
     items: List of objects for bulk replacement.
@@ -11094,7 +11094,7 @@ async def pfsense_delete_services_bind_sync_remote_hosts(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/bind/sync/remote_hosts
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -11119,7 +11119,7 @@ async def pfsense_delete_services_bind_sync_remote_hosts(
 
 @mcp.tool()
 async def pfsense_get_services_bind_sync_settings(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/bind/sync/settings
     """
     return await _client.request(
@@ -11134,12 +11134,12 @@ async def pfsense_update_services_bind_sync_settings(
     synconchanges: str,
     confirm: bool = False,
     synctimeout: int | None = 30,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/bind/sync/settings
 
     masterip: The IP address of the master BIND server.
-    synconchanges: The sync mode to use.
-    synctimeout: The timeout for the sync process.
+    synconchanges: The sync mode to use. Valid values: ['disabled', 'manual', 'auto']
+    synctimeout: The timeout for the sync process. Valid values: [30, 60, 90, 120, 150, 250]
     """
     if not confirm:
         return (
@@ -11163,7 +11163,7 @@ async def pfsense_update_services_bind_sync_settings(
 @mcp.tool()
 async def pfsense_get_services_bind_view(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/bind/view
 
     id: The ID of the object to target.
@@ -11187,7 +11187,7 @@ async def pfsense_create_services_bind_view(
     descr: str | None = None,
     match_clients: list[str] | None = None,
     recursion: bool | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/bind/view
 
     name: The name of the view.
@@ -11232,7 +11232,7 @@ async def pfsense_update_services_bind_view(
     match_clients: list[str] | None = None,
     name: str | None = None,
     recursion: bool | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/bind/view
 
     id: The ID of the object or resource to interact with.
@@ -11274,7 +11274,7 @@ async def pfsense_update_services_bind_view(
 async def pfsense_delete_services_bind_view(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/bind/view
 
     id: The ID of the object to target.
@@ -11301,14 +11301,14 @@ async def pfsense_list_services_bind_views(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/bind/views
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -11332,7 +11332,7 @@ async def pfsense_list_services_bind_views(
 async def pfsense_replace_services_bind_views(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/services/bind/views
 
     items: List of objects for bulk replacement.
@@ -11355,7 +11355,7 @@ async def pfsense_delete_services_bind_views(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/bind/views
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -11381,7 +11381,7 @@ async def pfsense_delete_services_bind_views(
 @mcp.tool()
 async def pfsense_get_services_bind_zone(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/bind/zone
 
     id: The ID of the object to target.
@@ -11429,7 +11429,7 @@ async def pfsense_create_services_bind_zone(
     type_: str | None = 'master',
     updatepolicy: str | None = None,
     view: list[str] | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/bind/zone
 
     baseip: The IP address of the base domain for this zone. This sets an A record for the base domain.This field is only available 
@@ -11459,7 +11459,7 @@ async def pfsense_create_services_bind_zone(
     rpz: Enable this zone as part of a response policy.This field is only available when the following conditions are met:- `type
     slaveip: The IP address of the slave server for this BIND zone.This field is only available when the following conditions are met
     ttl: The default TTL interval (in seconds) for records within this BIND zone without a specific TTL.This field is only availa
-    type_: The type of this BIND zone.
+    type_: The type of this BIND zone. Valid values: ['master', 'slave', 'forward', 'redirect']
     updatepolicy: The update policy for this BIND zone.This field is only available when the following conditions are met:- `type` must be
     view: The views this BIND zone belongs to.
     """
@@ -11570,7 +11570,7 @@ async def pfsense_update_services_bind_zone(
     type_: str | None = 'master',
     updatepolicy: str | None = None,
     view: list[str] | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/bind/zone
 
     id: The ID of the object or resource to interact with.
@@ -11601,7 +11601,7 @@ async def pfsense_update_services_bind_zone(
     serial: The SOA serial number for this zone.This field is only available when the following conditions are met:- `type` must be 
     slaveip: The IP address of the slave server for this BIND zone.This field is only available when the following conditions are met
     ttl: The default TTL interval (in seconds) for records within this BIND zone without a specific TTL.This field is only availa
-    type_: The type of this BIND zone.
+    type_: The type of this BIND zone. Valid values: ['master', 'slave', 'forward', 'redirect']
     updatepolicy: The update policy for this BIND zone.This field is only available when the following conditions are met:- `type` must be
     view: The views this BIND zone belongs to.
     """
@@ -11684,7 +11684,7 @@ async def pfsense_update_services_bind_zone(
 async def pfsense_delete_services_bind_zone(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/bind/zone
 
     id: The ID of the object to target.
@@ -11708,7 +11708,7 @@ async def pfsense_delete_services_bind_zone(
 async def pfsense_get_services_bind_zone_record(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/bind/zone/record
 
     id: The ID of the object to target.
@@ -11734,14 +11734,14 @@ async def pfsense_create_services_bind_zone_record(
     rdata: str,
     type_: str,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/bind/zone/record
 
     name: The domain name for this record.
     parent_id: The ID of the parent this object is nested under.
     priority: The priority for this record.This field is only available when the following conditions are met:- `type` must be one of 
     rdata: The data for this record. This can be an IP address, domain name, or other data depending on the record type.
-    type_: The type of record.
+    type_: The type of record. Valid values: ['A', 'AAAA', 'CNAME', 'MX', 'NS', 'LOC', 'PTR', 'SRV', 'TXT', 'SPF']
     """
     if not confirm:
         return (
@@ -11775,7 +11775,7 @@ async def pfsense_update_services_bind_zone_record(
     priority: int | None = None,
     rdata: str | None = None,
     type_: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/bind/zone/record
 
     id: The ID of the object or resource to interact with.
@@ -11783,7 +11783,7 @@ async def pfsense_update_services_bind_zone_record(
     name: The domain name for this record.
     priority: The priority for this record.This field is only available when the following conditions are met:- `type` must be one of 
     rdata: The data for this record. This can be an IP address, domain name, or other data depending on the record type.
-    type_: The type of record.
+    type_: The type of record. Valid values: ['A', 'AAAA', 'CNAME', 'MX', 'NS', 'LOC', 'PTR', 'SRV', 'TXT', 'SPF']
     """
     if not confirm:
         return (
@@ -11815,7 +11815,7 @@ async def pfsense_delete_services_bind_zone_record(
     id: str | int,
     parent_id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/bind/zone/record
 
     id: The ID of the object to target.
@@ -11845,14 +11845,14 @@ async def pfsense_list_services_bind_zones(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/bind/zones
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -11876,7 +11876,7 @@ async def pfsense_list_services_bind_zones(
 async def pfsense_replace_services_bind_zones(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/services/bind/zones
 
     items: List of objects for bulk replacement.
@@ -11899,7 +11899,7 @@ async def pfsense_delete_services_bind_zones(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/bind/zones
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -11925,7 +11925,7 @@ async def pfsense_delete_services_bind_zones(
 @mcp.tool()
 async def pfsense_get_services_cron_job(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/cron/job
 
     id: The ID of the object to target.
@@ -11950,7 +11950,7 @@ async def pfsense_create_services_cron_job(
     wday: str,
     who: str,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/cron/job
 
     command: The command to run. Use full file paths for this command and include an command parameters.
@@ -11999,7 +11999,7 @@ async def pfsense_update_services_cron_job(
     month: str | None = None,
     wday: str | None = None,
     who: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/cron/job
 
     id: The ID of the object or resource to interact with.
@@ -12044,7 +12044,7 @@ async def pfsense_update_services_cron_job(
 async def pfsense_delete_services_cron_job(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/cron/job
 
     id: The ID of the object to target.
@@ -12071,14 +12071,14 @@ async def pfsense_list_services_cron_jobs(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/cron/jobs
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -12102,7 +12102,7 @@ async def pfsense_list_services_cron_jobs(
 async def pfsense_replace_services_cron_jobs(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/services/cron/jobs
 
     items: List of objects for bulk replacement.
@@ -12125,7 +12125,7 @@ async def pfsense_delete_services_cron_jobs(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/cron/jobs
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -12150,7 +12150,7 @@ async def pfsense_delete_services_cron_jobs(
 
 @mcp.tool()
 async def pfsense_get_services_dhcp_relay(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/dhcp_relay
     """
     return await _client.request(
@@ -12167,7 +12167,7 @@ async def pfsense_update_services_dhcp_relay(
     carpstatusvip: str | None = 'none',
     enable: bool | None = None,
     interface: list[str] | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/dhcp_relay
 
     server: The IPv4 addresses of the DHCP server to relay requests to.
@@ -12203,7 +12203,7 @@ async def pfsense_update_services_dhcp_relay(
 async def pfsense_get_services_dhcp_server_address_pool(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/dhcp_server/address_pool
 
     id: The ID of the object to target.
@@ -12240,7 +12240,7 @@ async def pfsense_create_services_dhcp_server_address_pool(
     maxleasetime: int | None = 86400,
     ntpserver: list[str] | None = None,
     winsserver: list[str] | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/dhcp_server/address_pool
 
     Note: Call pfsense_services_dhcp_server_apply after this to apply changes.
@@ -12249,7 +12249,7 @@ async def pfsense_create_services_dhcp_server_address_pool(
     range_from: The starting IP address for this address pool. This address must be less than or equal to the `range_to` field.
     range_to: The ending IP address for the this address pool. This address must be greater than or equal to the `range_to` field.
     defaultleasetime: The default DHCP lease validity period (in seconds). This is used for clients that do not ask for a specific expiration 
-    denyunknown: Define how to handle unknown clients requesting DHCP leases. When set to `null`, any DHCP client will get an IP address 
+    denyunknown: Define how to handle unknown clients requesting DHCP leases. When set to `null`, any DHCP client will get an IP address  Valid values: ['enabled', 'class']
     dnsserver: The DNS servers to provide via DHCP. Leave empty to default to system nameservers.
     domain: The domain to be assigned via DHCP.
     domainsearchlist: The domain search list to provide via DHCP.
@@ -12328,7 +12328,7 @@ async def pfsense_update_services_dhcp_server_address_pool(
     range_from: str | None = None,
     range_to: str | None = None,
     winsserver: list[str] | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/dhcp_server/address_pool
 
     Note: Call pfsense_services_dhcp_server_apply after this to apply changes.
@@ -12336,7 +12336,7 @@ async def pfsense_update_services_dhcp_server_address_pool(
     id: The ID of the object or resource to interact with.
     parent_id: The ID of the parent this object is nested under.
     defaultleasetime: The default DHCP lease validity period (in seconds). This is used for clients that do not ask for a specific expiration 
-    denyunknown: Define how to handle unknown clients requesting DHCP leases. When set to `null`, any DHCP client will get an IP address 
+    denyunknown: Define how to handle unknown clients requesting DHCP leases. When set to `null`, any DHCP client will get an IP address  Valid values: ['enabled', 'class']
     dnsserver: The DNS servers to provide via DHCP. Leave empty to default to system nameservers.
     domain: The domain to be assigned via DHCP.
     domainsearchlist: The domain search list to provide via DHCP.
@@ -12405,7 +12405,7 @@ async def pfsense_delete_services_dhcp_server_address_pool(
     parent_id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dhcp_server/address_pool
 
     Note: Call pfsense_services_dhcp_server_apply after this to apply changes.
@@ -12436,7 +12436,7 @@ async def pfsense_delete_services_dhcp_server_address_pool(
 
 @mcp.tool()
 async def pfsense_get_services_dhcp_server_apply_status(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/dhcp_server/apply
     """
     return await _client.request(
@@ -12448,7 +12448,7 @@ async def pfsense_get_services_dhcp_server_apply_status(
 @mcp.tool()
 async def pfsense_services_dhcp_server_apply(
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/dhcp_server/apply
     """
     if not confirm:
@@ -12466,12 +12466,12 @@ async def pfsense_services_dhcp_server_apply(
 async def pfsense_update_services_dhcp_server_backend(
     confirm: bool = False,
     dhcpbackend: str | None = 'isc',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/dhcp_server/backend
 
     Note: Call pfsense_services_dhcp_server_apply after this to apply changes.
 
-    dhcpbackend: The backend DHCP server service to use. ISC DHCP is deprecate and will be removed in a future version of pfSense.
+    dhcpbackend: The backend DHCP server service to use. ISC DHCP is deprecate and will be removed in a future version of pfSense. Valid values: ['isc', 'kea']
     """
     if not confirm:
         return (
@@ -12493,7 +12493,7 @@ async def pfsense_update_services_dhcp_server_backend(
 async def pfsense_get_services_dhcp_server_custom_option(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/dhcp_server/custom_option
 
     id: The ID of the object to target.
@@ -12518,14 +12518,14 @@ async def pfsense_create_services_dhcp_server_custom_option(
     type_: str,
     value: str,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/dhcp_server/custom_option
 
     Note: Call pfsense_services_dhcp_server_apply after this to apply changes.
 
     number: The DHCP option number to configure.
     parent_id: The ID of the parent this object is nested under.
-    type_: The type of value to configure for the option.
+    type_: The type of value to configure for the option. Valid values: ['text', 'string', 'boolean', 'unsigned integer 8', 'unsigned integer 16', 'unsigned integer 32', 'signed integer 8', 'signed integer 16', 'signed integer 32', 'ip-address']
     value: The value to configure for the option.
     """
     if not confirm:
@@ -12558,7 +12558,7 @@ async def pfsense_update_services_dhcp_server_custom_option(
     number: int | None = None,
     type_: str | None = None,
     value: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/dhcp_server/custom_option
 
     Note: Call pfsense_services_dhcp_server_apply after this to apply changes.
@@ -12566,7 +12566,7 @@ async def pfsense_update_services_dhcp_server_custom_option(
     id: The ID of the object or resource to interact with.
     parent_id: The ID of the parent this object is nested under.
     number: The DHCP option number to configure.
-    type_: The type of value to configure for the option.
+    type_: The type of value to configure for the option. Valid values: ['text', 'string', 'boolean', 'unsigned integer 8', 'unsigned integer 16', 'unsigned integer 32', 'signed integer 8', 'signed integer 16', 'signed integer 32', 'ip-address']
     value: The value to configure for the option.
     """
     if not confirm:
@@ -12599,7 +12599,7 @@ async def pfsense_delete_services_dhcp_server_custom_option(
     parent_id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dhcp_server/custom_option
 
     Note: Call pfsense_services_dhcp_server_apply after this to apply changes.
@@ -12631,7 +12631,7 @@ async def pfsense_delete_services_dhcp_server_custom_option(
 @mcp.tool()
 async def pfsense_get_services_dhcp_server(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/dhcp_server
 
     id: The ID of the object to target.
@@ -12675,14 +12675,14 @@ async def pfsense_create_services_dhcp_server(
     staticmap: list[str] | None = None,
     statsgraph: bool | None = None,
     winsserver: list[str] | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/dhcp_server
 
     Note: Call pfsense_services_dhcp_server_apply after this to apply changes.
 
     interface: The interface to configure the DHCP server for. This field is only necessary when you wantto change the interface (ID) o
     defaultleasetime: The default DHCP lease validity period (in seconds). This is used for clients that do not ask for a specific expiration 
-    denyunknown: Define how to handle unknown clients requesting DHCP leases. When set to `null`, any DHCP client will get an IP address 
+    denyunknown: Define how to handle unknown clients requesting DHCP leases. When set to `null`, any DHCP client will get an IP address  Valid values: ['enabled', 'class']
     dhcpleaseinlocaltime: Display the DHCP lease times in local time instead of UTC.
     disablepingcheck: Prevent the DHCP server from sending a ping to the address being assigned, where if no response has been heard, it assig
     dnsserver: The DNS servers to provide via DHCP. Leave empty to default to system nameservers.
@@ -12803,14 +12803,14 @@ async def pfsense_update_services_dhcp_server(
     staticmap: list[str] | None = None,
     statsgraph: bool | None = None,
     winsserver: list[str] | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/dhcp_server
 
     Note: Call pfsense_services_dhcp_server_apply after this to apply changes.
 
     id: The ID of the object or resource to interact with.
     defaultleasetime: The default DHCP lease validity period (in seconds). This is used for clients that do not ask for a specific expiration 
-    denyunknown: Define how to handle unknown clients requesting DHCP leases. When set to `null`, any DHCP client will get an IP address 
+    denyunknown: Define how to handle unknown clients requesting DHCP leases. When set to `null`, any DHCP client will get an IP address  Valid values: ['enabled', 'class']
     dhcpleaseinlocaltime: Display the DHCP lease times in local time instead of UTC.
     disablepingcheck: Prevent the DHCP server from sending a ping to the address being assigned, where if no response has been heard, it assig
     dnsserver: The DNS servers to provide via DHCP. Leave empty to default to system nameservers.
@@ -12909,7 +12909,7 @@ async def pfsense_delete_services_dhcp_server(
     id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dhcp_server
 
     Note: Call pfsense_services_dhcp_server_apply after this to apply changes.
@@ -12939,7 +12939,7 @@ async def pfsense_delete_services_dhcp_server(
 async def pfsense_get_services_dhcp_server_static_mapping(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/dhcp_server/static_mapping
 
     id: The ID of the object to target.
@@ -12975,7 +12975,7 @@ async def pfsense_create_services_dhcp_server_static_mapping(
     maxleasetime: int | None = 86400,
     ntpserver: list[str] | None = None,
     winsserver: list[str] | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/dhcp_server/static_mapping
 
     Note: Call pfsense_services_dhcp_server_apply after this to apply changes.
@@ -13059,7 +13059,7 @@ async def pfsense_update_services_dhcp_server_static_mapping(
     maxleasetime: int | None = 86400,
     ntpserver: list[str] | None = None,
     winsserver: list[str] | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/dhcp_server/static_mapping
 
     Note: Call pfsense_services_dhcp_server_apply after this to apply changes.
@@ -13133,7 +13133,7 @@ async def pfsense_delete_services_dhcp_server_static_mapping(
     parent_id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dhcp_server/static_mapping
 
     Note: Call pfsense_services_dhcp_server_apply after this to apply changes.
@@ -13169,14 +13169,14 @@ async def pfsense_list_services_dhcp_servers(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/dhcp_servers
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -13200,7 +13200,7 @@ async def pfsense_list_services_dhcp_servers(
 async def pfsense_replace_services_dhcp_servers(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/services/dhcp_servers
 
     items: List of objects for bulk replacement.
@@ -13220,7 +13220,7 @@ async def pfsense_replace_services_dhcp_servers(
 
 @mcp.tool()
 async def pfsense_get_services_dns_forwarder_apply_status(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/dns_forwarder/apply
     """
     return await _client.request(
@@ -13232,7 +13232,7 @@ async def pfsense_get_services_dns_forwarder_apply_status(
 @mcp.tool()
 async def pfsense_services_dns_forwarder_apply(
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/dns_forwarder/apply
     """
     if not confirm:
@@ -13250,7 +13250,7 @@ async def pfsense_services_dns_forwarder_apply(
 async def pfsense_get_services_dns_forwarder_host_override_alias(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/dns_forwarder/host_override/alias
 
     id: The ID of the object to target.
@@ -13275,7 +13275,7 @@ async def pfsense_create_services_dns_forwarder_host_override_alias(
     parent_id: int,
     confirm: bool = False,
     description: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/dns_forwarder/host_override/alias
 
     Note: Call pfsense_services_dns_forwarder_apply after this to apply changes.
@@ -13315,7 +13315,7 @@ async def pfsense_update_services_dns_forwarder_host_override_alias(
     description: str | None = None,
     domain: str | None = None,
     host: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/dns_forwarder/host_override/alias
 
     Note: Call pfsense_services_dns_forwarder_apply after this to apply changes.
@@ -13356,7 +13356,7 @@ async def pfsense_delete_services_dns_forwarder_host_override_alias(
     parent_id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dns_forwarder/host_override/alias
 
     Note: Call pfsense_services_dns_forwarder_apply after this to apply changes.
@@ -13388,7 +13388,7 @@ async def pfsense_delete_services_dns_forwarder_host_override_alias(
 @mcp.tool()
 async def pfsense_get_services_dns_forwarder_host_override(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/dns_forwarder/host_override
 
     id: The ID of the object to target.
@@ -13411,7 +13411,7 @@ async def pfsense_create_services_dns_forwarder_host_override(
     confirm: bool = False,
     aliases: list[str] | None = None,
     descr: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/dns_forwarder/host_override
 
     Note: Call pfsense_services_dns_forwarder_apply after this to apply changes.
@@ -13455,7 +13455,7 @@ async def pfsense_update_services_dns_forwarder_host_override(
     domain: str | None = None,
     host: str | None = None,
     ip: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/dns_forwarder/host_override
 
     Note: Call pfsense_services_dns_forwarder_apply after this to apply changes.
@@ -13498,7 +13498,7 @@ async def pfsense_delete_services_dns_forwarder_host_override(
     id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dns_forwarder/host_override
 
     Note: Call pfsense_services_dns_forwarder_apply after this to apply changes.
@@ -13531,14 +13531,14 @@ async def pfsense_list_services_dns_forwarder_host_overrides(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/dns_forwarder/host_overrides
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -13562,7 +13562,7 @@ async def pfsense_list_services_dns_forwarder_host_overrides(
 async def pfsense_replace_services_dns_forwarder_host_overrides(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/services/dns_forwarder/host_overrides
 
     Note: Call pfsense_services_dns_forwarder_apply after this to apply changes.
@@ -13588,7 +13588,7 @@ async def pfsense_delete_services_dns_forwarder_host_overrides(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dns_forwarder/host_overrides
 
     Note: Call pfsense_services_dns_forwarder_apply after this to apply changes.
@@ -13617,7 +13617,7 @@ async def pfsense_delete_services_dns_forwarder_host_overrides(
 @mcp.tool()
 async def pfsense_get_services_dns_resolver_access_list(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/dns_resolver/access_list
 
     id: The ID of the object to target.
@@ -13639,12 +13639,12 @@ async def pfsense_create_services_dns_resolver_access_list(
     networks: list[str],
     confirm: bool = False,
     description: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/dns_resolver/access_list
 
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
 
-    action: The action to take when an access list match is found.
+    action: The action to take when an access list match is found. Valid values: ['allow', 'deny', 'refuse', 'allow snoop', 'deny nonlocal', 'refuse nonlocal']
     name: The name of this access list.
     networks: The DNS Resolver access list network entries to include in this access list.
     description: A description for this access list.
@@ -13679,13 +13679,13 @@ async def pfsense_update_services_dns_resolver_access_list(
     description: str | None = None,
     name: str | None = None,
     networks: list[str] | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/dns_resolver/access_list
 
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
 
     id: The ID of the object or resource to interact with.
-    action: The action to take when an access list match is found.
+    action: The action to take when an access list match is found. Valid values: ['allow', 'deny', 'refuse', 'allow snoop', 'deny nonlocal', 'refuse nonlocal']
     description: A description for this access list.
     name: The name of this access list.
     networks: The DNS Resolver access list network entries to include in this access list.
@@ -13719,7 +13719,7 @@ async def pfsense_delete_services_dns_resolver_access_list(
     id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dns_resolver/access_list
 
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
@@ -13749,7 +13749,7 @@ async def pfsense_delete_services_dns_resolver_access_list(
 async def pfsense_get_services_dns_resolver_access_list_network(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/dns_resolver/access_list/network
 
     id: The ID of the object to target.
@@ -13774,7 +13774,7 @@ async def pfsense_create_services_dns_resolver_access_list_network(
     parent_id: int,
     confirm: bool = False,
     description: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/dns_resolver/access_list/network
 
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
@@ -13814,7 +13814,7 @@ async def pfsense_update_services_dns_resolver_access_list_network(
     description: str | None = None,
     mask: int | None = None,
     network: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/dns_resolver/access_list/network
 
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
@@ -13855,7 +13855,7 @@ async def pfsense_delete_services_dns_resolver_access_list_network(
     parent_id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dns_resolver/access_list/network
 
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
@@ -13891,14 +13891,14 @@ async def pfsense_list_services_dns_resolver_access_lists(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/dns_resolver/access_lists
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -13922,7 +13922,7 @@ async def pfsense_list_services_dns_resolver_access_lists(
 async def pfsense_replace_services_dns_resolver_access_lists(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/services/dns_resolver/access_lists
 
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
@@ -13948,7 +13948,7 @@ async def pfsense_delete_services_dns_resolver_access_lists(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dns_resolver/access_lists
 
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
@@ -13976,7 +13976,7 @@ async def pfsense_delete_services_dns_resolver_access_lists(
 
 @mcp.tool()
 async def pfsense_get_services_dns_resolver_apply_status(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/dns_resolver/apply
     """
     return await _client.request(
@@ -13988,7 +13988,7 @@ async def pfsense_get_services_dns_resolver_apply_status(
 @mcp.tool()
 async def pfsense_services_dns_resolver_apply(
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/dns_resolver/apply
     """
     if not confirm:
@@ -14005,7 +14005,7 @@ async def pfsense_services_dns_resolver_apply(
 @mcp.tool()
 async def pfsense_get_services_dns_resolver_domain_override(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/dns_resolver/domain_override
 
     id: The ID of the object to target.
@@ -14028,7 +14028,7 @@ async def pfsense_create_services_dns_resolver_domain_override(
     descr: str | None = None,
     forward_tls_upstream: bool | None = None,
     tls_hostname: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/dns_resolver/domain_override
 
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
@@ -14072,7 +14072,7 @@ async def pfsense_update_services_dns_resolver_domain_override(
     forward_tls_upstream: bool | None = None,
     ip: str | None = None,
     tls_hostname: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/dns_resolver/domain_override
 
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
@@ -14115,7 +14115,7 @@ async def pfsense_delete_services_dns_resolver_domain_override(
     id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dns_resolver/domain_override
 
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
@@ -14148,14 +14148,14 @@ async def pfsense_list_services_dns_resolver_domain_overrides(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/dns_resolver/domain_overrides
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -14179,7 +14179,7 @@ async def pfsense_list_services_dns_resolver_domain_overrides(
 async def pfsense_replace_services_dns_resolver_domain_overrides(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/services/dns_resolver/domain_overrides
 
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
@@ -14205,7 +14205,7 @@ async def pfsense_delete_services_dns_resolver_domain_overrides(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dns_resolver/domain_overrides
 
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
@@ -14235,7 +14235,7 @@ async def pfsense_delete_services_dns_resolver_domain_overrides(
 async def pfsense_get_services_dns_resolver_host_override_alias(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/dns_resolver/host_override/alias
 
     id: The ID of the object to target.
@@ -14260,7 +14260,7 @@ async def pfsense_create_services_dns_resolver_host_override_alias(
     parent_id: int,
     confirm: bool = False,
     descr: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/dns_resolver/host_override/alias
 
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
@@ -14300,7 +14300,7 @@ async def pfsense_update_services_dns_resolver_host_override_alias(
     descr: str | None = None,
     domain: str | None = None,
     host: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/dns_resolver/host_override/alias
 
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
@@ -14341,7 +14341,7 @@ async def pfsense_delete_services_dns_resolver_host_override_alias(
     parent_id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dns_resolver/host_override/alias
 
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
@@ -14373,7 +14373,7 @@ async def pfsense_delete_services_dns_resolver_host_override_alias(
 @mcp.tool()
 async def pfsense_get_services_dns_resolver_host_override(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/dns_resolver/host_override
 
     id: The ID of the object to target.
@@ -14396,7 +14396,7 @@ async def pfsense_create_services_dns_resolver_host_override(
     confirm: bool = False,
     aliases: list[str] | None = None,
     descr: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/dns_resolver/host_override
 
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
@@ -14440,7 +14440,7 @@ async def pfsense_update_services_dns_resolver_host_override(
     domain: str | None = None,
     host: str | None = None,
     ip: list[str] | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/dns_resolver/host_override
 
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
@@ -14483,7 +14483,7 @@ async def pfsense_delete_services_dns_resolver_host_override(
     id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dns_resolver/host_override
 
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
@@ -14516,14 +14516,14 @@ async def pfsense_list_services_dns_resolver_host_overrides(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/dns_resolver/host_overrides
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -14547,7 +14547,7 @@ async def pfsense_list_services_dns_resolver_host_overrides(
 async def pfsense_replace_services_dns_resolver_host_overrides(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/services/dns_resolver/host_overrides
 
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
@@ -14573,7 +14573,7 @@ async def pfsense_delete_services_dns_resolver_host_overrides(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dns_resolver/host_overrides
 
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
@@ -14601,7 +14601,7 @@ async def pfsense_delete_services_dns_resolver_host_overrides(
 
 @mcp.tool()
 async def pfsense_get_services_dns_resolver_settings(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/dns_resolver/settings
     """
     return await _client.request(
@@ -14631,7 +14631,7 @@ async def pfsense_update_services_dns_resolver_settings(
     strictout: bool | None = None,
     system_domain_local_zone_type: str | None = 'transparent',
     tlsport: str | None = '853',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/dns_resolver/settings
 
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
@@ -14646,13 +14646,13 @@ async def pfsense_update_services_dns_resolver_settings(
     outgoing_interface: The interface on which the DNS Resolver service sends outgoing DNS queries. Set empty value ". "to use any interface.
     port: The port on which the DNS Resolver service listens. Valid options are: a TCP/UDP port number
     python: Enables or disables the Python module.
-    python_order: The order in which the Python module is loaded.This field is only available when the following conditions are met:- `pyt
+    python_order: The order in which the Python module is loaded.This field is only available when the following conditions are met:- `pyt Valid values: ['pre_validator', 'post_validator']
     python_script: The Python module to utilize.This field is only available when the following conditions are met:- `python` must be equal
     regdhcp: Enables or disables registering DHCP leases in the DNS Resolver service.
     regdhcpstatic: Enables or disables registering static DHCP mappings in the DNS Resolver service.
     regovpnclients: Enables or disables registering OpenVPN clients in the DNS Resolver service.
     strictout: Enables or disables sending recursive queries if none of the selected Outgoing Network ". "Interfaces are available.
-    system_domain_local_zone_type: The type of local zone used for the system domain.
+    system_domain_local_zone_type: The type of local zone used for the system domain. Valid values: ['deny', 'refuse', 'static', 'transparent', 'typetransparent', 'redirect', 'inform', 'inform_deny', 'nodefault']
     tlsport: The port on which the DNS Resolver service listens for SSL/TLS connections. Valid options are: a TCP/UDP port numberThis
     """
     if not confirm:
@@ -14708,7 +14708,7 @@ async def pfsense_update_services_dns_resolver_settings(
 @mcp.tool()
 async def pfsense_get_services_free_radius_client(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/freeradius/client
 
     id: The ID of the object to target.
@@ -14737,20 +14737,20 @@ async def pfsense_create_services_free_radius_client(
     naspassword: str | None = None,
     nastype: str | None = 'other',
     proto: str | None = 'udp',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/freeradius/client
 
     addr: The IP address or network of the RADIUS client(s) in CIDR notation. This is the IP of the NAS (switch, access point, fir
     secret: This is the shared secret (password) which the NAS (switch, accesspoint, etc.) needs to communicate with the RADIUS serv
     shortname: A short name for the client. This is generally the hostname of the NAS.
     description: The description for this interface.
-    ip_version: The IP version of the this Client.
+    ip_version: The IP version of the this Client. Valid values: ['ipaddr', 'ipv6addr']
     maxconn: Takes only effect if you use TCP as protocol. Limits the number of simultaneous TCP connections from a client.
     msgauth: RFC5080 requires Message-Authenticator in Access-Request. But older NAS (switches or accesspoints) do not include that.
     naslogin: If supported by your NAS, you can use SNMP or finger for simultaneous-use checks instead of (s)radutmp file and accounti
     naspassword: If supported by your NAS, you can use SNMP or finger for simultaneous-use checks instead of (s)radutmp file and accounti
-    nastype: The NAS type of the client. This is used by checkrad.pl for simultaneous use checks.
-    proto: The protocol the client uses.
+    nastype: The NAS type of the client. This is used by checkrad.pl for simultaneous use checks. Valid values: ['cisco', 'cvx', 'computone', 'digitro', 'livingston', 'juniper', 'max40xx', 'mikrotik', 'mikrotik_snmp', 'dot1x', 'other']
+    proto: The protocol the client uses. Valid values: ['udp', 'tcp']
     """
     if not confirm:
         return (
@@ -14802,19 +14802,19 @@ async def pfsense_update_services_free_radius_client(
     proto: str | None = 'udp',
     secret: str | None = None,
     shortname: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/freeradius/client
 
     id: The ID of the object or resource to interact with.
     addr: The IP address or network of the RADIUS client(s) in CIDR notation. This is the IP of the NAS (switch, access point, fir
     description: The description for this interface.
-    ip_version: The IP version of the this Client.
+    ip_version: The IP version of the this Client. Valid values: ['ipaddr', 'ipv6addr']
     maxconn: Takes only effect if you use TCP as protocol. Limits the number of simultaneous TCP connections from a client.
     msgauth: RFC5080 requires Message-Authenticator in Access-Request. But older NAS (switches or accesspoints) do not include that.
     naslogin: If supported by your NAS, you can use SNMP or finger for simultaneous-use checks instead of (s)radutmp file and accounti
     naspassword: If supported by your NAS, you can use SNMP or finger for simultaneous-use checks instead of (s)radutmp file and accounti
-    nastype: The NAS type of the client. This is used by checkrad.pl for simultaneous use checks.
-    proto: The protocol the client uses.
+    nastype: The NAS type of the client. This is used by checkrad.pl for simultaneous use checks. Valid values: ['cisco', 'cvx', 'computone', 'digitro', 'livingston', 'juniper', 'max40xx', 'mikrotik', 'mikrotik_snmp', 'dot1x', 'other']
+    proto: The protocol the client uses. Valid values: ['udp', 'tcp']
     secret: This is the shared secret (password) which the NAS (switch, accesspoint, etc.) needs to communicate with the RADIUS serv
     shortname: A short name for the client. This is generally the hostname of the NAS.
     """
@@ -14859,7 +14859,7 @@ async def pfsense_update_services_free_radius_client(
 async def pfsense_delete_services_free_radius_client(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/freeradius/client
 
     id: The ID of the object to target.
@@ -14882,7 +14882,7 @@ async def pfsense_delete_services_free_radius_client(
 @mcp.tool()
 async def pfsense_get_services_free_radius_interface(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/freeradius/interface
 
     id: The ID of the object to target.
@@ -14905,14 +14905,14 @@ async def pfsense_create_services_free_radius_interface(
     description: str | None = None,
     port: str | None = '1812',
     type_: str | None = 'auth',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/freeradius/interface
 
     addr: The IP address of the listening interface. If you choose * then it means all interfaces.
-    ip_version: The IP version of the listening interface.
+    ip_version: The IP version of the listening interface. Valid values: ['ipaddr', 'ipv6addr']
     description: The description for this interface.
     port: The port number of the listening interface. Different interface types need different ports. Valid options are: a TCP/UDP
-    type_: The type of the listening interface: Authentication/Accounting.
+    type_: The type of the listening interface: Authentication/Accounting. Valid values: ['auth', 'acct', 'proxy', 'detail', 'status', 'coa']
     """
     if not confirm:
         return (
@@ -14946,15 +14946,15 @@ async def pfsense_update_services_free_radius_interface(
     ip_version: str | None = None,
     port: str | None = '1812',
     type_: str | None = 'auth',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/freeradius/interface
 
     id: The ID of the object or resource to interact with.
     addr: The IP address of the listening interface. If you choose * then it means all interfaces.
     description: The description for this interface.
-    ip_version: The IP version of the listening interface.
+    ip_version: The IP version of the listening interface. Valid values: ['ipaddr', 'ipv6addr']
     port: The port number of the listening interface. Different interface types need different ports. Valid options are: a TCP/UDP
-    type_: The type of the listening interface: Authentication/Accounting.
+    type_: The type of the listening interface: Authentication/Accounting. Valid values: ['auth', 'acct', 'proxy', 'detail', 'status', 'coa']
     """
     if not confirm:
         return (
@@ -14985,7 +14985,7 @@ async def pfsense_update_services_free_radius_interface(
 async def pfsense_delete_services_free_radius_interface(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/freeradius/interface
 
     id: The ID of the object to target.
@@ -15008,7 +15008,7 @@ async def pfsense_delete_services_free_radius_interface(
 @mcp.tool()
 async def pfsense_get_services_free_radius_user(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/freeradius/user
 
     id: The ID of the object to target.
@@ -15037,7 +15037,7 @@ async def pfsense_create_services_free_radius_user(
     motp_enable: bool | None = None,
     motp_offset: int | None = None,
     password_encryption: str | None = 'Cleartext-Password',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/freeradius/user
 
     motp_pin: The PIN for the Mobile One-Time Password (MOTP). It must be exactly 4 digits.This field is only available when the follo
@@ -15047,10 +15047,10 @@ async def pfsense_create_services_free_radius_user(
     description: A description for this user.
     framed_ip_address: Framed-IP-Address MUST be supported by NAS. If the OpenVPN server uses a subnet style Topology the RADIUS server MUST al
     framed_ip_netmask: Framed-IP-Netmask MUST be supported by NAS
-    motp_authmethod: The authentication method for the Mobile One-Time Password (MOTP).This field is only available when the following condit
+    motp_authmethod: The authentication method for the Mobile One-Time Password (MOTP).This field is only available when the following condit Valid values: ['motp', 'googleauth']
     motp_enable: Enable or disable the use of Mobile One-Time Password (MOTP) for this user.
     motp_offset: The timezone offset for this user.This field is only available when the following conditions are met:- `motp_enable` mus
-    password_encryption: The encryption method for the password.This field is only available when the following conditions are met:- `motp_enable
+    password_encryption: The encryption method for the password.This field is only available when the following conditions are met:- `motp_enable Valid values: ['Cleartext-Password', 'MD5-Password', 'MD5-Password-hashed', 'NT-Password-hashed']
     """
     if not confirm:
         return (
@@ -15102,20 +15102,20 @@ async def pfsense_update_services_free_radius_user(
     password: str | None = None,
     password_encryption: str | None = 'Cleartext-Password',
     username: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/freeradius/user
 
     id: The ID of the object or resource to interact with.
     description: A description for this user.
     framed_ip_address: Framed-IP-Address MUST be supported by NAS. If the OpenVPN server uses a subnet style Topology the RADIUS server MUST al
     framed_ip_netmask: Framed-IP-Netmask MUST be supported by NAS
-    motp_authmethod: The authentication method for the Mobile One-Time Password (MOTP).This field is only available when the following condit
+    motp_authmethod: The authentication method for the Mobile One-Time Password (MOTP).This field is only available when the following condit Valid values: ['motp', 'googleauth']
     motp_enable: Enable or disable the use of Mobile One-Time Password (MOTP) for this user.
     motp_offset: The timezone offset for this user.This field is only available when the following conditions are met:- `motp_enable` mus
     motp_pin: The PIN for the Mobile One-Time Password (MOTP). It must be exactly 4 digits.This field is only available when the follo
     motp_secret: The secret for the Mobile One-Time Password (MOTP).This field is only available when the following conditions are met:- 
     password: The password for this username.This field is only available when the following conditions are met:- `motp_enable` must b
-    password_encryption: The encryption method for the password.This field is only available when the following conditions are met:- `motp_enable
+    password_encryption: The encryption method for the password.This field is only available when the following conditions are met:- `motp_enable Valid values: ['Cleartext-Password', 'MD5-Password', 'MD5-Password-hashed', 'NT-Password-hashed']
     username: The username for this user.
     """
     if not confirm:
@@ -15159,7 +15159,7 @@ async def pfsense_update_services_free_radius_user(
 async def pfsense_delete_services_free_radius_user(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/freeradius/user
 
     id: The ID of the object to target.
@@ -15181,7 +15181,7 @@ async def pfsense_delete_services_free_radius_user(
 
 @mcp.tool()
 async def pfsense_get_services_ha_proxy_apply_status(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/haproxy/apply
     """
     return await _client.request(
@@ -15193,7 +15193,7 @@ async def pfsense_get_services_ha_proxy_apply_status(
 @mcp.tool()
 async def pfsense_services_ha_proxy_apply(
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/haproxy/apply
     """
     if not confirm:
@@ -15211,7 +15211,7 @@ async def pfsense_services_ha_proxy_apply(
 async def pfsense_get_services_ha_proxy_backend_acl(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/haproxy/backend/acl
 
     id: The ID of the object to target.
@@ -15238,12 +15238,12 @@ async def pfsense_create_services_ha_proxy_backend_acl(
     confirm: bool = False,
     casesensitive: bool | None = None,
     not_: bool | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/haproxy/backend/acl
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
-    expression: The expression to use to determine the match for this ACL.
+    expression: The expression to use to determine the match for this ACL. Valid values: ['host_starts_with', 'host_ends_with', 'host_matches', 'host_regex', 'host_contains', 'path_starts_with', 'path_ends_with', 'path_matches', 'path_regex', 'path_contains', 'path_dir', 'url_parameter', 'ssl_c_verify_code', 'ss...
     name: The unique name for this backend ACL.
     parent_id: The ID of the parent this object is nested under.
     value: The value which indicates a match for this ACL.
@@ -15286,7 +15286,7 @@ async def pfsense_update_services_ha_proxy_backend_acl(
     name: str | None = None,
     not_: bool | None = None,
     value: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/haproxy/backend/acl
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -15294,7 +15294,7 @@ async def pfsense_update_services_ha_proxy_backend_acl(
     id: The ID of the object or resource to interact with.
     parent_id: The ID of the parent this object is nested under.
     casesensitive: Enables or disables case-sensitive matching for this ACL.
-    expression: The expression to use to determine the match for this ACL.
+    expression: The expression to use to determine the match for this ACL. Valid values: ['host_starts_with', 'host_ends_with', 'host_matches', 'host_regex', 'host_contains', 'path_starts_with', 'path_ends_with', 'path_matches', 'path_regex', 'path_contains', 'path_dir', 'url_parameter', 'ssl_c_verify_code', 'ss...
     name: The unique name for this backend ACL.
     not_: Enables or disables inverting the context of this ACL.
     value: The value which indicates a match for this ACL.
@@ -15332,7 +15332,7 @@ async def pfsense_delete_services_ha_proxy_backend_acl(
     id: str | int,
     parent_id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/backend/acl
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -15362,7 +15362,7 @@ async def pfsense_delete_services_ha_proxy_backend_acl(
 async def pfsense_get_services_ha_proxy_backend_action(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/haproxy/backend/action
 
     id: The ID of the object to target.
@@ -15399,13 +15399,13 @@ async def pfsense_create_services_ha_proxy_backend_action(
     server: str,
     status: str,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/haproxy/backend/action
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
     acl: The name of the backend ACL this action is associated with.
-    action: The action to take when an ACL match is found.
+    action: The action to take when an ACL match is found. Valid values: ['use_server', 'custom', 'http-request_allow', 'http-request_deny', 'http-request_tarpit', 'http-request_auth', 'http-request_redirect', 'http-request_lua', 'http-request_use-service', 'http-request_add-header', 'http-request_set-header...
     customaction: The custom action to take when an ACL match is found.This field is only available when the following conditions are met:
     deny_status: The deny status to use when an ACL match is found.This field is only available when the following conditions are met:- `
     find: The value to find when an ACL match is found.This field is only available when the following conditions are met:- `actio
@@ -15487,7 +15487,7 @@ async def pfsense_update_services_ha_proxy_backend_action(
     rule: str | None = None,
     server: str | None = None,
     status: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/haproxy/backend/action
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -15495,7 +15495,7 @@ async def pfsense_update_services_ha_proxy_backend_action(
     id: The ID of the object or resource to interact with.
     parent_id: The ID of the parent this object is nested under.
     acl: The name of the backend ACL this action is associated with.
-    action: The action to take when an ACL match is found.
+    action: The action to take when an ACL match is found. Valid values: ['use_server', 'custom', 'http-request_allow', 'http-request_deny', 'http-request_tarpit', 'http-request_auth', 'http-request_redirect', 'http-request_lua', 'http-request_use-service', 'http-request_add-header', 'http-request_set-header...
     customaction: The custom action to take when an ACL match is found.This field is only available when the following conditions are met:
     deny_status: The deny status to use when an ACL match is found.This field is only available when the following conditions are met:- `
     find: The value to find when an ACL match is found.This field is only available when the following conditions are met:- `actio
@@ -15563,7 +15563,7 @@ async def pfsense_delete_services_ha_proxy_backend_action(
     id: str | int,
     parent_id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/backend/action
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -15592,7 +15592,7 @@ async def pfsense_delete_services_ha_proxy_backend_action(
 @mcp.tool()
 async def pfsense_get_services_ha_proxy_backend(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/haproxy/backend
 
     id: The ID of the object to target.
@@ -15667,7 +15667,7 @@ async def pfsense_create_services_ha_proxy_backend(
     strict_transport_security: int | None = None,
     transparent_clientip: bool | None = None,
     transparent_interface: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/haproxy/backend
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -15681,22 +15681,22 @@ async def pfsense_create_services_ha_proxy_backend(
     advanced_backend: The backend pass thru to apply to the backend section.
     agent_checks: Enables or disables using a TCP connection to read an ASCII string of the form.
     agent_inter: The interval (in milliseconds) between agent checks.This field is only available when the following conditions are met:-
-    balance: The load balancing option to use for servers assigned to this backend.
+    balance: The load balancing option to use for servers assigned to this backend. Valid values: ['', 'roundrobin', 'static-rr', 'leastconn', 'source', 'uri']
     balance_uridepth: The maximum directory depth to be used to compute the hash. One level is counted for each slash in the request.This fiel
     balance_urilen: The number of URI characters the algorithm should consider when hashing.This field is only available when the following 
     balance_uriwhole: Enables or disables allowing the use of whole URIs, including URL parameters.This field is only available when the follo
-    check_type: The health check method to use when checking the health of backend servers.
+    check_type: The health check method to use when checking the health of backend servers. Valid values: ['none', 'Basic', 'HTTP', 'LDAP', 'MySQL', 'PostgreSQL', 'Redis', 'SMTP', 'ESMTP', 'SSL']
     checkinter: The interval (in milliseconds) in which health checks will be performed.This field is only available when the following 
     connection_timeout: The amount of time (in milliseconds) to wait before giving up on connections.
     cookie_attribute_secure: Enables or disables assigning the secure attributes on cookies for this backend.
-    email_level: The maximum log level to send emails for. Leave empty to disable sending email alerts. If left empty, the value set in t
+    email_level: The maximum log level to send emails for. Leave empty to disable sending email alerts. If left empty, the value set in t Valid values: ['', 'dontlog', 'emerg', 'alert', 'crit', 'err', 'warning', 'notice', 'info', 'debug']
     email_to: The email address to send emails to. If left empty, the value set in the global settings will be used.
     errorfiles: The HAProxy error file mappings to use for this backend.
     haproxy_cookie_domains: The domains to set the cookies for.This field is only available when the following conditions are met:- `persist_cookie_
     haproxy_cookie_dynamic_cookie_key: The dynamic cookie secret key. This is will be used to generate dynamic cookies for this backend.This field is only avai
     haproxy_cookie_maxidle: The max-idle time to allow. This option only applies to insert mode cookies.This field is only available when the follow
     haproxy_cookie_maxlife: The max-life time to allow. This option only applies to insert mode cookies.This field is only available when the follow
-    httpcheck_method: The HTTP method to use for HTTP health checks.This field is only available when the following conditions are met:- `chec
+    httpcheck_method: The HTTP method to use for HTTP health checks.This field is only available when the following conditions are met:- `chec Valid values: ['OPTIONS', 'HEAD', 'GET', 'POST', 'PUT', 'DELETE', 'TRACE']
     log_health_checks: Enables or disables logging changes to the health check statusThis field is only available when the following conditions
     monitor_domain: The domain to use for SMTP or ESMTP health checks.This field is only available when the following conditions are met:- `
     monitor_httpversion: The HTTP version to use for HTTP health checks.This field is only available when the following conditions are met:- `che
@@ -15705,14 +15705,14 @@ async def pfsense_create_services_ha_proxy_backend(
     persist_cookie_cachable: Enables or disables allowing shared caches to cache the server response.This field is only available when the following 
     persist_cookie_enabled: Enables or disables cookie based persistence.
     persist_cookie_httponly: Enables or disables preventing the use of cookies with non-HTTP components.This field is only available when the followi
-    persist_cookie_mode: The mode HAProxy uses to insert/prefix/replace or examine cookie and set-cookie headers.This field is only available whe
+    persist_cookie_mode: The mode HAProxy uses to insert/prefix/replace or examine cookie and set-cookie headers.This field is only available whe Valid values: ['passive', 'passive-silent', 'reset', 'set', 'set-silent', 'insert-only', 'insert-only-silent', 'session-prefix', 'passive-session-prefix']
     persist_cookie_postonly: Enables or disables only inserting cookies on POST requests.This field is only available when the following conditions a
     persist_cookie_secure: Enables or disables prevention of cookie usage over non-secure channels.This field is only available when the following 
     persist_stick_cookiename: The cookie name to use for stick table.This field is only available when the following conditions are met:- `persist_sti
     persist_stick_expire: The maximum duration of an entry in the stick-table since it was last created, refreshed or matched.This field is only a
     persist_stick_length: The maximum number of characters allowed in a string type stick tableThis field is only available when the following con
     persist_stick_tablesize: The maximum number of entries allowed in the table. This value directly impacts memory usage.This field is only availabl
-    persist_sticky_type: The sticky table mode to use for this backend. These options are used to make sure subsequent requests from a single cli
+    persist_sticky_type: The sticky table mode to use for this backend. These options are used to make sure subsequent requests from a single cli Valid values: ['none', 'stick_sslsessionid', 'stick_sourceipv4', 'stick_sourceipv6', 'stick_cookie_value', 'stick_rdp_cookie']
     retries: The number of retry attempts to allow after a connection failure to the server.
     server_timeout: The amount of time (in milliseconds) to wait for data transferred to or from the server.
     servers: The pool of servers this backend will use.
@@ -15919,7 +15919,7 @@ async def pfsense_update_services_ha_proxy_backend(
     strict_transport_security: int | None = None,
     transparent_clientip: bool | None = None,
     transparent_interface: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/haproxy/backend
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -15932,22 +15932,22 @@ async def pfsense_update_services_ha_proxy_backend(
     agent_checks: Enables or disables using a TCP connection to read an ASCII string of the form.
     agent_inter: The interval (in milliseconds) between agent checks.This field is only available when the following conditions are met:-
     agent_port: Valid options are: a TCP/UDP port numberThis field is only available when the following conditions are met:- `agent_chec
-    balance: The load balancing option to use for servers assigned to this backend.
+    balance: The load balancing option to use for servers assigned to this backend. Valid values: ['', 'roundrobin', 'static-rr', 'leastconn', 'source', 'uri']
     balance_uridepth: The maximum directory depth to be used to compute the hash. One level is counted for each slash in the request.This fiel
     balance_urilen: The number of URI characters the algorithm should consider when hashing.This field is only available when the following 
     balance_uriwhole: Enables or disables allowing the use of whole URIs, including URL parameters.This field is only available when the follo
-    check_type: The health check method to use when checking the health of backend servers.
+    check_type: The health check method to use when checking the health of backend servers. Valid values: ['none', 'Basic', 'HTTP', 'LDAP', 'MySQL', 'PostgreSQL', 'Redis', 'SMTP', 'ESMTP', 'SSL']
     checkinter: The interval (in milliseconds) in which health checks will be performed.This field is only available when the following 
     connection_timeout: The amount of time (in milliseconds) to wait before giving up on connections.
     cookie_attribute_secure: Enables or disables assigning the secure attributes on cookies for this backend.
-    email_level: The maximum log level to send emails for. Leave empty to disable sending email alerts. If left empty, the value set in t
+    email_level: The maximum log level to send emails for. Leave empty to disable sending email alerts. If left empty, the value set in t Valid values: ['', 'dontlog', 'emerg', 'alert', 'crit', 'err', 'warning', 'notice', 'info', 'debug']
     email_to: The email address to send emails to. If left empty, the value set in the global settings will be used.
     errorfiles: The HAProxy error file mappings to use for this backend.
     haproxy_cookie_domains: The domains to set the cookies for.This field is only available when the following conditions are met:- `persist_cookie_
     haproxy_cookie_dynamic_cookie_key: The dynamic cookie secret key. This is will be used to generate dynamic cookies for this backend.This field is only avai
     haproxy_cookie_maxidle: The max-idle time to allow. This option only applies to insert mode cookies.This field is only available when the follow
     haproxy_cookie_maxlife: The max-life time to allow. This option only applies to insert mode cookies.This field is only available when the follow
-    httpcheck_method: The HTTP method to use for HTTP health checks.This field is only available when the following conditions are met:- `chec
+    httpcheck_method: The HTTP method to use for HTTP health checks.This field is only available when the following conditions are met:- `chec Valid values: ['OPTIONS', 'HEAD', 'GET', 'POST', 'PUT', 'DELETE', 'TRACE']
     log_health_checks: Enables or disables logging changes to the health check statusThis field is only available when the following conditions
     monitor_domain: The domain to use for SMTP or ESMTP health checks.This field is only available when the following conditions are met:- `
     monitor_httpversion: The HTTP version to use for HTTP health checks.This field is only available when the following conditions are met:- `che
@@ -15957,7 +15957,7 @@ async def pfsense_update_services_ha_proxy_backend(
     persist_cookie_cachable: Enables or disables allowing shared caches to cache the server response.This field is only available when the following 
     persist_cookie_enabled: Enables or disables cookie based persistence.
     persist_cookie_httponly: Enables or disables preventing the use of cookies with non-HTTP components.This field is only available when the followi
-    persist_cookie_mode: The mode HAProxy uses to insert/prefix/replace or examine cookie and set-cookie headers.This field is only available whe
+    persist_cookie_mode: The mode HAProxy uses to insert/prefix/replace or examine cookie and set-cookie headers.This field is only available whe Valid values: ['passive', 'passive-silent', 'reset', 'set', 'set-silent', 'insert-only', 'insert-only-silent', 'session-prefix', 'passive-session-prefix']
     persist_cookie_name: The string name to track in Set-Cookie and Cookie HTTP headers.This field is only available when the following condition
     persist_cookie_postonly: Enables or disables only inserting cookies on POST requests.This field is only available when the following conditions a
     persist_cookie_secure: Enables or disables prevention of cookie usage over non-secure channels.This field is only available when the following 
@@ -15965,7 +15965,7 @@ async def pfsense_update_services_ha_proxy_backend(
     persist_stick_expire: The maximum duration of an entry in the stick-table since it was last created, refreshed or matched.This field is only a
     persist_stick_length: The maximum number of characters allowed in a string type stick tableThis field is only available when the following con
     persist_stick_tablesize: The maximum number of entries allowed in the table. This value directly impacts memory usage.This field is only availabl
-    persist_sticky_type: The sticky table mode to use for this backend. These options are used to make sure subsequent requests from a single cli
+    persist_sticky_type: The sticky table mode to use for this backend. These options are used to make sure subsequent requests from a single cli Valid values: ['none', 'stick_sslsessionid', 'stick_sourceipv4', 'stick_sourceipv6', 'stick_cookie_value', 'stick_rdp_cookie']
     retries: The number of retry attempts to allow after a connection failure to the server.
     server_timeout: The amount of time (in milliseconds) to wait for data transferred to or from the server.
     servers: The pool of servers this backend will use.
@@ -16117,7 +16117,7 @@ async def pfsense_update_services_ha_proxy_backend(
 async def pfsense_delete_services_ha_proxy_backend(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/backend
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -16144,7 +16144,7 @@ async def pfsense_delete_services_ha_proxy_backend(
 async def pfsense_get_services_ha_proxy_backend_error_file(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/haproxy/backend/error_file
 
     id: The ID of the object to target.
@@ -16168,7 +16168,7 @@ async def pfsense_create_services_ha_proxy_backend_error_file(
     errorfile: str,
     parent_id: int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/haproxy/backend/error_file
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -16204,7 +16204,7 @@ async def pfsense_update_services_ha_proxy_backend_error_file(
     confirm: bool = False,
     errorcode: int | None = None,
     errorfile: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/haproxy/backend/error_file
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -16241,7 +16241,7 @@ async def pfsense_delete_services_ha_proxy_backend_error_file(
     id: str | int,
     parent_id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/backend/error_file
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -16271,7 +16271,7 @@ async def pfsense_delete_services_ha_proxy_backend_error_file(
 async def pfsense_get_services_ha_proxy_backend_server(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/haproxy/backend/server
 
     id: The ID of the object to target.
@@ -16301,7 +16301,7 @@ async def pfsense_create_services_ha_proxy_backend_server(
     sslserververify: bool | None = None,
     status: str | None = 'active',
     weight: int | None = 1,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/haproxy/backend/server
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -16313,7 +16313,7 @@ async def pfsense_create_services_ha_proxy_backend_server(
     advanced: Allows adding custom HAProxy server settings to the server.
     ssl: Enables or disables using SSL/TLS when forwarding to this backend server.
     sslserververify: Enables or disables verifying the SSL/TLS certificate when forwarding to this backend server.
-    status: The eligibility status for this backend server.
+    status: The eligibility status for this backend server. Valid values: ['active', 'backup', 'disabled', 'inactive']
     weight: The weight of this backend server when load balancing.
     """
     if not confirm:
@@ -16361,7 +16361,7 @@ async def pfsense_update_services_ha_proxy_backend_server(
     sslserververify: bool | None = None,
     status: str | None = 'active',
     weight: int | None = 1,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/haproxy/backend/server
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -16374,7 +16374,7 @@ async def pfsense_update_services_ha_proxy_backend_server(
     port: The port to forward to for this backend server. Valid options are: a TCP/UDP port number
     ssl: Enables or disables using SSL/TLS when forwarding to this backend server.
     sslserververify: Enables or disables verifying the SSL/TLS certificate when forwarding to this backend server.
-    status: The eligibility status for this backend server.
+    status: The eligibility status for this backend server. Valid values: ['active', 'backup', 'disabled', 'inactive']
     weight: The weight of this backend server when load balancing.
     """
     if not confirm:
@@ -16416,7 +16416,7 @@ async def pfsense_delete_services_ha_proxy_backend_server(
     id: str | int,
     parent_id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/backend/server
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -16449,14 +16449,14 @@ async def pfsense_list_services_ha_proxy_backends(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/haproxy/backends
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -16480,7 +16480,7 @@ async def pfsense_list_services_ha_proxy_backends(
 async def pfsense_replace_services_ha_proxy_backends(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/services/haproxy/backends
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -16506,7 +16506,7 @@ async def pfsense_delete_services_ha_proxy_backends(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/backends
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -16535,7 +16535,7 @@ async def pfsense_delete_services_ha_proxy_backends(
 @mcp.tool()
 async def pfsense_get_services_ha_proxy_file(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/haproxy/file
 
     id: The ID of the object to target.
@@ -16556,14 +16556,14 @@ async def pfsense_create_services_ha_proxy_file(
     name: str,
     confirm: bool = False,
     type_: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/haproxy/file
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
     content: The content of this file.
     name: The unique name for this file.
-    type_: The type of file. Use `null` to assume an Errorfile.
+    type_: The type of file. Use `null` to assume an Errorfile. Valid values: ['luascript', 'writetodisk']
     """
     if not confirm:
         return (
@@ -16592,7 +16592,7 @@ async def pfsense_update_services_ha_proxy_file(
     content: str | None = None,
     name: str | None = None,
     type_: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/haproxy/file
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -16600,7 +16600,7 @@ async def pfsense_update_services_ha_proxy_file(
     id: The ID of the object or resource to interact with.
     content: The content of this file.
     name: The unique name for this file.
-    type_: The type of file. Use `null` to assume an Errorfile.
+    type_: The type of file. Use `null` to assume an Errorfile. Valid values: ['luascript', 'writetodisk']
     """
     if not confirm:
         return (
@@ -16628,7 +16628,7 @@ async def pfsense_update_services_ha_proxy_file(
 async def pfsense_delete_services_ha_proxy_file(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/file
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -16658,14 +16658,14 @@ async def pfsense_list_services_ha_proxy_files(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/haproxy/files
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -16689,7 +16689,7 @@ async def pfsense_list_services_ha_proxy_files(
 async def pfsense_replace_services_ha_proxy_files(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/services/haproxy/files
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -16715,7 +16715,7 @@ async def pfsense_delete_services_ha_proxy_files(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/files
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -16745,7 +16745,7 @@ async def pfsense_delete_services_ha_proxy_files(
 async def pfsense_get_services_ha_proxy_frontend_acl(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/haproxy/frontend/acl
 
     id: The ID of the object to target.
@@ -16772,12 +16772,12 @@ async def pfsense_create_services_ha_proxy_frontend_acl(
     confirm: bool = False,
     casesensitive: bool | None = None,
     not_: bool | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/haproxy/frontend/acl
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
-    expression: The expression to use to determine the match for this ACL.
+    expression: The expression to use to determine the match for this ACL. Valid values: ['host_starts_with', 'host_ends_with', 'host_matches', 'host_regex', 'host_contains', 'path_starts_with', 'path_ends_with', 'path_matches', 'path_regex', 'path_contains', 'path_dir', 'url_parameter', 'ssl_c_verify_code', 'ss...
     name: The unique name for this frontend ACL.
     parent_id: The ID of the parent this object is nested under.
     value: The value which indicates a match for this ACL.
@@ -16820,7 +16820,7 @@ async def pfsense_update_services_ha_proxy_frontend_acl(
     name: str | None = None,
     not_: bool | None = None,
     value: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/haproxy/frontend/acl
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -16828,7 +16828,7 @@ async def pfsense_update_services_ha_proxy_frontend_acl(
     id: The ID of the object or resource to interact with.
     parent_id: The ID of the parent this object is nested under.
     casesensitive: Enables or disables case-sensitive matching for this ACL.
-    expression: The expression to use to determine the match for this ACL.
+    expression: The expression to use to determine the match for this ACL. Valid values: ['host_starts_with', 'host_ends_with', 'host_matches', 'host_regex', 'host_contains', 'path_starts_with', 'path_ends_with', 'path_matches', 'path_regex', 'path_contains', 'path_dir', 'url_parameter', 'ssl_c_verify_code', 'ss...
     name: The unique name for this frontend ACL.
     not_: Enables or disables inverting the context of this ACL.
     value: The value which indicates a match for this ACL.
@@ -16866,7 +16866,7 @@ async def pfsense_delete_services_ha_proxy_frontend_acl(
     id: str | int,
     parent_id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/frontend/acl
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -16896,7 +16896,7 @@ async def pfsense_delete_services_ha_proxy_frontend_acl(
 async def pfsense_get_services_ha_proxy_frontend_action(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/haproxy/frontend/action
 
     id: The ID of the object to target.
@@ -16933,13 +16933,13 @@ async def pfsense_create_services_ha_proxy_frontend_action(
     rule: str,
     status: str,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/haproxy/frontend/action
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
     acl: The name of the frontend ACL this action is associated with.
-    action: The action to take when an ACL match is found.
+    action: The action to take when an ACL match is found. Valid values: ['use_backend', 'custom', 'http-request_allow', 'http-request_deny', 'http-request_tarpit', 'http-request_auth', 'http-request_redirect', 'http-request_lua', 'http-request_use-service', 'http-request_add-header', 'http-request_set-heade...
     backend: The backend to use when an ACL match is found.This field is only available when the following conditions are met:- `acti
     customaction: The custom action to take when an ACL match is found.This field is only available when the following conditions are met:
     deny_status: The deny status to use when an ACL match is found.This field is only available when the following conditions are met:- `
@@ -17021,7 +17021,7 @@ async def pfsense_update_services_ha_proxy_frontend_action(
     replace: str | None = None,
     rule: str | None = None,
     status: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/haproxy/frontend/action
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -17029,7 +17029,7 @@ async def pfsense_update_services_ha_proxy_frontend_action(
     id: The ID of the object or resource to interact with.
     parent_id: The ID of the parent this object is nested under.
     acl: The name of the frontend ACL this action is associated with.
-    action: The action to take when an ACL match is found.
+    action: The action to take when an ACL match is found. Valid values: ['use_backend', 'custom', 'http-request_allow', 'http-request_deny', 'http-request_tarpit', 'http-request_auth', 'http-request_redirect', 'http-request_lua', 'http-request_use-service', 'http-request_add-header', 'http-request_set-heade...
     backend: The backend to use when an ACL match is found.This field is only available when the following conditions are met:- `acti
     customaction: The custom action to take when an ACL match is found.This field is only available when the following conditions are met:
     deny_status: The deny status to use when an ACL match is found.This field is only available when the following conditions are met:- `
@@ -17097,7 +17097,7 @@ async def pfsense_delete_services_ha_proxy_frontend_action(
     id: str | int,
     parent_id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/frontend/action
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -17127,7 +17127,7 @@ async def pfsense_delete_services_ha_proxy_frontend_action(
 async def pfsense_get_services_ha_proxy_frontend_address(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/haproxy/frontend/address
 
     id: The ID of the object to target.
@@ -17154,12 +17154,12 @@ async def pfsense_create_services_ha_proxy_frontend_address(
     exaddr_advanced: str | None = None,
     extaddr_port: str | None = None,
     extaddr_ssl: bool | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/haproxy/frontend/address
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
-    extaddr: The external address to use.
+    extaddr: The external address to use. Valid values: ['custom', 'any_ipv4', 'any_ipv6', 'localhost_ipv4', 'localhost_ipv6']
     extaddr_custom: The custom IPv4 or IPv6 address to use as the external address.This field is only available when the following condition
     parent_id: The ID of the parent this object is nested under.
     exaddr_advanced: The advanced configuration to apply to this address.
@@ -17202,7 +17202,7 @@ async def pfsense_update_services_ha_proxy_frontend_address(
     extaddr_custom: str | None = None,
     extaddr_port: str | None = None,
     extaddr_ssl: bool | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/haproxy/frontend/address
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -17210,7 +17210,7 @@ async def pfsense_update_services_ha_proxy_frontend_address(
     id: The ID of the object or resource to interact with.
     parent_id: The ID of the parent this object is nested under.
     exaddr_advanced: The advanced configuration to apply to this address.
-    extaddr: The external address to use.
+    extaddr: The external address to use. Valid values: ['custom', 'any_ipv4', 'any_ipv6', 'localhost_ipv4', 'localhost_ipv6']
     extaddr_custom: The custom IPv4 or IPv6 address to use as the external address.This field is only available when the following condition
     extaddr_port: The port to bind to for this address. Valid options are: a TCP/UDP port number
     extaddr_ssl: Enables or disables using SSL/TLS for this address.
@@ -17248,7 +17248,7 @@ async def pfsense_delete_services_ha_proxy_frontend_address(
     id: str | int,
     parent_id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/frontend/address
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -17278,7 +17278,7 @@ async def pfsense_delete_services_ha_proxy_frontend_address(
 async def pfsense_get_services_ha_proxy_frontend_certificate(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/haproxy/frontend/certificate
 
     id: The ID of the object to target.
@@ -17301,7 +17301,7 @@ async def pfsense_create_services_ha_proxy_frontend_certificate(
     parent_id: int,
     confirm: bool = False,
     ssl_certificate: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/haproxy/frontend/certificate
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -17333,7 +17333,7 @@ async def pfsense_update_services_ha_proxy_frontend_certificate(
     parent_id: int,
     confirm: bool = False,
     ssl_certificate: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/haproxy/frontend/certificate
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -17367,7 +17367,7 @@ async def pfsense_delete_services_ha_proxy_frontend_certificate(
     id: str | int,
     parent_id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/frontend/certificate
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -17396,7 +17396,7 @@ async def pfsense_delete_services_ha_proxy_frontend_certificate(
 @mcp.tool()
 async def pfsense_get_services_ha_proxy_frontend(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/haproxy/frontend
 
     id: The ID of the object to target.
@@ -17436,13 +17436,13 @@ async def pfsense_create_services_ha_proxy_frontend(
     socket_stats: bool | None = None,
     ssloffloadcert: str | None = None,
     status: str | None = 'active',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/haproxy/frontend
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
     name: The unique name for this HAProxy frontend.
-    type_: The processing type for this frontend.
+    type_: The processing type for this frontend. Valid values: ['http', 'https', 'tcp']
     a_actionitems: The actions to take when an ACL match is found.
     a_errorfiles: The custom error files to use for this frontend.
     a_extaddr: The external addresses assigned to this frontend.
@@ -17456,13 +17456,13 @@ async def pfsense_create_services_ha_proxy_frontend(
     forwardfor: Enables or disables the HTTP X-Forwarded-For header which contains the client's IP address.This field is only available 
     ha_acls: The ACLs to apply to this frontend.
     ha_certificates: The additional SSL/TLS certificates to use on this frontend.
-    httpclose: The `httpclose` option this frontend will operate.
+    httpclose: The `httpclose` option this frontend will operate. Valid values: ['http-keep-alive', 'http-tunnel', 'httpclose', 'http-server-close', 'forceclose']
     log_detailed: Enables or disables more detailed logging.
     log_separate_errors: Enables or disables changing the log level from info to err on potentially interesting info.
     max_connections: The maximum number of connections allowed by this frontend.
     socket_stats: Enables or disables collecting and providing separate statistics for each socket.
     ssloffloadcert: The default SSL/TLS certificate refid to use for this frontend.
-    status: The activation status for this HAProxy frontend.
+    status: The activation status for this HAProxy frontend. Valid values: ['active', 'disabled']
     """
     if not confirm:
         return (
@@ -17548,7 +17548,7 @@ async def pfsense_update_services_ha_proxy_frontend(
     ssloffloadcert: str | None = None,
     status: str | None = 'active',
     type_: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/haproxy/frontend
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -17567,15 +17567,15 @@ async def pfsense_update_services_ha_proxy_frontend(
     forwardfor: Enables or disables the HTTP X-Forwarded-For header which contains the client's IP address.This field is only available 
     ha_acls: The ACLs to apply to this frontend.
     ha_certificates: The additional SSL/TLS certificates to use on this frontend.
-    httpclose: The `httpclose` option this frontend will operate.
+    httpclose: The `httpclose` option this frontend will operate. Valid values: ['http-keep-alive', 'http-tunnel', 'httpclose', 'http-server-close', 'forceclose']
     log_detailed: Enables or disables more detailed logging.
     log_separate_errors: Enables or disables changing the log level from info to err on potentially interesting info.
     max_connections: The maximum number of connections allowed by this frontend.
     name: The unique name for this HAProxy frontend.
     socket_stats: Enables or disables collecting and providing separate statistics for each socket.
     ssloffloadcert: The default SSL/TLS certificate refid to use for this frontend.
-    status: The activation status for this HAProxy frontend.
-    type_: The processing type for this frontend.
+    status: The activation status for this HAProxy frontend. Valid values: ['active', 'disabled']
+    type_: The processing type for this frontend. Valid values: ['http', 'https', 'tcp']
     """
     if not confirm:
         return (
@@ -17641,7 +17641,7 @@ async def pfsense_update_services_ha_proxy_frontend(
 async def pfsense_delete_services_ha_proxy_frontend(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/frontend
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -17668,7 +17668,7 @@ async def pfsense_delete_services_ha_proxy_frontend(
 async def pfsense_get_services_ha_proxy_frontend_error_file(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/haproxy/frontend/error_file
 
     id: The ID of the object to target.
@@ -17692,7 +17692,7 @@ async def pfsense_create_services_ha_proxy_frontend_error_file(
     errorfile: str,
     parent_id: int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/haproxy/frontend/error_file
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -17728,7 +17728,7 @@ async def pfsense_update_services_ha_proxy_frontend_error_file(
     confirm: bool = False,
     errorcode: int | None = None,
     errorfile: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/haproxy/frontend/error_file
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -17765,7 +17765,7 @@ async def pfsense_delete_services_ha_proxy_frontend_error_file(
     id: str | int,
     parent_id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/frontend/error_file
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -17798,14 +17798,14 @@ async def pfsense_list_services_ha_proxy_frontends(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/haproxy/frontends
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -17829,7 +17829,7 @@ async def pfsense_list_services_ha_proxy_frontends(
 async def pfsense_replace_services_ha_proxy_frontends(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/services/haproxy/frontends
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -17855,7 +17855,7 @@ async def pfsense_delete_services_ha_proxy_frontends(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/frontends
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -17884,7 +17884,7 @@ async def pfsense_delete_services_ha_proxy_frontends(
 @mcp.tool()
 async def pfsense_get_services_ha_proxy_settings_dns_resolver(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/haproxy/settings/dns_resolver
 
     id: The ID of the object to target.
@@ -17905,7 +17905,7 @@ async def pfsense_create_services_ha_proxy_settings_dns_resolver(
     server: str,
     confirm: bool = False,
     port: str | None = '53',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/haproxy/settings/dns_resolver
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -17941,7 +17941,7 @@ async def pfsense_update_services_ha_proxy_settings_dns_resolver(
     name: str | None = None,
     port: str | None = '53',
     server: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/haproxy/settings/dns_resolver
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -17977,7 +17977,7 @@ async def pfsense_update_services_ha_proxy_settings_dns_resolver(
 async def pfsense_delete_services_ha_proxy_settings_dns_resolver(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/settings/dns_resolver
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -18003,7 +18003,7 @@ async def pfsense_delete_services_ha_proxy_settings_dns_resolver(
 @mcp.tool()
 async def pfsense_get_services_ha_proxy_settings_email_mailer(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/haproxy/settings/email_mailer
 
     id: The ID of the object to target.
@@ -18024,7 +18024,7 @@ async def pfsense_create_services_ha_proxy_settings_email_mailer(
     name: str,
     confirm: bool = False,
     mailserverport: str | None = '53',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/haproxy/settings/email_mailer
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -18060,7 +18060,7 @@ async def pfsense_update_services_ha_proxy_settings_email_mailer(
     mailserver: str | None = None,
     mailserverport: str | None = '53',
     name: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/haproxy/settings/email_mailer
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -18096,7 +18096,7 @@ async def pfsense_update_services_ha_proxy_settings_email_mailer(
 async def pfsense_delete_services_ha_proxy_settings_email_mailer(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/settings/email_mailer
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -18121,7 +18121,7 @@ async def pfsense_delete_services_ha_proxy_settings_email_mailer(
 
 @mcp.tool()
 async def pfsense_get_services_ha_proxy_settings(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/haproxy/settings
     """
     return await _client.request(
@@ -18159,7 +18159,7 @@ async def pfsense_update_services_ha_proxy_settings(
     sslcompatibilitymode: str | None = 'auto',
     ssldefaultdhparam: int | None = 1024,
     terminate_on_reload: bool | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/haproxy/settings
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
@@ -18168,7 +18168,7 @@ async def pfsense_update_services_ha_proxy_settings(
     carpdev: The CARP interface IP to monitor. HAProxy will only run on the firewall whose interface is MASTER.
     dns_resolvers: The DNS resolvers HAProxy will use for DNS queries.
     email_from: The email address to be used as the sender of the emails.
-    email_level: The maximum log level to send emails for. Leave empty to disable sending email alerts.
+    email_level: The maximum log level to send emails for. Leave empty to disable sending email alerts. Valid values: ['', 'emerg', 'alert', 'crit', 'err', 'warning', 'notice', 'info', 'debug']
     email_mailers: The email servers HAProxy will use to send SMTP alerts.
     email_myhostname: The hostname to use as the origin of the email.
     email_to: The email address to send emails to.
@@ -18179,15 +18179,15 @@ async def pfsense_update_services_ha_proxy_settings(
     localstats_sticktable_refreshtime: The internal (in seconds) in which the sticktable stats will be refreshed.
     localstatsport: The internal port to be used for the stats tab. Set to null to disable local stats. Valid options are: a TCP/UDP port nu
     log_send_hostname: The hostname field to include in the syslog header. Leave empty to use the system hostname.
-    logfacility: The logging facility to log to.
-    loglevel: The log level to begin logging events. Only events of this level or higher will be logged.
+    logfacility: The logging facility to log to. Valid values: ['kern', 'user', 'mail', 'daemon', 'auth', 'syslog', 'lpr', 'news', 'uucp', 'cron', 'auth2', 'ftp', 'ntp', 'audit', 'cron2', 'local0', 'local1', 'local2', 'local3', 'local4', 'local5', 'local6', 'local7']
+    loglevel: The log level to begin logging events. Only events of this level or higher will be logged. Valid values: ['emerg', 'alert', 'crit', 'err', 'warning', 'notice', 'info', 'debug']
     maxconn: The maximum per-process number of concurrent connections
     nbthread: The number of threads to start per process. This setting is experimental.
     remotesyslog: The IP address or hostname of the remote syslog server to send logs to. Use `/var/run/log` to to log to the local pfSens
     resolver_holdvalid: The interval between two successive name resolution when the last answer was valid.
     resolver_retries: The number of queries to send to resolve a server name before giving up.
     resolver_timeoutretry: The time between two DNS queries, when no response have been received.
-    sslcompatibilitymode: The SSL/TLS compatibility mode which determines the cipher suites and TLS versions supported.
+    sslcompatibilitymode: The SSL/TLS compatibility mode which determines the cipher suites and TLS versions supported. Valid values: ['auto', 'modern', 'intermediate', 'old']
     ssldefaultdhparam: The maximum size of the Diffie-Hellman parameters used for generating the ephemeral/temporary Diffie-Hellman key in case
     terminate_on_reload: Enables or disables an immediate stop of old process on reload. (closes existing connections)
     """
@@ -18259,7 +18259,7 @@ async def pfsense_update_services_ha_proxy_settings(
 
 @mcp.tool()
 async def pfsense_get_services_ntp_settings(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/ntp/settings
     """
     return await _client.request(
@@ -18288,12 +18288,12 @@ async def pfsense_update_services_ntp_settings(
     serverauth: bool | None = None,
     serverauthalgo: str | None = 'md5',
     statsgraph: bool | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/ntp/settings
 
     serverauthkey: The NTP server authentication key.This field is only available when the following conditions are met:- `serverauth` must
     clockstats: Enable or disable logging reference clock statistics.
-    dnsresolv: The IP protocol peers are forced to use for DNS resolution.
+    dnsresolv: The IP protocol peers are forced to use for DNS resolution. Valid values: ['auto', 'inet', 'inet6']
     enable: Enables or disabled the NTP server.
     interface: The interfaces the NTP server will listen on.
     leapsec: The Leap second configuration as text.
@@ -18301,12 +18301,12 @@ async def pfsense_update_services_ntp_settings(
     logsys: Enable or disable logging system messages.
     loopstats: Enable or disable logging clock discipline statistics.
     ntpmaxpeers: The maximum number of candidate peers in the NTP pool.
-    ntpmaxpoll: The maximum poll interval for NTP messages. Use empty string to assume system default, and `omit` to not set this value.
-    ntpminpoll: The minimum poll interval for NTP messages. Use empty string to assume system default, and `omit` to not set this value.
+    ntpmaxpoll: The maximum poll interval for NTP messages. Use empty string to assume system default, and `omit` to not set this value. Valid values: ['', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', 'omit']
+    ntpminpoll: The minimum poll interval for NTP messages. Use empty string to assume system default, and `omit` to not set this value. Valid values: ['', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', 'omit']
     orphan: The orphan mode stratum to set. Orphan mode allows the system clock to be used when no other clocks are available. The n
     peerstats: Enable or disable logging peer statistics.
     serverauth: Enable or disable NTPv3 server authentication. (RFC 1305)
-    serverauthalgo: The digest algorithm for the server authentication key.
+    serverauthalgo: The digest algorithm for the server authentication key. Valid values: ['md5', 'sha1', 'sha256']
     statsgraph: Enable or disable RRD graphs for NTP statistics.
     """
     if not confirm:
@@ -18359,7 +18359,7 @@ async def pfsense_update_services_ntp_settings(
 @mcp.tool()
 async def pfsense_get_services_ntp_time_server(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/ntp/time_server
 
     id: The ID of the object to target.
@@ -18381,13 +18381,13 @@ async def pfsense_create_services_ntp_time_server(
     noselect: bool | None = None,
     prefer: bool | None = None,
     type_: str | None = 'server',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/ntp/time_server
 
     timeserver: The IP or hostname of the remote NTP time server, pool or peer.
     noselect: Prevent NTP from using this timeserver, but continue collecting stats.This field is only available when the following co
     prefer: Enable NTP favoring the use of this server more than all others.
-    type_: The type of this timeserver. Use `server` is `timeserver` is a standalone NTP server, use `pool` if `timeserver` represe
+    type_: The type of this timeserver. Use `server` is `timeserver` is a standalone NTP server, use `pool` if `timeserver` represe Valid values: ['server', 'pool', 'peer']
     """
     if not confirm:
         return (
@@ -18418,14 +18418,14 @@ async def pfsense_update_services_ntp_time_server(
     prefer: bool | None = None,
     timeserver: str | None = None,
     type_: str | None = 'server',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/ntp/time_server
 
     id: The ID of the object or resource to interact with.
     noselect: Prevent NTP from using this timeserver, but continue collecting stats.This field is only available when the following co
     prefer: Enable NTP favoring the use of this server more than all others.
     timeserver: The IP or hostname of the remote NTP time server, pool or peer.
-    type_: The type of this timeserver. Use `server` is `timeserver` is a standalone NTP server, use `pool` if `timeserver` represe
+    type_: The type of this timeserver. Use `server` is `timeserver` is a standalone NTP server, use `pool` if `timeserver` represe Valid values: ['server', 'pool', 'peer']
     """
     if not confirm:
         return (
@@ -18454,7 +18454,7 @@ async def pfsense_update_services_ntp_time_server(
 async def pfsense_delete_services_ntp_time_server(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/ntp/time_server
 
     id: The ID of the object to target.
@@ -18481,14 +18481,14 @@ async def pfsense_list_services_ntp_time_servers(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/ntp/time_servers
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -18512,7 +18512,7 @@ async def pfsense_list_services_ntp_time_servers(
 async def pfsense_replace_services_ntp_time_servers(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/services/ntp/time_servers
 
     items: List of objects for bulk replacement.
@@ -18535,7 +18535,7 @@ async def pfsense_delete_services_ntp_time_servers(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/ntp/time_servers
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -18560,7 +18560,7 @@ async def pfsense_delete_services_ntp_time_servers(
 
 @mcp.tool()
 async def pfsense_get_services_ssh(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/ssh
     """
     return await _client.request(
@@ -18576,13 +18576,13 @@ async def pfsense_update_services_ssh(
     port: str | None = '22',
     sshdagentforwarding: bool | None = None,
     sshdkeyonly: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/ssh
 
     enable: Enable the SSH server on this system.
     port: The TCP port the SSH server will listen on. Valid options are: a TCP/UDP port number
     sshdagentforwarding: Enable support for ssh-agent forwarding.
-    sshdkeyonly: The SSH authentication mode to use. Use `enabled` to require public key authentication, use both to require both a publi
+    sshdkeyonly: The SSH authentication mode to use. Use `enabled` to require public key authentication, use both to require both a publi Valid values: ['enabled', 'both']
     """
     if not confirm:
         return (
@@ -18608,7 +18608,7 @@ async def pfsense_update_services_ssh(
 @mcp.tool()
 async def pfsense_get_services_service_watchdog(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/service_watchdog
 
     id: The ID of the object to target.
@@ -18628,7 +18628,7 @@ async def pfsense_create_services_service_watchdog(
     name: str,
     confirm: bool = False,
     notify: bool | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/service_watchdog
 
     name: The name of the service to be watched.
@@ -18657,7 +18657,7 @@ async def pfsense_update_services_service_watchdog(
     confirm: bool = False,
     name: str | None = None,
     notify: bool | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/service_watchdog
 
     id: The ID of the object or resource to interact with.
@@ -18687,7 +18687,7 @@ async def pfsense_update_services_service_watchdog(
 async def pfsense_delete_services_service_watchdog(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/service_watchdog
 
     id: The ID of the object to target.
@@ -18714,14 +18714,14 @@ async def pfsense_list_services_service_watchdogs(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/service_watchdogs
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -18745,7 +18745,7 @@ async def pfsense_list_services_service_watchdogs(
 async def pfsense_replace_services_service_watchdogs(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/services/service_watchdogs
 
     items: List of objects for bulk replacement.
@@ -18768,7 +18768,7 @@ async def pfsense_delete_services_service_watchdogs(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/service_watchdogs
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -18796,7 +18796,7 @@ async def pfsense_create_services_wake_on_lan_send(
     interface: str,
     mac_addr: str,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/wake_on_lan/send
 
     interface: The interface the host to be woken up is connected to.
@@ -18821,7 +18821,7 @@ async def pfsense_create_services_wake_on_lan_send(
 
 @mcp.tool()
 async def pfsense_get_status_carp(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/status/carp
     """
     return await _client.request(
@@ -18835,7 +18835,7 @@ async def pfsense_update_status_carp(
     enable: bool,
     maintenance_mode: bool,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/status/carp
 
     enable: Enables or disables CARP on this system.
@@ -18865,14 +18865,14 @@ async def pfsense_list_status_dhcp_server_leases(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/status/dhcp_server/leases
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -18897,7 +18897,7 @@ async def pfsense_delete_status_dhcp_server_leases(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/status/dhcp_server/leases
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -18927,14 +18927,14 @@ async def pfsense_list_status_gateways(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/status/gateways
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -18961,14 +18961,14 @@ async def pfsense_list_status_i_psec_s_as(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/status/ipsec/sas
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -18995,14 +18995,14 @@ async def pfsense_list_status_interfaces(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/status/interfaces
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -19029,14 +19029,14 @@ async def pfsense_list_status_logs_dhcp(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/status/logs/dhcp
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -19063,14 +19063,14 @@ async def pfsense_list_status_logs_firewall(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/status/logs/firewall
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -19092,7 +19092,7 @@ async def pfsense_list_status_logs_firewall(
 
 @mcp.tool()
 async def pfsense_get_status_logs_settings(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/status/logs/settings
     """
     return await _client.request(
@@ -19138,7 +19138,7 @@ async def pfsense_update_status_logs_settings(
     sourceip: str | None = None,
     system: bool | None = None,
     vpn: bool | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/status/logs/settings
 
     auth: Log authentication events to the remote syslog server(s).This field is only available when the following conditions are 
@@ -19147,12 +19147,12 @@ async def pfsense_update_status_logs_settings(
     dpinger: Log gateway monitoring events to the remote syslog server(s).This field is only available when the following conditions 
     enableremotelogging: Enable remote logging.
     filter: Log filter events to the remote syslog server(s).This field is only available when the following conditions are met:- `e
-    filterdescriptions: Display filter descriptions in the log entries Use `0` to not load descriptions, `1` to display descriptions in their ow
-    format: The format of the log entries.
+    filterdescriptions: Display filter descriptions in the log entries Use `0` to not load descriptions, `1` to display descriptions in their ow Valid values: [0, 1, 2]
+    format: The format of the log entries. Valid values: ['rfc3164', 'rfc5424']
     hostapd: Log wireless authentication events to the remote syslog server(s).This field is only available when the following condit
-    ipprotocol: The IP protocol to use for remote logging.This field is only available when the following conditions are met:- `enablere
+    ipprotocol: The IP protocol to use for remote logging.This field is only available when the following conditions are met:- `enablere Valid values: ['ipv4', 'ipv6']
     logall: Log everything to the remote syslog server(s).This field is only available when the following conditions are met:- `enab
-    logcompressiontype: The type of compression to use for log files.
+    logcompressiontype: The type of compression to use for log files. Valid values: ['bzip2', 'gzip', 'xz', 'zstd', 'none']
     logconfigchanges: Log changes made to the pfSense configuration.
     logfilesize: The maximum size of the log file in kilobytes.
     nentries: The number of log entries to display in the UI.
@@ -19264,14 +19264,14 @@ async def pfsense_list_status_logs_system(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/status/logs/system
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -19298,14 +19298,14 @@ async def pfsense_list_status_open_vpn_clients(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/status/openvpn/clients
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -19332,14 +19332,14 @@ async def pfsense_list_status_open_vpn_servers(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/status/openvpn/servers
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -19364,11 +19364,11 @@ async def pfsense_create_status_service(
     id: int,
     confirm: bool = False,
     action: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/status/service
 
     id: The ID of the object or resource to interact with.
-    action: The action to perform against this service.
+    action: The action to perform against this service. Valid values: ['start', 'stop', 'restart']
     """
     if not confirm:
         return (
@@ -19394,14 +19394,14 @@ async def pfsense_list_status_services(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/status/services
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -19423,7 +19423,7 @@ async def pfsense_list_status_services(
 
 @mcp.tool()
 async def pfsense_get_status_system(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/status/system
     """
     return await _client.request(
@@ -19435,7 +19435,7 @@ async def pfsense_get_status_system(
 @mcp.tool()
 async def pfsense_get_system_crl(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/crl
 
     id: The ID of the object to target.
@@ -19460,12 +19460,12 @@ async def pfsense_create_system_crl(
     cert: list[str] | None = None,
     lifetime: int | None = 730,
     serial: int | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/system/crl
 
     caref: The unique ID of the CA that this CRL is associated with.
     descr: The unique name/description for this CRL.
-    method: The method used to generate this CRL.
+    method: The method used to generate this CRL. Valid values: ['existing', 'internal']
     text: The raw x509 CRL data.This field is only available when the following conditions are met:- `method` must be equal to `'e
     cert: The list of revoked certificates in this CRL.This field is only available when the following conditions are met:- `metho
     lifetime: The lifetime of this CRL in days.This field is only available when the following conditions are met:- `method` must be e
@@ -19509,7 +19509,7 @@ async def pfsense_update_system_crl(
     method: str | None = None,
     serial: int | None = None,
     text: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/system/crl
 
     id: The ID of the object or resource to interact with.
@@ -19517,7 +19517,7 @@ async def pfsense_update_system_crl(
     cert: The list of revoked certificates in this CRL.This field is only available when the following conditions are met:- `metho
     descr: The unique name/description for this CRL.
     lifetime: The lifetime of this CRL in days.This field is only available when the following conditions are met:- `method` must be e
-    method: The method used to generate this CRL.
+    method: The method used to generate this CRL. Valid values: ['existing', 'internal']
     serial: The serial number of the CRL.This field is only available when the following conditions are met:- `method` must be equal
     text: The raw x509 CRL data.This field is only available when the following conditions are met:- `method` must be equal to `'e
     """
@@ -19554,7 +19554,7 @@ async def pfsense_update_system_crl(
 async def pfsense_delete_system_crl(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/system/crl
 
     id: The ID of the object to target.
@@ -19578,7 +19578,7 @@ async def pfsense_delete_system_crl(
 async def pfsense_get_system_crl_revoked_certificate(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/crl/revoked_certificate
 
     id: The ID of the object to target.
@@ -19609,7 +19609,7 @@ async def pfsense_create_system_crl_revoked_certificate(
     reason: int | None = None,
     serial: str | None = None,
     type_: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/system/crl/revoked_certificate
 
     certref: The reference ID of the certificate to be revokedThis field is only available when the following conditions are met:- `s
@@ -19619,7 +19619,7 @@ async def pfsense_create_system_crl_revoked_certificate(
     crt: The X509 certificate string.
     descr: The unique name/description for this CRL.
     prv: The X509 private key string.
-    reason: The CRL reason for revocation code.
+    reason: The CRL reason for revocation code. Valid values: [-1, 0, 1, 2, 3, 4, 5, 6, 9]
     serial: The serial number of the certificate to be revoked.
     type_: The type of the certificate to be revoked.
     """
@@ -19670,7 +19670,7 @@ async def pfsense_update_system_crl_revoked_certificate(
     revoke_time: int | None = None,
     serial: str | None = None,
     type_: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/system/crl/revoked_certificate
 
     id: The ID of the object or resource to interact with.
@@ -19680,7 +19680,7 @@ async def pfsense_update_system_crl_revoked_certificate(
     crt: The X509 certificate string.
     descr: The unique name/description for this CRL.
     prv: The X509 private key string.
-    reason: The CRL reason for revocation code.
+    reason: The CRL reason for revocation code. Valid values: [-1, 0, 1, 2, 3, 4, 5, 6, 9]
     revoke_time: The unix timestamp of when the certificate was revoked.
     serial: The serial number of the certificate to be revoked.
     type_: The type of the certificate to be revoked.
@@ -19725,7 +19725,7 @@ async def pfsense_delete_system_crl_revoked_certificate(
     id: str | int,
     parent_id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/system/crl/revoked_certificate
 
     id: The ID of the object to target.
@@ -19755,14 +19755,14 @@ async def pfsense_list_system_cr_ls(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/crls
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -19787,7 +19787,7 @@ async def pfsense_delete_system_cr_ls(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/system/crls
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -19817,14 +19817,14 @@ async def pfsense_list_system_certificate_authorities(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/certificate_authorities
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -19849,7 +19849,7 @@ async def pfsense_delete_system_certificate_authorities(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/system/certificate_authorities
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -19875,7 +19875,7 @@ async def pfsense_delete_system_certificate_authorities(
 @mcp.tool()
 async def pfsense_get_system_certificate_authority(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/certificate_authority
 
     id: The ID of the object to target.
@@ -19899,7 +19899,7 @@ async def pfsense_create_system_certificate_authority(
     randomserial: bool | None = None,
     serial: int | None = 1,
     trust: bool | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/system/certificate_authority
 
     crt: The X509 certificate string.
@@ -19944,7 +19944,7 @@ async def pfsense_update_system_certificate_authority(
     randomserial: bool | None = None,
     serial: int | None = 1,
     trust: bool | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/system/certificate_authority
 
     id: The ID of the object or resource to interact with.
@@ -19986,7 +19986,7 @@ async def pfsense_update_system_certificate_authority(
 async def pfsense_delete_system_certificate_authority(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/system/certificate_authority
 
     id: The ID of the object to target.
@@ -20025,15 +20025,15 @@ async def pfsense_create_system_certificate_authority_generate(
     lifetime: int | None = 3650,
     randomserial: bool | None = None,
     trust: bool | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/system/certificate_authority/generate
 
     caref: The certificate authority to use as the parent for this intermediate certificate authority.This field is only available 
     descr: The descriptive name for this certificate authority.
     digest_alg: The digest algorithm to use when signing certificates.
     ecname: The name of the elliptic curve to use for the ECDSA key pair.This field is only available when the following conditions 
-    keylen: The length of the RSA key pair to generate.This field is only available when the following conditions are met:- `keytype
-    keytype: The type of key pair to generate.
+    keylen: The length of the RSA key pair to generate.This field is only available when the following conditions are met:- `keytype Valid values: [1024, 2048, 3072, 4096, 6144, 7680, 8192, 15360, 16384]
+    keytype: The type of key pair to generate. Valid values: ['RSA', 'ECDSA']
     dn_city: The city for the certificate authority.
     dn_commonname: The common name for the certificate authority.
     dn_country: The country for the certificate authority.
@@ -20097,7 +20097,7 @@ async def pfsense_create_system_certificate_authority_renew(
     reusekey: bool | None = True,
     reuseserial: bool | None = True,
     strictsecurity: bool | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/system/certificate_authority/renew
 
     caref: The Certificate Authority to renew.
@@ -20129,7 +20129,7 @@ async def pfsense_create_system_certificate_authority_renew(
 @mcp.tool()
 async def pfsense_get_system_certificate(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/certificate
 
     id: The ID of the object to target.
@@ -20151,13 +20151,13 @@ async def pfsense_create_system_certificate(
     prv: str,
     confirm: bool = False,
     type_: str | None = 'server',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/system/certificate
 
     crt: The X509 certificate string.
     descr: The descriptive name for this certificate.
     prv: The X509 private key string.
-    type_: The certificate type. Use `server` when this certificate is to be used by one or more services on this system. Use `user
+    type_: The certificate type. Use `server` when this certificate is to be used by one or more services on this system. Use `user Valid values: ['server', 'user']
     """
     if not confirm:
         return (
@@ -20188,14 +20188,14 @@ async def pfsense_update_system_certificate(
     descr: str | None = None,
     prv: str | None = None,
     type_: str | None = 'server',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/system/certificate
 
     id: The ID of the object or resource to interact with.
     crt: The X509 certificate string.
     descr: The descriptive name for this certificate.
     prv: The X509 private key string.
-    type_: The certificate type. Use `server` when this certificate is to be used by one or more services on this system. Use `user
+    type_: The certificate type. Use `server` when this certificate is to be used by one or more services on this system. Use `user Valid values: ['server', 'user']
     """
     if not confirm:
         return (
@@ -20224,7 +20224,7 @@ async def pfsense_update_system_certificate(
 async def pfsense_delete_system_certificate(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/system/certificate
 
     id: The ID of the object to target.
@@ -20266,7 +20266,7 @@ async def pfsense_create_system_certificate_generate(
     lifetime: int | None = 3650,
     prv: str | None = None,
     type_: str | None = 'user',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/system/certificate/generate
 
     caref: The certificate authority to use as the parent for this certificate.
@@ -20274,8 +20274,8 @@ async def pfsense_create_system_certificate_generate(
     digest_alg: The digest method used when the certificate is signed.
     dn_commonname: The common name of the certificate.
     ecname: The name of the elliptic curve to use for the ECDSA key pair.This field is only available when the following conditions 
-    keylen: The length of the RSA key pair to generate.This field is only available when the following conditions are met:- `keytype
-    keytype: The type of key pair to generate.
+    keylen: The length of the RSA key pair to generate.This field is only available when the following conditions are met:- `keytype Valid values: [1024, 2048, 3072, 4096, 6144, 7680, 8192, 15360, 16384]
+    keytype: The type of key pair to generate. Valid values: ['RSA', 'ECDSA']
     dn_city: The city of the certificate.
     dn_country: The country of the certificate.
     dn_dns_sans: The DNS Subject Alternative Names (SANs) for the certificate.
@@ -20287,7 +20287,7 @@ async def pfsense_create_system_certificate_generate(
     dn_uri_sans: The URI Subject Alternative Names (SANs) for the certificate.
     lifetime: The number of days the certificate is valid for.
     prv: The X509 private key string.
-    type_: The type of certificate to generate.
+    type_: The type of certificate to generate. Valid values: ['server', 'user']
     """
     if not confirm:
         return (
@@ -20346,11 +20346,11 @@ async def pfsense_create_system_certificate_pkcs12_export(
     confirm: bool = False,
     encryption: str | None = 'high',
     passphrase: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/system/certificate/pkcs12/export
 
     certref: The Certificate to export as a PKCS12 file.
-    encryption: The level of encryption to use when exporting the PKCS#12 archive.
+    encryption: The level of encryption to use when exporting the PKCS#12 archive. Valid values: ['high', 'low', 'legacy']
     passphrase: The passphrase to use when exporting the PKCS#12 archive. Leave empty for no passphrase.
     """
     if not confirm:
@@ -20379,7 +20379,7 @@ async def pfsense_create_system_certificate_renew(
     reusekey: bool | None = True,
     reuseserial: bool | None = True,
     strictsecurity: bool | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/system/certificate/renew
 
     certref: The `refid` of the Certificate to renew.
@@ -20428,15 +20428,15 @@ async def pfsense_create_system_certificate_signing_request(
     dn_uri_sans: list[str] | None = None,
     lifetime: int | None = 3650,
     type_: str | None = 'user',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/system/certificate/signing_request
 
     descr: The descriptive name for this certificate.
     digest_alg: The digest method used when the certificate is signed.
     dn_commonname: The common name of the certificate.
     ecname: The name of the elliptic curve to use for the ECDSA key pair.This field is only available when the following conditions 
-    keylen: The length of the RSA key pair to generate.This field is only available when the following conditions are met:- `keytype
-    keytype: The type of key pair to generate.
+    keylen: The length of the RSA key pair to generate.This field is only available when the following conditions are met:- `keytype Valid values: [1024, 2048, 3072, 4096, 6144, 7680, 8192, 15360, 16384]
+    keytype: The type of key pair to generate. Valid values: ['RSA', 'ECDSA']
     dn_city: The city of the certificate.
     dn_country: The country of the certificate.
     dn_dns_sans: The DNS Subject Alternative Names (SANs) for the certificate.
@@ -20447,7 +20447,7 @@ async def pfsense_create_system_certificate_signing_request(
     dn_state: The state/province of the certificate.
     dn_uri_sans: The URI Subject Alternative Names (SANs) for the certificate.
     lifetime: The number of days the certificate is valid for.
-    type_: The type of certificate to generate.
+    type_: The type of certificate to generate. Valid values: ['server', 'user']
     """
     if not confirm:
         return (
@@ -20510,7 +20510,7 @@ async def pfsense_create_system_certificate_signing_request_sign(
     lifetime: int | None = 3650,
     prv: str | None = None,
     type_: str | None = 'user',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/system/certificate/signing_request/sign
 
     caref: The certificate authority to sign the certificate with.
@@ -20523,7 +20523,7 @@ async def pfsense_create_system_certificate_signing_request_sign(
     dn_uri_sans: The URI Subject Alternative Names (SANs) for the certificate.
     lifetime: The number of days the certificate is valid for.
     prv: The X509 private key string.
-    type_: The type of certificate to generate.
+    type_: The type of certificate to generate. Valid values: ['server', 'user']
     """
     if not confirm:
         return (
@@ -20567,14 +20567,14 @@ async def pfsense_list_system_certificates(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/certificates
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -20599,7 +20599,7 @@ async def pfsense_delete_system_certificates(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/system/certificates
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -20624,7 +20624,7 @@ async def pfsense_delete_system_certificates(
 
 @mcp.tool()
 async def pfsense_get_system_console(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/console
     """
     return await _client.request(
@@ -20637,7 +20637,7 @@ async def pfsense_get_system_console(
 async def pfsense_update_system_console(
     confirm: bool = False,
     passwd_protect_console: bool | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/system/console
 
     passwd_protect_console: Enables or disables password protecting the console.
@@ -20659,7 +20659,7 @@ async def pfsense_update_system_console(
 
 @mcp.tool()
 async def pfsense_get_system_dns(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/dns
     """
     return await _client.request(
@@ -20674,11 +20674,11 @@ async def pfsense_update_system_dns(
     dnsallowoverride: bool | None = None,
     dnslocalhost: str | None = None,
     dnsserver: list[str] | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/system/dns
 
     dnsallowoverride: Allow DNS servers to be overwritten by DHCP on WAN interfaces.
-    dnslocalhost: Use local DNS server (DNS Resover or DNS Forwarder) as the primary DNS, or use only remote DNS servers specified in `dns
+    dnslocalhost: Use local DNS server (DNS Resover or DNS Forwarder) as the primary DNS, or use only remote DNS servers specified in `dns Valid values: ['local', 'remote']
     dnsserver: The remote DNS server IPv4 or IPv6 addresses.
     """
     if not confirm:
@@ -20702,7 +20702,7 @@ async def pfsense_update_system_dns(
 
 @mcp.tool()
 async def pfsense_get_system_hostname(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/hostname
     """
     return await _client.request(
@@ -20716,7 +20716,7 @@ async def pfsense_update_system_hostname(
     domain: str,
     hostname: str,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/system/hostname
 
     domain: The domain portion of the FQDN to assign to this system.
@@ -20741,7 +20741,7 @@ async def pfsense_update_system_hostname(
 
 @mcp.tool()
 async def pfsense_list_system_notifications_email_settings(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/notifications/email_settings
     """
     return await _client.request(
@@ -20764,12 +20764,12 @@ async def pfsense_update_system_notifications_email_settings(
     ssl: bool | None = None,
     sslvalidate: bool | None = True,
     timeout: int | None = 20,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/system/notifications/email_settings
 
     password: The password to use for SMTP authentication.This field is only available when the following conditions are met:- `authen
     username: The username to use for SMTP authentication.This field is only available when the following conditions are met:- `authen
-    authentication_mechanism: The authentication mechanism to use for the SMTP connection.
+    authentication_mechanism: The authentication mechanism to use for the SMTP connection. Valid values: ['PLAIN', 'LOGIN']
     disable: Disables SMTP notifications.
     fromaddress: The email address to use as the "From" address in notifications.
     ipaddress: The IP address or hostname of the SMTP server.
@@ -20821,14 +20821,14 @@ async def pfsense_list_system_package_available(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/package/available
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -20851,7 +20851,7 @@ async def pfsense_list_system_package_available(
 @mcp.tool()
 async def pfsense_get_system_package(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/package
 
     id: The ID of the object to target.
@@ -20870,7 +20870,7 @@ async def pfsense_get_system_package(
 async def pfsense_create_system_package(
     name: str,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/system/package
 
     name: The name of the pfSense package.
@@ -20894,7 +20894,7 @@ async def pfsense_create_system_package(
 async def pfsense_delete_system_package(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/system/package
 
     id: The ID of the object to target.
@@ -20921,14 +20921,14 @@ async def pfsense_list_system_packages(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/packages
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -20953,7 +20953,7 @@ async def pfsense_delete_system_packages(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/system/packages
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -20983,14 +20983,14 @@ async def pfsense_list_system_restapi_access_list(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/restapi/access_list
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -21014,7 +21014,7 @@ async def pfsense_list_system_restapi_access_list(
 async def pfsense_replace_system_restapi_access_list(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/system/restapi/access_list
 
     items: List of objects for bulk replacement.
@@ -21037,7 +21037,7 @@ async def pfsense_delete_system_restapi_access_list(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/system/restapi/access_list
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -21063,7 +21063,7 @@ async def pfsense_delete_system_restapi_access_list(
 @mcp.tool()
 async def pfsense_get_system_restapi_access_list_entry(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/restapi/access_list/entry
 
     id: The ID of the object to target.
@@ -21087,13 +21087,13 @@ async def pfsense_create_system_restapi_access_list_entry(
     type_: str | None = 'allow',
     users: list[str] | None = None,
     weight: int | None = 1,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/system/restapi/access_list/entry
 
     network: The network (in CIDR notation) that this entry applies to. Clients interacting with the REST API from this network will 
     descr: A description of this access list entry. This field is optional.
     sched: The firewall schedule that this entry will use. This entry will only be active during the times specified in the schedul
-    type_: The type of access this entry provides. "allow" entries permit access to the REST API from the specified networks. "deny
+    type_: The type of access this entry provides. "allow" entries permit access to the REST API from the specified networks. "deny Valid values: ['allow', 'deny']
     users: The users that this entry applies to. Only users in this list will be affected by this entry. Leave empty if this entry 
     weight: The weight of this entry. Entries with lower weights are evaluated first. If multiple entries match a request, the entry
     """
@@ -21132,14 +21132,14 @@ async def pfsense_update_system_restapi_access_list_entry(
     type_: str | None = 'allow',
     users: list[str] | None = None,
     weight: int | None = 1,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/system/restapi/access_list/entry
 
     id: The ID of the object or resource to interact with.
     descr: A description of this access list entry. This field is optional.
     network: The network (in CIDR notation) that this entry applies to. Clients interacting with the REST API from this network will 
     sched: The firewall schedule that this entry will use. This entry will only be active during the times specified in the schedul
-    type_: The type of access this entry provides. "allow" entries permit access to the REST API from the specified networks. "deny
+    type_: The type of access this entry provides. "allow" entries permit access to the REST API from the specified networks. "deny Valid values: ['allow', 'deny']
     users: The users that this entry applies to. Only users in this list will be affected by this entry. Leave empty if this entry 
     weight: The weight of this entry. Entries with lower weights are evaluated first. If multiple entries match a request, the entry
     """
@@ -21174,7 +21174,7 @@ async def pfsense_update_system_restapi_access_list_entry(
 async def pfsense_delete_system_restapi_access_list_entry(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/system/restapi/access_list/entry
 
     id: The ID of the object to target.
@@ -21196,7 +21196,7 @@ async def pfsense_delete_system_restapi_access_list_entry(
 
 @mcp.tool()
 async def pfsense_get_system_restapi_settings(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/restapi/settings
     """
     return await _client.request(
@@ -21227,7 +21227,7 @@ async def pfsense_update_system_restapi_settings(
     override_sensitive_fields: list[str] | None = None,
     read_only: bool | None = None,
     represent_interfaces_as: str | None = 'descr',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/system/restapi/settings
 
     allow_pre_releases: Enables or disables displaying pre-releases in available API updates. Pre-releases contain fixes and features that are c
@@ -21243,12 +21243,12 @@ async def pfsense_update_system_restapi_settings(
     hateoas: Enables or disables HATEOAS. Enabling HATEOAS will allow the API to include links to related resources in API responses.
     jwt_exp: Sets the amount of time (in seconds) JWTs are valid for.
     keep_backup: Enables or disables keeping a persistent backup of the API configuration that can be used to restore the API configurati
-    log_level: Sets the log level for API logging. The log level determines the minimum severity of messages that should be logged.
+    log_level: Sets the log level for API logging. The log level determines the minimum severity of messages that should be logged. Valid values: ['LOG_DEBUG', 'LOG_INFO', 'LOG_NOTICE', 'LOG_WARNING', 'LOG_ERR', 'LOG_CRIT', 'LOG_ALERT', 'LOG_EMERG']
     log_successful_auth: Enables or disables logging of API authentication attempts that are successful. By default, only failed API authenticati
     login_protection: Enables or disables Login Protection for API authentication. When enabled, Login Protection will monitor API attempts an
     override_sensitive_fields: Specifies a list of fields (formatted as ModelName:FieldName) that should have their sensitive attribute overridden. Fie
     read_only: Enables or disables read-only API access. If enabled, the API will only respond to GET requests and can only be disabled
-    represent_interfaces_as: Specifies how the API should represent interface names. Use `descr` to represent interface objects by their description 
+    represent_interfaces_as: Specifies how the API should represent interface names. Use `descr` to represent interface objects by their description  Valid values: ['descr', 'id', 'if']
     """
     if not confirm:
         return (
@@ -21305,7 +21305,7 @@ async def pfsense_update_system_restapi_settings(
 async def pfsense_create_system_restapi_settings_sync(
     sync_data: str,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/system/restapi/settings/sync
 
     sync_data: The serialized REST API settings data to be synced.
@@ -21327,7 +21327,7 @@ async def pfsense_create_system_restapi_settings_sync(
 
 @mcp.tool()
 async def pfsense_get_system_restapi_version(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/restapi/version
     """
     return await _client.request(
@@ -21340,7 +21340,7 @@ async def pfsense_get_system_restapi_version(
 async def pfsense_update_system_restapi_version(
     confirm: bool = False,
     install_version: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/system/restapi/version
 
     install_version: Set the API version to update or rollback to.
@@ -21362,7 +21362,7 @@ async def pfsense_update_system_restapi_version(
 
 @mcp.tool()
 async def pfsense_get_system_timezone(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/timezone
     """
     return await _client.request(
@@ -21375,7 +21375,7 @@ async def pfsense_get_system_timezone(
 async def pfsense_update_system_timezone(
     confirm: bool = False,
     timezone: str | None = 'UTC',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/system/timezone
 
     timezone: Set geographic region name (Continent/Location) to determine the timezone for the firewall.
@@ -21398,7 +21398,7 @@ async def pfsense_update_system_timezone(
 @mcp.tool()
 async def pfsense_get_system_tunable(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/tunable
 
     id: The ID of the object to target.
@@ -21419,7 +21419,7 @@ async def pfsense_create_system_tunable(
     value: str,
     confirm: bool = False,
     descr: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/system/tunable
 
     tunable: The name of the tunable to set.
@@ -21452,7 +21452,7 @@ async def pfsense_update_system_tunable(
     descr: str | None = None,
     tunable: str | None = None,
     value: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/system/tunable
 
     id: The ID of the object or resource to interact with.
@@ -21486,7 +21486,7 @@ async def pfsense_delete_system_tunable(
     id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/system/tunable
 
     id: The ID of the object to target.
@@ -21516,14 +21516,14 @@ async def pfsense_list_system_tunables(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/tunables
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -21547,7 +21547,7 @@ async def pfsense_list_system_tunables(
 async def pfsense_replace_system_tunables(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/system/tunables
 
     items: List of objects for bulk replacement.
@@ -21570,7 +21570,7 @@ async def pfsense_delete_system_tunables(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/system/tunables
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -21595,7 +21595,7 @@ async def pfsense_delete_system_tunables(
 
 @mcp.tool()
 async def pfsense_get_system_version(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/version
     """
     return await _client.request(
@@ -21606,7 +21606,7 @@ async def pfsense_get_system_version(
 
 @mcp.tool()
 async def pfsense_get_system_web_gui_settings(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/webgui/settings
     """
     return await _client.request(
@@ -21621,12 +21621,12 @@ async def pfsense_update_system_web_gui_settings(
     confirm: bool = False,
     port: str | None = '443',
     protocol: str | None = 'https',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/system/webgui/settings
 
     sslcertref: The SSL/TLS certificate to use for the web GUI.
     port: The port on which the web GUI listens. Valid options are: a TCP/UDP port number
-    protocol: The protocol to use for the web GUI.
+    protocol: The protocol to use for the web GUI. Valid values: ['http', 'https']
     """
     if not confirm:
         return (
@@ -21650,7 +21650,7 @@ async def pfsense_update_system_web_gui_settings(
 @mcp.tool()
 async def pfsense_get_user_auth_server(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/user/auth_server
 
     id: The ID of the object to target.
@@ -21699,18 +21699,18 @@ async def pfsense_create_user_auth_server(
     radius_auth_port: str | None = '1812',
     radius_protocol: str | None = 'MSCHAPv2',
     radius_timeout: int | None = 5,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/user/auth_server
 
     host: The remote IP address or hostname of the authentication server.
     ldap_bindpw: The password to use when binding to this authentication server.This field is only available when the following condition
     ldap_port: The LDAP port to connect to on this LDAP authentication server. Valid options are: a TCP/UDP port numberThis field is on
-    ldap_scope: The LDAP search scope. Use `one` to limit the scope to a single level, or `subtree` to allow the entire subtree to be se
-    ldap_urltype: The encryption mode to use when connecting to this authentication server. Use `Standard TCP` for unencrypted LDAP connec
+    ldap_scope: The LDAP search scope. Use `one` to limit the scope to a single level, or `subtree` to allow the entire subtree to be se Valid values: ['one', 'subtree']
+    ldap_urltype: The encryption mode to use when connecting to this authentication server. Use `Standard TCP` for unencrypted LDAP connec Valid values: ['Standard TCP', 'STARTTLS Encrypt', 'SSL/TLS Encrypted']
     name: The descriptive name for this authentication server.
     radius_nasip_attribute: The interface whose IP will be used as the 'NAS-IP-Address' attribute during RADIUS Access-Requests. This choice will no
     radius_secret: The shared secret to use when authenticating to this RADIUS server.This field is only available when the following condi
-    type_: The type of this authentication server.
+    type_: The type of this authentication server. Valid values: ['ldap', 'radius']
     ldap_allow_unauthenticated: Enables or disables unauthenticated binding. Unauthenticated binds are bind with an existing login but with an empty pas
     ldap_attr_group: The LDAP group attribute.This field is only available when the following conditions are met:- `type` must be equal to `'
     ldap_attr_groupobj: The group object class for groups in RFC2307 mode.This field is only available when the following conditions are met:- `
@@ -21724,14 +21724,14 @@ async def pfsense_create_user_auth_server(
     ldap_extended_query: The extended LDAP query to make during LDAP searches.This field is only available when the following conditions are met:
     ldap_nostrip_at: Do not strip away parts of the username after the @ symbol.This field is only available when the following conditions ar
     ldap_pam_groupdn: The group DN to use for shell authentication. Users must be a member of this group and have valid posixAccount attribute
-    ldap_protver: The LDAP protocol version to use for connections to this LDAP authentication server.This field is only available when th
+    ldap_protver: The LDAP protocol version to use for connections to this LDAP authentication server.This field is only available when th Valid values: [2, 3]
     ldap_rfc2307: Enables or disable RFC2307 LDAP options.This field is only available when the following conditions are met:- `type` must
     ldap_rfc2307_userdn: Enables or disable the use of DNs for username searches.This field is only available when the following conditions are m
     ldap_timeout: The timeout (in seconds) for connections to the LDAP authentication server.This field is only available when the followi
     ldap_utf8: Enables or disables UTF-8 encoding LDAP parameters before sending them to this authentication serverThis field is only a
     radius_acct_port: The port used by RADIUS for accounting. Set to `null` to disable use of accounting services. Valid options are: a TCP/UD
     radius_auth_port: The port used by RADIUS for authentication. Set to `null` to disable use of authentication services. Valid options are: 
-    radius_protocol: The RADIUS protocol to use when authenticating.This field is only available when the following conditions are met:- `typ
+    radius_protocol: The RADIUS protocol to use when authenticating.This field is only available when the following conditions are met:- `typ Valid values: ['MSCHAPv2', 'MSCHAPv1', 'CHAP_MD5', 'PAP']
     radius_timeout: The timeout (in seconds) for connections to this RADIUS authentication server.This field is only available when the foll
     """
     if not confirm:
@@ -21844,7 +21844,7 @@ async def pfsense_update_user_auth_server(
     radius_secret: str | None = None,
     radius_timeout: int | None = 5,
     type_: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/user/auth_server
 
     id: The ID of the object or resource to interact with.
@@ -21864,21 +21864,21 @@ async def pfsense_update_user_auth_server(
     ldap_nostrip_at: Do not strip away parts of the username after the @ symbol.This field is only available when the following conditions ar
     ldap_pam_groupdn: The group DN to use for shell authentication. Users must be a member of this group and have valid posixAccount attribute
     ldap_port: The LDAP port to connect to on this LDAP authentication server. Valid options are: a TCP/UDP port numberThis field is on
-    ldap_protver: The LDAP protocol version to use for connections to this LDAP authentication server.This field is only available when th
+    ldap_protver: The LDAP protocol version to use for connections to this LDAP authentication server.This field is only available when th Valid values: [2, 3]
     ldap_rfc2307: Enables or disable RFC2307 LDAP options.This field is only available when the following conditions are met:- `type` must
     ldap_rfc2307_userdn: Enables or disable the use of DNs for username searches.This field is only available when the following conditions are m
-    ldap_scope: The LDAP search scope. Use `one` to limit the scope to a single level, or `subtree` to allow the entire subtree to be se
+    ldap_scope: The LDAP search scope. Use `one` to limit the scope to a single level, or `subtree` to allow the entire subtree to be se Valid values: ['one', 'subtree']
     ldap_timeout: The timeout (in seconds) for connections to the LDAP authentication server.This field is only available when the followi
-    ldap_urltype: The encryption mode to use when connecting to this authentication server. Use `Standard TCP` for unencrypted LDAP connec
+    ldap_urltype: The encryption mode to use when connecting to this authentication server. Use `Standard TCP` for unencrypted LDAP connec Valid values: ['Standard TCP', 'STARTTLS Encrypt', 'SSL/TLS Encrypted']
     ldap_utf8: Enables or disables UTF-8 encoding LDAP parameters before sending them to this authentication serverThis field is only a
     name: The descriptive name for this authentication server.
     radius_acct_port: The port used by RADIUS for accounting. Set to `null` to disable use of accounting services. Valid options are: a TCP/UD
     radius_auth_port: The port used by RADIUS for authentication. Set to `null` to disable use of authentication services. Valid options are: 
     radius_nasip_attribute: The interface whose IP will be used as the 'NAS-IP-Address' attribute during RADIUS Access-Requests. This choice will no
-    radius_protocol: The RADIUS protocol to use when authenticating.This field is only available when the following conditions are met:- `typ
+    radius_protocol: The RADIUS protocol to use when authenticating.This field is only available when the following conditions are met:- `typ Valid values: ['MSCHAPv2', 'MSCHAPv1', 'CHAP_MD5', 'PAP']
     radius_secret: The shared secret to use when authenticating to this RADIUS server.This field is only available when the following condi
     radius_timeout: The timeout (in seconds) for connections to this RADIUS authentication server.This field is only available when the foll
-    type_: The type of this authentication server.
+    type_: The type of this authentication server. Valid values: ['ldap', 'radius']
     """
     if not confirm:
         return (
@@ -21961,7 +21961,7 @@ async def pfsense_update_user_auth_server(
 async def pfsense_delete_user_auth_server(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/user/auth_server
 
     id: The ID of the object to target.
@@ -21988,14 +21988,14 @@ async def pfsense_list_user_auth_servers(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/user/auth_servers
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -22019,7 +22019,7 @@ async def pfsense_list_user_auth_servers(
 async def pfsense_replace_user_auth_servers(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/user/auth_servers
 
     items: List of objects for bulk replacement.
@@ -22042,7 +22042,7 @@ async def pfsense_delete_user_auth_servers(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/user/auth_servers
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -22068,7 +22068,7 @@ async def pfsense_delete_user_auth_servers(
 @mcp.tool()
 async def pfsense_get_user(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/user
 
     id: The ID of the object to target.
@@ -22095,7 +22095,7 @@ async def pfsense_create_user(
     expires: str | None = None,
     ipsecpsk: str | None = None,
     priv: list[str] | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/user
 
     name: The username of this local user.
@@ -22152,7 +22152,7 @@ async def pfsense_update_user(
     name: str | None = None,
     password: str | None = None,
     priv: list[str] | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/user
 
     id: The ID of the object or resource to interact with.
@@ -22203,7 +22203,7 @@ async def pfsense_update_user(
 async def pfsense_delete_user(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/user
 
     id: The ID of the object to target.
@@ -22226,7 +22226,7 @@ async def pfsense_delete_user(
 @mcp.tool()
 async def pfsense_get_user_group(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/user/group
 
     id: The ID of the object to target.
@@ -22249,14 +22249,14 @@ async def pfsense_create_user_group(
     member: list[str] | None = None,
     priv: list[str] | None = None,
     scope: str | None = 'local',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/user/group
 
     name: The name for this user group.
     description: The description to assign to this user group.
     member: The local user names to assign to this user group.
     priv: The privileges to assign to this user group.
-    scope: The scope of this user group. Use `local` for user groups that only apply to this system. use `remote` for groups that a
+    scope: The scope of this user group. Use `local` for user groups that only apply to this system. use `remote` for groups that a Valid values: ['local', 'remote', 'system']
     """
     if not confirm:
         return (
@@ -22290,7 +22290,7 @@ async def pfsense_update_user_group(
     name: str | None = None,
     priv: list[str] | None = None,
     scope: str | None = 'local',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/user/group
 
     id: The ID of the object or resource to interact with.
@@ -22298,7 +22298,7 @@ async def pfsense_update_user_group(
     member: The local user names to assign to this user group.
     name: The name for this user group.
     priv: The privileges to assign to this user group.
-    scope: The scope of this user group. Use `local` for user groups that only apply to this system. use `remote` for groups that a
+    scope: The scope of this user group. Use `local` for user groups that only apply to this system. use `remote` for groups that a Valid values: ['local', 'remote', 'system']
     """
     if not confirm:
         return (
@@ -22329,7 +22329,7 @@ async def pfsense_update_user_group(
 async def pfsense_delete_user_group(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/user/group
 
     id: The ID of the object to target.
@@ -22356,14 +22356,14 @@ async def pfsense_list_user_groups(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/user/groups
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -22387,7 +22387,7 @@ async def pfsense_list_user_groups(
 async def pfsense_replace_user_groups(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/user/groups
 
     items: List of objects for bulk replacement.
@@ -22410,7 +22410,7 @@ async def pfsense_delete_user_groups(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/user/groups
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -22440,14 +22440,14 @@ async def pfsense_list_users(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/users
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -22472,7 +22472,7 @@ async def pfsense_delete_users(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/users
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -22497,7 +22497,7 @@ async def pfsense_delete_users(
 
 @mcp.tool()
 async def pfsense_get_vpni_psec_apply_status(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/vpn/ipsec/apply
     """
     return await _client.request(
@@ -22509,7 +22509,7 @@ async def pfsense_get_vpni_psec_apply_status(
 @mcp.tool()
 async def pfsense_vpni_psec_apply(
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/vpn/ipsec/apply
     """
     if not confirm:
@@ -22527,7 +22527,7 @@ async def pfsense_vpni_psec_apply(
 async def pfsense_get_vpni_psec_phase1_encryption(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/vpn/ipsec/phase1/encryption
 
     id: The ID of the object to target.
@@ -22554,17 +22554,17 @@ async def pfsense_create_vpni_psec_phase1_encryption(
     parent_id: int,
     confirm: bool = False,
     prf_algorithm: str | None = 'sha256',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/vpn/ipsec/phase1/encryption
 
     Note: Call pfsense_vpn_ipsec_apply after this to apply changes.
 
-    dhgroup: The Diffie-Hellman (DH) group to use for this P1 encryption item.
+    dhgroup: The Diffie-Hellman (DH) group to use for this P1 encryption item. Valid values: [1, 2, 5, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]
     encryption_algorithm_keylen: The key length for the encryption algorithm.This field is only available when the following conditions are met:- `encryp
-    encryption_algorithm_name: The name of the encryption algorithm to use for this P1 encryption item.
-    hash_algorithm: The hash algorithm to use for this P1 encryption item.
+    encryption_algorithm_name: The name of the encryption algorithm to use for this P1 encryption item. Valid values: ['aes', 'aes128gcm', 'aes192gcm', 'aes256gcm', 'chacha20poly1305']
+    hash_algorithm: The hash algorithm to use for this P1 encryption item. Valid values: ['sha1', 'sha256', 'sha384', 'sha512', 'aesxcbc']
     parent_id: The ID of the parent this object is nested under.
-    prf_algorithm: The PRF algorithm to use for this P1 encryption item. This value has no affect unless the P1 entry has PRF enabled.
+    prf_algorithm: The PRF algorithm to use for this P1 encryption item. This value has no affect unless the P1 entry has PRF enabled. Valid values: ['sha1', 'sha256', 'sha384', 'sha512', 'aesxcbc']
     """
     if not confirm:
         return (
@@ -22602,18 +22602,18 @@ async def pfsense_update_vpni_psec_phase1_encryption(
     encryption_algorithm_name: str | None = None,
     hash_algorithm: str | None = None,
     prf_algorithm: str | None = 'sha256',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/vpn/ipsec/phase1/encryption
 
     Note: Call pfsense_vpn_ipsec_apply after this to apply changes.
 
     id: The ID of the object or resource to interact with.
     parent_id: The ID of the parent this object is nested under.
-    dhgroup: The Diffie-Hellman (DH) group to use for this P1 encryption item.
+    dhgroup: The Diffie-Hellman (DH) group to use for this P1 encryption item. Valid values: [1, 2, 5, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]
     encryption_algorithm_keylen: The key length for the encryption algorithm.This field is only available when the following conditions are met:- `encryp
-    encryption_algorithm_name: The name of the encryption algorithm to use for this P1 encryption item.
-    hash_algorithm: The hash algorithm to use for this P1 encryption item.
-    prf_algorithm: The PRF algorithm to use for this P1 encryption item. This value has no affect unless the P1 entry has PRF enabled.
+    encryption_algorithm_name: The name of the encryption algorithm to use for this P1 encryption item. Valid values: ['aes', 'aes128gcm', 'aes192gcm', 'aes256gcm', 'chacha20poly1305']
+    hash_algorithm: The hash algorithm to use for this P1 encryption item. Valid values: ['sha1', 'sha256', 'sha384', 'sha512', 'aesxcbc']
+    prf_algorithm: The PRF algorithm to use for this P1 encryption item. This value has no affect unless the P1 entry has PRF enabled. Valid values: ['sha1', 'sha256', 'sha384', 'sha512', 'aesxcbc']
     """
     if not confirm:
         return (
@@ -22649,7 +22649,7 @@ async def pfsense_delete_vpni_psec_phase1_encryption(
     parent_id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/ipsec/phase1/encryption
 
     Note: Call pfsense_vpn_ipsec_apply after this to apply changes.
@@ -22681,7 +22681,7 @@ async def pfsense_delete_vpni_psec_phase1_encryption(
 @mcp.tool()
 async def pfsense_get_vpni_psec_phase1(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/vpn/ipsec/phase1
 
     id: The ID of the object to target.
@@ -22730,26 +22730,26 @@ async def pfsense_create_vpni_psec_phase1(
     rekey_time: int | None = 25920,
     splitconn: bool | None = None,
     startaction: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/vpn/ipsec/phase1
 
     Note: Call pfsense_vpn_ipsec_apply after this to apply changes.
 
-    authentication_method: The IPsec authentication method this tunnel will use.
+    authentication_method: The IPsec authentication method this tunnel will use. Valid values: ['pre_shared_key', 'cert']
     caref: The certificate authority to use when validating the peer certificate.This field is only available when the following co
     certref: The certificate which identifies this system. The certificate must have at least one non-wildcard SAN.This field is only
     encryption: The encryption algorithms supported by this P1 encryption.
-    iketype: The IKE protocol version this phase 1 entry will use.
+    iketype: The IKE protocol version this phase 1 entry will use. Valid values: ['ikev1', 'ikev2', 'auto']
     interface: The interface for the local endpoint of this phase 1 entry. This should be an interface that is reachable by the remote 
-    mode: The IKEv1 negotiation mode this phase 1 entry will use.This field is only available when the following conditions are me
+    mode: The IKEv1 negotiation mode this phase 1 entry will use.This field is only available when the following conditions are me Valid values: ['main', 'aggressive']
     myid_data: The identifier value used by the local end of the tunnel. This must be a value that corresponds with the current `myid_t
-    myid_type: The identifier type used by the local end of the tunnel.
+    myid_type: The identifier type used by the local end of the tunnel. Valid values: ['myaddress', 'address', 'fqdn', 'user_fqdn', 'asn1dn', 'keyid tag', 'dyn_dns', 'auto']
     peerid_data: The identifier value used by the remote end of the tunnel. This must be a value that corresponds with the current `peeri
-    peerid_type: The identifier type used by the remote end of the tunnel.
+    peerid_type: The identifier type used by the remote end of the tunnel. Valid values: ['any', 'peeraddress', 'address', 'fqdn', 'user_fqdn', 'asn1dn', 'keyid tag', 'dyn_dns', 'auto']
     pre_shared_key: The Pre-Shared Key (PSK) value. This key must match on both peers and should be long and random to protect the tunnel an
-    protocol: The IP version this phase 1 entry will use.
+    protocol: The IP version this phase 1 entry will use. Valid values: ['inet', 'inet6', 'both']
     remote_gateway: The IP address or hostname of the remote gateway.
-    closeaction: The option used to control the behavior when the remote peer unexpectedly closes a child SA (P2)
+    closeaction: The option used to control the behavior when the remote peer unexpectedly closes a child SA (P2) Valid values: ['', 'none', 'start', 'trap']
     descr: A description for this IPsec phase 1 entry.
     disabled: Disables this IPsec phase 1 entry.
     dpd_delay: The delay (in seconds) between sending peer acknowledgement messages.
@@ -22758,14 +22758,14 @@ async def pfsense_create_vpni_psec_phase1(
     ikeport: The UDP port for IKE on the remote gateway. Valid options are: a TCP/UDP port number
     lifetime: The hard child SA lifetime (in seconds) after which the child SA will be expired.
     mobike: Enables or disables the use of MOBIKE for this tunnel.
-    nat_traversal: The option used to enable the use of NAT-T (i.e. the encapsulation of ESP in UDP packets) if needed, which can help with
+    nat_traversal: The option used to enable the use of NAT-T (i.e. the encapsulation of ESP in UDP packets) if needed, which can help with Valid values: ['on', 'force']
     nattport: The UDP port for NAT-T on the remote gateway. Valid options are: a TCP/UDP port number
     prfselect_enable: Enables or disables manual Pseudo-Random Function (PRF) selection.
     rand_time: A random value up to this amount will be subtracted from the `rekey_time` to avoid simultaneous renegotiation.
     reauth_time: The amount of time (in seconds) before an child SA is torn down and recreated from scratch, including authentication.
     rekey_time: The amount of time (in seconds) before an child SA establishes new keys.
     splitconn: Enables or disables the use split connection entries with multiple phase 2 configurations. Required for remote endpoints
-    startaction: The option used to force specific initiation/responder behavior for child SA (P2) entries.
+    startaction: The option used to force specific initiation/responder behavior for child SA (P2) entries. Valid values: ['', 'none', 'start', 'trap']
     """
     if not confirm:
         return (
@@ -22878,16 +22878,16 @@ async def pfsense_update_vpni_psec_phase1(
     remote_gateway: str | None = None,
     splitconn: bool | None = None,
     startaction: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/vpn/ipsec/phase1
 
     Note: Call pfsense_vpn_ipsec_apply after this to apply changes.
 
     id: The ID of the object or resource to interact with.
-    authentication_method: The IPsec authentication method this tunnel will use.
+    authentication_method: The IPsec authentication method this tunnel will use. Valid values: ['pre_shared_key', 'cert']
     caref: The certificate authority to use when validating the peer certificate.This field is only available when the following co
     certref: The certificate which identifies this system. The certificate must have at least one non-wildcard SAN.This field is only
-    closeaction: The option used to control the behavior when the remote peer unexpectedly closes a child SA (P2)
+    closeaction: The option used to control the behavior when the remote peer unexpectedly closes a child SA (P2) Valid values: ['', 'none', 'start', 'trap']
     descr: A description for this IPsec phase 1 entry.
     disabled: Disables this IPsec phase 1 entry.
     dpd_delay: The delay (in seconds) between sending peer acknowledgement messages.
@@ -22895,26 +22895,26 @@ async def pfsense_update_vpni_psec_phase1(
     encryption: The encryption algorithms supported by this P1 encryption.
     gw_duplicates: Enables or disables the allowance of multiple phase 1 configurations with the same remote gateway endpoint.
     ikeport: The UDP port for IKE on the remote gateway. Valid options are: a TCP/UDP port number
-    iketype: The IKE protocol version this phase 1 entry will use.
+    iketype: The IKE protocol version this phase 1 entry will use. Valid values: ['ikev1', 'ikev2', 'auto']
     interface: The interface for the local endpoint of this phase 1 entry. This should be an interface that is reachable by the remote 
     lifetime: The hard child SA lifetime (in seconds) after which the child SA will be expired.
     mobike: Enables or disables the use of MOBIKE for this tunnel.
-    mode: The IKEv1 negotiation mode this phase 1 entry will use.This field is only available when the following conditions are me
+    mode: The IKEv1 negotiation mode this phase 1 entry will use.This field is only available when the following conditions are me Valid values: ['main', 'aggressive']
     myid_data: The identifier value used by the local end of the tunnel. This must be a value that corresponds with the current `myid_t
-    myid_type: The identifier type used by the local end of the tunnel.
-    nat_traversal: The option used to enable the use of NAT-T (i.e. the encapsulation of ESP in UDP packets) if needed, which can help with
+    myid_type: The identifier type used by the local end of the tunnel. Valid values: ['myaddress', 'address', 'fqdn', 'user_fqdn', 'asn1dn', 'keyid tag', 'dyn_dns', 'auto']
+    nat_traversal: The option used to enable the use of NAT-T (i.e. the encapsulation of ESP in UDP packets) if needed, which can help with Valid values: ['on', 'force']
     nattport: The UDP port for NAT-T on the remote gateway. Valid options are: a TCP/UDP port number
     peerid_data: The identifier value used by the remote end of the tunnel. This must be a value that corresponds with the current `peeri
-    peerid_type: The identifier type used by the remote end of the tunnel.
+    peerid_type: The identifier type used by the remote end of the tunnel. Valid values: ['any', 'peeraddress', 'address', 'fqdn', 'user_fqdn', 'asn1dn', 'keyid tag', 'dyn_dns', 'auto']
     pre_shared_key: The Pre-Shared Key (PSK) value. This key must match on both peers and should be long and random to protect the tunnel an
     prfselect_enable: Enables or disables manual Pseudo-Random Function (PRF) selection.
-    protocol: The IP version this phase 1 entry will use.
+    protocol: The IP version this phase 1 entry will use. Valid values: ['inet', 'inet6', 'both']
     rand_time: A random value up to this amount will be subtracted from the `rekey_time` to avoid simultaneous renegotiation.
     reauth_time: The amount of time (in seconds) before an child SA is torn down and recreated from scratch, including authentication.
     rekey_time: The amount of time (in seconds) before an child SA establishes new keys.
     remote_gateway: The IP address or hostname of the remote gateway.
     splitconn: Enables or disables the use split connection entries with multiple phase 2 configurations. Required for remote endpoints
-    startaction: The option used to force specific initiation/responder behavior for child SA (P2) entries.
+    startaction: The option used to force specific initiation/responder behavior for child SA (P2) entries. Valid values: ['', 'none', 'start', 'trap']
     """
     if not confirm:
         return (
@@ -22999,7 +22999,7 @@ async def pfsense_delete_vpni_psec_phase1(
     id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/ipsec/phase1
 
     Note: Call pfsense_vpn_ipsec_apply after this to apply changes.
@@ -23032,14 +23032,14 @@ async def pfsense_list_vpni_psec_phase1s(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/vpn/ipsec/phase1s
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -23063,7 +23063,7 @@ async def pfsense_list_vpni_psec_phase1s(
 async def pfsense_replace_vpni_psec_phase1s(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/vpn/ipsec/phase1s
 
     Note: Call pfsense_vpn_ipsec_apply after this to apply changes.
@@ -23089,7 +23089,7 @@ async def pfsense_delete_vpni_psec_phase1s(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/ipsec/phase1s
 
     Note: Call pfsense_vpn_ipsec_apply after this to apply changes.
@@ -23119,7 +23119,7 @@ async def pfsense_delete_vpni_psec_phase1s(
 async def pfsense_get_vpni_psec_phase2_encryption(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/vpn/ipsec/phase2/encryption
 
     id: The ID of the object to target.
@@ -23143,13 +23143,13 @@ async def pfsense_create_vpni_psec_phase2_encryption(
     name: str,
     parent_id: int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/vpn/ipsec/phase2/encryption
 
     Note: Call pfsense_vpn_ipsec_apply after this to apply changes.
 
     keylen: The key length for the encryption algorithm.This field is only available when the following conditions are met:- `name` 
-    name: The name of the encryption algorithm to use for this P2 encryption item.
+    name: The name of the encryption algorithm to use for this P2 encryption item. Valid values: ['aes', 'aes128gcm', 'aes192gcm', 'aes256gcm', 'chacha20poly1305']
     parent_id: The ID of the parent this object is nested under.
     """
     if not confirm:
@@ -23179,7 +23179,7 @@ async def pfsense_update_vpni_psec_phase2_encryption(
     confirm: bool = False,
     keylen: int | None = None,
     name: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/vpn/ipsec/phase2/encryption
 
     Note: Call pfsense_vpn_ipsec_apply after this to apply changes.
@@ -23187,7 +23187,7 @@ async def pfsense_update_vpni_psec_phase2_encryption(
     id: The ID of the object or resource to interact with.
     parent_id: The ID of the parent this object is nested under.
     keylen: The key length for the encryption algorithm.This field is only available when the following conditions are met:- `name` 
-    name: The name of the encryption algorithm to use for this P2 encryption item.
+    name: The name of the encryption algorithm to use for this P2 encryption item. Valid values: ['aes', 'aes128gcm', 'aes192gcm', 'aes256gcm', 'chacha20poly1305']
     """
     if not confirm:
         return (
@@ -23217,7 +23217,7 @@ async def pfsense_delete_vpni_psec_phase2_encryption(
     parent_id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/ipsec/phase2/encryption
 
     Note: Call pfsense_vpn_ipsec_apply after this to apply changes.
@@ -23249,7 +23249,7 @@ async def pfsense_delete_vpni_psec_phase2_encryption(
 @mcp.tool()
 async def pfsense_get_vpni_psec_phase2(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/vpn/ipsec/phase2
 
     id: The ID of the object to target.
@@ -23289,7 +23289,7 @@ async def pfsense_create_vpni_psec_phase2(
     protocol: str | None = 'esp',
     rand_time: int | None = 360,
     rekey_time: int | None = 3240,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/vpn/ipsec/phase2
 
     Note: Call pfsense_vpn_ipsec_apply after this to apply changes.
@@ -23300,7 +23300,7 @@ async def pfsense_create_vpni_psec_phase2(
     localid_address: The local network IP component of this IPsec security association.This field is only available when the following condit
     localid_netbits: The subnet bits of the `localid_address` network.This field is only available when the following conditions are met:- `l
     localid_type: The local ID type to use for this phase 2 entry. Valid value options are: an existing interface, `address`, `network`. F
-    mode: The IPsec phase 2 mode this entry will use.
+    mode: The IPsec phase 2 mode this entry will use. Valid values: ['tunnel', 'tunnel6', 'transport', 'vti']
     natlocalid_address: The NAT/BINAT local network IP component of this IPsec security association.This field is only available when the follow
     natlocalid_netbits: The subnet bits of the `natlocalid_address` network.This field is only available when the following conditions are met:-
     remoteid_address: The remote network IP component of this IPsec security association.This field is only available when the following condi
@@ -23311,9 +23311,9 @@ async def pfsense_create_vpni_psec_phase2(
     keepalive: Enables or disables checking this P2 and initiating if disconnected; does not send traffic inside the tunnel. This check
     lifetime: The hard IKE SA lifetime (in seconds) after which the IKE SA will be expired.
     natlocalid_type: The NAT/BINAT translation type for this IPsec phase 2 entry. Leave as `null` if NAT/BINAT is not needed. Valid value opt
-    pfsgroup: The PFS key group this IPsec phase 2 entry should use. Note: Groups 1, 2, 5, 22, 23, and 24 provide weak security and sh
+    pfsgroup: The PFS key group this IPsec phase 2 entry should use. Note: Groups 1, 2, 5, 22, 23, and 24 provide weak security and sh Valid values: [0, 1, 2, 5, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]
     pinghost: The IP address to send an ICMP echo request to inside the tunnel. Can trigger initiation of a tunnel mode P2, but does n
-    protocol: the IPsec phase 2 proposal protocol for this entry. Encapsulating Security Payload (`esp`) performs encryption and authe
+    protocol: the IPsec phase 2 proposal protocol for this entry. Encapsulating Security Payload (`esp`) performs encryption and authe Valid values: ['esp', 'ah']
     rand_time: A random value up to this amount will be subtracted from the `rekey_time` and `reauth_time` to avoid simultaneous renego
     rekey_time: The amount of time (in seconds) before an IKE SA establishes new keys.
     """
@@ -23401,7 +23401,7 @@ async def pfsense_update_vpni_psec_phase2(
     remoteid_address: str | None = None,
     remoteid_netbits: int | None = None,
     remoteid_type: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/vpn/ipsec/phase2
 
     Note: Call pfsense_vpn_ipsec_apply after this to apply changes.
@@ -23417,13 +23417,13 @@ async def pfsense_update_vpni_psec_phase2(
     localid_address: The local network IP component of this IPsec security association.This field is only available when the following condit
     localid_netbits: The subnet bits of the `localid_address` network.This field is only available when the following conditions are met:- `l
     localid_type: The local ID type to use for this phase 2 entry. Valid value options are: an existing interface, `address`, `network`. F
-    mode: The IPsec phase 2 mode this entry will use.
+    mode: The IPsec phase 2 mode this entry will use. Valid values: ['tunnel', 'tunnel6', 'transport', 'vti']
     natlocalid_address: The NAT/BINAT local network IP component of this IPsec security association.This field is only available when the follow
     natlocalid_netbits: The subnet bits of the `natlocalid_address` network.This field is only available when the following conditions are met:-
     natlocalid_type: The NAT/BINAT translation type for this IPsec phase 2 entry. Leave as `null` if NAT/BINAT is not needed. Valid value opt
-    pfsgroup: The PFS key group this IPsec phase 2 entry should use. Note: Groups 1, 2, 5, 22, 23, and 24 provide weak security and sh
+    pfsgroup: The PFS key group this IPsec phase 2 entry should use. Note: Groups 1, 2, 5, 22, 23, and 24 provide weak security and sh Valid values: [0, 1, 2, 5, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]
     pinghost: The IP address to send an ICMP echo request to inside the tunnel. Can trigger initiation of a tunnel mode P2, but does n
-    protocol: the IPsec phase 2 proposal protocol for this entry. Encapsulating Security Payload (`esp`) performs encryption and authe
+    protocol: the IPsec phase 2 proposal protocol for this entry. Encapsulating Security Payload (`esp`) performs encryption and authe Valid values: ['esp', 'ah']
     rand_time: A random value up to this amount will be subtracted from the `rekey_time` and `reauth_time` to avoid simultaneous renego
     rekey_time: The amount of time (in seconds) before an IKE SA establishes new keys.
     remoteid_address: The remote network IP component of this IPsec security association.This field is only available when the following condi
@@ -23495,7 +23495,7 @@ async def pfsense_delete_vpni_psec_phase2(
     id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/ipsec/phase2
 
     Note: Call pfsense_vpn_ipsec_apply after this to apply changes.
@@ -23528,14 +23528,14 @@ async def pfsense_list_vpni_psec_phase2s(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/vpn/ipsec/phase2s
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -23559,7 +23559,7 @@ async def pfsense_list_vpni_psec_phase2s(
 async def pfsense_replace_vpni_psec_phase2s(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/vpn/ipsec/phase2s
 
     Note: Call pfsense_vpn_ipsec_apply after this to apply changes.
@@ -23585,7 +23585,7 @@ async def pfsense_delete_vpni_psec_phase2s(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/ipsec/phase2s
 
     Note: Call pfsense_vpn_ipsec_apply after this to apply changes.
@@ -23614,7 +23614,7 @@ async def pfsense_delete_vpni_psec_phase2s(
 @mcp.tool()
 async def pfsense_get_vpn_open_vpncso(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/vpn/openvpn/cso
 
     id: The ID of the object to target.
@@ -23659,7 +23659,7 @@ async def pfsense_create_vpn_open_vpncso(
     tunnel_networkv6: str | None = None,
     wins_server1: str | None = None,
     wins_server2: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/vpn/openvpn/cso
 
     common_name: The X.509 common name for the client certificate, or the username for VPNs utilizing password authentication.
@@ -23676,7 +23676,7 @@ async def pfsense_create_vpn_open_vpncso(
     local_network: The IPv4 server-side networks that will be accessible from this particular client.
     local_networkv6: the IPv6 server-side networks that will be accessible from this particular client.
     netbios_enable: Enables or disables NetBIOS over TCP/IP.
-    netbios_ntype: The NetBIOS node type.This field is only available when the following conditions are met:- `netbios_enable` must be equa
+    netbios_ntype: The NetBIOS node type.This field is only available when the following conditions are met:- `netbios_enable` must be equa Valid values: [0, 1, 2, 4, 8]
     netbios_scope: The NetBIOS Scope ID. This provides an extended naming service for NetBIOS over TCP/IP. The NetBIOS scope ID isolates Ne
     ntp_server1: The primary NTP server to provide to the client.
     ntp_server2: The secondary NTP server to provide to the client.
@@ -23788,7 +23788,7 @@ async def pfsense_update_vpn_open_vpncso(
     tunnel_networkv6: str | None = None,
     wins_server1: str | None = None,
     wins_server2: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/vpn/openvpn/cso
 
     id: The ID of the object or resource to interact with.
@@ -23806,7 +23806,7 @@ async def pfsense_update_vpn_open_vpncso(
     local_network: The IPv4 server-side networks that will be accessible from this particular client.
     local_networkv6: the IPv6 server-side networks that will be accessible from this particular client.
     netbios_enable: Enables or disables NetBIOS over TCP/IP.
-    netbios_ntype: The NetBIOS node type.This field is only available when the following conditions are met:- `netbios_enable` must be equa
+    netbios_ntype: The NetBIOS node type.This field is only available when the following conditions are met:- `netbios_enable` must be equa Valid values: [0, 1, 2, 4, 8]
     netbios_scope: The NetBIOS Scope ID. This provides an extended naming service for NetBIOS over TCP/IP. The NetBIOS scope ID isolates Ne
     ntp_server1: The primary NTP server to provide to the client.
     ntp_server2: The secondary NTP server to provide to the client.
@@ -23893,7 +23893,7 @@ async def pfsense_update_vpn_open_vpncso(
 async def pfsense_delete_vpn_open_vpncso(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/openvpn/cso
 
     id: The ID of the object to target.
@@ -23920,14 +23920,14 @@ async def pfsense_list_vpn_open_vpncs_os(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/vpn/openvpn/csos
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -23952,7 +23952,7 @@ async def pfsense_delete_vpn_open_vpncs_os(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/openvpn/csos
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -23978,7 +23978,7 @@ async def pfsense_delete_vpn_open_vpncs_os(
 @mcp.tool()
 async def pfsense_get_vpn_open_vpn_client(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/vpn/openvpn/client
 
     id: The ID of the object to target.
@@ -24046,59 +24046,59 @@ async def pfsense_create_vpn_open_vpn_client(
     udp_fast_io: bool | None = None,
     use_shaper: int | None = None,
     verbosity_level: int | None = 1,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/vpn/openvpn/client
 
     caref: The `refid` of the CA object to assume as the peer CA.
     data_ciphers: The encryption algorithms/ciphers allowed by this OpenVPN client.
     data_ciphers_fallback: The fallback encryption algorithm/cipher used for data channel packets when communicating with clients that do not suppo
-    dev_mode: The carrier mode for this OpenVPN client. `tun` mode carries IPv4 and IPv6 (layer 3) and is the most common and compatib
+    dev_mode: The carrier mode for this OpenVPN client. `tun` mode carries IPv4 and IPv6 (layer 3) and is the most common and compatib Valid values: ['tun', 'tap']
     digest: The algorithm used to authenticate data channel packets, and control channel packets if a TLS Key is present.
     interface: The interface used by the firewall to originate this OpenVPN client connection.This field is only available when the fol
-    mode: The OpenVPN client mode.
-    protocol: The protocol used by this OpenVPN client.
+    mode: The OpenVPN client mode. Valid values: ['p2p_tls']
+    protocol: The protocol used by this OpenVPN client. Valid values: ['UDP4', 'UDP6', 'UDP', 'TCP4', 'TCP6', 'TCP']
     proxy_passwd: The username to use for authentication to the remote proxy.This field is only available when the following conditions ar
     proxy_user: The username to use for authentication to the remote proxy.This field is only available when the following conditions ar
     server_addr: The IP address or hostname of the OpenVPN server this client will connect to.
     server_port: The port used by the server to receive client connections. Valid options are: a TCP/UDP port number
-    tls_type: The TLS key usage type. In `auth` mode, the TLS key is used only as HMAC authentication for the control channel, protect
-    allow_compression: The compression mode allowed by this OpenVPN client. Compression can potentially increase throughput but may allow an at
+    tls_type: The TLS key usage type. In `auth` mode, the TLS key is used only as HMAC authentication for the control channel, protect Valid values: ['auth', 'crypt']
+    allow_compression: The compression mode allowed by this OpenVPN client. Compression can potentially increase throughput but may allow an at Valid values: ['no', 'yes', 'asym']
     auth_pass: The password used to authenticate with the OpenVPN server.This field is only available when the following conditions are
     auth_retry_none: Disables retrying authentication if an authentication failed error is received from the server
     auth_user: The username used to authenticate with the OpenVPN server.
     certref: The `refid` of the certificate object to assume as the OpenVPN client certificate.
-    create_gw: The gateway type(s) that will be created when a virtual interface is assigned to this OpenVPN server
+    create_gw: The gateway type(s) that will be created when a virtual interface is assigned to this OpenVPN server Valid values: ['both', 'v4only', 'v6only']
     custom_options: Additional options to add to the OpenVPN client configuration.
     description: The description for this OpenVPN client.
     disable: Disables this OpenVPN client.
     dns_add: Enables or disables using the DNS server(s) provided by the OpenVPN server.
-    exit_notify: The number of times this client will attempt to send an exit notifications.
+    exit_notify: The number of times this client will attempt to send an exit notifications. Valid values: ['1', '2', '3', '4', '5', 'none']
     inactive_seconds: The amount of time (in seconds) until a client connection is closed for inactivity.
     keepalive_interval: The keepalive interval parameter.This field is only available when the following conditions are met:- `ping_method` must
     keepalive_timeout: The keepalive timeout parameter.This field is only available when the following conditions are met:- `ping_method` must 
     local_port: The port binding used by OpenVPN for client connections. Valid options are: a TCP/UDP port number
     passtos: Enables or disables setting the TOS IP header value of tunnel packets to match the encapsulated packet value.
-    ping_action: The action to take after a ping to the remote peer times-out.This field is only available when the following conditions 
+    ping_action: The action to take after a ping to the remote peer times-out.This field is only available when the following conditions  Valid values: ['ping_restart', 'ping_exit']
     ping_action_seconds: The number of seconds that must elapse before the ping is considered a timeout and the configured `ping_action` is perfo
-    ping_method: The method used to define ping configuration.
+    ping_method: The method used to define ping configuration. Valid values: ['keepalive', 'ping']
     ping_seconds: The number of seconds to accept no packets before sending a ping to the remote peer over the TCP/UDP control channel.Thi
     proxy_addr: The address for an HTTP Proxy this client can use to connect to a remote server.
-    proxy_authtype: The type of authentication used by the proxy server.
+    proxy_authtype: The type of authentication used by the proxy server. Valid values: ['none', 'basic', 'ntlm']
     proxy_port: The port used by the HTTP Proxy. Valid options are: a TCP/UDP port number
     remote_cert_tls: Enables or disables requiring hosts to have a client certificate to connect.
     remote_network: IPv4 networks that will be routed through the tunnel, so that a site-to-site VPN can be established without manually cha
     remote_networkv6: IPv6 networks that will be routed through the tunnel, so that a site-to-site VPN can be established without manually cha
     route_no_exec: Enables or disables adding/removing routes automatically.
     route_no_pull: Enables or disables the servers ability to add routes to the client's routing table.
-    sndrcvbuf: The send and receive buffer size for OpenVPN. Set to null to use the system default.
+    sndrcvbuf: The send and receive buffer size for OpenVPN. Set to null to use the system default. Valid values: [65536, 131072, 262144, 524288, 1048576, 2097152]
     tls: The TLS key this OpenVPN client will use to sign control channel packets with an HMAC signature for authentication when 
-    tlsauth_keydir: The TLS key direction. This must be set to complementary values on the client and client. For example, if the client is 
-    topology: The method used to supply a virtual adapter IP address to clients when using TUN mode on IPv4.This field is only availab
+    tlsauth_keydir: The TLS key direction. This must be set to complementary values on the client and client. For example, if the client is  Valid values: ['default', '0', '1', '2']
+    topology: The method used to supply a virtual adapter IP address to clients when using TUN mode on IPv4.This field is only availab Valid values: ['subnet', 'net30']
     tunnel_network: The IPv4 virtual network used for private communications between this client and client hosts.
     tunnel_networkv6: The IPv6 virtual network used for private communications between this client and client hosts.
     udp_fast_io: Enables or disables fast I/O operations with UDP writes to tun/tap (Experimental).
     use_shaper: Maximum outgoing bandwidth (in bytes per second) for this tunnel. Use `null` no limit.
-    verbosity_level: The OpenVPN logging verbosity level.
+    verbosity_level: The OpenVPN logging verbosity level. Valid values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     """
     if not confirm:
         return (
@@ -24267,40 +24267,40 @@ async def pfsense_update_vpn_open_vpn_client(
     udp_fast_io: bool | None = None,
     use_shaper: int | None = None,
     verbosity_level: int | None = 1,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/vpn/openvpn/client
 
     id: The ID of the object or resource to interact with.
-    allow_compression: The compression mode allowed by this OpenVPN client. Compression can potentially increase throughput but may allow an at
+    allow_compression: The compression mode allowed by this OpenVPN client. Compression can potentially increase throughput but may allow an at Valid values: ['no', 'yes', 'asym']
     auth_pass: The password used to authenticate with the OpenVPN server.This field is only available when the following conditions are
     auth_retry_none: Disables retrying authentication if an authentication failed error is received from the server
     auth_user: The username used to authenticate with the OpenVPN server.
     caref: The `refid` of the CA object to assume as the peer CA.
     certref: The `refid` of the certificate object to assume as the OpenVPN client certificate.
-    create_gw: The gateway type(s) that will be created when a virtual interface is assigned to this OpenVPN server
+    create_gw: The gateway type(s) that will be created when a virtual interface is assigned to this OpenVPN server Valid values: ['both', 'v4only', 'v6only']
     custom_options: Additional options to add to the OpenVPN client configuration.
     data_ciphers: The encryption algorithms/ciphers allowed by this OpenVPN client.
     data_ciphers_fallback: The fallback encryption algorithm/cipher used for data channel packets when communicating with clients that do not suppo
     description: The description for this OpenVPN client.
-    dev_mode: The carrier mode for this OpenVPN client. `tun` mode carries IPv4 and IPv6 (layer 3) and is the most common and compatib
+    dev_mode: The carrier mode for this OpenVPN client. `tun` mode carries IPv4 and IPv6 (layer 3) and is the most common and compatib Valid values: ['tun', 'tap']
     digest: The algorithm used to authenticate data channel packets, and control channel packets if a TLS Key is present.
     disable: Disables this OpenVPN client.
     dns_add: Enables or disables using the DNS server(s) provided by the OpenVPN server.
-    exit_notify: The number of times this client will attempt to send an exit notifications.
+    exit_notify: The number of times this client will attempt to send an exit notifications. Valid values: ['1', '2', '3', '4', '5', 'none']
     inactive_seconds: The amount of time (in seconds) until a client connection is closed for inactivity.
     interface: The interface used by the firewall to originate this OpenVPN client connection.This field is only available when the fol
     keepalive_interval: The keepalive interval parameter.This field is only available when the following conditions are met:- `ping_method` must
     keepalive_timeout: The keepalive timeout parameter.This field is only available when the following conditions are met:- `ping_method` must 
     local_port: The port binding used by OpenVPN for client connections. Valid options are: a TCP/UDP port number
-    mode: The OpenVPN client mode.
+    mode: The OpenVPN client mode. Valid values: ['p2p_tls']
     passtos: Enables or disables setting the TOS IP header value of tunnel packets to match the encapsulated packet value.
-    ping_action: The action to take after a ping to the remote peer times-out.This field is only available when the following conditions 
+    ping_action: The action to take after a ping to the remote peer times-out.This field is only available when the following conditions  Valid values: ['ping_restart', 'ping_exit']
     ping_action_seconds: The number of seconds that must elapse before the ping is considered a timeout and the configured `ping_action` is perfo
-    ping_method: The method used to define ping configuration.
+    ping_method: The method used to define ping configuration. Valid values: ['keepalive', 'ping']
     ping_seconds: The number of seconds to accept no packets before sending a ping to the remote peer over the TCP/UDP control channel.Thi
-    protocol: The protocol used by this OpenVPN client.
+    protocol: The protocol used by this OpenVPN client. Valid values: ['UDP4', 'UDP6', 'UDP', 'TCP4', 'TCP6', 'TCP']
     proxy_addr: The address for an HTTP Proxy this client can use to connect to a remote server.
-    proxy_authtype: The type of authentication used by the proxy server.
+    proxy_authtype: The type of authentication used by the proxy server. Valid values: ['none', 'basic', 'ntlm']
     proxy_passwd: The username to use for authentication to the remote proxy.This field is only available when the following conditions ar
     proxy_port: The port used by the HTTP Proxy. Valid options are: a TCP/UDP port number
     proxy_user: The username to use for authentication to the remote proxy.This field is only available when the following conditions ar
@@ -24311,16 +24311,16 @@ async def pfsense_update_vpn_open_vpn_client(
     route_no_pull: Enables or disables the servers ability to add routes to the client's routing table.
     server_addr: The IP address or hostname of the OpenVPN server this client will connect to.
     server_port: The port used by the server to receive client connections. Valid options are: a TCP/UDP port number
-    sndrcvbuf: The send and receive buffer size for OpenVPN. Set to null to use the system default.
+    sndrcvbuf: The send and receive buffer size for OpenVPN. Set to null to use the system default. Valid values: [65536, 131072, 262144, 524288, 1048576, 2097152]
     tls: The TLS key this OpenVPN client will use to sign control channel packets with an HMAC signature for authentication when 
-    tls_type: The TLS key usage type. In `auth` mode, the TLS key is used only as HMAC authentication for the control channel, protect
-    tlsauth_keydir: The TLS key direction. This must be set to complementary values on the client and client. For example, if the client is 
-    topology: The method used to supply a virtual adapter IP address to clients when using TUN mode on IPv4.This field is only availab
+    tls_type: The TLS key usage type. In `auth` mode, the TLS key is used only as HMAC authentication for the control channel, protect Valid values: ['auth', 'crypt']
+    tlsauth_keydir: The TLS key direction. This must be set to complementary values on the client and client. For example, if the client is  Valid values: ['default', '0', '1', '2']
+    topology: The method used to supply a virtual adapter IP address to clients when using TUN mode on IPv4.This field is only availab Valid values: ['subnet', 'net30']
     tunnel_network: The IPv4 virtual network used for private communications between this client and client hosts.
     tunnel_networkv6: The IPv6 virtual network used for private communications between this client and client hosts.
     udp_fast_io: Enables or disables fast I/O operations with UDP writes to tun/tap (Experimental).
     use_shaper: Maximum outgoing bandwidth (in bytes per second) for this tunnel. Use `null` no limit.
-    verbosity_level: The OpenVPN logging verbosity level.
+    verbosity_level: The OpenVPN logging verbosity level. Valid values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     """
     if not confirm:
         return (
@@ -24441,7 +24441,7 @@ async def pfsense_update_vpn_open_vpn_client(
 async def pfsense_delete_vpn_open_vpn_client(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/openvpn/client
 
     id: The ID of the object to target.
@@ -24464,7 +24464,7 @@ async def pfsense_delete_vpn_open_vpn_client(
 @mcp.tool()
 async def pfsense_get_vpn_open_vpn_client_export_config(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/vpn/openvpn/client_export/config
 
     id: The ID of the object to target.
@@ -24505,7 +24505,7 @@ async def pfsense_create_vpn_open_vpn_client_export_config(
     useproxytype: str | None = 'http',
     usetoken: bool | None = None,
     verifyservercn: str | None = 'auto',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/vpn/openvpn/client_export/config
 
     pass_: Password used to protect the certificate file contents.This field is only available when the following conditions are me
@@ -24516,21 +24516,21 @@ async def pfsense_create_vpn_open_vpn_client_export_config(
     proxyport: The port where the proxy server is listening. Valid options are: a TCP/UDP port numberThis field is only available when 
     proxyuser: The username to use to authenticate with the proxy server.This field is only available when the following conditions are
     server: The VPN ID of the OpenVPN server this client export corresponds to.
-    useproxypass: The type of authentication to use for the proxy server.This field is only available when the following conditions are me
+    useproxypass: The type of authentication to use for the proxy server.This field is only available when the following conditions are me Valid values: ['none', 'basic', 'ntlm']
     advancedoptions: Additional options to add to the OpenVPN client export configuration.
-    bindmode: The port binding mode to use. If OpenVPN client binds to the default OpenVPN port (1194), two clients may not run concur
+    bindmode: The port binding mode to use. If OpenVPN client binds to the default OpenVPN port (1194), two clients may not run concur Valid values: ['nobind', 'lport0', 'bind']
     blockoutsidedns: Block access to DNS servers except across OpenVPN while connected, forcing clients to use only VPN DNS servers.
     legacy: Do not include OpenVPN 2.5 and later settings in the client configuration.
-    p12encryption: The level of encryption to use when exporting a PKCS#12 archive. Encryption support varies by Operating System and progr
+    p12encryption: The level of encryption to use when exporting a PKCS#12 archive. Encryption support varies by Operating System and progr Valid values: ['high', 'low', 'legacy']
     silent: Create Windows installer for unattended deploy.
-    useaddr: The method to use for the OpenVPN server address listed in the config export.
+    useaddr: The method to use for the OpenVPN server address listed in the config export. Valid values: ['serveraddr', 'servermagic', 'servermagichost', 'serverhostname', 'other']
     useaddr_hostname: The hostname to use for the OpenVPN server address.This field is only available when the following conditions are met:- 
     usepass: Use a password to protect the PKCS#12 file contents or key in Viscosity bundles.
     usepkcs11: Use PKCS#11 storage device (cryptographic token, HSM, smart card) instead of local files.
     useproxy: Use proxy to communicate with the OpenVPN server.
-    useproxytype: The proxy type to use.This field is only available when the following conditions are met:- `useproxy` must be equal to `
+    useproxytype: The proxy type to use.This field is only available when the following conditions are met:- `useproxy` must be equal to ` Valid values: ['http', 'socks']
     usetoken: Use Microsoft Certificate Storage instead of local files.
-    verifyservercn: Verify the server certificate Common Name (CN) when the client connects.
+    verifyservercn: Verify the server certificate Common Name (CN) when the client connects. Valid values: ['auto', 'none']
     """
     if not confirm:
         return (
@@ -24618,15 +24618,15 @@ async def pfsense_update_vpn_open_vpn_client_export_config(
     useproxytype: str | None = 'http',
     usetoken: bool | None = None,
     verifyservercn: str | None = 'auto',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/vpn/openvpn/client_export/config
 
     id: The ID of the object or resource to interact with.
     advancedoptions: Additional options to add to the OpenVPN client export configuration.
-    bindmode: The port binding mode to use. If OpenVPN client binds to the default OpenVPN port (1194), two clients may not run concur
+    bindmode: The port binding mode to use. If OpenVPN client binds to the default OpenVPN port (1194), two clients may not run concur Valid values: ['nobind', 'lport0', 'bind']
     blockoutsidedns: Block access to DNS servers except across OpenVPN while connected, forcing clients to use only VPN DNS servers.
     legacy: Do not include OpenVPN 2.5 and later settings in the client configuration.
-    p12encryption: The level of encryption to use when exporting a PKCS#12 archive. Encryption support varies by Operating System and progr
+    p12encryption: The level of encryption to use when exporting a PKCS#12 archive. Encryption support varies by Operating System and progr Valid values: ['high', 'low', 'legacy']
     pass_: Password used to protect the certificate file contents.This field is only available when the following conditions are me
     pkcs11id: The object's ID on the PKCS#11 device.This field is only available when the following conditions are met:- `usepkcs11` m
     pkcs11providers: The client local path to the PKCS#11 provider(s) (DLL, module)This field is only available when the following conditions
@@ -24636,15 +24636,15 @@ async def pfsense_update_vpn_open_vpn_client_export_config(
     proxyuser: The username to use to authenticate with the proxy server.This field is only available when the following conditions are
     server: The VPN ID of the OpenVPN server this client export corresponds to.
     silent: Create Windows installer for unattended deploy.
-    useaddr: The method to use for the OpenVPN server address listed in the config export.
+    useaddr: The method to use for the OpenVPN server address listed in the config export. Valid values: ['serveraddr', 'servermagic', 'servermagichost', 'serverhostname', 'other']
     useaddr_hostname: The hostname to use for the OpenVPN server address.This field is only available when the following conditions are met:- 
     usepass: Use a password to protect the PKCS#12 file contents or key in Viscosity bundles.
     usepkcs11: Use PKCS#11 storage device (cryptographic token, HSM, smart card) instead of local files.
     useproxy: Use proxy to communicate with the OpenVPN server.
-    useproxypass: The type of authentication to use for the proxy server.This field is only available when the following conditions are me
-    useproxytype: The proxy type to use.This field is only available when the following conditions are met:- `useproxy` must be equal to `
+    useproxypass: The type of authentication to use for the proxy server.This field is only available when the following conditions are me Valid values: ['none', 'basic', 'ntlm']
+    useproxytype: The proxy type to use.This field is only available when the following conditions are met:- `useproxy` must be equal to ` Valid values: ['http', 'socks']
     usetoken: Use Microsoft Certificate Storage instead of local files.
-    verifyservercn: Verify the server certificate Common Name (CN) when the client connects.
+    verifyservercn: Verify the server certificate Common Name (CN) when the client connects. Valid values: ['auto', 'none']
     """
     if not confirm:
         return (
@@ -24711,7 +24711,7 @@ async def pfsense_update_vpn_open_vpn_client_export_config(
 async def pfsense_delete_vpn_open_vpn_client_export_config(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/openvpn/client_export/config
 
     id: The ID of the object to target.
@@ -24761,16 +24761,16 @@ async def pfsense_create_vpn_open_vpn_client_export(
     username: str | None = None,
     usetoken: bool | None = None,
     verifyservercn: str | None = 'auto',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/vpn/openvpn/client_export
 
     id: The ID of the object or resource to interact with.
     advancedoptions: Additional options to add to the OpenVPN client export configuration.
-    bindmode: The port binding mode to use. If OpenVPN client binds to the default OpenVPN port (1194), two clients may not run concur
+    bindmode: The port binding mode to use. If OpenVPN client binds to the default OpenVPN port (1194), two clients may not run concur Valid values: ['nobind', 'lport0', 'bind']
     blockoutsidedns: Block access to DNS servers except across OpenVPN while connected, forcing clients to use only VPN DNS servers.
     certref: The reference ID of the certificate to use for this OpenVPN client export. This is only applicable for OpenVPN servers t
     legacy: Do not include OpenVPN 2.5 and later settings in the client configuration.
-    p12encryption: The level of encryption to use when exporting a PKCS#12 archive. Encryption support varies by Operating System and progr
+    p12encryption: The level of encryption to use when exporting a PKCS#12 archive. Encryption support varies by Operating System and progr Valid values: ['high', 'low', 'legacy']
     pass_: Password used to protect the certificate file contents.This field is only available when the following conditions are me
     pkcs11id: The object's ID on the PKCS#11 device.This field is only available when the following conditions are met:- `usepkcs11` m
     pkcs11providers: The client local path to the PKCS#11 provider(s) (DLL, module)This field is only available when the following conditions
@@ -24780,17 +24780,17 @@ async def pfsense_create_vpn_open_vpn_client_export(
     proxyuser: The username to use to authenticate with the proxy server.This field is only available when the following conditions are
     server: The VPN ID of the OpenVPN server this client export corresponds to.
     silent: Create Windows installer for unattended deploy.
-    type_: The type of OpenVPN client export to generate. This determines the format and content of the export file.
-    useaddr: The method to use for the OpenVPN server address listed in the config export.
+    type_: The type of OpenVPN client export to generate. This determines the format and content of the export file. Valid values: ['confzip', 'conf_yealink_t28', 'conf_yealink_t38g', 'conf_yealink_t38g2', 'conf_snom', 'confinline', 'confinlinedroid', 'confinlineconnect', 'confinlinevisc', 'inst-Win7', 'ins...
+    useaddr: The method to use for the OpenVPN server address listed in the config export. Valid values: ['serveraddr', 'servermagic', 'servermagichost', 'serverhostname', 'other']
     useaddr_hostname: The hostname to use for the OpenVPN server address.This field is only available when the following conditions are met:- 
     usepass: Use a password to protect the PKCS#12 file contents or key in Viscosity bundles.
     usepkcs11: Use PKCS#11 storage device (cryptographic token, HSM, smart card) instead of local files.
     useproxy: Use proxy to communicate with the OpenVPN server.
-    useproxypass: The type of authentication to use for the proxy server.This field is only available when the following conditions are me
-    useproxytype: The proxy type to use.This field is only available when the following conditions are met:- `useproxy` must be equal to `
+    useproxypass: The type of authentication to use for the proxy server.This field is only available when the following conditions are me Valid values: ['none', 'basic', 'ntlm']
+    useproxytype: The proxy type to use.This field is only available when the following conditions are met:- `useproxy` must be equal to ` Valid values: ['http', 'socks']
     username: The username of the user this client export corresponds to. This is only applicable for OpenVPN servers that use the Loc
     usetoken: Use Microsoft Certificate Storage instead of local files.
-    verifyservercn: Verify the server certificate Common Name (CN) when the client connects.
+    verifyservercn: Verify the server certificate Common Name (CN) when the client connects. Valid values: ['auto', 'none']
     """
     if not confirm:
         return (
@@ -24866,14 +24866,14 @@ async def pfsense_list_vpn_open_vpn_clients(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/vpn/openvpn/clients
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -24898,7 +24898,7 @@ async def pfsense_delete_vpn_open_vpn_clients(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/openvpn/clients
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -24924,7 +24924,7 @@ async def pfsense_delete_vpn_open_vpn_clients(
 @mcp.tool()
 async def pfsense_get_vpn_open_vpn_server(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/vpn/openvpn/server
 
     id: The ID of the object to target.
@@ -25013,30 +25013,30 @@ async def pfsense_create_vpn_open_vpn_server(
     verbosity_level: int | None = 1,
     wins_server1: str | None = None,
     wins_server2: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/vpn/openvpn/server
 
     caref: The `refid` of the CA object to assume as the peer CA.
     certref: The `refid` of the certificate object to assume as the OpenVPN server certificate.
     data_ciphers: The encryption algorithms/ciphers allowed by this OpenVPN server.
     data_ciphers_fallback: The fallback encryption algorithm/cipher used for data channel packets when communicating with clients that do not suppo
-    dev_mode: The carrier mode for this OpenVPN server. `tun` mode carries IPv4 and IPv6 (layer 3) and is the most common and compatib
+    dev_mode: The carrier mode for this OpenVPN server. `tun` mode carries IPv4 and IPv6 (layer 3) and is the most common and compatib Valid values: ['tun', 'tap']
     dh_length: The Diffie-Hellman (DH) parameter set used for key exchange.
     digest: The algorithm used to authenticate data channel packets, and control channel packets if a TLS Key is present.
     ecdh_curve: The Elliptic Curve to use for key exchange. The curve from the server certificate is used by default when the server use
     interface: The interface or Virtual IP address where OpenVPN will receive client connections.This field is only available when the 
-    mode: The OpenVPN server mode.
-    protocol: The protocol used by this OpenVPN server.
+    mode: The OpenVPN server mode. Valid values: ['p2p_tls', 'server_tls', 'server_user', 'server_tls_user']
+    protocol: The protocol used by this OpenVPN server. Valid values: ['UDP4', 'UDP6', 'UDP', 'TCP4', 'TCP6', 'TCP']
     serverbridge_dhcp_end: The bridge DHCP range's end address.This field is only available when the following conditions are met:- `serverbridge_d
     serverbridge_dhcp_start: The bridge DHCP range's start address.This field is only available when the following conditions are met:- `serverbridge
     serverbridge_interface: The interface to which this TAP instance will be bridged. This is not done automatically. This interface must be assigne
-    tls_type: The TLS key usage type. In `auth` mode, the TLS key is used only as HMAC authentication for the control channel, protect
-    allow_compression: The compression mode allowed by this OpenVPN server. Compression can potentially increase throughput but may allow an at
+    tls_type: The TLS key usage type. In `auth` mode, the TLS key is used only as HMAC authentication for the control channel, protect Valid values: ['auth', 'crypt']
+    allow_compression: The compression mode allowed by this OpenVPN server. Compression can potentially increase throughput but may allow an at Valid values: ['no', 'yes', 'asym']
     authmode: The name of the authentication server to use as the authentication backend for this OpenVPN serverThis field is only ava
-    cert_depth: The depth of the certificate chain to check when a certificate based client signs in. Certificates below this depth are 
+    cert_depth: The depth of the certificate chain to check when a certificate based client signs in. Certificates below this depth are  Valid values: [1, 2, 3, 4, 5]
     client2client: Enables or disables allowing communication between clients connected to this server.
     connlimit: The number of concurrent connections a single user can have.This field is only available when the following conditions a
-    create_gw: The gateway type(s) that will be created when a virtual interface is assigned to this OpenVPN server
+    create_gw: The gateway type(s) that will be created when a virtual interface is assigned to this OpenVPN server Valid values: ['both', 'v4only', 'v6only']
     custom_options: Additional options to add to the OpenVPN server configuration.
     description: The description for this OpenVPN server.
     disable: Disables this OpenVPN server.
@@ -25057,15 +25057,15 @@ async def pfsense_create_vpn_open_vpn_server(
     local_port: The port used by OpenVPN to receive client connections. Valid options are: a TCP/UDP port number
     maxclients: The maximum number of clients allowed to concurrently connect to this server.
     netbios_enable: Enables or disables NetBIOS over TCP/IP.This field is only available when the following conditions are met:- `mode` must
-    netbios_ntype: The NetBIOS node type.This field is only available when the following conditions are met:- `netbios_enable` must be equa
+    netbios_ntype: The NetBIOS node type.This field is only available when the following conditions are met:- `netbios_enable` must be equa Valid values: [0, 1, 2, 4, 8]
     netbios_scope: The NetBIOS Scope ID. This provides an extended naming service for NetBIOS over TCP/IP. The NetBIOS scope ID isolates Ne
     ntp_server1: The primary NTP server to provide to clients.This field is only available when the following conditions are met:- `mode`
     ntp_server2: The secondary NTP server to provide to clients.This field is only available when the following conditions are met:- `mod
     passtos: Enables or disables setting the TOS IP header value of tunnel packets to match the encapsulated packet value.
-    ping_action: The action to take after a ping to the remote peer times-out.This field is only available when the following conditions 
+    ping_action: The action to take after a ping to the remote peer times-out.This field is only available when the following conditions  Valid values: ['ping_restart', 'ping_exit']
     ping_action_push: Enables or disables pushing the ping action to the VPN client.This field is only available when the following conditions
     ping_action_seconds: The number of seconds that must elapse before the ping is considered a timeout and the configured `ping_action` is perfo
-    ping_method: The method used to define ping configuration.
+    ping_method: The method used to define ping configuration. Valid values: ['keepalive', 'ping']
     ping_push: Enables or disables push ping to the VPN client.This field is only available when the following conditions are met:- `pi
     ping_seconds: The number of seconds to accept no packets before sending a ping to the remote peer over the TCP/UDP control channel.Thi
     push_blockoutsidedns: Enables or disables blocking Windows 10 clients' access to DNS servers except across OpenVPN while connected, forcing cl
@@ -25075,16 +25075,16 @@ async def pfsense_create_vpn_open_vpn_server(
     remote_networkv6: IPv6 networks that will be routed through the tunnel, so that a site-to-site VPN can be established without manually cha
     serverbridge_dhcp: Enables or disables clients on the bridge to obtain DHCP.This field is only available when the following conditions are 
     serverbridge_routegateway: Enables or disables pushing the bridge interface's IPv4 address to connecting clients as a route gateway.This field is o
-    sndrcvbuf: The send and receive buffer size for OpenVPN. Set to null to use the system default.
+    sndrcvbuf: The send and receive buffer size for OpenVPN. Set to null to use the system default. Valid values: [65536, 131072, 262144, 524288, 1048576, 2097152]
     strictusercn: Enables or disables enforcing a match between the common name of the client certificate and the username given at login.
     tls: The TLS key this OpenVPN server will use to sign control channel packets with an HMAC signature for authentication when 
-    tlsauth_keydir: The TLS key direction. This must be set to complementary values on the client and server. For example, if the server is 
-    topology: The method used to supply a virtual adapter IP address to clients when using TUN mode on IPv4.This field is only availab
+    tlsauth_keydir: The TLS key direction. This must be set to complementary values on the client and server. For example, if the server is  Valid values: ['default', '0', '1', '2']
+    topology: The method used to supply a virtual adapter IP address to clients when using TUN mode on IPv4.This field is only availab Valid values: ['subnet', 'net30']
     tunnel_network: The IPv4 virtual network used for private communications between this server and client hosts.
     tunnel_networkv6: The IPv6 virtual network used for private communications between this server and client hosts.
     use_tls: Enables or disables the use of a TLS key for this OpenVPN server.
     username_as_common_name: Enables or disable the username of the client being used in place of the certificate common name for purposes such as de
-    verbosity_level: The OpenVPN logging verbosity level.
+    verbosity_level: The OpenVPN logging verbosity level. Valid values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     wins_server1: The primary WINS server to provide to clients.This field is only available when the following conditions are met:- `mode
     wins_server2: The secondary WINS server to provide to clients.This field is only available when the following conditions are met:- `mo
     """
@@ -25318,23 +25318,23 @@ async def pfsense_update_vpn_open_vpn_server(
     verbosity_level: int | None = 1,
     wins_server1: str | None = None,
     wins_server2: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/vpn/openvpn/server
 
     id: The ID of the object or resource to interact with.
-    allow_compression: The compression mode allowed by this OpenVPN server. Compression can potentially increase throughput but may allow an at
+    allow_compression: The compression mode allowed by this OpenVPN server. Compression can potentially increase throughput but may allow an at Valid values: ['no', 'yes', 'asym']
     authmode: The name of the authentication server to use as the authentication backend for this OpenVPN serverThis field is only ava
     caref: The `refid` of the CA object to assume as the peer CA.
-    cert_depth: The depth of the certificate chain to check when a certificate based client signs in. Certificates below this depth are 
+    cert_depth: The depth of the certificate chain to check when a certificate based client signs in. Certificates below this depth are  Valid values: [1, 2, 3, 4, 5]
     certref: The `refid` of the certificate object to assume as the OpenVPN server certificate.
     client2client: Enables or disables allowing communication between clients connected to this server.
     connlimit: The number of concurrent connections a single user can have.This field is only available when the following conditions a
-    create_gw: The gateway type(s) that will be created when a virtual interface is assigned to this OpenVPN server
+    create_gw: The gateway type(s) that will be created when a virtual interface is assigned to this OpenVPN server Valid values: ['both', 'v4only', 'v6only']
     custom_options: Additional options to add to the OpenVPN server configuration.
     data_ciphers: The encryption algorithms/ciphers allowed by this OpenVPN server.
     data_ciphers_fallback: The fallback encryption algorithm/cipher used for data channel packets when communicating with clients that do not suppo
     description: The description for this OpenVPN server.
-    dev_mode: The carrier mode for this OpenVPN server. `tun` mode carries IPv4 and IPv6 (layer 3) and is the most common and compatib
+    dev_mode: The carrier mode for this OpenVPN server. `tun` mode carries IPv4 and IPv6 (layer 3) and is the most common and compatib Valid values: ['tun', 'tap']
     dh_length: The Diffie-Hellman (DH) parameter set used for key exchange.
     digest: The algorithm used to authenticate data channel packets, and control channel packets if a TLS Key is present.
     disable: Disables this OpenVPN server.
@@ -25356,20 +25356,20 @@ async def pfsense_update_vpn_open_vpn_server(
     local_networkv6: The IPv6 networks that will be accessible from the remote endpoint. Expressed as a list of one or more CIDR ranges or ho
     local_port: The port used by OpenVPN to receive client connections. Valid options are: a TCP/UDP port number
     maxclients: The maximum number of clients allowed to concurrently connect to this server.
-    mode: The OpenVPN server mode.
+    mode: The OpenVPN server mode. Valid values: ['p2p_tls', 'server_tls', 'server_user', 'server_tls_user']
     netbios_enable: Enables or disables NetBIOS over TCP/IP.This field is only available when the following conditions are met:- `mode` must
-    netbios_ntype: The NetBIOS node type.This field is only available when the following conditions are met:- `netbios_enable` must be equa
+    netbios_ntype: The NetBIOS node type.This field is only available when the following conditions are met:- `netbios_enable` must be equa Valid values: [0, 1, 2, 4, 8]
     netbios_scope: The NetBIOS Scope ID. This provides an extended naming service for NetBIOS over TCP/IP. The NetBIOS scope ID isolates Ne
     ntp_server1: The primary NTP server to provide to clients.This field is only available when the following conditions are met:- `mode`
     ntp_server2: The secondary NTP server to provide to clients.This field is only available when the following conditions are met:- `mod
     passtos: Enables or disables setting the TOS IP header value of tunnel packets to match the encapsulated packet value.
-    ping_action: The action to take after a ping to the remote peer times-out.This field is only available when the following conditions 
+    ping_action: The action to take after a ping to the remote peer times-out.This field is only available when the following conditions  Valid values: ['ping_restart', 'ping_exit']
     ping_action_push: Enables or disables pushing the ping action to the VPN client.This field is only available when the following conditions
     ping_action_seconds: The number of seconds that must elapse before the ping is considered a timeout and the configured `ping_action` is perfo
-    ping_method: The method used to define ping configuration.
+    ping_method: The method used to define ping configuration. Valid values: ['keepalive', 'ping']
     ping_push: Enables or disables push ping to the VPN client.This field is only available when the following conditions are met:- `pi
     ping_seconds: The number of seconds to accept no packets before sending a ping to the remote peer over the TCP/UDP control channel.Thi
-    protocol: The protocol used by this OpenVPN server.
+    protocol: The protocol used by this OpenVPN server. Valid values: ['UDP4', 'UDP6', 'UDP', 'TCP4', 'TCP6', 'TCP']
     push_blockoutsidedns: Enables or disables blocking Windows 10 clients' access to DNS servers except across OpenVPN while connected, forcing cl
     push_register_dns: Enables or disables running `net stop dnscache`, `net start dnscache`, `ipconfig /flushdns` and `ipconfig /registerdns` 
     remote_cert_tls: Enables or disables requiring hosts to have a client certificate to connect.
@@ -25380,17 +25380,17 @@ async def pfsense_update_vpn_open_vpn_server(
     serverbridge_dhcp_start: The bridge DHCP range's start address.This field is only available when the following conditions are met:- `serverbridge
     serverbridge_interface: The interface to which this TAP instance will be bridged. This is not done automatically. This interface must be assigne
     serverbridge_routegateway: Enables or disables pushing the bridge interface's IPv4 address to connecting clients as a route gateway.This field is o
-    sndrcvbuf: The send and receive buffer size for OpenVPN. Set to null to use the system default.
+    sndrcvbuf: The send and receive buffer size for OpenVPN. Set to null to use the system default. Valid values: [65536, 131072, 262144, 524288, 1048576, 2097152]
     strictusercn: Enables or disables enforcing a match between the common name of the client certificate and the username given at login.
     tls: The TLS key this OpenVPN server will use to sign control channel packets with an HMAC signature for authentication when 
-    tls_type: The TLS key usage type. In `auth` mode, the TLS key is used only as HMAC authentication for the control channel, protect
-    tlsauth_keydir: The TLS key direction. This must be set to complementary values on the client and server. For example, if the server is 
-    topology: The method used to supply a virtual adapter IP address to clients when using TUN mode on IPv4.This field is only availab
+    tls_type: The TLS key usage type. In `auth` mode, the TLS key is used only as HMAC authentication for the control channel, protect Valid values: ['auth', 'crypt']
+    tlsauth_keydir: The TLS key direction. This must be set to complementary values on the client and server. For example, if the server is  Valid values: ['default', '0', '1', '2']
+    topology: The method used to supply a virtual adapter IP address to clients when using TUN mode on IPv4.This field is only availab Valid values: ['subnet', 'net30']
     tunnel_network: The IPv4 virtual network used for private communications between this server and client hosts.
     tunnel_networkv6: The IPv6 virtual network used for private communications between this server and client hosts.
     use_tls: Enables or disables the use of a TLS key for this OpenVPN server.
     username_as_common_name: Enables or disable the username of the client being used in place of the certificate common name for purposes such as de
-    verbosity_level: The OpenVPN logging verbosity level.
+    verbosity_level: The OpenVPN logging verbosity level. Valid values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     wins_server1: The primary WINS server to provide to clients.This field is only available when the following conditions are met:- `mode
     wins_server2: The secondary WINS server to provide to clients.This field is only available when the following conditions are met:- `mo
     """
@@ -25555,7 +25555,7 @@ async def pfsense_update_vpn_open_vpn_server(
 async def pfsense_delete_vpn_open_vpn_server(
     id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/openvpn/server
 
     id: The ID of the object to target.
@@ -25582,14 +25582,14 @@ async def pfsense_list_vpn_open_vpn_servers(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/vpn/openvpn/servers
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -25614,7 +25614,7 @@ async def pfsense_delete_vpn_open_vpn_servers(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/openvpn/servers
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -25639,7 +25639,7 @@ async def pfsense_delete_vpn_open_vpn_servers(
 
 @mcp.tool()
 async def pfsense_get_vpn_wire_guard_apply_status(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/vpn/wireguard/apply
     """
     return await _client.request(
@@ -25651,7 +25651,7 @@ async def pfsense_get_vpn_wire_guard_apply_status(
 @mcp.tool()
 async def pfsense_vpn_wire_guard_apply(
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/vpn/wireguard/apply
     """
     if not confirm:
@@ -25669,7 +25669,7 @@ async def pfsense_vpn_wire_guard_apply(
 async def pfsense_get_vpn_wire_guard_peer_allowed_ip(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/vpn/wireguard/peer/allowed_ip
 
     id: The ID of the object to target.
@@ -25694,7 +25694,7 @@ async def pfsense_create_vpn_wire_guard_peer_allowed_ip(
     parent_id: int,
     confirm: bool = False,
     descr: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/vpn/wireguard/peer/allowed_ip
 
     Note: Call pfsense_vpn_wireguard_apply after this to apply changes.
@@ -25734,7 +25734,7 @@ async def pfsense_update_vpn_wire_guard_peer_allowed_ip(
     address: str | None = None,
     descr: str | None = None,
     mask: int | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/vpn/wireguard/peer/allowed_ip
 
     Note: Call pfsense_vpn_wireguard_apply after this to apply changes.
@@ -25774,7 +25774,7 @@ async def pfsense_delete_vpn_wire_guard_peer_allowed_ip(
     id: str | int,
     parent_id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/wireguard/peer/allowed_ip
 
     Note: Call pfsense_vpn_wireguard_apply after this to apply changes.
@@ -25803,7 +25803,7 @@ async def pfsense_delete_vpn_wire_guard_peer_allowed_ip(
 @mcp.tool()
 async def pfsense_get_vpn_wire_guard_peer(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/vpn/wireguard/peer
 
     id: The ID of the object to target.
@@ -25830,7 +25830,7 @@ async def pfsense_create_vpn_wire_guard_peer(
     port: str | None = '51820',
     presharedkey: str | None = None,
     tun: str | None = 'unassigned',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/vpn/wireguard/peer
 
     Note: Call pfsense_vpn_wireguard_apply after this to apply changes.
@@ -25890,7 +25890,7 @@ async def pfsense_update_vpn_wire_guard_peer(
     presharedkey: str | None = None,
     publickey: str | None = None,
     tun: str | None = 'unassigned',
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/vpn/wireguard/peer
 
     Note: Call pfsense_vpn_wireguard_apply after this to apply changes.
@@ -25945,7 +25945,7 @@ async def pfsense_delete_vpn_wire_guard_peer(
     id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/wireguard/peer
 
     Note: Call pfsense_vpn_wireguard_apply after this to apply changes.
@@ -25978,14 +25978,14 @@ async def pfsense_list_vpn_wire_guard_peers(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/vpn/wireguard/peers
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -26009,7 +26009,7 @@ async def pfsense_list_vpn_wire_guard_peers(
 async def pfsense_replace_vpn_wire_guard_peers(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/vpn/wireguard/peers
 
     Note: Call pfsense_vpn_wireguard_apply after this to apply changes.
@@ -26035,7 +26035,7 @@ async def pfsense_delete_vpn_wire_guard_peers(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/wireguard/peers
 
     Note: Call pfsense_vpn_wireguard_apply after this to apply changes.
@@ -26063,7 +26063,7 @@ async def pfsense_delete_vpn_wire_guard_peers(
 
 @mcp.tool()
 async def pfsense_get_vpn_wire_guard_settings(
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/vpn/wireguard/settings
     """
     return await _client.request(
@@ -26082,7 +26082,7 @@ async def pfsense_update_vpn_wire_guard_settings(
     keep_conf: bool | None = True,
     resolve_interval: int | None = 300,
     resolve_interval_track: bool | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/vpn/wireguard/settings
 
     Note: Call pfsense_vpn_wireguard_apply after this to apply changes.
@@ -26090,7 +26090,7 @@ async def pfsense_update_vpn_wire_guard_settings(
     enable: Enables or disables WireGuard on this system. WireGuard cannot be disabled when one or more tunnels is assigned to a pfS
     hide_peers: Enables or disables initially hiding all peers in the user interface.
     hide_secrets: Enables or disables hiding all secrets (private and pre-shared keys) in the user interface.
-    interface_group: Configures which WireGuard tunnels are members of the WireGuard interface group.
+    interface_group: Configures which WireGuard tunnels are members of the WireGuard interface group. Valid values: ['all', 'unassigned', 'none']
     keep_conf: Enables or disables keeping the WireGuard configuration when the package is uninstalled/reinstalled.
     resolve_interval: The interval (in seconds) for re-resolving endpoint host/domain names.This field is only available when the following co
     resolve_interval_track: Enables or disables tracking the 'Aliases Hostnames Resolve Interval' value as the `resolve_internal` value instead of s
@@ -26127,7 +26127,7 @@ async def pfsense_update_vpn_wire_guard_settings(
 async def pfsense_get_vpn_wire_guard_tunnel_address(
     id: str | int,
     parent_id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/vpn/wireguard/tunnel/address
 
     id: The ID of the object to target.
@@ -26152,7 +26152,7 @@ async def pfsense_create_vpn_wire_guard_tunnel_address(
     parent_id: int,
     confirm: bool = False,
     descr: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/vpn/wireguard/tunnel/address
 
     Note: Call pfsense_vpn_wireguard_apply after this to apply changes.
@@ -26192,7 +26192,7 @@ async def pfsense_update_vpn_wire_guard_tunnel_address(
     address: str | None = None,
     descr: str | None = None,
     mask: int | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/vpn/wireguard/tunnel/address
 
     Note: Call pfsense_vpn_wireguard_apply after this to apply changes.
@@ -26232,7 +26232,7 @@ async def pfsense_delete_vpn_wire_guard_tunnel_address(
     id: str | int,
     parent_id: str | int,
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/wireguard/tunnel/address
 
     Note: Call pfsense_vpn_wireguard_apply after this to apply changes.
@@ -26261,7 +26261,7 @@ async def pfsense_delete_vpn_wire_guard_tunnel_address(
 @mcp.tool()
 async def pfsense_get_vpn_wire_guard_tunnel(
     id: str | int,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/vpn/wireguard/tunnel
 
     id: The ID of the object to target.
@@ -26285,7 +26285,7 @@ async def pfsense_create_vpn_wire_guard_tunnel(
     enabled: bool | None = True,
     listenport: str | None = '51820',
     mtu: int | None = 1420,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/vpn/wireguard/tunnel
 
     Note: Call pfsense_vpn_wireguard_apply after this to apply changes.
@@ -26333,7 +26333,7 @@ async def pfsense_update_vpn_wire_guard_tunnel(
     listenport: str | None = '51820',
     mtu: int | None = 1420,
     privatekey: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/vpn/wireguard/tunnel
 
     Note: Call pfsense_vpn_wireguard_apply after this to apply changes.
@@ -26379,7 +26379,7 @@ async def pfsense_delete_vpn_wire_guard_tunnel(
     id: str | int,
     confirm: bool = False,
     apply: bool | None = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/wireguard/tunnel
 
     Note: Call pfsense_vpn_wireguard_apply after this to apply changes.
@@ -26412,14 +26412,14 @@ async def pfsense_list_vpn_wire_guard_tunnels(
     sort_by: list[str] | None = None,
     sort_flags: str | None = None,
     sort_order: str | None = None,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/vpn/wireguard/tunnels
 
     limit: The number of objects to obtain at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     sort_by: The fields to sort response data by.
-    sort_flags: The sort flag to use to customize the behavior of the sort.
-    sort_order: The order to sort response data by.
+    sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
+    sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -26443,7 +26443,7 @@ async def pfsense_list_vpn_wire_guard_tunnels(
 async def pfsense_replace_vpn_wire_guard_tunnels(
     items: list[dict[str, Any]],
     confirm: bool = False,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """PUT /api/v2/vpn/wireguard/tunnels
 
     Note: Call pfsense_vpn_wireguard_apply after this to apply changes.
@@ -26469,7 +26469,7 @@ async def pfsense_delete_vpn_wire_guard_tunnels(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
-) -> dict[str, Any] | str:
+) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/wireguard/tunnels
 
     Note: Call pfsense_vpn_wireguard_apply after this to apply changes.

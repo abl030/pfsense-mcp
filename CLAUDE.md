@@ -455,3 +455,69 @@ Each full test run takes ~5-8 minutes. To avoid wasting time:
 ## Integration
 
 See `examples/nixosconfig-integration.md` for deploying into the homelab NixOS fleet.
+
+---
+
+## MCP Research — Best Practices for Building MCP Servers
+
+**IMPORTANT: Always add new learnings to this section as they are discovered during bank tester runs, generator fixes, or any MCP-related debugging. Every fix, workaround, or surprise should be captured here as a numbered best practice. This section is the living record of what we've learned — don't let findings get lost in commit messages or memory files.**
+
+Findings from building a 599-tool MCP server and testing it with an AI consumer (bank tester). These are hard-won lessons applicable to any MCP server project.
+
+### Tool Schema Constraints
+
+1. **Return type annotations must cover all response shapes.** FastMCP validates tool return values against the function's return type annotation. If your API returns both objects and arrays, the return type must be `dict[str, Any] | list[Any] | str` — not just `dict[str, Any] | str`. A `list` response against a `dict`-only annotation triggers an `Output validation error` that confuses the consumer even though the data was successfully retrieved.
+
+2. **Sanitize large integers from OpenAPI specs.** The Anthropic API rejects tool schemas containing integers that exceed safe serialization limits (e.g., `9223372036854775807` / int64 max). OpenAPI specs commonly use these as sentinel values meaning "no limit". The generator must detect values where `abs(value) >= 2**53` and replace them with `None` defaults. Without this, the entire MCP server fails to register with `tools.N.custom.input_schema: int too big to convert`.
+
+3. **One bad tool schema poisons the whole server.** When the Anthropic API rejects a single tool's schema, ALL tools become unavailable for that request — not just the broken one. This makes schema validation bugs critical-severity, since a single overlooked field can take down a 599-tool server.
+
+### Tool Discoverability (What Works)
+
+4. **Consistent naming conventions are highly discoverable.** The pattern `pfsense_{verb}_{resource}` (e.g., `create_firewall_rule`, `list_status_gateways`, `apply_firewall`) let the tester find every tool on the first attempt. Verbs: `get` (singular), `list` (plural), `create`, `update`, `delete`, `apply`.
+
+5. **Apply-pattern reminders in docstrings work.** Adding `"Note: Call {apply_tool_name} after this to apply changes."` to mutation tool docstrings meant the tester never forgot to apply. This is more effective than relying on the consumer to know which subsystems need apply.
+
+6. **Confirmation gates (`confirm=True`) work smoothly.** The preview-then-execute pattern for mutations caused zero confusion in testing. The tester naturally used `confirm=True` on first attempt. The preview message showing the HTTP method and path provides useful context.
+
+### Tool Count Challenges
+
+7. **599 tools is at the edge of API limits.** With this many tools, some API calls intermittently fail due to serialization or token budget constraints. Consider: grouping related tools, lazy-loading tool subsets, or offering a "tool catalog" meta-tool that returns available tools for a subsystem.
+
+### Error Handling
+
+8. **Distinguish API errors from schema validation errors.** When FastMCP's output validation rejects a valid API response, the error message is indistinguishable from an actual API failure. The consumer retried with the same parameters (which will never help for a schema bug). Error messages should clearly indicate whether the failure was in the upstream API vs. local schema validation.
+
+9. **Sibling tool call error propagation is overly aggressive.** When one tool in a parallel batch triggers a validation error, FastMCP cancels all sibling calls with a generic error. For read-only operations, this is unnecessarily conservative — one failed GET shouldn't prevent other independent GETs from executing.
+
+### OpenAPI-to-MCP Generation Lessons
+
+10. **Phantom routes in specs cause silent failures.** OpenAPI specs may document routes that don't exist on the real server (e.g., plural sub-resource endpoints). These generate tools that always 404. Filter them by testing against a live instance during generation, or maintain an exclusion list.
+
+11. **`readOnly` schema fields must be excluded from request parameters.** Including response-only fields as tool parameters confuses the consumer into thinking they're settable.
+
+12. **Enum values belong in parameter descriptions.** When an API field accepts a fixed set of values, listing them in the tool's parameter description eliminates the most common failure category (`missing_enum_values`). Don't rely on the consumer guessing valid values.
+
+13. **Default values from specs need validation.** Not all OpenAPI defaults are safe to use as Python defaults. Sentinel values (int64 max/min), empty objects that should be `None`, and values that depend on server state should all be sanitized during generation.
+
+### Sub-resource vs Inline Array Pattern
+
+14. **Array parameters that are actually sub-resources cause `parameter_format` failures.** Some APIs expose array fields (e.g., WireGuard `addresses`, `allowedips`) in the create schema, but passing JSON arrays triggers validation errors. The correct pattern is to create the parent without the array, then add items via sub-resource endpoints (`tunnel/address`, `peer/allowed_ip`). Tool docstrings should explicitly note when an array parameter must be managed via sub-resources instead of inline.
+
+### Conditional Required Fields
+
+15. **Unconditionally required fields that are actually conditional confuse consumers.** When an OpenAPI spec marks fields like `ecname` (only needed for ECDSA keys) or `caref` (only needed for intermediate CAs) as always-required, the consumer must guess to pass empty strings. Docstrings should document which "required" fields can be empty and under what conditions.
+
+### Bank Tester Run 1 Results (pre-fix baseline)
+
+**Test run**: `run-20260208-144233` (8 tasks, pre-generator-fix)
+- 6/8 passed, 2 failed (both `int too big to convert` — fixed by sanitizing int64 max defaults)
+- 95% first-attempt success rate across working tests (57/60 tool calls)
+- Failure categories: `parameter_format` (2), `missing_enum_values` (1)
+- Zero failures on: firewall rules, DNS settings, certificates, diagnostics, full network setup
+- All failures were in WireGuard (sub-resource array pattern + private key format guessing)
+- Output validation errors on list endpoints noted but non-blocking (fixed by widening return type)
+
+**Generator fixes applied after this run:**
+- `codegen.py`: return type `dict[str, Any] | str` → `dict[str, Any] | list[Any] | str`
+- `schema_parser.py`: sanitize defaults where `abs(value) >= 2**53` → treat as `None`
