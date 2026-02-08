@@ -288,7 +288,6 @@ _ENDPOINT_OVERRIDES: dict[str, dict[str, str]] = {
 
 # Endpoints that should be completely skipped for CRUD tests
 _SKIP_CRUD_PATHS: dict[str, str] = {
-    "/api/v2/interface": "interface CRUD can destabilize VM (em2 reserved for LAGG)",
     "/api/v2/vpn/openvpn/client_export/config": "complex 5-step chain: CA+cert+OVPN server+user cert (deferred)",
     "/api/v2/services/dhcp_server": "per-interface singleton, POST not supported",
     "/api/v2/services/haproxy/settings/dns_resolver": "500 parent Model not constructed (bug persists in v2.7.1)",
@@ -615,6 +614,37 @@ _CHAINED_CRUD: dict[str, dict[str, Any]] = {
             "descr": "Test VLAN",
         },
         "update_field": "descr",
+    },
+    # ── Interface (needs VLAN as parent) ──────────────────────────────────
+    "/api/v2/interface": {
+        "parents": [
+            {
+                "path": "/api/v2/interface/vlan",
+                "body_template": {
+                    "if": "em2",
+                    "tag": 999,
+                    "pcp": 0,
+                    "descr": "Test VLAN for iface",
+                },
+                "tag": "iface",
+                "inject": {"if": "vlanif"},
+            }
+        ],
+        "child_body": {
+            "descr": "TESTVLAN",
+            "enable": True,
+            "typev4": "static",
+            "ipaddr": "10.99.99.1",
+            "subnet": 24,
+            "ipaddrv6": "none",
+            "subnetv6": 128,
+            "prefix_6rd": "",
+            "gateway_6rd": "",
+            "prefix_6rd_v4plen": 0,
+            "track6_interface": "",
+        },
+        "update_field": "descr",
+        "update_value": '"TESTVLAN_UPDATED"',
     },
     # ── Routing: static_route needs gateway ───────────────────────────────
     "/api/v2/routing/static_route": {

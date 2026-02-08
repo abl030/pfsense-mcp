@@ -79,7 +79,7 @@ def _delete_with_retry(client: httpx.Client, path: str, obj_id, params: dict | N
             break
         time.sleep(5)
     assert resp.status_code in (200, 404), f"Delete {path} id={obj_id} failed: {resp.text[:500]}"
-# Total generated tests: 204
+# Total generated tests: 205
 
 def test_crud_firewall_alias(client: httpx.Client):
     """CRUD lifecycle: /api/v2/firewall/alias"""
@@ -890,7 +890,66 @@ def test_crud_firewall_virtual_ip(client: httpx.Client):
         assert del_resp.status_code in (200, 404), f"Delete failed: {del_resp.text[:500]}"
 
 
-# SKIP /api/v2/interface: interface CRUD can destabilize VM (em2 reserved for LAGG)
+def test_crud_interface(client: httpx.Client):
+    """CRUD lifecycle: /api/v2/interface (needs: interface/vlan)"""
+    # Setup: create parent interface/vlan
+    p0_resp = client.post(
+        "/api/v2/interface/vlan",
+        json={
+        "if": 'em2',
+        "tag": 999,
+        "pcp": 0,
+        "descr": 'Test VLAN for iface',
+    },
+    )
+    p0 = _ok(p0_resp)
+    p0_id = p0.get("id")
+    assert p0_id is not None, f"No id in parent response: {p0}"
+
+    try:
+        # CREATE
+        body = {
+                "descr": 'TESTVLAN',
+                "enable": True,
+                "typev4": 'static',
+                "ipaddr": '10.99.99.1',
+                "subnet": 24,
+                "ipaddrv6": 'none',
+                "subnetv6": 128,
+                "prefix_6rd": '',
+                "gateway_6rd": '',
+                "prefix_6rd_v4plen": 0,
+                "track6_interface": '',
+            }
+        body["if"] = p0["vlanif"]
+        create_resp = client.post(
+            "/api/v2/interface",
+            json=body,
+        )
+        data = _ok(create_resp)
+        obj_id = data.get("id")
+        assert obj_id is not None, f"No id in create response: {data}"
+
+        try:
+            # GET (singular)
+            get_resp = client.get(
+                "/api/v2/interface",
+                params={"id": obj_id},
+            )
+            _ok(get_resp)
+
+            # UPDATE
+            update_resp = client.patch(
+                "/api/v2/interface",
+                json={"id": obj_id, "descr": "TESTVLAN_UPDATED"},
+            )
+            _ok(update_resp)
+
+        finally:
+            _delete_with_retry(client, "/api/v2/interface", obj_id)
+    finally:
+        _delete_with_retry(client, "/api/v2/interface/vlan", p0_id)
+
 
 def test_crud_interface_bridge(client: httpx.Client):
     """CRUD lifecycle: /api/v2/interface/bridge"""

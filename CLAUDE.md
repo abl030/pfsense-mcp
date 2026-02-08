@@ -317,14 +317,14 @@ Exclude from generation or add extra warnings:
 
 ## Phase 2 Status: Test Coverage
 
-**Current: 203 tests, 203 passing** against 217 active API paths (599 tools; 41 phantom plural routes filtered out)
+**Current: 204 tests, 204 passing** against 217 active API paths (599 tools; 41 phantom plural routes filtered out)
 
 ### Coverage summary
 
 | Metric | Count | % |
 |---|---|---|
-| Paths with active tests | 203 | 78.7% |
-| Paths with documented skip | 55 | 21.3% |
+| Paths with active tests | 204 | 79.1% |
+| Paths with documented skip | 54 | 20.9% |
 | **Total accounted** | **258** | **100%** |
 
 pfSense CE 2.8.1 with REST API v2.7.1 (upgraded from 2.7.2 via `upgrade-2.8.exp`).
@@ -343,8 +343,7 @@ pfSense CE 2.8.1 with REST API v2.7.1 (upgraded from 2.7.2 via `upgrade-2.8.exp`
 
 Every skip is documented in `_SKIP_CRUD_PATHS`, `_SKIP_ACTION`, `_SKIP_SINGLETON`, or `_PHANTOM_PLURAL_ROUTES` in `test_generator.py`.
 
-**Hardware/VM limitations (2):**
-- `interface` — interface CRUD can destabilize VM (em2 reserved for LAGG)
+**Hardware/VM limitations (1):**
 - `vpn/openvpn/client_export/config` — complex 5-step chain: CA+cert+OVPN server+user cert (deferred)
 
 **pfSense singleton design (1):**
@@ -385,7 +384,7 @@ Deep research on all skipped endpoints is in `research/skipped-endpoints-analysi
 | Sprint | Endpoints | Approach | Status |
 |--------|-----------|----------|--------|
 | 0 | Phantom plural routes (41 paths) | Remove from MCP server generator (`codegen.py`/`context_builder.py`) using `_PHANTOM_PLURAL_ROUTES` set. Update tool count in `README.md` and `flake.nix`. | **DONE** — 41 paths (78 ops) filtered in `context_builder.py`. 677→599 tools. |
-| 1 | `interface` CRUD (+3 tests) | Create VLAN on em2, assign as opt1, PATCH, delete. Safe — doesn't touch WAN/LAN. | **TODO** |
+| 1 | `interface` CRUD (+1 test) | Create VLAN on em2, assign as opt1, PATCH, delete. Safe — doesn't touch WAN/LAN. | **DONE** — VLAN parent on em2:999, interface CRUD test passes. 203→204 tests. |
 | 2 | `services/dhcp_server` POST | Confirm by-design limitation. Re-categorize skip reason from "singleton" to "not applicable — POST not supported, PATCH tested". No new tests needed. | **TODO** |
 | 3 | `system/certificate/pkcs12/export` (+1 test) | Try `Accept: application/octet-stream` header. If still 406, use client-side PKCS12 generation as fallback proof. | **TODO** |
 | 4 | `services/haproxy/settings/dns_resolver` & `email_mailer` (+2 tests) | Initialize HAProxy config in config.xml via `diagnostics/command_prompt` PHP call, then POST sub-resources. | **TODO** |
