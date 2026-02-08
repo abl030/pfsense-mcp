@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "pfsense": {
+      "command": "FASTMCP_PATH_PLACEHOLDER",
+      "args": ["run", "REPO_DIR_PLACEHOLDER/generated/server.py"],
+      "env": {
+        "PFSENSE_HOST": "https://127.0.0.1:18443",
+        "PFSENSE_API_KEY": "API_KEY_PLACEHOLDER",
+        "PFSENSE_VERIFY_SSL": "false"
+      }
+    }
+  }
+}

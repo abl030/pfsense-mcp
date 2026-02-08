@@ -6,7 +6,7 @@ Build a **self-contained, auto-generated MCP server** for the pfSense REST API v
 
 ## Work Order
 
-Complete these phases in order. Phase 1 gives you a working test target. Phase 2 builds the generator and tests against it.
+Complete these phases in order. Phase 1 gives you a working test target. Phase 2 builds the generator and tests against it. Phase 3 tests the MCP server end-to-end with an AI consumer.
 
 ### Phase 1: VM Test Infrastructure
 
@@ -363,30 +363,6 @@ Every skip is documented in `_SKIP_CRUD_PATHS`, `_SKIP_ACTION`, `_SKIP_SINGLETON
 
 Routes present in the OpenAPI spec but return nginx 404 on the real server. These are sub-resource plural endpoints whose singular forms require `parent_id`. The pfSense REST API simply doesn't register these routes. All are tested via their singular CRUD endpoints instead.
 
-### Backlog: Endpoint Unblocking Sprints
-
-Deep research on all skipped endpoints is in `research/skipped-endpoints-analysis.md`. Work is split into 10 sprints, ordered by confidence (high first). Each sprint follows the same process:
-
-1. **Plan** — read the research report for that sprint, read the current test generator and any relevant generated tests, then enter plan mode and propose an approach
-2. **Iterate** — implement, regenerate, run targeted tests (`-k`), fix failures, repeat
-3. **Finalize** — run full suite, commit, update this section with the outcome (passed/blocked/skipped)
-4. **Decision** — if it doesn't work for a technical reason, document why here and move on
-
-**All 10 sprints (0-9) are complete.** Final result: 208 tests, 208 passing. 7 endpoints remain permanently skipped with documented reasons.
-
-| Sprint | Endpoints | Approach | Status |
-|--------|-----------|----------|--------|
-| 0 | Phantom plural routes (41 paths) | Remove from MCP server generator (`codegen.py`/`context_builder.py`) using `_PHANTOM_PLURAL_ROUTES` set. Update tool count in `README.md` and `flake.nix`. | **DONE** — 41 paths (78 ops) filtered in `context_builder.py`. 677→599 tools. |
-| 1 | `interface` CRUD (+1 test) | Create VLAN on em2, assign as opt1, PATCH, delete. Safe — doesn't touch WAN/LAN. | **DONE** — VLAN parent on em2:999, interface CRUD test passes. 203→204 tests. |
-| 2 | `services/dhcp_server` POST | Confirm by-design limitation. Re-categorize skip reason from "singleton" to "not applicable — POST not supported, PATCH tested". No new tests needed. | **DONE** — re-categorized skip reason. No test changes needed. |
-| 3 | `system/certificate/pkcs12/export` (+1 test) | Try `Accept: application/octet-stream` header. If still 406, use client-side PKCS12 generation as fallback proof. | **DONE** — `Accept: application/octet-stream` works! Was never a bug, just wrong Accept header. 204→205 tests. |
-| 4 | `services/haproxy/settings/dns_resolver` & `email_mailer` (+2 tests) | Initialize HAProxy config in config.xml via `diagnostics/command_prompt` PHP call, then POST sub-resources. | **BLOCKED** — config.xml init helps CREATE but GET/DELETE still 500. Confirmed framework bug in v2.7.1. Stays skipped. |
-| 5 | `system/package` POST/DELETE (+1 test) | Try `pfSense-pkg-cron` (smaller than arping). Use 504-as-success polling pattern. | **BLOCKED** — pfSense-pkg-cron not found in repo. QEMU NAT too slow/unreliable for package downloads. Stays skipped; GET tested via read tests. |
-| 6 | `vpn/openvpn/client_export` (+1 test) | 6-step chain: CA → server cert → OVPN server → user cert → export config → export. Pre-install `pfSense-pkg-openvpn-client-export` in golden image. | **DONE** — custom test with 7-step chain (CA, server cert, OVPN server, user cert, export config, export, cleanup). 205→206 tests. |
-| 7 | ACME `register`/`issue`/`renew` (+1 test) | All three are async (fire-and-forget) — return 200 immediately with `status: pending`. No external ACME server needed. | **DONE** — custom test covers all 3 endpoints. 206→207 tests. |
-| 8 | `system/restapi/settings/sync` (+1 test) | Sync-to-self: GET PHP-serialized settings via command_prompt, POST to sync endpoint. No HA peer needed. | **DONE** — custom test reads current config and syncs it back. 207→208 tests. |
-| 9 | `system/restapi/version` PATCH | Confirm too destructive. Keep skipped. | **DONE** — confirmed destructive (triggers package reinstall). Stays permanently skipped. |
-
 ### Key test patterns
 
 - **IPsec encryption**: Use `aes` (AES-CBC) with `keylen=256`, NOT `aes256gcm` (GCM keylen field is not the key size)
@@ -410,6 +386,46 @@ packages.x86_64-linux.default = writeShellApplication {
 ```
 
 The dev shell includes jinja2, pytest, qemu, and curl for generator development and VM testing.
+
+## Phase 3: Bank Tester Integration Testing
+
+Test the MCP server end-to-end by having a "tester Claude" use it as a real consumer. The tester attempts 9 realistic pfSense tasks of escalating complexity, records every friction point, and produces an aggregate report. Use findings to improve tool docstrings, parameter hints, and error messages.
+
+### Running the bank tester
+
+```bash
+nix develop -c bash bank-tester/run-bank-test.sh              # all 9 tasks
+nix develop -c bash bank-tester/run-bank-test.sh 01            # single task
+nix develop -c bash bank-tester/run-bank-test.sh "01 03 05"    # subset
+```
+
+### Bank tester structure
+
+```
+bank-tester/
+  run-bank-test.sh          # Orchestrator: boot VM → run tasks → collect results
+  mcp-config.json           # MCP config template (placeholders for key/path)
+  TESTER-CLAUDE.md          # System prompt for the tester Claude
+  tasks/                    # 9 task files, escalating complexity
+  analyze-results.py        # Parse tester output, aggregate failure categories
+  results/run-*/            # Per-run results (JSONL + summary.md)
+```
+
+### Work order
+
+1. **Run the bank tester** — `nix develop -c bash bank-tester/run-bank-test.sh` against a fresh VM. Start with task 01 alone to validate the setup, then run all 9.
+2. **Read the summary** — `bank-tester/results/run-*/summary.md` shows failure categories and per-task results.
+3. **Fix the generator** — for each high-frequency failure category, fix `codegen.py`, `context_builder.py`, or `templates/server.py.j2`. Common predicted fixes:
+   - `missing_enum_values`: render `p.enum` values in parameter descriptions (`codegen.py`)
+   - `type_confusion`: add example values for `list[str]` params in docstrings
+   - `dependency_unknown`: add "Requires: ..." notes to dependent resource docstrings (`context_builder.py`)
+   - `missing_required_field`: mark required fields more clearly in descriptions
+4. **Regenerate** — `nix develop -c python -m generator`
+5. **Re-run bank tester** — confirm fixes reduce first-attempt failures
+6. **Run full pytest suite** — `nix develop -c bash vm/run-tests.sh -v` to ensure generator changes don't break existing tests
+7. **Iterate** — repeat steps 2-6 until first-attempt success rate is acceptable
+
+---
 
 ## Rules
 

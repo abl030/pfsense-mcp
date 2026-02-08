@@ -1,0 +1,253 @@
+#!/usr/bin/env python3
+"""
+Analyze bank tester results from Claude's text output.
+
+Reads *.txt files from a results directory, extracts TASK-REPORT blocks,
+parses them, and produces an aggregate summary.
+
+Usage:
+    python bank-tester/analyze-results.py <results-dir>
+"""
+
+import re
+import sys
+from collections import Counter
+from pathlib import Path
+
+
+def extract_reports_from_text(filepath: Path) -> list[dict]:
+    """Extract task reports from a plain text output file."""
+    reports = []
+    text = filepath.read_text()
+
+    pattern = r"---TASK-REPORT-START---(.*?)---TASK-REPORT-END---"
+    matches = re.findall(pattern, text, re.DOTALL)
+
+    for match in matches:
+        report = parse_report(match.strip())
+        if report:
+            reports.append(report)
+
+    return reports
+
+
+def parse_report(text: str) -> dict | None:
+    """Parse a structured task report from text.
+
+    Handles YAML-like format with simple key: value pairs.
+    """
+    report = {}
+    lines = text.split("\n")
+    i = 0
+    while i < len(lines):
+        line = lines[i].strip()
+        if not line or line.startswith("#") or line.startswith("```"):
+            i += 1
+            continue
+
+        if ":" in line:
+            key, _, value = line.partition(":")
+            key = key.strip()
+            value = value.strip()
+
+            if key == "details":
+                # Parse the details list
+                details = []
+                i += 1
+                current_detail = {}
+                while i < len(lines):
+                    dline = lines[i]
+                    stripped = dline.strip()
+                    if stripped.startswith("```"):
+                        i += 1
+                        continue
+                    if stripped.startswith("- tool:"):
+                        if current_detail:
+                            details.append(current_detail)
+                        current_detail = {"tool": stripped.split(":", 1)[1].strip()}
+                    elif stripped and ":" in stripped and current_detail:
+                        dk, _, dv = stripped.partition(":")
+                        dk = dk.strip().lstrip("- ")
+                        dv = dv.strip()
+                        current_detail[dk] = dv
+                    elif not stripped.startswith(" ") and not stripped.startswith("-") and ":" in stripped:
+                        # We've left the details block
+                        if current_detail:
+                            details.append(current_detail)
+                        break
+                    i += 1
+                if current_detail and current_detail not in details:
+                    details.append(current_detail)
+                report["details"] = details
+                continue
+
+            elif key == "notes":
+                # Multiline notes block
+                notes_lines = []
+                i += 1
+                while i < len(lines):
+                    nline = lines[i]
+                    if nline.strip().startswith("---") or nline.strip().startswith("```"):
+                        break
+                    notes_lines.append(nline)
+                    i += 1
+                report["notes"] = "\n".join(notes_lines).strip()
+                continue
+            else:
+                report[key] = value
+
+        i += 1
+
+    return report if report else None
+
+
+def generate_summary(results_dir: Path, reports: list[dict]) -> str:
+    """Generate a markdown summary from parsed reports."""
+    lines = []
+    lines.append("# Bank Tester Results Summary\n")
+    lines.append(f"**Results directory**: `{results_dir}`\n")
+    lines.append(f"**Tasks analyzed**: {len(reports)}\n")
+
+    # Overall status
+    statuses = Counter(r.get("status", "unknown") for r in reports)
+    lines.append("## Overall Status\n")
+    for status, count in statuses.most_common():
+        lines.append(f"- **{status}**: {count}")
+    lines.append("")
+
+    # Aggregate metrics
+    total_calls = 0
+    total_first_failures = 0
+    for r in reports:
+        try:
+            total_calls += int(r.get("total_tool_calls", 0))
+        except (ValueError, TypeError):
+            pass
+        try:
+            total_first_failures += int(r.get("first_attempt_failures", 0))
+        except (ValueError, TypeError):
+            pass
+
+    if total_calls > 0:
+        success_rate = ((total_calls - total_first_failures) / total_calls) * 100
+        lines.append(f"**Total tool calls**: {total_calls}")
+        lines.append(f"**First-attempt failures**: {total_first_failures}")
+        lines.append(f"**First-attempt success rate**: {success_rate:.1f}%\n")
+
+    # Failure categories
+    categories = Counter()
+    tool_failures = Counter()
+    for r in reports:
+        for d in r.get("details", []):
+            if isinstance(d, dict):
+                cat = d.get("category", "unknown")
+                categories[cat] += 1
+                tool = d.get("tool", "unknown")
+                tool_failures[tool] += 1
+
+    if categories:
+        lines.append("## Failure Categories\n")
+        lines.append("| Category | Count |")
+        lines.append("|----------|-------|")
+        for cat, count in categories.most_common():
+            lines.append(f"| `{cat}` | {count} |")
+        lines.append("")
+
+    if tool_failures:
+        lines.append("## Tools With Most Failures\n")
+        lines.append("| Tool | Failures |")
+        lines.append("|------|----------|")
+        for tool, count in tool_failures.most_common(10):
+            lines.append(f"| `{tool}` | {count} |")
+        lines.append("")
+
+    # Per-task breakdown
+    lines.append("## Per-Task Results\n")
+    for r in reports:
+        task_id = r.get("task_id", "unknown")
+        status = r.get("status", "unknown")
+        calls = r.get("total_tool_calls", "?")
+        failures = r.get("first_attempt_failures", "?")
+        cleanup = r.get("cleanup_complete", "?")
+        lines.append(f"### {task_id}\n")
+        lines.append(f"- **Status**: {status}")
+        lines.append(f"- **Tool calls**: {calls}")
+        lines.append(f"- **First-attempt failures**: {failures}")
+        lines.append(f"- **Cleanup complete**: {cleanup}")
+
+        details = r.get("details", [])
+        if details and isinstance(details, list) and len(details) > 0:
+            lines.append("- **Failure details**:")
+            for d in details:
+                if isinstance(d, dict):
+                    lines.append(f"  - `{d.get('tool', '?')}` [{d.get('category', '?')}]: {d.get('diagnosis', 'no diagnosis')}")
+
+        notes = r.get("notes", "")
+        if notes:
+            lines.append(f"- **Notes**: {notes}")
+        lines.append("")
+
+    # Actionable findings
+    if categories:
+        lines.append("## Actionable Findings\n")
+        if categories.get("missing_enum_values", 0) > 0:
+            lines.append("- **Enum values**: Generator should render valid values in parameter descriptions")
+        if categories.get("type_confusion", 0) > 0:
+            lines.append("- **Type hints**: Generator should add example values for list-typed params")
+        if categories.get("missing_required_field", 0) > 0:
+            lines.append("- **Required fields**: Generator should mark required fields more clearly")
+        if categories.get("dependency_unknown", 0) > 0:
+            lines.append("- **Dependencies**: Generator should add 'Requires: ...' notes to dependent resources")
+        if categories.get("forgot_apply", 0) > 0:
+            lines.append("- **Apply reminders**: Tool docstrings need stronger apply-after-mutation reminders")
+        if categories.get("parameter_format", 0) > 0:
+            lines.append("- **Parameter format**: Add format examples (CIDR vs plain IP, etc.) to descriptions")
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: python analyze-results.py <results-dir>", file=sys.stderr)
+        sys.exit(1)
+
+    results_dir = Path(sys.argv[1])
+    if not results_dir.is_dir():
+        print(f"Error: {results_dir} is not a directory", file=sys.stderr)
+        sys.exit(1)
+
+    # Collect all reports from text files
+    all_reports = []
+    txt_files = sorted(results_dir.glob("*.txt"))
+
+    if not txt_files:
+        print(f"No .txt files found in {results_dir}", file=sys.stderr)
+        sys.exit(1)
+
+    print(f"Analyzing {len(txt_files)} result files...")
+
+    for tf in txt_files:
+        reports = extract_reports_from_text(tf)
+        if reports:
+            all_reports.extend(reports)
+            print(f"  {tf.name}: {len(reports)} report(s)")
+        else:
+            print(f"  {tf.name}: no reports found")
+
+    if not all_reports:
+        print("Warning: No task reports found in any file.", file=sys.stderr)
+
+    summary = generate_summary(results_dir, all_reports)
+
+    # Write summary
+    summary_path = results_dir / "summary.md"
+    with open(summary_path, "w") as f:
+        f.write(summary)
+
+    print(f"\nSummary written to {summary_path}")
+    print(summary)
+
+
+if __name__ == "__main__":
+    main()
