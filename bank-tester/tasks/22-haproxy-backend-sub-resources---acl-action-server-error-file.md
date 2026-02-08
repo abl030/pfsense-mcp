@@ -32,7 +32,6 @@
     - `name`: `bt_sys22_be`
     - `agent_port`: `0`
     - `persist_cookie_name`: `SRVID`
-    - `descr`: `Parent backend for sub-resources`
 2. **Create** using `pfsense_create_services_ha_proxy_backend_acl` with `confirm=True` (use the `parent_id` from the parent resource created earlier):
     - `name`: `bt_sys22_bacl`
     - `expression`: `host_starts_with`

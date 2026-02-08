@@ -42,7 +42,6 @@
     - `name`: `bt_sys23_be`
     - `agent_port`: `0`
     - `persist_cookie_name`: `SRVID`
-    - `descr`: `Parent backend for frontend`
 2. **Create** using `pfsense_create_services_ha_proxy_frontend` with `confirm=True`:
     - `name`: `bt_sys23_fe`
     - `type_`: `http`

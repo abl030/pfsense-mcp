@@ -46,6 +46,7 @@
     - `name`: `bt_sys25_acme_cert`
     - `descr`: `Bank tester ACME cert`
     - `acmeserver`: `letsencrypt-staging-2`
+    - `a_domainlist`: `[{'name': 'test.example.com', 'method': 'standalone'}]`
 10. **List** using `pfsense_list_services_acme_certificates` — verify the created resource appears
 11. **Get** using `pfsense_get_services_acme_certificate` with the ID from the create response
 12. **Update** using `pfsense_update_services_acme_certificate` with `confirm=True` — set `descr` to `Updated ACME cert`

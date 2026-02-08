@@ -44,11 +44,10 @@
     - `number`: `252`
     - `type_`: `text`
     - `value`: `http://wpad.example.com/wpad.dat`
-    - `descr`: `bt_sys20_opt`
 12. **List** using `pfsense_list_services_dhcp_server_custom_options` — verify the created resource appears
 13. **Get** using `pfsense_get_services_dhcp_server_custom_option` with the ID from the create response
-14. **Update** using `pfsense_update_services_dhcp_server_custom_option` with `confirm=True` — set `descr` to `Updated custom option`
-15. **Get** again using `pfsense_get_services_dhcp_server_custom_option` — verify `descr` was updated
+14. **Update** using `pfsense_update_services_dhcp_server_custom_option` with `confirm=True` — set `value` to `http://wpad.example.com/updated.dat`
+15. **Get** again using `pfsense_get_services_dhcp_server_custom_option` — verify `value` was updated
 16. **Update settings** using `pfsense_update_services_dhcp_server_backend` with `confirm=True` — set `dhcpbackend` to `'kea'`
 17. **Restore** using `pfsense_update_services_dhcp_server_backend` with `confirm=True` — set `dhcpbackend` back to `'isc'`
 18. **Check apply status** using `pfsense_get_services_dhcp_server_apply_status`

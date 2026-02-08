@@ -480,10 +480,9 @@ tasks:
           number: 252
           type_: text
           value: "http://wpad.example.com/wpad.dat"
-          descr: bt_sys20_opt
         static_parent_id: lan
-        update_field: descr
-        update_value: "Updated custom option"
+        update_field: value
+        update_value: "http://wpad.example.com/updated.dat"
       - path: /api/v2/services/dhcp_server/backend
         settings: true
         patch_only: true
@@ -520,9 +519,8 @@ tasks:
           name: bt_sys21_be
           agent_port: "0"
           persist_cookie_name: SRVID
-          descr: Bank tester backend
-        update_field: descr
-        update_value: "Updated backend"
+        update_field: advanced
+        update_value: "# updated by bank tester"
       - path: /api/v2/services/haproxy/apply
         apply: true
     notes: |
@@ -544,7 +542,6 @@ tasks:
           name: bt_sys22_be
           agent_port: "0"
           persist_cookie_name: SRVID
-          descr: Parent backend for sub-resources
       - path: /api/v2/services/haproxy/backend/acl
         crud: true
         parent: /api/v2/services/haproxy/backend
@@ -608,7 +605,6 @@ tasks:
           name: bt_sys23_be
           agent_port: "0"
           persist_cookie_name: SRVID
-          descr: Parent backend for frontend
       - path: /api/v2/services/haproxy/frontend
         crud: true
         parent: null
@@ -727,8 +723,12 @@ tasks:
           priority: 0
         update_field: rdata
         update_value: "10.99.99.2"
-      - path: /api/v2/services/bind/sync
-        action: true
+      - path: /api/v2/services/bind/sync/settings
+        settings: true
+        patch_field: synconchanges
+        patch_value: manual
+        extra_fields:
+          masterip: "10.0.0.1"
     notes: |
       Enable BIND in settings first. Access list entry and zone record are sub-resources.
       Cleanup: record → zone, entry → access_list, view.
@@ -756,6 +756,9 @@ tasks:
           name: bt_sys25_acme_cert
           descr: Bank tester ACME cert
           acmeserver: "letsencrypt-staging-2"
+          a_domainlist:
+            - name: test.example.com
+              method: standalone
         update_field: descr
         update_value: "Updated ACME cert"
       - path: /api/v2/services/acme/certificate/domain
@@ -920,10 +923,7 @@ tasks:
           descr: bt_sys28_tunable
         update_field: descr
         update_value: "Updated tunable"
-      - path: /api/v2/system/webgui/settings
-        settings: true
-        patch_field: webguicss
-        patch_value: pfSense.css
+      # webgui/settings excluded: all fields (port, protocol, sslcertref) are endpoint-altering (finding #21)
       - path: /api/v2/system/notifications/email_settings
         settings: true
         patch_field: ipaddress

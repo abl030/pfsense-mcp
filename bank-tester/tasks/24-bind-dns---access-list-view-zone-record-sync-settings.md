@@ -4,7 +4,7 @@
 
 **Objective**: Exercise all tools in the services/bind subsystem through CRUD lifecycle, settings, and actions.
 
-**Tools to exercise** (26):
+**Tools to exercise** (27):
 - `pfsense_get_services_bind_settings`
 - `pfsense_update_services_bind_settings`
 - `pfsense_create_services_bind_access_list`
@@ -30,7 +30,8 @@
 - `pfsense_get_services_bind_zone_record`
 - `pfsense_update_services_bind_zone_record`
 - `pfsense_delete_services_bind_zone_record`
-- `pfsense_post_/api/v2/services/bind/sync`
+- `pfsense_get_services_bind_sync_settings`
+- `pfsense_update_services_bind_sync_settings`
 
 **Steps**:
 1. **Get settings** using `pfsense_get_services_bind_settings` — note current value of `enable_bind`
@@ -74,8 +75,9 @@
 24. **Get** using `pfsense_get_services_bind_zone_record` with the ID from the create response
 25. **Update** using `pfsense_update_services_bind_zone_record` with `confirm=True` — set `rdata` to `10.99.99.2`
 26. **Get** again using `pfsense_get_services_bind_zone_record` — verify `rdata` was updated
-27. **Execute** `pfsense_post_/api/v2/services/bind/sync` with `confirm=True`:
-(no parameters needed)
+27. **Get settings** using `pfsense_get_services_bind_sync_settings` — note current value of `synconchanges`
+28. **Update settings** using `pfsense_update_services_bind_sync_settings` with `confirm=True` — set `synconchanges` to `'manual'` (also include: `masterip=10.0.0.1`)
+29. **Get settings** again using `pfsense_get_services_bind_sync_settings` — verify `synconchanges` was updated
 
 **Important notes**:
 Enable BIND in settings first. Access list entry and zone record are sub-resources.
@@ -88,4 +90,4 @@ Cleanup: record → zone, entry → access_list, view.
 - Delete using `pfsense_delete_services_bind_access_list_entry` with `confirm=True` (ID from create step)
 - Delete using `pfsense_delete_services_bind_access_list` with `confirm=True` (ID from create step)
 
-**Expected outcome**: All 26 tools exercised successfully.
+**Expected outcome**: All 27 tools exercised successfully.
