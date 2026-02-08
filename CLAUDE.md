@@ -419,22 +419,18 @@ bank-tester/
 
 ### Phase 3.2 Work Order: Iterative Test-Fix-Regenerate
 
-Work through each bank tester task one at a time. For each task:
+Work through every bank tester task sequentially (10, 11, 12, ... 37, 40-44), greening each one before moving to the next. No user input needed until all tasks are done.
+
+For each task:
 
 1. **Run the task** — `nix develop -c bash bank-tester/run-bank-test.sh <task-number>`
-2. **Read results** — check `results/run-*/summary.md` and the task `.txt` file
-3. **Fix the generator** — for each failure, fix `codegen.py`, `context_builder.py`, or `schema_parser.py`:
-   - `missing_enum_values` → already fixed (enum values rendered in param descriptions)
-   - `dependency_unknown` → add "Requires: ..." notes to dependent resource docstrings
-   - `parameter_format` → add format examples (CIDR vs plain IP, etc.)
-   - `type_confusion` → add example values for list-typed params
-   - Truncated conditional docs → already fixed (250-char limit, HTML stripped)
-4. **Tabulate phantom/broken endpoints** — add any 404s or 500s to the "Bank Tester Endpoint Discovery" table below
-5. **Regenerate** — `nix develop -c python -m generator`
-6. **Re-run the task** — confirm fixes resolved the failures
-7. **Commit** — commit generator fix + regenerated server.py
+2. **Read results** — check the task `.txt` file and `summary.md`
+3. **If failures**: fix the generator (`codegen.py`, `context_builder.py`, `schema_parser.py`, or task-config), regenerate (`nix develop -c python -m generator`), and re-run until the task passes
+4. **Tabulate** — add any phantom 404s or API 500s to the "Bank Tester Endpoint Discovery" table below
+5. **Commit** — commit fixes + regenerated server.py after each task greens
+6. **Move to next task** — no pause needed, just keep going
 
-Task execution order: 35 (read-only, done) → 37 → 36 → 10-34 → 40-44
+Task 35 already done. Work through 10→44 sequentially.
 
 ### Bank Tester Endpoint Discovery
 
