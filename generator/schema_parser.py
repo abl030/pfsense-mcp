@@ -41,6 +41,18 @@ class ToolParameter:
 
 def _openapi_type_to_python(schema: dict[str, Any]) -> str:
     """Map an OpenAPI schema to a Python type string."""
+    # Handle $ref — it's always an object
+    if "$ref" in schema:
+        return "dict[str, Any]"
+
+    # Handle allOf — if any sub-schema is an object or $ref, it's an object
+    if "allOf" in schema:
+        for sub in schema["allOf"]:
+            if "$ref" in sub or sub.get("type") == "object":
+                return "dict[str, Any]"
+        # Fallback: treat allOf as object (composite schemas are objects)
+        return "dict[str, Any]"
+
     # Handle oneOf (e.g. id can be int or string)
     if "oneOf" in schema:
         types = [_openapi_type_to_python(s) for s in schema["oneOf"]]

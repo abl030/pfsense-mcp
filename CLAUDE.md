@@ -438,11 +438,16 @@ Task 35 already done. Work through 10→44 sequentially.
 
 Endpoints discovered as phantom or broken during bank tester runs. Compare against `_PHANTOM_PLURAL_ROUTES` in `context_builder.py`.
 
-| Task | Endpoint / Tool | Issue | Category |
-|------|----------------|-------|----------|
-| 35 | `pfsense_list_status_logs_auth` | 404 — phantom plural route (in `_PHANTOM_PLURAL_ROUTES`) | phantom |
+| Task | Endpoint / Tool | Issue | Fix |
+|------|----------------|-------|-----|
+| 35 | `pfsense_list_status_logs_auth` | 404 — phantom plural route | tabulated |
+| 11 | `pfsense_create_firewall_nat_port_forward` | `destination: "wanip"` wrong format | task-config fixed to `"wan:ip"` |
+| 11 | `pfsense_create_firewall_nat_outbound_mapping` | `target_subnet` default 128 fails IPv4 | conditional defaults → None (`schema_parser.py`) |
+| 12 | `pfsense_create_firewall_schedule` | `timerange: list[str]` should be `list[dict]` | handle `allOf`/`$ref` in type resolver (`schema_parser.py`) |
 
-*This table grows as tasks are run. Every 404 or 500 discovered by the bank tester gets added here.*
+**Task status**: 10 green, 11 green, 12 green, 35 green. Next: 13.
+
+*This table grows as tasks are run. Every failure, phantom, or API bug gets recorded here.*
 
 ---
 
@@ -530,6 +535,10 @@ Findings from building a 677-tool MCP server and testing it with an AI consumer 
 ### Description Quality
 
 16. **Strip HTML and increase truncation limits for conditional field docs.** OpenAPI descriptions often contain `<br>` tags and conditional availability notes (e.g., "only available when enableremotelogging is true"). A 120-char truncation limit cuts these off mid-sentence, hiding critical dependency information from the consumer. Fix: strip HTML tags, collapse whitespace, increase limit to 250 chars. This fixed a `dependency_unknown` failure in bank tester task 35 where the tester couldn't see that `logall` requires `enableremotelogging`.
+
+17. **Conditional field defaults cause IPv4/IPv6 mismatches.** When a spec sets `default: 128` for a subnet field (valid for IPv6), sending that default for an IPv4 address causes validation failure. Fix: detect conditional fields (description contains "only available when") and set their defaults to `None` so they're only sent when explicitly specified. Applied in `schema_parser.py`.
+
+18. **`allOf`/`$ref` in array items must resolve to `dict`, not `str`.** When an array's `items` schema uses `allOf` with a `$ref` (e.g., `timerange` containing `FirewallScheduleTimeRange` objects), the type resolver must recognize this as `list[dict[str, Any]]`, not `list[str]`. Without `$ref`/`allOf` handling, the function falls through to the default `"string"` type, generating `list[str]` which causes "must be of type array" errors when the API receives strings instead of objects.
 
 ### Bank Tester Run 1 Results (pre-fix baseline)
 
