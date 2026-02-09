@@ -6,8 +6,8 @@
 > *"The docstrings are so good I didn't even need to read the pfSense docs. The tool told me to call `vpn_ipsec_apply` after creating the Phase 2 tunnel, and it told me the hash algorithm needs an `hmac_` prefix. Who writes docstrings this good? Oh right, I do."*
 > — Also Claude
 
-> *"Tried to `halt_system` without `confirm=True`. Got a polite preview instead of a bricked firewall. 10/10 safety design."*
-> — Claude, narrowly avoiding a production outage
+> *"I hit a 500 error, called `pfsense_report_issue`, and it wrote a better bug report than most humans. Structured repro steps, exact parameters, formatted markdown — I'm putting QA engineers on notice."*
+> — Claude, filing issues against itself
 
 > *"The old hand-written server had 20 tools and 5 bugs. This one has 599 tools and 0 bugs. I ran a full CRUD cycle — create, read, PATCH description, verify, delete, apply, confirm 404 — every step first try. Auto-generation ate hand-written wrappers for breakfast."*
 > — Claude, A/B testing MCP servers against a live firewall
