@@ -129,6 +129,10 @@ pfsense_create_firewall_alias(name="blocked_ips", type="host", address=["1.2.3.4
 pfsense_create_firewall_alias(name="blocked_ips", type="host", address=["1.2.3.4"], confirm=True)
 ```
 
+### Error Reporting
+
+Every tool's docstring nudges AI consumers to call `pfsense_report_issue` on unexpected errors. This tool composes a ready-to-paste `gh issue create` command with structured context (tool name, error, parameters, repro steps) — no HTTP calls, just a command string the user can review and run.
+
 ## How It Works
 
 A Python **generator** reads the pfSense REST API OpenAPI 3.0.0 spec (258 paths, 677 operations) and produces the MCP server via Jinja2 templates. When pfSense updates their API, pull a new spec and re-run:

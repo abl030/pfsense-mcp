@@ -85,6 +85,51 @@ class PfSenseClient:
 _client = PfSenseClient()
 
 
+@mcp.tool()
+async def pfsense_report_issue(
+    tool_name: str,
+    error_message: str,
+    parameters_used: dict[str, Any],
+    notes: str = "",
+) -> str:
+    """Report an unexpected pfSense MCP tool error by composing a GitHub issue command.
+
+    This tool does NOT make any HTTP calls. It returns a ready-to-paste
+    `gh issue create` command that the user can run to file a bug report.
+
+    tool_name: The MCP tool that produced the error (e.g. pfsense_get_firewall_rules)
+    error_message: The error message or response body returned by the tool
+    parameters_used: The parameters that were passed to the failing tool call
+    notes: Any additional context about what you were trying to accomplish
+    """
+    import json as _json
+
+    params_block = _json.dumps(parameters_used, indent=2, default=str)
+    notes_section = f"\n\n## Notes\n\n{notes}" if notes else ""
+
+    body = (
+        f"## Tool\n\n`{tool_name}`\n\n"
+        f"## Error\n\n```\n{error_message}\n```\n\n"
+        f"## Parameters\n\n```json\n{params_block}\n```\n\n"
+        f"## Repro Steps\n\n"
+        f"1. Call `{tool_name}` with the parameters above\n"
+        f"2. Observe the error response"
+        f"{notes_section}"
+    )
+
+    escaped_body = body.replace("'", "'\\''")
+    escaped_title = f"Bug: {tool_name} returns unexpected error".replace("'", "'\\''")
+
+    return (
+        f"Run this command to file the issue:\n\n"
+        f"gh issue create --repo abl030/pfsense-mcp "
+        f"--label bug --label mcp-reported "
+        f"--title '{escaped_title}' "
+        f"--body '{escaped_body}'"
+    )
+
+
+
 
 @mcp.tool()
 async def pfsense_post_auth_jwt(
@@ -94,6 +139,8 @@ async def pfsense_post_auth_jwt(
 
     WARNING: This endpoint requires HTTP BasicAuth (username:password).
     It does NOT accept API key or JWT auth. Will return 401 via MCP.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -125,6 +172,8 @@ async def pfsense_create_auth_key(
     hash_algo: The hash algorithm used for this API key. It is recommended to increase the strength of the algorithm for keys assigned to privileged users. Valid values: ['sha256', 'sha384', 'sha512']
     key: The real API key. This value is not stored internally and cannot be recovered if lost.
     length_bytes: The length of the API key (in bytes). Greater key lengths provide greater security, but also increase the number of characters used in the key string. Valid values: [16, 24, 32, 64]
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -160,6 +209,8 @@ async def pfsense_delete_auth_key(
     It does NOT accept API key or JWT auth. Will return 401 via MCP.
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -191,6 +242,8 @@ async def pfsense_list_auth_keys(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -226,6 +279,8 @@ async def pfsense_delete_auth_keys(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -261,6 +316,8 @@ async def pfsense_list_diagnostics_arp_table(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -298,6 +355,8 @@ async def pfsense_delete_diagnostics_arp_table(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request. Note: the `interface` filter uses display names like 'WAN', 'LAN' — not device names like 'em0', 'em1'.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -326,6 +385,8 @@ async def pfsense_get_diagnostics_arp_table_entry(
     """GET /api/v2/diagnostics/arp_table/entry
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -345,6 +406,8 @@ async def pfsense_delete_diagnostics_arp_table_entry(
     """DELETE /api/v2/diagnostics/arp_table/entry
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -371,6 +434,8 @@ async def pfsense_post_diagnostics_command_prompt(
     WARNING: DANGEROUS: Executes arbitrary shell commands.
 
     command: The command to be executed.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -395,6 +460,8 @@ async def pfsense_get_diagnostics_config_history_revision(
     """GET /api/v2/diagnostics/config_history/revision
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -414,6 +481,8 @@ async def pfsense_delete_diagnostics_config_history_revision(
     """DELETE /api/v2/diagnostics/config_history/revision
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -445,6 +514,8 @@ async def pfsense_list_diagnostics_config_history_revisions(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -482,6 +553,8 @@ async def pfsense_delete_diagnostics_config_history_revisions(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -513,6 +586,8 @@ async def pfsense_post_diagnostics_halt_system(
     WARNING: DANGEROUS: Halts the pfSense system.
 
     dry_run: Run through the call but don't actually initiate a shutdown.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -542,6 +617,8 @@ async def pfsense_post_diagnostics_ping(
     host: The IP address or hostname to ping.
     count: The number of ping requests to send.
     source_address: The source IP address to use for ping requests.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -572,6 +649,8 @@ async def pfsense_post_diagnostics_reboot(
     WARNING: DANGEROUS: Reboots the pfSense system.
 
     dry_run: Run through the call but don't actually initiate a reboot.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -596,6 +675,8 @@ async def pfsense_get_diagnostics_table(
     """GET /api/v2/diagnostics/table
 
     id: The ID of the object to target. Common pfSense PF table names: virusprot, bogons, snort2c, LAN_NETWORK, WAN_NETWORK.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -615,6 +696,8 @@ async def pfsense_delete_diagnostics_table(
     """DELETE /api/v2/diagnostics/table
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -646,6 +729,8 @@ async def pfsense_list_diagnostics_tables(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -669,6 +754,8 @@ async def pfsense_list_diagnostics_tables(
 async def pfsense_get_firewall_advanced_settings(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/advanced_settings
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -688,6 +775,8 @@ async def pfsense_update_firewall_advanced_settings(
 
     aliasesresolveinterval: The interval (in seconds) at which to resolve hostnames in aliases.
     checkaliasesurlcert: Check the certificate of URLs used in aliases.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -714,6 +803,8 @@ async def pfsense_get_firewall_alias(
     """GET /api/v2/firewall/alias
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -743,6 +834,8 @@ async def pfsense_create_firewall_alias(
     address: Sets the host, network or port entries for the alias. When `type` is set to `host`, each entry must be a valid IP address or FQDN. When `type` is set to `network`, each entry must be a valid network CIDR or FQDN. When `type` is set to `port`, each entry must be a valid port or port range. You may also specify an existing alias's `name` as an entry to created nested aliases.
     descr: Sets a description to help specify the purpose or contents of the alias.
     detail: Sets descriptions for each alias `address`. Values must match the order of the `address` value it relates to. For example, the first value specified here is the description for the first value specified in the `address` field. This value cannot contain
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -788,6 +881,8 @@ async def pfsense_update_firewall_alias(
     detail: Sets descriptions for each alias `address`. Values must match the order of the `address` value it relates to. For example, the first value specified here is the description for the first value specified in the `address` field. This value cannot contain
     name: Sets the name for the alias. This name must be unique from all other aliases.
     type_: Sets the type of alias this object will be. This directly impacts what values can be specified in the `address` field. Valid values: ['host', 'network', 'port']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -827,6 +922,8 @@ async def pfsense_delete_firewall_alias(
 
     id: The ID of the object to target.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -861,6 +958,8 @@ async def pfsense_list_firewall_aliases(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -890,6 +989,8 @@ async def pfsense_replace_firewall_aliases(
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -923,6 +1024,8 @@ async def pfsense_delete_firewall_aliases(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -948,6 +1051,8 @@ async def pfsense_delete_firewall_aliases(
 async def pfsense_get_firewall_apply_status(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/apply
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -960,6 +1065,8 @@ async def pfsense_firewall_apply(
     confirm: bool = False,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/firewall/apply
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -979,6 +1086,8 @@ async def pfsense_get_firewall_nat_one_to_one_mapping(
     """GET /api/v2/firewall/nat/one_to_one/mapping
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -1016,6 +1125,8 @@ async def pfsense_create_firewall_nat_one_to_one_mapping(
     ipprotocol: The IP version this mapping applies to. Valid values: ['inet', 'inet6']
     natreflection: Enables or disables NAT reflection for traffic matching this mapping. Set to `null` to use the system default. Valid values: ['enable', 'disable']
     nobinat: Exclude traffic matching this mapping from a later, more general, mapping.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -1077,6 +1188,8 @@ async def pfsense_update_firewall_nat_one_to_one_mapping(
     natreflection: Enables or disables NAT reflection for traffic matching this mapping. Set to `null` to use the system default. Valid values: ['enable', 'disable']
     nobinat: Exclude traffic matching this mapping from a later, more general, mapping.
     source: The source IP address or subnet that traffic must match to apply this mapping. Valid value options are: an existing interface, an IP address, a subnet CIDR, `any`, `l2tp`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -1124,6 +1237,8 @@ async def pfsense_delete_firewall_nat_one_to_one_mapping(
 
     id: The ID of the object to target.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -1158,6 +1273,8 @@ async def pfsense_list_firewall_nat_one_to_one_mappings(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -1187,6 +1304,8 @@ async def pfsense_replace_firewall_nat_one_to_one_mappings(
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -1220,6 +1339,8 @@ async def pfsense_delete_firewall_nat_one_to_one_mappings(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -1248,6 +1369,8 @@ async def pfsense_get_firewall_nat_outbound_mapping(
     """GET /api/v2/firewall/nat/outbound/mapping
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -1299,6 +1422,8 @@ async def pfsense_create_firewall_nat_outbound_mapping(
     static_nat_port: Do not rewrite source port for traffic matching this rule.This field is only available when the following conditions are met:- `nonat` must be equal to `false`
     target: The target network traffic matching this rule should be translated to. Valid value options are: an IP address, an existing alias. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.This field is only available when the following conditions are met:- `nonat` must be equal to `false`
     target_subnet: The subnet bits for the assigned `target`. This field is only applicable if `target` is set to an IP address. This has no affect for alias or interface `targets`.This field is only available when the following conditions are met:- `nonat` must be equal to `false`
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -1388,6 +1513,8 @@ async def pfsense_update_firewall_nat_outbound_mapping(
     static_nat_port: Do not rewrite source port for traffic matching this rule.This field is only available when the following conditions are met:- `nonat` must be equal to `false`
     target: The target network traffic matching this rule should be translated to. Valid value options are: an IP address, an existing alias. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.This field is only available when the following conditions are met:- `nonat` must be equal to `false`
     target_subnet: The subnet bits for the assigned `target`. This field is only applicable if `target` is set to an IP address. This has no affect for alias or interface `targets`.This field is only available when the following conditions are met:- `nonat` must be equal to `false`
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -1449,6 +1576,8 @@ async def pfsense_delete_firewall_nat_outbound_mapping(
 
     id: The ID of the object to target.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -1483,6 +1612,8 @@ async def pfsense_list_firewall_nat_outbound_mappings(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -1512,6 +1643,8 @@ async def pfsense_replace_firewall_nat_outbound_mappings(
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -1545,6 +1678,8 @@ async def pfsense_delete_firewall_nat_outbound_mappings(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -1570,6 +1705,8 @@ async def pfsense_delete_firewall_nat_outbound_mappings(
 async def pfsense_get_firewall_nat_outbound_mode(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/nat/outbound/mode
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -1587,6 +1724,8 @@ async def pfsense_update_firewall_nat_outbound_mode(
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     mode: The outbound NAT mode to assign this system. Set to `automatic` to have this system automatically generate NAT rules this firewall, `hybrid` to automatically generate NAT rules AND allow manual outbound NAT mappings to be assigned, `manual` to prevent the system from automatically generating NAT rules and only allow manual outbound NAT mappings, or `disabled` to disable outbound NAT on this system entirely. Valid values: ['automatic', 'hybrid', 'advanced', 'disabled']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -1611,6 +1750,8 @@ async def pfsense_get_firewall_nat_port_forward(
     """GET /api/v2/firewall/nat/port_forward
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -1660,6 +1801,8 @@ async def pfsense_create_firewall_nat_port_forward(
     nordr: Disables redirection for traffic matching this rule.
     nosync: Prevents this port forward rule from being synced to non-primary CARP members.
     source_port: The source port this port forward rule applies to. Set to `null` to allow any source port. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`, an existing port type firewall aliasThis field is only available when the following conditions are met:- `protocol` must be one of [ tcp, udp, tcp/udp ]
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -1745,6 +1888,8 @@ async def pfsense_update_firewall_nat_port_forward(
     source: The source address this port forward rule applies to. Valid value options are: an existing interface, an IP address, a subnet CIDR, an existing alias, `any`, `(self)`, `l2tp`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
     source_port: The source port this port forward rule applies to. Set to `null` to allow any source port. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`, an existing port type firewall aliasThis field is only available when the following conditions are met:- `protocol` must be one of [ tcp, udp, tcp/udp ]
     target: The IP address or alias of the internal host to forward matching traffic to. Valid value options are: an IP address, an existing alias. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -1804,6 +1949,8 @@ async def pfsense_delete_firewall_nat_port_forward(
 
     id: The ID of the object to target.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -1838,6 +1985,8 @@ async def pfsense_list_firewall_nat_port_forwards(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -1867,6 +2016,8 @@ async def pfsense_replace_firewall_nat_port_forwards(
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -1900,6 +2051,8 @@ async def pfsense_delete_firewall_nat_port_forwards(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -1928,6 +2081,8 @@ async def pfsense_get_firewall_rule(
     """GET /api/v2/firewall/rule
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -1999,6 +2154,8 @@ async def pfsense_create_firewall_rule(
     tcp_flags_any: Allow any TCP flags.
     tcp_flags_out_of: The TCP flags that can be set for this rule to match.This field is only available when the following conditions are met:- `tcp_flags_any` must be equal to `false`
     tcp_flags_set: The TCP flags that must be set for this rule to match.This field is only available when the following conditions are met:- `tcp_flags_any` must be equal to `false`
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -2128,6 +2285,8 @@ async def pfsense_update_firewall_rule(
     tcp_flags_out_of: The TCP flags that can be set for this rule to match.This field is only available when the following conditions are met:- `tcp_flags_any` must be equal to `false`
     tcp_flags_set: The TCP flags that must be set for this rule to match.This field is only available when the following conditions are met:- `tcp_flags_any` must be equal to `false`
     type_: The action to take against traffic that matches this rule. Valid values: ['pass', 'block', 'reject']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -2207,6 +2366,8 @@ async def pfsense_delete_firewall_rule(
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -2239,6 +2400,8 @@ async def pfsense_list_firewall_rules(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -2268,6 +2431,8 @@ async def pfsense_replace_firewall_rules(
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -2301,6 +2466,8 @@ async def pfsense_delete_firewall_rules(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -2329,6 +2496,8 @@ async def pfsense_get_firewall_schedule(
     """GET /api/v2/firewall/schedule
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -2354,6 +2523,8 @@ async def pfsense_create_firewall_schedule(
     name: The unique name to assign this schedule.
     timerange: The date/times this firewall schedule will be active. Each object accepts: - position (array) - month (array) - day (array) - hour (string) - rangedescr (string)
     descr: A description of this schedules purpose.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -2391,6 +2562,8 @@ async def pfsense_update_firewall_schedule(
     descr: A description of this schedules purpose.
     name: The unique name to assign this schedule.
     timerange: The date/times this firewall schedule will be active. Each object accepts: - position (array) - month (array) - day (array) - hour (string) - rangedescr (string)
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -2424,6 +2597,8 @@ async def pfsense_delete_firewall_schedule(
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -2450,6 +2625,8 @@ async def pfsense_get_firewall_schedule_time_range(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -2483,6 +2660,8 @@ async def pfsense_create_firewall_schedule_time_range(
     month: The month for each specified `day` value. Each value specified must correspond with a `day` field value and must match the order exactly. For example, a `month` value of `[3, 6]` and a `day` value of `[2, 17]` would evaluate to March 2nd and June 17th respectively.This field is only available when the following conditions are met:- `position` must be equal to `NULL`
     position: The day of the week this schedule should be active for. Use `1` for every Monday, `2` for every Tuesday, `3` for every Wednesday, `4` for every Thursday, `5` for every Friday, `6` for every Saturday, or `7` for every Sunday. If this field has a value specified, the `month` and `day` fields will be unavailable.
     rangedescr: A description detailing this firewall schedule time range's purpose.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -2532,6 +2711,8 @@ async def pfsense_update_firewall_schedule_time_range(
     month: The month for each specified `day` value. Each value specified must correspond with a `day` field value and must match the order exactly. For example, a `month` value of `[3, 6]` and a `day` value of `[2, 17]` would evaluate to March 2nd and June 17th respectively.This field is only available when the following conditions are met:- `position` must be equal to `NULL`
     position: The day of the week this schedule should be active for. Use `1` for every Monday, `2` for every Tuesday, `3` for every Wednesday, `4` for every Thursday, `5` for every Friday, `6` for every Saturday, or `7` for every Sunday. If this field has a value specified, the `month` and `day` fields will be unavailable.
     rangedescr: A description detailing this firewall schedule time range's purpose.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -2573,6 +2754,8 @@ async def pfsense_delete_firewall_schedule_time_range(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -2607,6 +2790,8 @@ async def pfsense_list_firewall_schedule_time_ranges(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -2644,6 +2829,8 @@ async def pfsense_delete_firewall_schedule_time_ranges(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -2680,6 +2867,8 @@ async def pfsense_list_firewall_schedules(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -2709,6 +2898,8 @@ async def pfsense_replace_firewall_schedules(
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -2742,6 +2933,8 @@ async def pfsense_delete_firewall_schedules(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -2770,6 +2963,8 @@ async def pfsense_get_firewall_state(
     """GET /api/v2/firewall/state
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -2791,6 +2986,8 @@ async def pfsense_delete_firewall_state(
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -2823,6 +3020,8 @@ async def pfsense_list_firewall_states(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -2862,6 +3061,8 @@ async def pfsense_delete_firewall_states(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -2888,6 +3089,8 @@ async def pfsense_delete_firewall_states(
 async def pfsense_get_firewall_states_size(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/states/size
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -2905,6 +3108,8 @@ async def pfsense_update_firewall_states_size(
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     maximumstates: The maximum number of firewall state entries allowed by this firewall.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -2929,6 +3134,8 @@ async def pfsense_get_firewall_traffic_shaper(
     """GET /api/v2/firewall/traffic_shaper
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -2964,6 +3171,8 @@ async def pfsense_create_firewall_traffic_shaper(
     qlimit: The number of packets that can be held in a queue waiting to be transmitted by the shaper.This field is only available when the following conditions are met:- `scheduler` must not be one of [ CODELQ ]
     queue: The child queues assigned to this traffic shaper. Each object accepts: - interface (string) - enabled (boolean) - name (string) - priority (integer) - qlimit (integer) - description (string) - default (boolean) - red (boolean) - rio (boolean) - ecn (boolean) - codel (boolean) - bandwidthtype (string): valid=['%', 'b', 'Kb', 'Mb', 'Gb'] ... and 16 more fields
     tbrconfig: The size, in bytes, of the token bucket regulator. If `null`, heuristics based on the interface bandwidth are used to determine the size.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -3021,6 +3230,8 @@ async def pfsense_update_firewall_traffic_shaper(
     queue: The child queues assigned to this traffic shaper. Each object accepts: - interface (string) - enabled (boolean) - name (string) - priority (integer) - qlimit (integer) - description (string) - default (boolean) - red (boolean) - rio (boolean) - ecn (boolean) - codel (boolean) - bandwidthtype (string): valid=['%', 'b', 'Kb', 'Mb', 'Gb'] ... and 16 more fields
     scheduler: The scheduler type to use for this traffic shaper. Changing this value will automatically update any child queues assigned to this traffic shaper. Valid values: ['HFSC', 'CBQ', 'FAIRQ', 'CODELQ', 'PRIQ']
     tbrconfig: The size, in bytes, of the token bucket regulator. If `null`, heuristics based on the interface bandwidth are used to determine the size.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -3066,6 +3277,8 @@ async def pfsense_delete_firewall_traffic_shaper(
 
     id: The ID of the object to target.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -3094,6 +3307,8 @@ async def pfsense_get_firewall_traffic_shaper_limiter_bandwidth(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -3123,6 +3338,8 @@ async def pfsense_create_firewall_traffic_shaper_limiter_bandwidth(
     bwscale: The scale factor of the `bw` fields value. Valid values: ['b', 'Kb', 'Mb']
     parent_id: The ID of the parent this object is nested under.
     bwsched: The schedule to assign this bandwidth profile. When this firewall schedule is active, this bandwidth profile will be used.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -3164,6 +3381,8 @@ async def pfsense_update_firewall_traffic_shaper_limiter_bandwidth(
     bw: The amount of bandwidth this profile allows.
     bwscale: The scale factor of the `bw` fields value. Valid values: ['b', 'Kb', 'Mb']
     bwsched: The schedule to assign this bandwidth profile. When this firewall schedule is active, this bandwidth profile will be used.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -3201,6 +3420,8 @@ async def pfsense_delete_firewall_traffic_shaper_limiter_bandwidth(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -3235,6 +3456,8 @@ async def pfsense_list_firewall_traffic_shaper_limiter_bandwidths(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -3272,6 +3495,8 @@ async def pfsense_delete_firewall_traffic_shaper_limiter_bandwidths(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -3300,6 +3525,8 @@ async def pfsense_get_firewall_traffic_shaper_limiter(
     """GET /api/v2/firewall/traffic_shaper/limiter
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -3417,6 +3644,8 @@ async def pfsense_create_firewall_traffic_shaper_limiter(
     plr: The amount of packet loss (in percentage) added to traffic passing through the limiter.
     qlimit: The length of the limiter's queue which the scheduler and AQM are responsible for. Set to `null` to assume default.
     queue: The child queues for this limiter. Each object accepts: - name (string) - number (integer) - enabled (boolean) - mask (string): valid=['none', 'srcaddress', 'dstaddress'] - maskbits (integer) - maskbitsv6 (integer) - qlimit (integer) - ecn (boolean) - description (string) - aqm (string): valid=['droptail', 'codel', 'pie', 'red', 'gred'] - param_codel_target (integer) - param_codel_interval (integer) ... and 21 more fields
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -3638,6 +3867,8 @@ async def pfsense_update_firewall_traffic_shaper_limiter(
     qlimit: The length of the limiter's queue which the scheduler and AQM are responsible for. Set to `null` to assume default.
     queue: The child queues for this limiter. Each object accepts: - name (string) - number (integer) - enabled (boolean) - mask (string): valid=['none', 'srcaddress', 'dstaddress'] - maskbits (integer) - maskbitsv6 (integer) - qlimit (integer) - ecn (boolean) - description (string) - aqm (string): valid=['droptail', 'codel', 'pie', 'red', 'gred'] - param_codel_target (integer) - param_codel_interval (integer) ... and 21 more fields
     sched: The scheduler to use for this limiter. The scheduler manages the sequence of network packets in the limiter's queue. Valid values: ['wf2q+', 'fifo', 'qfq', 'rr', 'prio', 'fq_codel', 'fq_pie']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -3765,6 +3996,8 @@ async def pfsense_delete_firewall_traffic_shaper_limiter(
 
     id: The ID of the object to target.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -3793,6 +4026,8 @@ async def pfsense_get_firewall_traffic_shaper_limiter_queue(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -3880,6 +4115,8 @@ async def pfsense_create_firewall_traffic_shaper_limiter_queue(
     plr: The amount of packet loss (in percentage) added to traffic passing through this limiter queue.
     qlimit: The length of the limiter's queue which the scheduler and AQM are responsible for. Set to `null` to assume default.
     weight: The share of the parent limiter this queue gets.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -4037,6 +4274,8 @@ async def pfsense_update_firewall_traffic_shaper_limiter_queue(
     plr: The amount of packet loss (in percentage) added to traffic passing through this limiter queue.
     qlimit: The length of the limiter's queue which the scheduler and AQM are responsible for. Set to `null` to assume default.
     weight: The share of the parent limiter this queue gets.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -4134,6 +4373,8 @@ async def pfsense_delete_firewall_traffic_shaper_limiter_queue(
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -4170,6 +4411,8 @@ async def pfsense_list_firewall_traffic_shaper_limiter_queues(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -4207,6 +4450,8 @@ async def pfsense_delete_firewall_traffic_shaper_limiter_queues(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -4243,6 +4488,8 @@ async def pfsense_list_firewall_traffic_shaper_limiters(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -4272,6 +4519,8 @@ async def pfsense_replace_firewall_traffic_shaper_limiters(
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -4296,6 +4545,8 @@ async def pfsense_get_firewall_traffic_shaper_queue(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -4373,6 +4624,8 @@ async def pfsense_create_firewall_traffic_shaper_queue(
     upperlimit_d: The duration (in milliseconds) that the burst-able bandwidth limit (`upperlimit_m1` is in effect.This field is only available when the following conditions are met:- `upperlimit` must be equal to `true`
     upperlimit_m1: The burst-able bandwidth limit for this traffic shaper queue.This field is only available when the following conditions are met:- `upperlimit` must be equal to `true`
     upperlimit_m2: The normal bandwidth limit for this traffic shaper queue. If `upperlimit_m1` is not defined, this limit will always be in effect. If `upperlimit_m1` is defined, this limit will take effect after the `upperlimit_d` duration has expired.This field is only available when the following conditions are met:- `upperlimit` must be equal to `true`
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -4510,6 +4763,8 @@ async def pfsense_update_firewall_traffic_shaper_queue(
     upperlimit_d: The duration (in milliseconds) that the burst-able bandwidth limit (`upperlimit_m1` is in effect.This field is only available when the following conditions are met:- `upperlimit` must be equal to `true`
     upperlimit_m1: The burst-able bandwidth limit for this traffic shaper queue.This field is only available when the following conditions are met:- `upperlimit` must be equal to `true`
     upperlimit_m2: The normal bandwidth limit for this traffic shaper queue. If `upperlimit_m1` is not defined, this limit will always be in effect. If `upperlimit_m1` is defined, this limit will take effect after the `upperlimit_d` duration has expired.This field is only available when the following conditions are met:- `upperlimit` must be equal to `true`
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -4597,6 +4852,8 @@ async def pfsense_delete_firewall_traffic_shaper_queue(
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -4633,6 +4890,8 @@ async def pfsense_list_firewall_traffic_shaper_queues(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -4670,6 +4929,8 @@ async def pfsense_delete_firewall_traffic_shaper_queues(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -4706,6 +4967,8 @@ async def pfsense_list_firewall_traffic_shapers(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -4735,6 +4998,8 @@ async def pfsense_replace_firewall_traffic_shapers(
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -4768,6 +5033,8 @@ async def pfsense_delete_firewall_traffic_shapers(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -4793,6 +5060,8 @@ async def pfsense_delete_firewall_traffic_shapers(
 async def pfsense_get_firewall_virtual_ip_apply_status(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/firewall/virtual_ip/apply
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -4805,6 +5074,8 @@ async def pfsense_firewall_virtual_ip_apply(
     confirm: bool = False,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/firewall/virtual_ip/apply
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -4824,6 +5095,8 @@ async def pfsense_get_firewall_virtual_ip(
     """GET /api/v2/firewall/virtual_ip
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -4869,6 +5142,8 @@ async def pfsense_create_firewall_virtual_ip(
     password: The VHID group password shared by all CARP members.This field is only available when the following conditions are met:- `mode` must be equal to `'carp'`
     type_: The virtual IP scope type. The `network` option is only applicable to the `proxyarp` and `other` virtual IP modes. Valid values: ['single', 'network']
     vhid: The VHID group that the machines will share.This field is only available when the following conditions are met:- `mode` must be equal to `'carp'`
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -4946,6 +5221,8 @@ async def pfsense_update_firewall_virtual_ip(
     subnet_bits: The subnet bits for this virtual IP. For `proxyarp` and `other` virtual IPs, this value specifies a block of many IP address. For all other virtual IP modes, this specifies the subnet mask
     type_: The virtual IP scope type. The `network` option is only applicable to the `proxyarp` and `other` virtual IP modes. Valid values: ['single', 'network']
     vhid: The VHID group that the machines will share.This field is only available when the following conditions are met:- `mode` must be equal to `'carp'`
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -5001,6 +5278,8 @@ async def pfsense_delete_firewall_virtual_ip(
 
     id: The ID of the object to target.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -5035,6 +5314,8 @@ async def pfsense_list_firewall_virtual_i_ps(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -5072,6 +5353,8 @@ async def pfsense_delete_firewall_virtual_i_ps(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -5105,6 +5388,8 @@ async def pfsense_create_graph_ql(
 
     query: The GraphQL query/mutation to execute.
     variables: The variables to pass to the GraphQL query or mutation. In general, this will be an object containing the variables to pass to the query or mutation.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -5128,6 +5413,8 @@ async def pfsense_create_graph_ql(
 async def pfsense_get_interface_apply_status(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/interface/apply
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -5140,6 +5427,8 @@ async def pfsense_interface_apply(
     confirm: bool = False,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/interface/apply
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -5167,6 +5456,8 @@ async def pfsense_list_interface_available_interfaces(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -5193,6 +5484,8 @@ async def pfsense_get_interface_bridge(
     """GET /api/v2/interface/bridge
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -5216,6 +5509,8 @@ async def pfsense_create_interface_bridge(
 
     members: The member interfaces to include in this bridge.
     descr: A description for this interface bridge.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -5249,6 +5544,8 @@ async def pfsense_update_interface_bridge(
     id: The ID of the object or resource to interact with.
     descr: A description for this interface bridge.
     members: The member interfaces to include in this bridge.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -5280,6 +5577,8 @@ async def pfsense_delete_interface_bridge(
     Note: Call pfsense_interface_apply after this to apply changes.
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -5312,6 +5611,8 @@ async def pfsense_list_interface_bridges(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -5338,6 +5639,8 @@ async def pfsense_get_interface_gre(
     """GET /api/v2/interface/gre
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -5377,6 +5680,8 @@ async def pfsense_create_interface_gre(
     tunnel_remote_addr6: The remote IPv6 address to use for the GRE tunnel.This field is only available when the following conditions are met:- `tunnel_local_addr6` must not be equal to `NULL`
     tunnel_remote_net: The remote IPv4 subnet bitmask to use for the GRE tunnel.This field is only available when the following conditions are met:- `tunnel_local_addr` must not be equal to `NULL`
     tunnel_remote_net6: The remote IPv6 subnet bitmask to use for the GRE tunnel.This field is only available when the following conditions are met:- `tunnel_local_addr6` must not be equal to `NULL`
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -5442,6 +5747,8 @@ async def pfsense_update_interface_gre(
     tunnel_remote_addr6: The remote IPv6 address to use for the GRE tunnel.This field is only available when the following conditions are met:- `tunnel_local_addr6` must not be equal to `NULL`
     tunnel_remote_net: The remote IPv4 subnet bitmask to use for the GRE tunnel.This field is only available when the following conditions are met:- `tunnel_local_addr` must not be equal to `NULL`
     tunnel_remote_net6: The remote IPv6 subnet bitmask to use for the GRE tunnel.This field is only available when the following conditions are met:- `tunnel_local_addr6` must not be equal to `NULL`
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -5489,6 +5796,8 @@ async def pfsense_delete_interface_gre(
     Note: Call pfsense_interface_apply after this to apply changes.
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -5521,6 +5830,8 @@ async def pfsense_list_interface_gr_es(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -5558,6 +5869,8 @@ async def pfsense_delete_interface_gr_es(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -5586,6 +5899,8 @@ async def pfsense_get_interface_group(
     """GET /api/v2/interface/group
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -5611,6 +5926,8 @@ async def pfsense_create_interface_group(
     ifname: The name of this interface group.
     descr: The description for this interface group.
     members: The member interfaces to assign to this interface group.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -5648,6 +5965,8 @@ async def pfsense_update_interface_group(
     descr: The description for this interface group.
     ifname: The name of this interface group.
     members: The member interfaces to assign to this interface group.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -5681,6 +6000,8 @@ async def pfsense_delete_interface_group(
     Note: Call pfsense_interface_apply after this to apply changes.
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -5713,6 +6034,8 @@ async def pfsense_list_interface_groups(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -5742,6 +6065,8 @@ async def pfsense_replace_interface_groups(
     Note: Call pfsense_interface_apply after this to apply changes.
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -5775,6 +6100,8 @@ async def pfsense_delete_interface_groups(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -5803,6 +6130,8 @@ async def pfsense_get_interface_lagg(
     """GET /api/v2/interface/lagg
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -5834,6 +6163,8 @@ async def pfsense_create_interface_lagg(
     failovermaster: The failover master interface to use.This field is only available when the following conditions are met:- `proto` must be equal to `'failover'`
     lacptimeout: The LACP timeout mode to use.This field is only available when the following conditions are met:- `proto` must be equal to `'lacp'` Valid values: ['slow', 'fast']
     lagghash: The LAGG hash algorithm to use.This field is only available when the following conditions are met:- `proto` must be one of [ lacp, loadbalance ] Valid values: ['l2', 'l3', 'l4', 'l2,l3', 'l2,l4', 'l3,l4', 'l2,l3,l4']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -5883,6 +6214,8 @@ async def pfsense_update_interface_lagg(
     lagghash: The LAGG hash algorithm to use.This field is only available when the following conditions are met:- `proto` must be one of [ lacp, loadbalance ] Valid values: ['l2', 'l3', 'l4', 'l2,l3', 'l2,l4', 'l3,l4', 'l2,l3,l4']
     members: A list of member interfaces to include in the LAGG.
     proto: The LAGG protocol to use. Valid values: ['lacp', 'failover', 'loadbalance', 'roundrobin', 'none']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -5922,6 +6255,8 @@ async def pfsense_delete_interface_lagg(
     Note: Call pfsense_interface_apply after this to apply changes.
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -5954,6 +6289,8 @@ async def pfsense_list_interface_lag_gs(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -5991,6 +6328,8 @@ async def pfsense_delete_interface_lag_gs(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -6019,6 +6358,8 @@ async def pfsense_get_interface_vlan(
     """GET /api/v2/interface/vlan
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -6046,6 +6387,8 @@ async def pfsense_create_interface_vlan(
     tag: The VLAN ID tag to use. This must be unique from all other VLANs on the parent interface.
     descr: A description to help document the purpose of this VLAN.
     pcp: The 802.1p VLAN priority code point (PCP) to assign to this VLAN.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -6087,6 +6430,8 @@ async def pfsense_update_interface_vlan(
     if_: The real parent interface this VLAN will be applied to.
     pcp: The 802.1p VLAN priority code point (PCP) to assign to this VLAN.
     tag: The VLAN ID tag to use. This must be unique from all other VLANs on the parent interface.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -6122,6 +6467,8 @@ async def pfsense_delete_interface_vlan(
     Note: Call pfsense_interface_apply after this to apply changes.
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -6154,6 +6501,8 @@ async def pfsense_list_interface_vla_ns(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -6191,6 +6540,8 @@ async def pfsense_delete_interface_vla_ns(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -6219,6 +6570,8 @@ async def pfsense_get_network_interface(
     """GET /api/v2/interface
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -6324,6 +6677,8 @@ async def pfsense_create_network_interface(
     track6_interface: Sets the dynamic IPv6 WAN interface to track for configuration.This field is only available when the following conditions are met:- `typev6` must be equal to `'track6'`
     track6_prefix_id_hex: Sets the hexadecimal IPv6 prefix ID. This determines the configurable network ID based on the dynamic IPv6 connection.This field is only available when the following conditions are met:- `typev6` must be equal to `'track6'`
     typev6: Selects the IPv6 address type to assign this interface. Valid values: ['staticv6', 'dhcp6', 'slaac', '6rd', 'track6', '6to4', 'none']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -6521,6 +6876,8 @@ async def pfsense_update_network_interface(
     track6_prefix_id_hex: Sets the hexadecimal IPv6 prefix ID. This determines the configurable network ID based on the dynamic IPv6 connection.This field is only available when the following conditions are met:- `typev6` must be equal to `'track6'`
     typev4: Selects the IPv4 address type to assign this interface. Valid values: ['static', 'dhcp', 'none']
     typev6: Selects the IPv6 address type to assign this interface. Valid values: ['staticv6', 'dhcp6', 'slaac', '6rd', 'track6', '6to4', 'none']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -6636,6 +6993,8 @@ async def pfsense_delete_network_interface(
 
     id: The ID of the object to target.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -6670,6 +7029,8 @@ async def pfsense_list_network_interfaces(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -6705,6 +7066,8 @@ async def pfsense_delete_network_interfaces(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -6729,6 +7092,8 @@ async def pfsense_delete_network_interfaces(
 async def pfsense_get_routing_apply_status(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/routing/apply
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -6741,6 +7106,8 @@ async def pfsense_routing_apply(
     confirm: bool = False,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/routing/apply
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -6757,6 +7124,8 @@ async def pfsense_routing_apply(
 async def pfsense_get_routing_gateway_default(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/routing/gateway/default
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -6776,6 +7145,8 @@ async def pfsense_update_routing_gateway_default(
 
     defaultgw4: The gateway to assigns as the default IPv4 gateway for this system. Leave blank to automatically determine the default gateway, or set to `-` to assign no gateway.
     defaultgw6: The gateway to assigns as the default IPv6 gateway for this system. Leave blank to automatically determine the default gateway, or set to `-` to assign no gateway.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -6802,6 +7173,8 @@ async def pfsense_get_routing_gateway(
     """GET /api/v2/routing/gateway
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -6867,6 +7240,8 @@ async def pfsense_create_routing_gateway(
     nonlocalgateway: Allows or disallows gateway IPs that are not a part of the parent interface's subnet(s).
     time_period: Sets the time period in milliseconds over which results are averaged.
     weight: Sets the weight for this gateway when used in a Gateway Group.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -6984,6 +7359,8 @@ async def pfsense_update_routing_gateway(
     nonlocalgateway: Allows or disallows gateway IPs that are not a part of the parent interface's subnet(s).
     time_period: Sets the time period in milliseconds over which results are averaged.
     weight: Sets the weight for this gateway when used in a Gateway Group.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -7059,6 +7436,8 @@ async def pfsense_delete_routing_gateway(
 
     id: The ID of the object to target.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -7085,6 +7464,8 @@ async def pfsense_get_routing_gateway_group(
     """GET /api/v2/routing/gateway/group
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -7112,6 +7493,8 @@ async def pfsense_create_routing_gateway_group(
     priorities: The priorities of the gateways in this group. Each object accepts: - gateway (string) - tier (integer) - virtual_ip (string)
     descr: A description of the gateway group.
     trigger: The trigger that will cause a gateway to be excluded from the group. Valid values: ['down', 'downloss', 'downlatency', 'downlosslatency']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -7153,6 +7536,8 @@ async def pfsense_update_routing_gateway_group(
     name: The name of the gateway group.
     priorities: The priorities of the gateways in this group. Each object accepts: - gateway (string) - tier (integer) - virtual_ip (string)
     trigger: The trigger that will cause a gateway to be excluded from the group. Valid values: ['down', 'downloss', 'downlatency', 'downlosslatency']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -7190,6 +7575,8 @@ async def pfsense_delete_routing_gateway_group(
 
     id: The ID of the object to target.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -7224,6 +7611,8 @@ async def pfsense_list_routing_gateway_group_priorities(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -7261,6 +7650,8 @@ async def pfsense_delete_routing_gateway_group_priorities(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -7291,6 +7682,8 @@ async def pfsense_get_routing_gateway_group_priority(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -7320,6 +7713,8 @@ async def pfsense_create_routing_gateway_group_priority(
     parent_id: The ID of the parent this object is nested under.
     tier: The priority of this gateway in the group. Lower numbered tiers are higher priority.
     virtual_ip: The virtual IP to use for this gateway group. Use `address` to use the interface's current IP.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -7361,6 +7756,8 @@ async def pfsense_update_routing_gateway_group_priority(
     gateway: The name of the gateway to prioritize in this gateway group.
     tier: The priority of this gateway in the group. Lower numbered tiers are higher priority.
     virtual_ip: The virtual IP to use for this gateway group. Use `address` to use the interface's current IP.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -7400,6 +7797,8 @@ async def pfsense_delete_routing_gateway_group_priority(
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -7436,6 +7835,8 @@ async def pfsense_list_routing_gateway_groups(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -7473,6 +7874,8 @@ async def pfsense_delete_routing_gateway_groups(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -7509,6 +7912,8 @@ async def pfsense_list_routing_gateways(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -7546,6 +7951,8 @@ async def pfsense_delete_routing_gateways(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -7574,6 +7981,8 @@ async def pfsense_get_routing_static_route(
     """GET /api/v2/routing/static_route
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -7601,6 +8010,8 @@ async def pfsense_create_routing_static_route(
     network: Sets the destination network for this static route in CIDR notation.
     descr: Sets a description for administrative reference.
     disabled: Disable this static route.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -7642,6 +8053,8 @@ async def pfsense_update_routing_static_route(
     disabled: Disable this static route.
     gateway: Sets which gateway this route applies to.
     network: Sets the destination network for this static route in CIDR notation.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -7679,6 +8092,8 @@ async def pfsense_delete_routing_static_route(
 
     id: The ID of the object to target.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -7713,6 +8128,8 @@ async def pfsense_list_routing_static_routes(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -7750,6 +8167,8 @@ async def pfsense_delete_routing_static_routes(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -7778,6 +8197,8 @@ async def pfsense_get_services_acme_account_key(
     """GET /api/v2/services/acme/account_key
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -7805,6 +8226,8 @@ async def pfsense_create_services_acme_account_key(
     accountkey: The RSA private key for the ACME account key.
     descr: A description of the ACME account key.
     email: The email address associated with the ACME account key.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -7847,6 +8270,8 @@ async def pfsense_update_services_acme_account_key(
     descr: A description of the ACME account key.
     email: The email address associated with the ACME account key.
     name: The name of the ACME account key.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -7881,6 +8306,8 @@ async def pfsense_delete_services_acme_account_key(
     """DELETE /api/v2/services/acme/account_key
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -7905,6 +8332,8 @@ async def pfsense_create_services_acme_account_key_register(
     """POST /api/v2/services/acme/account_key/register
 
     name: The name of the ACME account key to register.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -7936,6 +8365,8 @@ async def pfsense_list_services_acme_account_key_registrations(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -7970,6 +8401,8 @@ async def pfsense_list_services_acme_account_keys(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -7997,6 +8430,8 @@ async def pfsense_replace_services_acme_account_keys(
     """PUT /api/v2/services/acme/account_keys
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -8027,6 +8462,8 @@ async def pfsense_delete_services_acme_account_keys(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -8056,6 +8493,8 @@ async def pfsense_get_services_acme_certificate_action(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -8083,6 +8522,8 @@ async def pfsense_create_services_acme_certificate_action(
     method: The action method that should be used to run the command. Valid values: ['shellcommand', 'php_command', 'servicerestart', 'xmlrpcservicerestart']
     parent_id: The ID of the parent this object is nested under.
     status: The activation status of the ACME certificate. Valid values: ['active', 'disabled']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -8121,6 +8562,8 @@ async def pfsense_update_services_acme_certificate_action(
     command: The command to execute on the ACME certificate.
     method: The action method that should be used to run the command. Valid values: ['shellcommand', 'php_command', 'servicerestart', 'xmlrpcservicerestart']
     status: The activation status of the ACME certificate. Valid values: ['active', 'disabled']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -8155,6 +8598,8 @@ async def pfsense_delete_services_acme_certificate_action(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -8182,6 +8627,8 @@ async def pfsense_get_services_acme_certificate_domain(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -8793,6 +9240,8 @@ async def pfsense_create_services_acme_certificate_domain(
     zm_key: Zonomi API KeyThis field is only available when the following conditions are met:- `method` must be equal to `'dns_zonomi'`
     zone_key: Zone.ee API KeyThis field is only available when the following conditions are met:- `method` must be equal to `'dns_zone'`
     zone_username: Zone.ee UsernameThis field is only available when the following conditions are met:- `method` must be equal to `'dns_zone'`
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -9999,6 +10448,8 @@ async def pfsense_update_services_acme_certificate_domain(
     zm_key: Zonomi API KeyThis field is only available when the following conditions are met:- `method` must be equal to `'dns_zonomi'`
     zone_key: Zone.ee API KeyThis field is only available when the following conditions are met:- `method` must be equal to `'dns_zone'`
     zone_username: Zone.ee UsernameThis field is only available when the following conditions are met:- `method` must be equal to `'dns_zone'`
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -10617,6 +11068,8 @@ async def pfsense_delete_services_acme_certificate_domain(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -10642,6 +11095,8 @@ async def pfsense_get_services_acme_certificate(
     """GET /api/v2/services/acme/certificate
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -10683,6 +11138,8 @@ async def pfsense_create_services_acme_certificate(
     preferredchain: The preferred certificate chain to use for the ACME certificate.
     renewafter: The number of days before expiration to renew the ACME certificate.
     status: The activation status of the ACME certificate. Valid values: ['active', 'disabled']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -10753,6 +11210,8 @@ async def pfsense_update_services_acme_certificate(
     preferredchain: The preferred certificate chain to use for the ACME certificate.
     renewafter: The number of days before expiration to renew the ACME certificate.
     status: The activation status of the ACME certificate. Valid values: ['active', 'disabled']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -10801,6 +11260,8 @@ async def pfsense_delete_services_acme_certificate(
     """DELETE /api/v2/services/acme/certificate
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -10832,6 +11293,8 @@ async def pfsense_list_services_acme_certificate_issuances(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -10859,6 +11322,8 @@ async def pfsense_create_services_acme_certificate_issue(
     """POST /api/v2/services/acme/certificate/issue
 
     certificate: The name of the ACME certificate to be issued.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -10883,6 +11348,8 @@ async def pfsense_create_services_acme_certificate_renew(
     """POST /api/v2/services/acme/certificate/renew
 
     certificate: The name of the ACME certificate to be renewed.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -10914,6 +11381,8 @@ async def pfsense_list_services_acme_certificate_renewals(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -10948,6 +11417,8 @@ async def pfsense_list_services_acme_certificates(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -10975,6 +11446,8 @@ async def pfsense_replace_services_acme_certificates(
     """PUT /api/v2/services/acme/certificates
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -11005,6 +11478,8 @@ async def pfsense_delete_services_acme_certificates(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -11029,6 +11504,8 @@ async def pfsense_delete_services_acme_certificates(
 async def pfsense_get_services_acme_settings(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/acme/settings
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -11046,6 +11523,8 @@ async def pfsense_update_services_acme_settings(
 
     enable: Enables or disables the ACME renewal job.
     writecerts: Enables or disables the writing of certificates to /conf/acme/ in various formats for use by other scripts or daemons which do not integrate with the pfSense certificate manager.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -11071,6 +11550,8 @@ async def pfsense_get_services_bind_access_list(
     """GET /api/v2/services/bind/access_list
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -11094,6 +11575,8 @@ async def pfsense_create_services_bind_access_list(
     entries: The network entries for this access list. Each object accepts: - value (string) - description (string)
     name: The name of the access list.
     description: A description for the access list.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -11128,6 +11611,8 @@ async def pfsense_update_services_bind_access_list(
     description: A description for the access list.
     entries: The network entries for this access list. Each object accepts: - value (string) - description (string)
     name: The name of the access list.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -11158,6 +11643,8 @@ async def pfsense_delete_services_bind_access_list(
     """DELETE /api/v2/services/bind/access_list
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -11189,6 +11676,8 @@ async def pfsense_list_services_bind_access_list_entries(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -11224,6 +11713,8 @@ async def pfsense_delete_services_bind_access_list_entries(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -11253,6 +11744,8 @@ async def pfsense_get_services_bind_access_list_entry(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -11278,6 +11771,8 @@ async def pfsense_create_services_bind_access_list_entry(
     parent_id: The ID of the parent this object is nested under.
     value: The network CIDR to allow.
     description: A description of the access list entry.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -11312,6 +11807,8 @@ async def pfsense_update_services_bind_access_list_entry(
     parent_id: The ID of the parent this object is nested under.
     description: A description of the access list entry.
     value: The network CIDR to allow.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -11344,6 +11841,8 @@ async def pfsense_delete_services_bind_access_list_entry(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -11377,6 +11876,8 @@ async def pfsense_list_services_bind_access_lists(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -11404,6 +11905,8 @@ async def pfsense_replace_services_bind_access_lists(
     """PUT /api/v2/services/bind/access_lists
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -11434,6 +11937,8 @@ async def pfsense_delete_services_bind_access_lists(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -11458,6 +11963,8 @@ async def pfsense_delete_services_bind_access_lists(
 async def pfsense_get_services_bind_settings(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/bind/settings
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -11509,6 +12016,8 @@ async def pfsense_update_services_bind_settings(
     log_severity: The minimum severity of events to log. Valid values: ['critical', 'error', 'warning', 'notice', 'info', 'debug 1', 'debug 3', 'debug 5', 'dynamic']
     rate_enabled: Enable rate limiting for the BIND service.
     rate_limit: The maximum number of queries per second to allow.This field is only available when the following conditions are met:- `rate_enabled` must be equal to `true`
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -11568,6 +12077,8 @@ async def pfsense_get_services_bind_sync_remote_host(
     """GET /api/v2/services/bind/sync/remote_host
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -11597,6 +12108,8 @@ async def pfsense_create_services_bind_sync_remote_host(
     syncprotocol: The protocol to use for syncing. Valid values: ['http', 'https']
     username: The username to use to authenticate when syncing.
     syncdestinenable: Enable this remote host for syncing.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -11643,6 +12156,8 @@ async def pfsense_update_services_bind_sync_remote_host(
     syncport: The remote host port to use for syncing. Valid options are: a TCP/UDP port number
     syncprotocol: The protocol to use for syncing. Valid values: ['http', 'https']
     username: The username to use to authenticate when syncing.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -11679,6 +12194,8 @@ async def pfsense_delete_services_bind_sync_remote_host(
     """DELETE /api/v2/services/bind/sync/remote_host
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -11710,6 +12227,8 @@ async def pfsense_list_services_bind_sync_remote_hosts(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -11737,6 +12256,8 @@ async def pfsense_replace_services_bind_sync_remote_hosts(
     """PUT /api/v2/services/bind/sync/remote_hosts
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -11767,6 +12288,8 @@ async def pfsense_delete_services_bind_sync_remote_hosts(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -11791,6 +12314,8 @@ async def pfsense_delete_services_bind_sync_remote_hosts(
 async def pfsense_get_services_bind_sync_settings(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/bind/sync/settings
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -11810,6 +12335,8 @@ async def pfsense_update_services_bind_sync_settings(
     masterip: The IP address of the master BIND server.
     synconchanges: The sync mode to use. Valid values: ['disabled', 'manual', 'auto']
     synctimeout: The timeout for the sync process. Valid values: [30, 60, 90, 120, 150, 250]
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -11837,6 +12364,8 @@ async def pfsense_get_services_bind_view(
     """GET /api/v2/services/bind/view
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -11866,6 +12395,8 @@ async def pfsense_create_services_bind_view(
     descr: A description for the view.
     match_clients: The access lists to match clients against.
     recursion: Enables or disables recursion for the view.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -11912,6 +12443,8 @@ async def pfsense_update_services_bind_view(
     match_clients: The access lists to match clients against.
     name: The name of the view.
     recursion: Enables or disables recursion for the view.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -11948,6 +12481,8 @@ async def pfsense_delete_services_bind_view(
     """DELETE /api/v2/services/bind/view
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -11979,6 +12514,8 @@ async def pfsense_list_services_bind_views(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -12006,6 +12543,8 @@ async def pfsense_replace_services_bind_views(
     """PUT /api/v2/services/bind/views
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -12036,6 +12575,8 @@ async def pfsense_delete_services_bind_views(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -12063,6 +12604,8 @@ async def pfsense_get_services_bind_zone(
     """GET /api/v2/services/bind/zone
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -12140,6 +12683,8 @@ async def pfsense_create_services_bind_zone(
     type_: The type of this BIND zone. Valid values: ['master', 'slave', 'forward', 'redirect']
     updatepolicy: The update policy for this BIND zone.This field is only available when the following conditions are met:- `type` must be equal to `'master'`- `enable_updatepolicy` must be equal to `true`
     view: The views this BIND zone belongs to.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -12282,6 +12827,8 @@ async def pfsense_update_services_bind_zone(
     type_: The type of this BIND zone. Valid values: ['master', 'slave', 'forward', 'redirect']
     updatepolicy: The update policy for this BIND zone.This field is only available when the following conditions are met:- `type` must be equal to `'master'`- `enable_updatepolicy` must be equal to `true`
     view: The views this BIND zone belongs to.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -12366,6 +12913,8 @@ async def pfsense_delete_services_bind_zone(
     """DELETE /api/v2/services/bind/zone
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -12391,6 +12940,8 @@ async def pfsense_get_services_bind_zone_record(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -12420,6 +12971,8 @@ async def pfsense_create_services_bind_zone_record(
     rdata: The data for this record. This can be an IP address, domain name, or other data depending on the record type.
     type_: The type of record. Valid values: ['A', 'AAAA', 'CNAME', 'MX', 'NS', 'LOC', 'PTR', 'SRV', 'TXT', 'SPF']
     priority: The priority for this record.This field is only available when the following conditions are met:- `type` must be one of [ MX, SRV ]
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -12462,6 +13015,8 @@ async def pfsense_update_services_bind_zone_record(
     priority: The priority for this record.This field is only available when the following conditions are met:- `type` must be one of [ MX, SRV ]
     rdata: The data for this record. This can be an IP address, domain name, or other data depending on the record type.
     type_: The type of record. Valid values: ['A', 'AAAA', 'CNAME', 'MX', 'NS', 'LOC', 'PTR', 'SRV', 'TXT', 'SPF']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -12498,6 +13053,8 @@ async def pfsense_delete_services_bind_zone_record(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -12531,6 +13088,8 @@ async def pfsense_list_services_bind_zones(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -12558,6 +13117,8 @@ async def pfsense_replace_services_bind_zones(
     """PUT /api/v2/services/bind/zones
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -12588,6 +13149,8 @@ async def pfsense_delete_services_bind_zones(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -12615,6 +13178,8 @@ async def pfsense_get_services_cron_job(
     """GET /api/v2/services/cron/job
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -12646,6 +13211,8 @@ async def pfsense_create_services_cron_job(
     mday: The day(s) of the month on which the command will be executed. (1-31, ranges, or divided, *=all).This field is only available when the following conditions are met:- `minute` must not be one of [ @reboot, @yearly, @annually, @monthly, @weekly, @daily, @midnight, @hourly, @every_minute, @every_second ]
     month: The month(s) of the year in which the command will be executed. (1-31, ranges, or divided, *=all).This field is only available when the following conditions are met:- `minute` must not be one of [ @reboot, @yearly, @annually, @monthly, @weekly, @daily, @midnight, @hourly, @every_minute, @every_second ]
     wday: The day(s) of the week on which the command will be executed. (0-7, 7=Sun or use names, ranges, or divided, *=all).This field is only available when the following conditions are met:- `minute` must not be one of [ @reboot, @yearly, @annually, @monthly, @weekly, @daily, @midnight, @hourly, @every_minute, @every_second ]
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -12696,6 +13263,8 @@ async def pfsense_update_services_cron_job(
     month: The month(s) of the year in which the command will be executed. (1-31, ranges, or divided, *=all).This field is only available when the following conditions are met:- `minute` must not be one of [ @reboot, @yearly, @annually, @monthly, @weekly, @daily, @midnight, @hourly, @every_minute, @every_second ]
     wday: The day(s) of the week on which the command will be executed. (0-7, 7=Sun or use names, ranges, or divided, *=all).This field is only available when the following conditions are met:- `minute` must not be one of [ @reboot, @yearly, @annually, @monthly, @weekly, @daily, @midnight, @hourly, @every_minute, @every_second ]
     who: The OS user to use when cron runs the command.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -12734,6 +13303,8 @@ async def pfsense_delete_services_cron_job(
     """DELETE /api/v2/services/cron/job
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -12765,6 +13336,8 @@ async def pfsense_list_services_cron_jobs(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -12792,6 +13365,8 @@ async def pfsense_replace_services_cron_jobs(
     """PUT /api/v2/services/cron/jobs
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -12822,6 +13397,8 @@ async def pfsense_delete_services_cron_jobs(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -12846,6 +13423,8 @@ async def pfsense_delete_services_cron_jobs(
 async def pfsense_get_services_dhcp_relay(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/dhcp_relay
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -12869,6 +13448,8 @@ async def pfsense_update_services_dhcp_relay(
     carpstatusvip: DHCP Relay will be stopped when the chosen VIP is in BACKUP status, and started in MASTER status.
     enable: Enables or disables the DHCP relay.
     interface: The downstream interfaces to listen on for DHCP requests.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -12902,6 +13483,8 @@ async def pfsense_get_services_dhcp_server_address_pool(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -12955,6 +13538,8 @@ async def pfsense_create_services_dhcp_server_address_pool(
     maxleasetime: The maximum DHCP lease validity period (in seconds) a client can request.
     ntpserver: The NTP servers to provide via DHCP.
     winsserver: The WINS servers to provide via DHCP.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -13044,6 +13629,8 @@ async def pfsense_update_services_dhcp_server_address_pool(
     range_from: The starting IP address for this address pool. This address must be less than or equal to the `range_to` field.
     range_to: The ending IP address for the this address pool. This address must be greater than or equal to the `range_to` field.
     winsserver: The WINS servers to provide via DHCP.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -13107,6 +13694,8 @@ async def pfsense_delete_services_dhcp_server_address_pool(
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -13143,6 +13732,8 @@ async def pfsense_list_services_dhcp_server_address_pools(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -13180,6 +13771,8 @@ async def pfsense_delete_services_dhcp_server_address_pools(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -13205,6 +13798,8 @@ async def pfsense_delete_services_dhcp_server_address_pools(
 async def pfsense_get_services_dhcp_server_apply_status(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/dhcp_server/apply
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -13217,6 +13812,8 @@ async def pfsense_services_dhcp_server_apply(
     confirm: bool = False,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/dhcp_server/apply
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -13239,6 +13836,8 @@ async def pfsense_update_services_dhcp_server_backend(
     Note: Call pfsense_services_dhcp_server_apply after this to apply changes.
 
     dhcpbackend: The backend DHCP server service to use. ISC DHCP is deprecate and will be removed in a future version of pfSense. Valid values: ['isc', 'kea']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -13265,6 +13864,8 @@ async def pfsense_get_services_dhcp_server_custom_option(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -13294,6 +13895,8 @@ async def pfsense_create_services_dhcp_server_custom_option(
     parent_id: The ID of the parent this object is nested under.
     type_: The type of value to configure for the option. Valid values: ['text', 'string', 'boolean', 'unsigned integer 8', 'unsigned integer 16', 'unsigned integer 32', 'signed integer 8', 'signed integer 16', 'signed integer 32', 'ip-address']
     value: The value to configure for the option.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -13335,6 +13938,8 @@ async def pfsense_update_services_dhcp_server_custom_option(
     number: The DHCP option number to configure.
     type_: The type of value to configure for the option. Valid values: ['text', 'string', 'boolean', 'unsigned integer 8', 'unsigned integer 16', 'unsigned integer 32', 'signed integer 8', 'signed integer 16', 'signed integer 32', 'ip-address']
     value: The value to configure for the option.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -13374,6 +13979,8 @@ async def pfsense_delete_services_dhcp_server_custom_option(
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -13410,6 +14017,8 @@ async def pfsense_list_services_dhcp_server_custom_options(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -13447,6 +14056,8 @@ async def pfsense_delete_services_dhcp_server_custom_options(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -13475,6 +14086,8 @@ async def pfsense_get_services_dhcp_server(
     """GET /api/v2/services/dhcp_server
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -13546,6 +14159,8 @@ async def pfsense_create_services_dhcp_server(
     staticmap: Static mappings applied to this DHCP server. Each object accepts: - mac (string) - ipaddr (string) - cid (string) - hostname (string) - domain (string) - domainsearchlist (array) - defaultleasetime (integer) - maxleasetime (integer) - gateway (string) - dnsserver (array) - winsserver (array) - ntpserver (array) ... and 2 more fields
     statsgraph: Enable adding DHCP lease statistics to the pfSense Monitoring graphs.
     winsserver: The WINS servers to provide via DHCP.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -13675,6 +14290,8 @@ async def pfsense_update_services_dhcp_server(
     staticmap: Static mappings applied to this DHCP server. Each object accepts: - mac (string) - ipaddr (string) - cid (string) - hostname (string) - domain (string) - domainsearchlist (array) - defaultleasetime (integer) - maxleasetime (integer) - gateway (string) - dnsserver (array) - winsserver (array) - ntpserver (array) ... and 2 more fields
     statsgraph: Enable adding DHCP lease statistics to the pfSense Monitoring graphs.
     winsserver: The WINS servers to provide via DHCP.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -13756,6 +14373,8 @@ async def pfsense_delete_services_dhcp_server(
 
     id: The ID of the object to target.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -13784,6 +14403,8 @@ async def pfsense_get_services_dhcp_server_static_mapping(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -13835,6 +14456,8 @@ async def pfsense_create_services_dhcp_server_static_mapping(
     maxleasetime: The maximum DHCP lease validity period (in seconds) this client can request.
     ntpserver: The NTP servers to provide via DHCP.
     winsserver: The WINS servers to provide via DHCP.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -13920,6 +14543,8 @@ async def pfsense_update_services_dhcp_server_static_mapping(
     maxleasetime: The maximum DHCP lease validity period (in seconds) this client can request.
     ntpserver: The NTP servers to provide via DHCP.
     winsserver: The WINS servers to provide via DHCP.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -13981,6 +14606,8 @@ async def pfsense_delete_services_dhcp_server_static_mapping(
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -14017,6 +14644,8 @@ async def pfsense_list_services_dhcp_server_static_mappings(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -14054,6 +14683,8 @@ async def pfsense_delete_services_dhcp_server_static_mappings(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -14090,6 +14721,8 @@ async def pfsense_list_services_dhcp_servers(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -14117,6 +14750,8 @@ async def pfsense_replace_services_dhcp_servers(
     """PUT /api/v2/services/dhcp_servers
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -14135,6 +14770,8 @@ async def pfsense_replace_services_dhcp_servers(
 async def pfsense_get_services_dns_forwarder_apply_status(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/dns_forwarder/apply
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -14147,6 +14784,8 @@ async def pfsense_services_dns_forwarder_apply(
     confirm: bool = False,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/dns_forwarder/apply
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -14168,6 +14807,8 @@ async def pfsense_get_services_dns_forwarder_host_override_alias(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -14197,6 +14838,8 @@ async def pfsense_create_services_dns_forwarder_host_override_alias(
     host: The hostname of this override alias.
     parent_id: The ID of the parent this object is nested under.
     description: The description of this override alias.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -14238,6 +14881,8 @@ async def pfsense_update_services_dns_forwarder_host_override_alias(
     description: The description of this override alias.
     domain: The domain of this override alias.
     host: The hostname of this override alias.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -14277,6 +14922,8 @@ async def pfsense_delete_services_dns_forwarder_host_override_alias(
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -14313,6 +14960,8 @@ async def pfsense_list_services_dns_forwarder_host_override_aliases(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -14350,6 +14999,8 @@ async def pfsense_delete_services_dns_forwarder_host_override_aliases(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -14378,6 +15029,8 @@ async def pfsense_get_services_dns_forwarder_host_override(
     """GET /api/v2/services/dns_forwarder/host_override
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -14407,6 +15060,8 @@ async def pfsense_create_services_dns_forwarder_host_override(
     ip: The IP address of this override.
     aliases: The aliases for this override. Each object accepts: - host (string) - domain (string) - description (string)
     descr: The description for this override.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -14452,6 +15107,8 @@ async def pfsense_update_services_dns_forwarder_host_override(
     domain: The domain of this override.
     host: The hostname of this override.
     ip: The IP address of this override.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -14491,6 +15148,8 @@ async def pfsense_delete_services_dns_forwarder_host_override(
 
     id: The ID of the object to target.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -14525,6 +15184,8 @@ async def pfsense_list_services_dns_forwarder_host_overrides(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -14554,6 +15215,8 @@ async def pfsense_replace_services_dns_forwarder_host_overrides(
     Note: Call pfsense_services_dns_forwarder_apply after this to apply changes.
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -14587,6 +15250,8 @@ async def pfsense_delete_services_dns_forwarder_host_overrides(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -14615,6 +15280,8 @@ async def pfsense_get_services_dns_resolver_access_list(
     """GET /api/v2/services/dns_resolver/access_list
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -14642,6 +15309,8 @@ async def pfsense_create_services_dns_resolver_access_list(
     name: The name of this access list.
     networks: The DNS Resolver access list network entries to include in this access list. Each object accepts: - network (string) - mask (integer) - description (string)
     description: A description for this access list.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -14683,6 +15352,8 @@ async def pfsense_update_services_dns_resolver_access_list(
     description: A description for this access list.
     name: The name of this access list.
     networks: The DNS Resolver access list network entries to include in this access list. Each object accepts: - network (string) - mask (integer) - description (string)
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -14720,6 +15391,8 @@ async def pfsense_delete_services_dns_resolver_access_list(
 
     id: The ID of the object to target.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -14748,6 +15421,8 @@ async def pfsense_get_services_dns_resolver_access_list_network(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -14777,6 +15452,8 @@ async def pfsense_create_services_dns_resolver_access_list_network(
     network: The network address of this access list entry.
     parent_id: The ID of the parent this object is nested under.
     description: A description for this access list entry.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -14818,6 +15495,8 @@ async def pfsense_update_services_dns_resolver_access_list_network(
     description: A description for this access list entry.
     mask: The subnet mask of this access list entry's network.
     network: The network address of this access list entry.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -14857,6 +15536,8 @@ async def pfsense_delete_services_dns_resolver_access_list_network(
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -14893,6 +15574,8 @@ async def pfsense_list_services_dns_resolver_access_list_networks(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -14930,6 +15613,8 @@ async def pfsense_delete_services_dns_resolver_access_list_networks(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -14966,6 +15651,8 @@ async def pfsense_list_services_dns_resolver_access_lists(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -14995,6 +15682,8 @@ async def pfsense_replace_services_dns_resolver_access_lists(
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -15028,6 +15717,8 @@ async def pfsense_delete_services_dns_resolver_access_lists(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -15053,6 +15744,8 @@ async def pfsense_delete_services_dns_resolver_access_lists(
 async def pfsense_get_services_dns_resolver_apply_status(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/dns_resolver/apply
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -15065,6 +15758,8 @@ async def pfsense_services_dns_resolver_apply(
     confirm: bool = False,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/dns_resolver/apply
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -15084,6 +15779,8 @@ async def pfsense_get_services_dns_resolver_domain_override(
     """GET /api/v2/services/dns_resolver/domain_override
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -15113,6 +15810,8 @@ async def pfsense_create_services_dns_resolver_domain_override(
     descr: The description for this domain override.
     forward_tls_upstream: Enables or disables forwarding DNS queries to the upstream DNS server using TLS.
     tls_hostname: The hostname to use for the TLS connection to the upstream DNS server.This field is only available when the following conditions are met:- `forward_tls_upstream` must be equal to `true`
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -15158,6 +15857,8 @@ async def pfsense_update_services_dns_resolver_domain_override(
     forward_tls_upstream: Enables or disables forwarding DNS queries to the upstream DNS server using TLS.
     ip: The IP address to which the domain should resolve.
     tls_hostname: The hostname to use for the TLS connection to the upstream DNS server.This field is only available when the following conditions are met:- `forward_tls_upstream` must be equal to `true`
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -15197,6 +15898,8 @@ async def pfsense_delete_services_dns_resolver_domain_override(
 
     id: The ID of the object to target.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -15231,6 +15934,8 @@ async def pfsense_list_services_dns_resolver_domain_overrides(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -15260,6 +15965,8 @@ async def pfsense_replace_services_dns_resolver_domain_overrides(
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -15293,6 +16000,8 @@ async def pfsense_delete_services_dns_resolver_domain_overrides(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -15323,6 +16032,8 @@ async def pfsense_get_services_dns_resolver_host_override_alias(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -15352,6 +16063,8 @@ async def pfsense_create_services_dns_resolver_host_override_alias(
     host: The hostname portion of the host override alias.
     parent_id: The ID of the parent this object is nested under.
     descr: A detailed description for this host override alias.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -15393,6 +16106,8 @@ async def pfsense_update_services_dns_resolver_host_override_alias(
     descr: A detailed description for this host override alias.
     domain: The hostname portion of the host override alias.
     host: The hostname portion of the host override alias.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -15432,6 +16147,8 @@ async def pfsense_delete_services_dns_resolver_host_override_alias(
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -15468,6 +16185,8 @@ async def pfsense_list_services_dns_resolver_host_override_aliases(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -15505,6 +16224,8 @@ async def pfsense_delete_services_dns_resolver_host_override_aliases(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -15533,6 +16254,8 @@ async def pfsense_get_services_dns_resolver_host_override(
     """GET /api/v2/services/dns_resolver/host_override
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -15562,6 +16285,8 @@ async def pfsense_create_services_dns_resolver_host_override(
     ip: The IP addresses this host override will resolve.
     aliases: Additional alias hostnames that should resolve the same IP(s). Each object accepts: - host (string) - domain (string) - descr (string)
     descr: A detailed description for this host override.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -15607,6 +16332,8 @@ async def pfsense_update_services_dns_resolver_host_override(
     domain: The hostname portion of the host override.
     host: The hostname portion of the host override.
     ip: The IP addresses this host override will resolve.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -15646,6 +16373,8 @@ async def pfsense_delete_services_dns_resolver_host_override(
 
     id: The ID of the object to target.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -15680,6 +16409,8 @@ async def pfsense_list_services_dns_resolver_host_overrides(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -15709,6 +16440,8 @@ async def pfsense_replace_services_dns_resolver_host_overrides(
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -15742,6 +16475,8 @@ async def pfsense_delete_services_dns_resolver_host_overrides(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -15767,6 +16502,8 @@ async def pfsense_delete_services_dns_resolver_host_overrides(
 async def pfsense_get_services_dns_resolver_settings(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/dns_resolver/settings
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -15818,6 +16555,8 @@ async def pfsense_update_services_dns_resolver_settings(
     strictout: Enables or disables sending recursive queries if none of the selected Outgoing Network ". "Interfaces are available.
     system_domain_local_zone_type: The type of local zone used for the system domain. Valid values: ['deny', 'refuse', 'static', 'transparent', 'typetransparent', 'redirect', 'inform', 'inform_deny', 'nodefault']
     tlsport: The port on which the DNS Resolver service listens for SSL/TLS connections. Valid options are: a TCP/UDP port numberThis field is only available when the following conditions are met:- `enablessl` must be equal to `true`
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -15876,6 +16615,8 @@ async def pfsense_get_services_free_radius_client(
     """GET /api/v2/services/freeradius/client
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -15915,6 +16656,8 @@ async def pfsense_create_services_free_radius_client(
     naspassword: If supported by your NAS, you can use SNMP or finger for simultaneous-use checks instead of (s)radutmp file and accounting. Leave empty to choose (s)radutmp.
     nastype: The NAS type of the client. This is used by checkrad.pl for simultaneous use checks. Valid values: ['cisco', 'cvx', 'computone', 'digitro', 'livingston', 'juniper', 'max40xx', 'mikrotik', 'mikrotik_snmp', 'dot1x', 'other']
     proto: The protocol the client uses. Valid values: ['udp', 'tcp']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -15981,6 +16724,8 @@ async def pfsense_update_services_free_radius_client(
     proto: The protocol the client uses. Valid values: ['udp', 'tcp']
     secret: This is the shared secret (password) which the NAS (switch, accesspoint, etc.) needs to communicate with the RADIUS server.
     shortname: A short name for the client. This is generally the hostname of the NAS.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -16027,6 +16772,8 @@ async def pfsense_delete_services_free_radius_client(
     """DELETE /api/v2/services/freeradius/client
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -16058,6 +16805,8 @@ async def pfsense_list_services_free_radius_clients(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -16085,6 +16834,8 @@ async def pfsense_replace_services_free_radius_clients(
     """PUT /api/v2/services/freeradius/clients
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -16115,6 +16866,8 @@ async def pfsense_delete_services_free_radius_clients(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -16142,6 +16895,8 @@ async def pfsense_get_services_free_radius_interface(
     """GET /api/v2/services/freeradius/interface
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -16169,6 +16924,8 @@ async def pfsense_create_services_free_radius_interface(
     description: The description for this interface.
     port: The port number of the listening interface. Different interface types need different ports. Valid options are: a TCP/UDP port number
     type_: The type of the listening interface: Authentication/Accounting. Valid values: ['auth', 'acct', 'proxy', 'detail', 'status', 'coa']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -16211,6 +16968,8 @@ async def pfsense_update_services_free_radius_interface(
     ip_version: The IP version of the listening interface. Valid values: ['ipaddr', 'ipv6addr']
     port: The port number of the listening interface. Different interface types need different ports. Valid options are: a TCP/UDP port number
     type_: The type of the listening interface: Authentication/Accounting. Valid values: ['auth', 'acct', 'proxy', 'detail', 'status', 'coa']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -16245,6 +17004,8 @@ async def pfsense_delete_services_free_radius_interface(
     """DELETE /api/v2/services/freeradius/interface
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -16276,6 +17037,8 @@ async def pfsense_list_services_free_radius_interfaces(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -16303,6 +17066,8 @@ async def pfsense_replace_services_free_radius_interfaces(
     """PUT /api/v2/services/freeradius/interfaces
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -16333,6 +17098,8 @@ async def pfsense_delete_services_free_radius_interfaces(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -16360,6 +17127,8 @@ async def pfsense_get_services_free_radius_user(
     """GET /api/v2/services/freeradius/user
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -16399,6 +17168,8 @@ async def pfsense_create_services_free_radius_user(
     motp_secret: The secret for the Mobile One-Time Password (MOTP).This field is only available when the following conditions are met:- `motp_enable` must be equal to `true`
     password: The password for this username.This field is only available when the following conditions are met:- `motp_enable` must be equal to `false`
     password_encryption: The encryption method for the password.This field is only available when the following conditions are met:- `motp_enable` must be equal to `false` Valid values: ['Cleartext-Password', 'MD5-Password', 'MD5-Password-hashed', 'NT-Password-hashed']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -16465,6 +17236,8 @@ async def pfsense_update_services_free_radius_user(
     password: The password for this username.This field is only available when the following conditions are met:- `motp_enable` must be equal to `false`
     password_encryption: The encryption method for the password.This field is only available when the following conditions are met:- `motp_enable` must be equal to `false` Valid values: ['Cleartext-Password', 'MD5-Password', 'MD5-Password-hashed', 'NT-Password-hashed']
     username: The username for this user.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -16511,6 +17284,8 @@ async def pfsense_delete_services_free_radius_user(
     """DELETE /api/v2/services/freeradius/user
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -16542,6 +17317,8 @@ async def pfsense_list_services_free_radius_users(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -16569,6 +17346,8 @@ async def pfsense_replace_services_free_radius_users(
     """PUT /api/v2/services/freeradius/users
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -16599,6 +17378,8 @@ async def pfsense_delete_services_free_radius_users(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -16623,6 +17404,8 @@ async def pfsense_delete_services_free_radius_users(
 async def pfsense_get_services_ha_proxy_apply_status(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/haproxy/apply
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -16635,6 +17418,8 @@ async def pfsense_services_ha_proxy_apply(
     confirm: bool = False,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/haproxy/apply
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -16656,6 +17441,8 @@ async def pfsense_get_services_ha_proxy_backend_acl(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -16689,6 +17476,8 @@ async def pfsense_create_services_ha_proxy_backend_acl(
     value: The value which indicates a match for this ACL.
     casesensitive: Enables or disables case-sensitive matching for this ACL.
     not_: Enables or disables inverting the context of this ACL.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -16738,6 +17527,8 @@ async def pfsense_update_services_ha_proxy_backend_acl(
     name: The unique name for this backend ACL.
     not_: Enables or disables inverting the context of this ACL.
     value: The value which indicates a match for this ACL.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -16779,6 +17570,8 @@ async def pfsense_delete_services_ha_proxy_backend_acl(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -16813,6 +17606,8 @@ async def pfsense_list_services_ha_proxy_backend_ac_ls(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -16850,6 +17645,8 @@ async def pfsense_delete_services_ha_proxy_backend_ac_ls(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -16880,6 +17677,8 @@ async def pfsense_get_services_ha_proxy_backend_action(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -16933,6 +17732,8 @@ async def pfsense_create_services_ha_proxy_backend_action(
     rule: The redirect rule to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'http-request_redirect'`
     server: The backend server to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'use_server'`
     status: The status to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-response_set-status, http-after-response_set-status ]
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -17022,6 +17823,8 @@ async def pfsense_update_services_ha_proxy_backend_action(
     rule: The redirect rule to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'http-request_redirect'`
     server: The backend server to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'use_server'`
     status: The status to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-response_set-status, http-after-response_set-status ]
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -17083,6 +17886,8 @@ async def pfsense_delete_services_ha_proxy_backend_action(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -17117,6 +17922,8 @@ async def pfsense_list_services_ha_proxy_backend_actions(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -17154,6 +17961,8 @@ async def pfsense_delete_services_ha_proxy_backend_actions(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -17182,6 +17991,8 @@ async def pfsense_get_services_ha_proxy_backend(
     """GET /api/v2/services/haproxy/backend
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -17315,6 +18126,8 @@ async def pfsense_create_services_ha_proxy_backend(
     strict_transport_security: The HSTS validity period for this backend. Leave empty to disable HSTS.
     transparent_clientip: Enables or disables using the client-IP to connect to backend servers.
     transparent_interface: The interface that will connect to the backend server.This field is only available when the following conditions are met:- `transparent_clientip` must be equal to `true`
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -17568,6 +18381,8 @@ async def pfsense_update_services_ha_proxy_backend(
     strict_transport_security: The HSTS validity period for this backend. Leave empty to disable HSTS.
     transparent_clientip: Enables or disables using the client-IP to connect to backend servers.
     transparent_interface: The interface that will connect to the backend server.This field is only available when the following conditions are met:- `transparent_clientip` must be equal to `true`
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -17709,6 +18524,8 @@ async def pfsense_delete_services_ha_proxy_backend(
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -17735,6 +18552,8 @@ async def pfsense_get_services_ha_proxy_backend_error_file(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -17762,6 +18581,8 @@ async def pfsense_create_services_ha_proxy_backend_error_file(
     errorcode: The HTTP status code that will trigger this error file to be used.
     errorfile: The HAProxy error file object that should be used for the assigned HTTP status code.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -17799,6 +18620,8 @@ async def pfsense_update_services_ha_proxy_backend_error_file(
     parent_id: The ID of the parent this object is nested under.
     errorcode: The HTTP status code that will trigger this error file to be used.
     errorfile: The HAProxy error file object that should be used for the assigned HTTP status code.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -17834,6 +18657,8 @@ async def pfsense_delete_services_ha_proxy_backend_error_file(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -17868,6 +18693,8 @@ async def pfsense_list_services_ha_proxy_backend_error_files(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -17905,6 +18732,8 @@ async def pfsense_delete_services_ha_proxy_backend_error_files(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -17935,6 +18764,8 @@ async def pfsense_get_services_ha_proxy_backend_server(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -17974,6 +18805,8 @@ async def pfsense_create_services_ha_proxy_backend_server(
     sslserververify: Enables or disables verifying the SSL/TLS certificate when forwarding to this backend server.
     status: The eligibility status for this backend server. Valid values: ['active', 'backup', 'disabled', 'inactive']
     weight: The weight of this backend server when load balancing.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -18035,6 +18868,8 @@ async def pfsense_update_services_ha_proxy_backend_server(
     sslserververify: Enables or disables verifying the SSL/TLS certificate when forwarding to this backend server.
     status: The eligibility status for this backend server. Valid values: ['active', 'backup', 'disabled', 'inactive']
     weight: The weight of this backend server when load balancing.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -18082,6 +18917,8 @@ async def pfsense_delete_services_ha_proxy_backend_server(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -18116,6 +18953,8 @@ async def pfsense_list_services_ha_proxy_backend_servers(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -18153,6 +18992,8 @@ async def pfsense_delete_services_ha_proxy_backend_servers(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -18189,6 +19030,8 @@ async def pfsense_list_services_ha_proxy_backends(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -18218,6 +19061,8 @@ async def pfsense_replace_services_ha_proxy_backends(
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -18251,6 +19096,8 @@ async def pfsense_delete_services_ha_proxy_backends(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -18279,6 +19126,8 @@ async def pfsense_get_services_ha_proxy_file(
     """GET /api/v2/services/haproxy/file
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -18304,6 +19153,8 @@ async def pfsense_create_services_ha_proxy_file(
     content: The content of this file.
     name: The unique name for this file.
     type_: The type of file. Use `null` to assume an Errorfile. Valid values: ['luascript', 'writetodisk']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -18341,6 +19192,8 @@ async def pfsense_update_services_ha_proxy_file(
     content: The content of this file.
     name: The unique name for this file.
     type_: The type of file. Use `null` to assume an Errorfile. Valid values: ['luascript', 'writetodisk']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -18374,6 +19227,8 @@ async def pfsense_delete_services_ha_proxy_file(
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -18406,6 +19261,8 @@ async def pfsense_list_services_ha_proxy_files(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -18435,6 +19292,8 @@ async def pfsense_replace_services_ha_proxy_files(
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -18468,6 +19327,8 @@ async def pfsense_delete_services_ha_proxy_files(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -18498,6 +19359,8 @@ async def pfsense_get_services_ha_proxy_frontend_acl(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -18531,6 +19394,8 @@ async def pfsense_create_services_ha_proxy_frontend_acl(
     value: The value which indicates a match for this ACL.
     casesensitive: Enables or disables case-sensitive matching for this ACL.
     not_: Enables or disables inverting the context of this ACL.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -18580,6 +19445,8 @@ async def pfsense_update_services_ha_proxy_frontend_acl(
     name: The unique name for this frontend ACL.
     not_: Enables or disables inverting the context of this ACL.
     value: The value which indicates a match for this ACL.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -18621,6 +19488,8 @@ async def pfsense_delete_services_ha_proxy_frontend_acl(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -18655,6 +19524,8 @@ async def pfsense_list_services_ha_proxy_frontend_ac_ls(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -18692,6 +19563,8 @@ async def pfsense_delete_services_ha_proxy_frontend_ac_ls(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -18722,6 +19595,8 @@ async def pfsense_get_services_ha_proxy_frontend_action(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -18775,6 +19650,8 @@ async def pfsense_create_services_ha_proxy_frontend_action(
     replace: The value to replace with when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_replace-header, http-request_replace-value, http-request_replace-path, http-response_replace-header, http-response_replace-value, http-after-response_replace-header, http-after-response_replace-value ]
     rule: The redirect rule to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'http-request_redirect'`
     status: The status to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-response_set-status, http-after-response_set-status ]
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -18864,6 +19741,8 @@ async def pfsense_update_services_ha_proxy_frontend_action(
     replace: The value to replace with when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_replace-header, http-request_replace-value, http-request_replace-path, http-response_replace-header, http-response_replace-value, http-after-response_replace-header, http-after-response_replace-value ]
     rule: The redirect rule to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'http-request_redirect'`
     status: The status to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-response_set-status, http-after-response_set-status ]
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -18925,6 +19804,8 @@ async def pfsense_delete_services_ha_proxy_frontend_action(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -18959,6 +19840,8 @@ async def pfsense_list_services_ha_proxy_frontend_actions(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -18996,6 +19879,8 @@ async def pfsense_delete_services_ha_proxy_frontend_actions(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -19026,6 +19911,8 @@ async def pfsense_get_services_ha_proxy_frontend_address(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -19059,6 +19946,8 @@ async def pfsense_create_services_ha_proxy_frontend_address(
     extaddr_custom: The custom IPv4 or IPv6 address to use as the external address.This field is only available when the following conditions are met:- `extaddr` must be equal to `'custom'`
     extaddr_port: The port to bind to for this address. Valid options are: a TCP/UDP port number
     extaddr_ssl: Enables or disables using SSL/TLS for this address.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -19108,6 +19997,8 @@ async def pfsense_update_services_ha_proxy_frontend_address(
     extaddr_custom: The custom IPv4 or IPv6 address to use as the external address.This field is only available when the following conditions are met:- `extaddr` must be equal to `'custom'`
     extaddr_port: The port to bind to for this address. Valid options are: a TCP/UDP port number
     extaddr_ssl: Enables or disables using SSL/TLS for this address.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -19149,6 +20040,8 @@ async def pfsense_delete_services_ha_proxy_frontend_address(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -19183,6 +20076,8 @@ async def pfsense_list_services_ha_proxy_frontend_addresses(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -19220,6 +20115,8 @@ async def pfsense_delete_services_ha_proxy_frontend_addresses(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -19250,6 +20147,8 @@ async def pfsense_get_services_ha_proxy_frontend_certificate(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -19275,6 +20174,8 @@ async def pfsense_create_services_ha_proxy_frontend_certificate(
 
     parent_id: The ID of the parent this object is nested under.
     ssl_certificate: The SSL/TLS certificate refid to add to this frontend.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -19308,6 +20209,8 @@ async def pfsense_update_services_ha_proxy_frontend_certificate(
     id: The ID of the object or resource to interact with.
     parent_id: The ID of the parent this object is nested under.
     ssl_certificate: The SSL/TLS certificate refid to add to this frontend.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -19341,6 +20244,8 @@ async def pfsense_delete_services_ha_proxy_frontend_certificate(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -19375,6 +20280,8 @@ async def pfsense_list_services_ha_proxy_frontend_certificates(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -19412,6 +20319,8 @@ async def pfsense_delete_services_ha_proxy_frontend_certificates(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -19440,6 +20349,8 @@ async def pfsense_get_services_ha_proxy_frontend(
     """GET /api/v2/services/haproxy/frontend
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -19503,6 +20414,8 @@ async def pfsense_create_services_ha_proxy_frontend(
     socket_stats: Enables or disables collecting and providing separate statistics for each socket.
     ssloffloadcert: The default SSL/TLS certificate refid to use for this frontend.
     status: The activation status for this HAProxy frontend. Valid values: ['active', 'disabled']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -19616,6 +20529,8 @@ async def pfsense_update_services_ha_proxy_frontend(
     ssloffloadcert: The default SSL/TLS certificate refid to use for this frontend.
     status: The activation status for this HAProxy frontend. Valid values: ['active', 'disabled']
     type_: The processing type for this frontend. Valid values: ['http', 'https', 'tcp']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -19687,6 +20602,8 @@ async def pfsense_delete_services_ha_proxy_frontend(
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -19713,6 +20630,8 @@ async def pfsense_get_services_ha_proxy_frontend_error_file(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -19740,6 +20659,8 @@ async def pfsense_create_services_ha_proxy_frontend_error_file(
     errorcode: The HTTP status code that will trigger this error file to be used.
     errorfile: The HAProxy error file object that should be used for the assigned HTTP status code.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -19777,6 +20698,8 @@ async def pfsense_update_services_ha_proxy_frontend_error_file(
     parent_id: The ID of the parent this object is nested under.
     errorcode: The HTTP status code that will trigger this error file to be used.
     errorfile: The HAProxy error file object that should be used for the assigned HTTP status code.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -19812,6 +20735,8 @@ async def pfsense_delete_services_ha_proxy_frontend_error_file(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -19846,6 +20771,8 @@ async def pfsense_list_services_ha_proxy_frontend_error_files(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -19883,6 +20810,8 @@ async def pfsense_delete_services_ha_proxy_frontend_error_files(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -19919,6 +20848,8 @@ async def pfsense_list_services_ha_proxy_frontends(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -19948,6 +20879,8 @@ async def pfsense_replace_services_ha_proxy_frontends(
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -19981,6 +20914,8 @@ async def pfsense_delete_services_ha_proxy_frontends(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -20009,6 +20944,8 @@ async def pfsense_get_services_ha_proxy_settings_dns_resolver(
     """GET /api/v2/services/haproxy/settings/dns_resolver
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -20034,6 +20971,8 @@ async def pfsense_create_services_ha_proxy_settings_dns_resolver(
     name: The descriptive name for this DNS server.
     server: The IP or hostname of the DNS server.
     port: The port used by this DNS server. Valid options are: a TCP/UDP port number
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -20071,6 +21010,8 @@ async def pfsense_update_services_ha_proxy_settings_dns_resolver(
     name: The descriptive name for this DNS server.
     port: The port used by this DNS server. Valid options are: a TCP/UDP port number
     server: The IP or hostname of the DNS server.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -20104,6 +21045,8 @@ async def pfsense_delete_services_ha_proxy_settings_dns_resolver(
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -20136,6 +21079,8 @@ async def pfsense_list_services_ha_proxy_settings_dns_resolvers(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -20173,6 +21118,8 @@ async def pfsense_delete_services_ha_proxy_settings_dns_resolvers(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -20201,6 +21148,8 @@ async def pfsense_get_services_ha_proxy_settings_email_mailer(
     """GET /api/v2/services/haproxy/settings/email_mailer
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -20226,6 +21175,8 @@ async def pfsense_create_services_ha_proxy_settings_email_mailer(
     mailserver: The IP or hostname of the mail server.
     name: The descriptive name for this mail server.
     mailserverport: The port used by this mail server. Valid options are: a TCP/UDP port number
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -20263,6 +21214,8 @@ async def pfsense_update_services_ha_proxy_settings_email_mailer(
     mailserver: The IP or hostname of the mail server.
     mailserverport: The port used by this mail server. Valid options are: a TCP/UDP port number
     name: The descriptive name for this mail server.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -20296,6 +21249,8 @@ async def pfsense_delete_services_ha_proxy_settings_email_mailer(
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -20328,6 +21283,8 @@ async def pfsense_list_services_ha_proxy_settings_email_mailers(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -20365,6 +21322,8 @@ async def pfsense_delete_services_ha_proxy_settings_email_mailers(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -20390,6 +21349,8 @@ async def pfsense_delete_services_ha_proxy_settings_email_mailers(
 async def pfsense_get_services_ha_proxy_settings(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/haproxy/settings
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -20457,6 +21418,8 @@ async def pfsense_update_services_ha_proxy_settings(
     sslcompatibilitymode: The SSL/TLS compatibility mode which determines the cipher suites and TLS versions supported. Valid values: ['auto', 'modern', 'intermediate', 'old']
     ssldefaultdhparam: The maximum size of the Diffie-Hellman parameters used for generating the ephemeral/temporary Diffie-Hellman key in case of DHE key exchange
     terminate_on_reload: Enables or disables an immediate stop of old process on reload. (closes existing connections)
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -20528,6 +21491,8 @@ async def pfsense_update_services_ha_proxy_settings(
 async def pfsense_get_services_ntp_settings(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/ntp/settings
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -20575,6 +21540,8 @@ async def pfsense_update_services_ntp_settings(
     serverauthalgo: The digest algorithm for the server authentication key. Valid values: ['md5', 'sha1', 'sha256']
     serverauthkey: The NTP server authentication key.This field is only available when the following conditions are met:- `serverauth` must be equal to `true`
     statsgraph: Enable or disable RRD graphs for NTP statistics.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -20630,6 +21597,8 @@ async def pfsense_get_services_ntp_time_server(
     """GET /api/v2/services/ntp/time_server
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -20655,6 +21624,8 @@ async def pfsense_create_services_ntp_time_server(
     noselect: Prevent NTP from using this timeserver, but continue collecting stats.This field is only available when the following conditions are met:- `type` must not be equal to `'pool'`
     prefer: Enable NTP favoring the use of this server more than all others.
     type_: The type of this timeserver. Use `server` is `timeserver` is a standalone NTP server, use `pool` if `timeserver` represents an NTP pool, or `peer` if `timeserver` is an NTP peer. Note: If the `timeserver` value ends with the `pool.ntp.org` suffix, this field will be forced to use `pool`. Valid values: ['server', 'pool', 'peer']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -20693,6 +21664,8 @@ async def pfsense_update_services_ntp_time_server(
     prefer: Enable NTP favoring the use of this server more than all others.
     timeserver: The IP or hostname of the remote NTP time server, pool or peer.
     type_: The type of this timeserver. Use `server` is `timeserver` is a standalone NTP server, use `pool` if `timeserver` represents an NTP pool, or `peer` if `timeserver` is an NTP peer. Note: If the `timeserver` value ends with the `pool.ntp.org` suffix, this field will be forced to use `pool`. Valid values: ['server', 'pool', 'peer']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -20725,6 +21698,8 @@ async def pfsense_delete_services_ntp_time_server(
     """DELETE /api/v2/services/ntp/time_server
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -20756,6 +21731,8 @@ async def pfsense_list_services_ntp_time_servers(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -20783,6 +21760,8 @@ async def pfsense_replace_services_ntp_time_servers(
     """PUT /api/v2/services/ntp/time_servers
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -20813,6 +21792,8 @@ async def pfsense_delete_services_ntp_time_servers(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -20837,6 +21818,8 @@ async def pfsense_delete_services_ntp_time_servers(
 async def pfsense_get_services_ssh(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/services/ssh
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -20858,6 +21841,8 @@ async def pfsense_update_services_ssh(
     port: The TCP port the SSH server will listen on. Valid options are: a TCP/UDP port number
     sshdagentforwarding: Enable support for ssh-agent forwarding.
     sshdkeyonly: The SSH authentication mode to use. Use `enabled` to require public key authentication, use both to require both a public key AND a password, or use `null` to allow a password OR a public key. Valid values: ['enabled', 'both']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -20887,6 +21872,8 @@ async def pfsense_get_services_service_watchdog(
     """GET /api/v2/services/service_watchdog
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -20908,6 +21895,8 @@ async def pfsense_create_services_service_watchdog(
 
     name: The name of the service to be watched.
     notify: Enable or disable notifications being sent when Service Watchdogs finds this service stopped.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -20938,6 +21927,8 @@ async def pfsense_update_services_service_watchdog(
     id: The ID of the object or resource to interact with.
     name: The name of the service to be watched.
     notify: Enable or disable notifications being sent when Service Watchdogs finds this service stopped.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -20966,6 +21957,8 @@ async def pfsense_delete_services_service_watchdog(
     """DELETE /api/v2/services/service_watchdog
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -20997,6 +21990,8 @@ async def pfsense_list_services_service_watchdogs(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -21024,6 +22019,8 @@ async def pfsense_replace_services_service_watchdogs(
     """PUT /api/v2/services/service_watchdogs
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -21054,6 +22051,8 @@ async def pfsense_delete_services_service_watchdogs(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -21084,6 +22083,8 @@ async def pfsense_create_services_wake_on_lan_send(
 
     interface: The interface the host to be woken up is connected to.
     mac_addr: The MAC address of the host to be awoken.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -21106,6 +22107,8 @@ async def pfsense_create_services_wake_on_lan_send(
 async def pfsense_get_status_carp(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/status/carp
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -21123,6 +22126,8 @@ async def pfsense_update_status_carp(
 
     enable: Enables or disables CARP on this system.
     maintenance_mode: Enables or disables CARP maintenance mode on this system.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -21156,6 +22161,8 @@ async def pfsense_list_status_dhcp_server_leases(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -21191,6 +22198,8 @@ async def pfsense_delete_status_dhcp_server_leases(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -21226,6 +22235,8 @@ async def pfsense_list_status_gateways(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -21254,6 +22265,8 @@ async def pfsense_get_status_i_psec_child_sa(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -21282,6 +22295,8 @@ async def pfsense_list_status_i_psec_child_s_as(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -21316,6 +22331,8 @@ async def pfsense_list_status_i_psec_s_as(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -21350,6 +22367,8 @@ async def pfsense_list_status_interfaces(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -21384,6 +22403,8 @@ async def pfsense_list_status_logs_auth(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -21418,6 +22439,8 @@ async def pfsense_list_status_logs_dhcp(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -21452,6 +22475,8 @@ async def pfsense_list_status_logs_firewall(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -21486,6 +22511,8 @@ async def pfsense_list_status_logs_open_vpn(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -21520,6 +22547,8 @@ async def pfsense_list_status_logs_packages_restapi(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -21543,6 +22572,8 @@ async def pfsense_list_status_logs_packages_restapi(
 async def pfsense_get_status_logs_settings(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/status/logs/settings
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -21624,6 +22655,8 @@ async def pfsense_update_status_logs_settings(
     sourceip: The interface to use as the source IP address for remote logging.This field is only available when the following conditions are met:- `enableremotelogging` must be equal to `true`
     system: Log system events to the remote syslog server(s).This field is only available when the following conditions are met:- `enableremotelogging` must be equal to `true`- `logall` must not be equal to `true`
     vpn: Log VPN events to the remote syslog server(s).This field is only available when the following conditions are met:- `enableremotelogging` must be equal to `true`- `logall` must not be equal to `true`
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -21721,6 +22754,8 @@ async def pfsense_list_status_logs_system(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -21755,6 +22790,8 @@ async def pfsense_list_status_open_vpn_clients(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -21783,6 +22820,8 @@ async def pfsense_get_status_open_vpn_server_connection(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -21806,6 +22845,8 @@ async def pfsense_delete_status_open_vpn_server_connection(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -21839,6 +22880,8 @@ async def pfsense_list_status_open_vpn_server_connections(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -21874,6 +22917,8 @@ async def pfsense_delete_status_open_vpn_server_connections(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -21903,6 +22948,8 @@ async def pfsense_get_status_open_vpn_server_route(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -21931,6 +22978,8 @@ async def pfsense_list_status_open_vpn_server_routes(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -21965,6 +23014,8 @@ async def pfsense_list_status_open_vpn_servers(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -21994,6 +23045,8 @@ async def pfsense_create_status_service(
 
     id: The ID of the object or resource to interact with.
     action: The action to perform against this service. Valid values: ['start', 'stop', 'restart']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -22027,6 +23080,8 @@ async def pfsense_list_status_services(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -22050,6 +23105,8 @@ async def pfsense_list_status_services(
 async def pfsense_get_status_system(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/status/system
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -22064,6 +23121,8 @@ async def pfsense_get_system_crl(
     """GET /api/v2/system/crl
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -22095,6 +23154,8 @@ async def pfsense_create_system_crl(
     lifetime: The lifetime of this CRL in days.This field is only available when the following conditions are met:- `method` must be equal to `'internal'`
     serial: The serial number of the CRL.This field is only available when the following conditions are met:- `method` must be equal to `'internal'`
     text: The raw x509 CRL data.This field is only available when the following conditions are met:- `method` must be equal to `'existing'`
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -22145,6 +23206,8 @@ async def pfsense_update_system_crl(
     method: The method used to generate this CRL. Valid values: ['existing', 'internal']
     serial: The serial number of the CRL.This field is only available when the following conditions are met:- `method` must be equal to `'internal'` WARNING: This field is read-only after creation — PATCH will return FIELD_VALUE_CHANGED_WHEN_NOT_EDITABLE if a different value is sent.
     text: The raw x509 CRL data.This field is only available when the following conditions are met:- `method` must be equal to `'existing'`
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -22183,6 +23246,8 @@ async def pfsense_delete_system_crl(
     """DELETE /api/v2/system/crl
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -22208,6 +23273,8 @@ async def pfsense_get_system_crl_revoked_certificate(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -22247,6 +23314,8 @@ async def pfsense_create_system_crl_revoked_certificate(
     reason: The CRL reason for revocation code. Valid values: [-1, 0, 1, 2, 3, 4, 5, 6, 9]
     serial: The serial number of the certificate to be revoked.
     type_: The type of the certificate to be revoked.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -22309,6 +23378,8 @@ async def pfsense_update_system_crl_revoked_certificate(
     revoke_time: The unix timestamp of when the certificate was revoked.
     serial: The serial number of the certificate to be revoked.
     type_: The type of the certificate to be revoked.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -22355,6 +23426,8 @@ async def pfsense_delete_system_crl_revoked_certificate(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -22388,6 +23461,8 @@ async def pfsense_list_system_cr_ls(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -22423,6 +23498,8 @@ async def pfsense_delete_system_cr_ls(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -22458,6 +23535,8 @@ async def pfsense_list_system_certificate_authorities(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -22493,6 +23572,8 @@ async def pfsense_delete_system_certificate_authorities(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -22520,6 +23601,8 @@ async def pfsense_get_system_certificate_authority(
     """GET /api/v2/system/certificate_authority
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -22549,6 +23632,8 @@ async def pfsense_create_system_certificate_authority(
     randomserial: Enables or disables the randomization of serial numbers for certificates signed by this CA.
     serial: The decimal number to be used as a sequential serial number for the next certificate to be signed by this CA. This value is ignored when Randomize Serial is checked.
     trust: Adds or removes this certificate authority from the operating system's trust stored.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -22595,6 +23680,8 @@ async def pfsense_update_system_certificate_authority(
     randomserial: Enables or disables the randomization of serial numbers for certificates signed by this CA.
     serial: The decimal number to be used as a sequential serial number for the next certificate to be signed by this CA. This value is ignored when Randomize Serial is checked.
     trust: Adds or removes this certificate authority from the operating system's trust stored.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -22631,6 +23718,8 @@ async def pfsense_delete_system_certificate_authority(
     """DELETE /api/v2/system/certificate_authority
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -22685,6 +23774,8 @@ async def pfsense_create_system_certificate_authority_generate(
     lifetime: The number of days the certificate authority is valid for.
     randomserial: Enables or disables the randomization of serial numbers for certificates signed by this CA.
     trust: Adds or removes this certificate authority from the operating system's trust stored.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -22745,6 +23836,8 @@ async def pfsense_create_system_certificate_authority_renew(
     reusekey: Reuses the existing private key when renewing the certificate authority.
     reuseserial: Reuses the existing serial number when renewing the certificate authority.
     strictsecurity: Enforces strict security measures when renewing the certificate authority.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -22774,6 +23867,8 @@ async def pfsense_get_system_certificate(
     """GET /api/v2/system/certificate
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -22799,6 +23894,8 @@ async def pfsense_create_system_certificate(
     descr: The descriptive name for this certificate.
     prv: The X509 private key string.
     type_: The certificate type. Use `server` when this certificate is to be used by one or more services on this system. Use `user` when this certificate is intended to be assigned to a user for authentication purposes. Valid values: ['server', 'user']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -22837,6 +23934,8 @@ async def pfsense_update_system_certificate(
     descr: The descriptive name for this certificate.
     prv: The X509 private key string.
     type_: The certificate type. Use `server` when this certificate is to be used by one or more services on this system. Use `user` when this certificate is intended to be assigned to a user for authentication purposes. Valid values: ['server', 'user']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -22869,6 +23968,8 @@ async def pfsense_delete_system_certificate(
     """DELETE /api/v2/system/certificate
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -22929,6 +24030,8 @@ async def pfsense_create_system_certificate_generate(
     lifetime: The number of days the certificate is valid for.
     prv: The X509 private key string.
     type_: The type of certificate to generate. Valid values: ['server', 'user']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -22993,6 +24096,8 @@ async def pfsense_create_system_certificate_pkcs12_export(
     certref: The Certificate to export as a PKCS12 file.
     encryption: The level of encryption to use when exporting the PKCS#12 archive. Valid values: ['high', 'low', 'legacy']
     passphrase: The passphrase to use when exporting the PKCS#12 archive. Leave empty for no passphrase.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -23027,6 +24132,8 @@ async def pfsense_create_system_certificate_renew(
     reusekey: Reuses the existing private key when renewing the certificate.
     reuseserial: Reuses the existing serial number when renewing the certificate.
     strictsecurity: Enforces strict security measures when renewing the certificate.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -23089,6 +24196,8 @@ async def pfsense_create_system_certificate_signing_request(
     keylen: The length of the RSA key pair to generate.This field is only available when the following conditions are met:- `keytype` must be equal to `'RSA'` Valid values: [1024, 2048, 3072, 4096, 6144, 7680, 8192, 15360, 16384]
     lifetime: The number of days the certificate is valid for.
     type_: The type of certificate to generate. Valid values: ['server', 'user']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -23165,6 +24274,8 @@ async def pfsense_create_system_certificate_signing_request_sign(
     lifetime: The number of days the certificate is valid for.
     prv: The X509 private key string.
     type_: The type of certificate to generate. Valid values: ['server', 'user']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -23216,6 +24327,8 @@ async def pfsense_list_system_certificates(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -23251,6 +24364,8 @@ async def pfsense_delete_system_certificates(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -23275,6 +24390,8 @@ async def pfsense_delete_system_certificates(
 async def pfsense_get_system_console(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/console
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -23290,6 +24407,8 @@ async def pfsense_update_system_console(
     """PATCH /api/v2/system/console
 
     passwd_protect_console: Enables or disables password protecting the console.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -23310,6 +24429,8 @@ async def pfsense_update_system_console(
 async def pfsense_get_system_dns(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/dns
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -23329,6 +24450,8 @@ async def pfsense_update_system_dns(
     dnsallowoverride: Allow DNS servers to be overwritten by DHCP on WAN interfaces.
     dnslocalhost: Use local DNS server (DNS Resover or DNS Forwarder) as the primary DNS, or use only remote DNS servers specified in `dnsserver`. Set to `null` to use local DNS server as the primary and remote DNS servers as backup. Valid values: ['local', 'remote']
     dnsserver: The remote DNS server IPv4 or IPv6 addresses.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -23353,6 +24476,8 @@ async def pfsense_update_system_dns(
 async def pfsense_get_system_hostname(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/hostname
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -23370,6 +24495,8 @@ async def pfsense_update_system_hostname(
 
     domain: The domain portion of the FQDN to assign to this system.
     hostname: The hostname portion of the FQDN to assign to this system.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -23392,6 +24519,8 @@ async def pfsense_update_system_hostname(
 async def pfsense_list_system_notifications_email_settings(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/notifications/email_settings
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -23427,6 +24556,8 @@ async def pfsense_update_system_notifications_email_settings(
     sslvalidate: Enables or disables SSL/TLS certificate validation for the SMTP connection.
     timeout: The timeout (in seconds) for the SMTP connection.
     username: The username to use for SMTP authentication.This field is only available when the following conditions are met:- `authentication_mechanism` must be equal to `'LOGIN'`
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -23478,6 +24609,8 @@ async def pfsense_list_system_package_available(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -23504,6 +24637,8 @@ async def pfsense_get_system_package(
     """GET /api/v2/system/package
 
     id: The ID of the object to target. NOTE: The id is an integer array index (0, 1, 2, ...), not a package name string.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -23523,6 +24658,8 @@ async def pfsense_create_system_package(
     """POST /api/v2/system/package
 
     name: The name of the pfSense package.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -23547,6 +24684,8 @@ async def pfsense_delete_system_package(
     """DELETE /api/v2/system/package
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -23578,6 +24717,8 @@ async def pfsense_list_system_packages(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -23613,6 +24754,8 @@ async def pfsense_delete_system_packages(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -23648,6 +24791,8 @@ async def pfsense_list_system_restapi_access_list(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -23675,6 +24820,8 @@ async def pfsense_replace_system_restapi_access_list(
     """PUT /api/v2/system/restapi/access_list
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -23705,6 +24852,8 @@ async def pfsense_delete_system_restapi_access_list(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -23732,6 +24881,8 @@ async def pfsense_get_system_restapi_access_list_entry(
     """GET /api/v2/system/restapi/access_list/entry
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -23761,6 +24912,8 @@ async def pfsense_create_system_restapi_access_list_entry(
     type_: The type of access this entry provides. "allow" entries permit access to the REST API from the specified networks. "deny" entries block access to the REST API from the specified networks. Valid values: ['allow', 'deny']
     users: The users that this entry applies to. Only users in this list will be affected by this entry. Leave empty if this entry should apply to all users.
     weight: The weight of this entry. Entries with lower weights are evaluated first. If multiple entries match a request, the entry with the lowest weight will be applied.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -23807,6 +24960,8 @@ async def pfsense_update_system_restapi_access_list_entry(
     type_: The type of access this entry provides. "allow" entries permit access to the REST API from the specified networks. "deny" entries block access to the REST API from the specified networks. Valid values: ['allow', 'deny']
     users: The users that this entry applies to. Only users in this list will be affected by this entry. Leave empty if this entry should apply to all users.
     weight: The weight of this entry. Entries with lower weights are evaluated first. If multiple entries match a request, the entry with the lowest weight will be applied.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -23843,6 +24998,8 @@ async def pfsense_delete_system_restapi_access_list_entry(
     """DELETE /api/v2/system/restapi/access_list/entry
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -23863,6 +25020,8 @@ async def pfsense_delete_system_restapi_access_list_entry(
 async def pfsense_get_system_restapi_settings(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/restapi/settings
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -23914,6 +25073,8 @@ async def pfsense_update_system_restapi_settings(
     override_sensitive_fields: Specifies a list of fields (formatted as ModelName:FieldName) that should have their sensitive attribute overridden. Fields selected here will not be considered sensitive and will be included in API responses regardless of the `expose_sensitive_fields` setting.This field is only available when the following conditions are met:- `expose_sensitive_fields` must be equal to `false`
     read_only: Enables or disables read-only API access. If enabled, the API will only respond to GET requests and can only be disabled via webConfigurator.
     represent_interfaces_as: Specifies how the API should represent interface names. Use `descr` to represent interface objects by their description name, use `id` to represent interface objects by their internal pfSense ID (e.g. wan, lan, opt1), or use `if` to represent interface objects by their real interface name (e.g. em0, igb1, bxe3). Valid values: ['descr', 'id', 'if']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -23977,6 +25138,8 @@ async def pfsense_create_system_restapi_settings_sync(
     It does NOT accept API key or JWT auth. Will return 401 via MCP.
 
     sync_data: The serialized REST API settings data to be synced.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -23997,6 +25160,8 @@ async def pfsense_create_system_restapi_settings_sync(
 async def pfsense_get_system_restapi_version(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/restapi/version
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -24012,6 +25177,8 @@ async def pfsense_update_system_restapi_version(
     """PATCH /api/v2/system/restapi/version
 
     install_version: Set the API version to update or rollback to.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -24032,6 +25199,8 @@ async def pfsense_update_system_restapi_version(
 async def pfsense_get_system_timezone(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/timezone
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -24047,6 +25216,8 @@ async def pfsense_update_system_timezone(
     """PATCH /api/v2/system/timezone
 
     timezone: Set geographic region name (Continent/Location) to determine the timezone for the firewall.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -24070,6 +25241,8 @@ async def pfsense_get_system_tunable(
     """GET /api/v2/system/tunable
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -24093,6 +25266,8 @@ async def pfsense_create_system_tunable(
     tunable: The name of the tunable to set.
     value: The value to assign this tunable.
     descr: A description for this tunable.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -24127,6 +25302,8 @@ async def pfsense_update_system_tunable(
     descr: A description for this tunable.
     tunable: The name of the tunable to set.
     value: The value to assign this tunable.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -24159,6 +25336,8 @@ async def pfsense_delete_system_tunable(
 
     id: The ID of the object to target.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -24192,6 +25371,8 @@ async def pfsense_list_system_tunables(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -24219,6 +25400,8 @@ async def pfsense_replace_system_tunables(
     """PUT /api/v2/system/tunables
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -24249,6 +25432,8 @@ async def pfsense_delete_system_tunables(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -24273,6 +25458,8 @@ async def pfsense_delete_system_tunables(
 async def pfsense_get_system_version(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/version
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -24284,6 +25471,8 @@ async def pfsense_get_system_version(
 async def pfsense_get_system_web_gui_settings(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/webgui/settings
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -24303,6 +25492,8 @@ async def pfsense_update_system_web_gui_settings(
     sslcertref: The SSL/TLS certificate to use for the web GUI.
     port: The port on which the web GUI listens. Valid options are: a TCP/UDP port number
     protocol: The protocol to use for the web GUI. Valid values: ['http', 'https']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -24330,6 +25521,8 @@ async def pfsense_get_user_auth_server(
     """GET /api/v2/user/auth_server
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -24409,6 +25602,8 @@ async def pfsense_create_user_auth_server(
     radius_protocol: The RADIUS protocol to use when authenticating.This field is only available when the following conditions are met:- `type` must be equal to `'radius'` Valid values: ['MSCHAPv2', 'MSCHAPv1', 'CHAP_MD5', 'PAP']
     radius_secret: The shared secret to use when authenticating to this RADIUS server.This field is only available when the following conditions are met:- `type` must be equal to `'radius'`
     radius_timeout: The timeout (in seconds) for connections to this RADIUS authentication server.This field is only available when the following conditions are met:- `type` must be equal to `'radius'`
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -24555,6 +25750,8 @@ async def pfsense_update_user_auth_server(
     radius_secret: The shared secret to use when authenticating to this RADIUS server.This field is only available when the following conditions are met:- `type` must be equal to `'radius'`
     radius_timeout: The timeout (in seconds) for connections to this RADIUS authentication server.This field is only available when the following conditions are met:- `type` must be equal to `'radius'`
     type_: The type of this authentication server. Valid values: ['ldap', 'radius']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -24641,6 +25838,8 @@ async def pfsense_delete_user_auth_server(
     """DELETE /api/v2/user/auth_server
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -24672,6 +25871,8 @@ async def pfsense_list_user_auth_servers(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -24699,6 +25900,8 @@ async def pfsense_replace_user_auth_servers(
     """PUT /api/v2/user/auth_servers
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -24729,6 +25932,8 @@ async def pfsense_delete_user_auth_servers(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -24756,6 +25961,8 @@ async def pfsense_get_user(
     """GET /api/v2/user
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -24791,6 +25998,8 @@ async def pfsense_create_user(
     expires: The expiration date for this user in mm/dd/YYYY format. Use empty string for no expiration
     ipsecpsk: The IPsec pre-shared key to assign this user.
     priv: The privileges assigned to this local user.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -24849,6 +26058,8 @@ async def pfsense_update_user(
     name: The username of this local user.
     password: The password of this local user.
     priv: The privileges assigned to this local user.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -24891,6 +26102,8 @@ async def pfsense_delete_user(
     """DELETE /api/v2/user
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -24914,6 +26127,8 @@ async def pfsense_get_user_group(
     """GET /api/v2/user/group
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -24941,6 +26156,8 @@ async def pfsense_create_user_group(
     member: The local user names to assign to this user group.
     priv: The privileges to assign to this user group.
     scope: The scope of this user group. Use `local` for user groups that only apply to this system. use `remote` for groups that also apply to remote authentication servers. Please note the `system` scope is reserved for built-in, system-defined user groups and cannot be assigned manually. Valid values: ['local', 'remote', 'system']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -24983,6 +26200,8 @@ async def pfsense_update_user_group(
     name: The name for this user group.
     priv: The privileges to assign to this user group.
     scope: The scope of this user group. Use `local` for user groups that only apply to this system. use `remote` for groups that also apply to remote authentication servers. Please note the `system` scope is reserved for built-in, system-defined user groups and cannot be assigned manually. Valid values: ['local', 'remote', 'system']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -25017,6 +26236,8 @@ async def pfsense_delete_user_group(
     """DELETE /api/v2/user/group
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -25048,6 +26269,8 @@ async def pfsense_list_user_groups(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -25075,6 +26298,8 @@ async def pfsense_replace_user_groups(
     """PUT /api/v2/user/groups
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -25105,6 +26330,8 @@ async def pfsense_delete_user_groups(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -25140,6 +26367,8 @@ async def pfsense_list_users(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -25175,6 +26404,8 @@ async def pfsense_delete_users(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -25199,6 +26430,8 @@ async def pfsense_delete_users(
 async def pfsense_get_vpni_psec_apply_status(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/vpn/ipsec/apply
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -25211,6 +26444,8 @@ async def pfsense_vpni_psec_apply(
     confirm: bool = False,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/vpn/ipsec/apply
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -25232,6 +26467,8 @@ async def pfsense_get_vpni_psec_phase1_encryption(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -25265,6 +26502,8 @@ async def pfsense_create_vpni_psec_phase1_encryption(
     parent_id: The ID of the parent this object is nested under.
     encryption_algorithm_keylen: The key length for the encryption algorithm.This field is only available when the following conditions are met:- `encryption_algorithm_name` must be one of [ aes, aes128gcm, aes192gcm, aes256gcm ]
     prf_algorithm: The PRF algorithm to use for this P1 encryption item. This value has no affect unless the P1 entry has PRF enabled. Valid values: ['sha1', 'sha256', 'sha384', 'sha512', 'aesxcbc']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -25314,6 +26553,8 @@ async def pfsense_update_vpni_psec_phase1_encryption(
     encryption_algorithm_name: The name of the encryption algorithm to use for this P1 encryption item. Valid values: ['aes', 'aes128gcm', 'aes192gcm', 'aes256gcm', 'chacha20poly1305']
     hash_algorithm: The hash algorithm to use for this P1 encryption item. Valid values: ['sha1', 'sha256', 'sha384', 'sha512', 'aesxcbc']
     prf_algorithm: The PRF algorithm to use for this P1 encryption item. This value has no affect unless the P1 entry has PRF enabled. Valid values: ['sha1', 'sha256', 'sha384', 'sha512', 'aesxcbc']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -25357,6 +26598,8 @@ async def pfsense_delete_vpni_psec_phase1_encryption(
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -25393,6 +26636,8 @@ async def pfsense_list_vpni_psec_phase1_encryptions(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -25430,6 +26675,8 @@ async def pfsense_delete_vpni_psec_phase1_encryptions(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -25458,6 +26705,8 @@ async def pfsense_get_vpni_psec_phase1(
     """GET /api/v2/vpn/ipsec/phase1
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -25539,6 +26788,8 @@ async def pfsense_create_vpni_psec_phase1(
     rekey_time: The amount of time (in seconds) before an child SA establishes new keys.
     splitconn: Enables or disables the use split connection entries with multiple phase 2 configurations. Required for remote endpoints that support only a single traffic selector per child SA.
     startaction: The option used to force specific initiation/responder behavior for child SA (P2) entries. Valid values: ['', 'none', 'start', 'trap']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -25688,6 +26939,8 @@ async def pfsense_update_vpni_psec_phase1(
     remote_gateway: The IP address or hostname of the remote gateway.
     splitconn: Enables or disables the use split connection entries with multiple phase 2 configurations. Required for remote endpoints that support only a single traffic selector per child SA.
     startaction: The option used to force specific initiation/responder behavior for child SA (P2) entries. Valid values: ['', 'none', 'start', 'trap']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -25779,6 +27032,8 @@ async def pfsense_delete_vpni_psec_phase1(
 
     id: The ID of the object to target.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -25813,6 +27068,8 @@ async def pfsense_list_vpni_psec_phase1s(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -25842,6 +27099,8 @@ async def pfsense_replace_vpni_psec_phase1s(
     Note: Call pfsense_vpn_ipsec_apply after this to apply changes.
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -25875,6 +27134,8 @@ async def pfsense_delete_vpni_psec_phase1s(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -25905,6 +27166,8 @@ async def pfsense_get_vpni_psec_phase2_encryption(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -25932,6 +27195,8 @@ async def pfsense_create_vpni_psec_phase2_encryption(
     name: The name of the encryption algorithm to use for this P2 encryption item. Valid values: ['aes', 'aes128gcm', 'aes192gcm', 'aes256gcm', 'chacha20poly1305']
     parent_id: The ID of the parent this object is nested under.
     keylen: The key length for the encryption algorithm.This field is only available when the following conditions are met:- `name` must be one of [ aes, aes128gcm, aes192gcm, aes256gcm ]
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -25969,6 +27234,8 @@ async def pfsense_update_vpni_psec_phase2_encryption(
     parent_id: The ID of the parent this object is nested under.
     keylen: The key length for the encryption algorithm.This field is only available when the following conditions are met:- `name` must be one of [ aes, aes128gcm, aes192gcm, aes256gcm ]
     name: The name of the encryption algorithm to use for this P2 encryption item. Valid values: ['aes', 'aes128gcm', 'aes192gcm', 'aes256gcm', 'chacha20poly1305']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -26006,6 +27273,8 @@ async def pfsense_delete_vpni_psec_phase2_encryption(
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -26042,6 +27311,8 @@ async def pfsense_list_vpni_psec_phase2_encryptions(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -26079,6 +27350,8 @@ async def pfsense_delete_vpni_psec_phase2_encryptions(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -26107,6 +27380,8 @@ async def pfsense_get_vpni_psec_phase2(
     """GET /api/v2/vpn/ipsec/phase2
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -26170,6 +27445,8 @@ async def pfsense_create_vpni_psec_phase2(
     remoteid_address: The remote network IP component of this IPsec security association.This field is only available when the following conditions are met:- `remoteid_type` must be one of [ address, network ]
     remoteid_netbits: The subnet bits of the `remoteid_address` network.This field is only available when the following conditions are met:- `remoteid_type` must be equal to `'network'`
     remoteid_type: The remote ID type to use for this phase 2 entry. Valid value options are: `address`, `network`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.This field is only available when the following conditions are met:- `mode` must not be equal to `'transport'`
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -26283,6 +27560,8 @@ async def pfsense_update_vpni_psec_phase2(
     remoteid_address: The remote network IP component of this IPsec security association.This field is only available when the following conditions are met:- `remoteid_type` must be one of [ address, network ]
     remoteid_netbits: The subnet bits of the `remoteid_address` network.This field is only available when the following conditions are met:- `remoteid_type` must be equal to `'network'`
     remoteid_type: The remote ID type to use for this phase 2 entry. Valid value options are: `address`, `network`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.This field is only available when the following conditions are met:- `mode` must not be equal to `'transport'`
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -26356,6 +27635,8 @@ async def pfsense_delete_vpni_psec_phase2(
 
     id: The ID of the object to target.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -26390,6 +27671,8 @@ async def pfsense_list_vpni_psec_phase2s(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -26419,6 +27702,8 @@ async def pfsense_replace_vpni_psec_phase2s(
     Note: Call pfsense_vpn_ipsec_apply after this to apply changes.
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -26452,6 +27737,8 @@ async def pfsense_delete_vpni_psec_phase2s(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -26480,6 +27767,8 @@ async def pfsense_get_vpn_open_vpncso(
     """GET /api/v2/vpn/openvpn/cso
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -26551,6 +27840,8 @@ async def pfsense_create_vpn_open_vpncso(
     tunnel_networkv6: The IPv6 virtual network used for private communications between the server and client hosts.
     wins_server1: The primary WINS server to provide to the client.This field is only available when the following conditions are met:- `netbios_enable` must be equal to `true`
     wins_server2: The secondary WINS server to provide to the client.This field is only available when the following conditions are met:- `netbios_enable` must be equal to `true`
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -26681,6 +27972,8 @@ async def pfsense_update_vpn_open_vpncso(
     tunnel_networkv6: The IPv6 virtual network used for private communications between the server and client hosts.
     wins_server1: The primary WINS server to provide to the client.This field is only available when the following conditions are met:- `netbios_enable` must be equal to `true`
     wins_server2: The secondary WINS server to provide to the client.This field is only available when the following conditions are met:- `netbios_enable` must be equal to `true`
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -26759,6 +28052,8 @@ async def pfsense_delete_vpn_open_vpncso(
     """DELETE /api/v2/vpn/openvpn/cso
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -26790,6 +28085,8 @@ async def pfsense_list_vpn_open_vpncs_os(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -26825,6 +28122,8 @@ async def pfsense_delete_vpn_open_vpncs_os(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -26852,6 +28151,8 @@ async def pfsense_get_vpn_open_vpn_client(
     """GET /api/v2/vpn/openvpn/client
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -26969,6 +28270,8 @@ async def pfsense_create_vpn_open_vpn_client(
     udp_fast_io: Enables or disables fast I/O operations with UDP writes to tun/tap (Experimental).
     use_shaper: Maximum outgoing bandwidth (in bytes per second) for this tunnel. Use `null` no limit.
     verbosity_level: The OpenVPN logging verbosity level. Valid values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -27191,6 +28494,8 @@ async def pfsense_update_vpn_open_vpn_client(
     udp_fast_io: Enables or disables fast I/O operations with UDP writes to tun/tap (Experimental).
     use_shaper: Maximum outgoing bandwidth (in bytes per second) for this tunnel. Use `null` no limit.
     verbosity_level: The OpenVPN logging verbosity level. Valid values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -27315,6 +28620,8 @@ async def pfsense_delete_vpn_open_vpn_client(
     """DELETE /api/v2/vpn/openvpn/client
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -27338,6 +28645,8 @@ async def pfsense_get_vpn_open_vpn_client_export_config(
     """GET /api/v2/vpn/openvpn/client_export/config
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -27401,6 +28710,8 @@ async def pfsense_create_vpn_open_vpn_client_export_config(
     useproxytype: The proxy type to use.This field is only available when the following conditions are met:- `useproxy` must be equal to `true` Valid values: ['http', 'socks']
     usetoken: Use Microsoft Certificate Storage instead of local files.
     verifyservercn: Verify the server certificate Common Name (CN) when the client connects. Valid values: ['auto', 'none']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -27515,6 +28826,8 @@ async def pfsense_update_vpn_open_vpn_client_export_config(
     useproxytype: The proxy type to use.This field is only available when the following conditions are met:- `useproxy` must be equal to `true` Valid values: ['http', 'socks']
     usetoken: Use Microsoft Certificate Storage instead of local files.
     verifyservercn: Verify the server certificate Common Name (CN) when the client connects. Valid values: ['auto', 'none']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -27585,6 +28898,8 @@ async def pfsense_delete_vpn_open_vpn_client_export_config(
     """DELETE /api/v2/vpn/openvpn/client_export/config
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -27616,6 +28931,8 @@ async def pfsense_list_vpn_open_vpn_client_export_configs(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -27643,6 +28960,8 @@ async def pfsense_replace_vpn_open_vpn_client_export_configs(
     """PUT /api/v2/vpn/openvpn/client_export/configs
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -27673,6 +28992,8 @@ async def pfsense_delete_vpn_open_vpn_client_export_configs(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -27753,6 +29074,8 @@ async def pfsense_create_vpn_open_vpn_client_export(
     username: The username of the user this client export corresponds to. This is only applicable for OpenVPN servers that use the Local Database AND client certificates.
     usetoken: Use Microsoft Certificate Storage instead of local files.
     verifyservercn: Verify the server certificate Common Name (CN) when the client connects. Valid values: ['auto', 'none']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -27836,6 +29159,8 @@ async def pfsense_list_vpn_open_vpn_clients(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -27871,6 +29196,8 @@ async def pfsense_delete_vpn_open_vpn_clients(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -27898,6 +29225,8 @@ async def pfsense_get_vpn_open_vpn_server(
     """GET /api/v2/vpn/openvpn/server
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -28057,6 +29386,8 @@ async def pfsense_create_vpn_open_vpn_server(
     verbosity_level: The OpenVPN logging verbosity level. Valid values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     wins_server1: The primary WINS server to provide to clients.This field is only available when the following conditions are met:- `mode` must be one of [ server_user, server_tls_user ]
     wins_server2: The secondary WINS server to provide to clients.This field is only available when the following conditions are met:- `mode` must be one of [ server_user, server_tls_user ]
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -28363,6 +29694,8 @@ async def pfsense_update_vpn_open_vpn_server(
     verbosity_level: The OpenVPN logging verbosity level. Valid values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     wins_server1: The primary WINS server to provide to clients.This field is only available when the following conditions are met:- `mode` must be one of [ server_user, server_tls_user ]
     wins_server2: The secondary WINS server to provide to clients.This field is only available when the following conditions are met:- `mode` must be one of [ server_user, server_tls_user ]
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -28529,6 +29862,8 @@ async def pfsense_delete_vpn_open_vpn_server(
     """DELETE /api/v2/vpn/openvpn/server
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -28560,6 +29895,8 @@ async def pfsense_list_vpn_open_vpn_servers(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -28595,6 +29932,8 @@ async def pfsense_delete_vpn_open_vpn_servers(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -28619,6 +29958,8 @@ async def pfsense_delete_vpn_open_vpn_servers(
 async def pfsense_get_vpn_wire_guard_apply_status(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/vpn/wireguard/apply
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -28631,6 +29972,8 @@ async def pfsense_vpn_wire_guard_apply(
     confirm: bool = False,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/vpn/wireguard/apply
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -28652,6 +29995,8 @@ async def pfsense_get_vpn_wire_guard_peer_allowed_ip(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -28681,6 +30026,8 @@ async def pfsense_create_vpn_wire_guard_peer_allowed_ip(
     mask: The subnet mask for this peer IP.
     parent_id: The ID of the parent this object is nested under.
     descr: A description for this allowed peer IP.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -28722,6 +30069,8 @@ async def pfsense_update_vpn_wire_guard_peer_allowed_ip(
     address: The IPv4 or IPv6 address for this peer IP.
     descr: A description for this allowed peer IP.
     mask: The subnet mask for this peer IP.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -28759,6 +30108,8 @@ async def pfsense_delete_vpn_wire_guard_peer_allowed_ip(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -28793,6 +30144,8 @@ async def pfsense_list_vpn_wire_guard_peer_allowed_i_ps(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -28830,6 +30183,8 @@ async def pfsense_delete_vpn_wire_guard_peer_allowed_i_ps(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -28858,6 +30213,8 @@ async def pfsense_get_vpn_wire_guard_peer(
     """GET /api/v2/vpn/wireguard/peer
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -28895,6 +30252,8 @@ async def pfsense_create_vpn_wire_guard_peer(
     port: The port used by the remote peer. Valid options are: a TCP/UDP port numberThis field is only available when the following conditions are met:- `endpoint` must not be equal to `NULL`
     presharedkey: The pre-shared key for this tunnel.
     tun: The WireGuard tunnel for this peer.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -28956,6 +30315,8 @@ async def pfsense_update_vpn_wire_guard_peer(
     presharedkey: The pre-shared key for this tunnel.
     publickey: The public key for this peer.
     tun: The WireGuard tunnel for this peer.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -29003,6 +30364,8 @@ async def pfsense_delete_vpn_wire_guard_peer(
 
     id: The ID of the object to target.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -29037,6 +30400,8 @@ async def pfsense_list_vpn_wire_guard_peers(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -29066,6 +30431,8 @@ async def pfsense_replace_vpn_wire_guard_peers(
     Note: Call pfsense_vpn_wireguard_apply after this to apply changes.
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -29099,6 +30466,8 @@ async def pfsense_delete_vpn_wire_guard_peers(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -29124,6 +30493,8 @@ async def pfsense_delete_vpn_wire_guard_peers(
 async def pfsense_get_vpn_wire_guard_settings(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/vpn/wireguard/settings
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     return await _client.request(
         "GET",
@@ -29153,6 +30524,8 @@ async def pfsense_update_vpn_wire_guard_settings(
     keep_conf: Enables or disables keeping the WireGuard configuration when the package is uninstalled/reinstalled.
     resolve_interval: The interval (in seconds) for re-resolving endpoint host/domain names.This field is only available when the following conditions are met:- `resolve_interval_track` must be equal to `false`
     resolve_interval_track: Enables or disables tracking the 'Aliases Hostnames Resolve Interval' value as the `resolve_internal` value instead of specifying a value directly.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -29191,6 +30564,8 @@ async def pfsense_get_vpn_wire_guard_tunnel_address(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -29220,6 +30595,8 @@ async def pfsense_create_vpn_wire_guard_tunnel_address(
     mask: The subnet mask for this WireGuard tunnel.
     parent_id: The ID of the parent this object is nested under.
     descr: A description for this WireGuard tunnel address entry.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -29261,6 +30638,8 @@ async def pfsense_update_vpn_wire_guard_tunnel_address(
     address: The IPv4 or IPv6 address for this WireGuard tunnel.
     descr: A description for this WireGuard tunnel address entry.
     mask: The subnet mask for this WireGuard tunnel.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -29298,6 +30677,8 @@ async def pfsense_delete_vpn_wire_guard_tunnel_address(
 
     id: The ID of the object to target.
     parent_id: The ID of the parent this object is nested under.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -29332,6 +30713,8 @@ async def pfsense_list_vpn_wire_guard_tunnel_addresses(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -29369,6 +30752,8 @@ async def pfsense_delete_vpn_wire_guard_tunnel_addresses(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -29397,6 +30782,8 @@ async def pfsense_get_vpn_wire_guard_tunnel(
     """GET /api/v2/vpn/wireguard/tunnel
 
     id: The ID of the object to target.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -29428,6 +30815,8 @@ async def pfsense_create_vpn_wire_guard_tunnel(
     enabled: Enables or disables this tunnels and any associated peers.
     listenport: The port WireGuard will listen on for this tunnel. Valid options are: a TCP/UDP port number
     mtu: The MTU for this WireGuard tunnel interface. This value is ignored if this tunnel is assigned as a pfSense interface.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -29477,6 +30866,8 @@ async def pfsense_update_vpn_wire_guard_tunnel(
     listenport: The port WireGuard will listen on for this tunnel. Valid options are: a TCP/UDP port number
     mtu: The MTU for this WireGuard tunnel interface. This value is ignored if this tunnel is assigned as a pfSense interface.
     privatekey: The private key for this tunnel. Must be a valid WireGuard Curve25519 private key (base64-encoded, 32 bytes with proper bit clamping). Generate with `wg genkey`.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -29518,6 +30909,8 @@ async def pfsense_delete_vpn_wire_guard_tunnel(
 
     id: The ID of the object to target.
     apply: Apply this deletion immediately.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -29552,6 +30945,8 @@ async def pfsense_list_vpn_wire_guard_tunnels(
     sort_by: The fields to sort response data by.
     sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
     sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     params: dict[str, Any] = {}
     if limit is not None:
@@ -29581,6 +30976,8 @@ async def pfsense_replace_vpn_wire_guard_tunnels(
     Note: Call pfsense_vpn_wireguard_apply after this to apply changes.
 
     items: List of objects for bulk replacement.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (
@@ -29614,6 +31011,8 @@ async def pfsense_delete_vpn_wire_guard_tunnels(
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
     """
     if not confirm:
         return (

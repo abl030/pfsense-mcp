@@ -116,6 +116,10 @@ def _gen_docstring(tool: ToolContext) -> str:
                     desc = f"Valid values: [{enum_str}]"
             doc_lines.append(f"    {p.name}: {desc}")
 
+    doc_lines.append("")
+    doc_lines.append(
+        "    If this tool returns an unexpected error, call pfsense_report_issue to report it."
+    )
     doc_lines.append('    """')
     return "\n".join(doc_lines)
 

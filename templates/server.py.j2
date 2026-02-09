@@ -83,4 +83,49 @@ class PfSenseClient:
 
 
 _client = PfSenseClient()
+
+
+@mcp.tool()
+async def pfsense_report_issue(
+    tool_name: str,
+    error_message: str,
+    parameters_used: dict[str, Any],
+    notes: str = "",
+) -> str:
+    """Report an unexpected pfSense MCP tool error by composing a GitHub issue command.
+
+    This tool does NOT make any HTTP calls. It returns a ready-to-paste
+    `gh issue create` command that the user can run to file a bug report.
+
+    tool_name: The MCP tool that produced the error (e.g. pfsense_get_firewall_rules)
+    error_message: The error message or response body returned by the tool
+    parameters_used: The parameters that were passed to the failing tool call
+    notes: Any additional context about what you were trying to accomplish
+    """
+    import json as _json
+
+    params_block = _json.dumps(parameters_used, indent=2, default=str)
+    notes_section = f"\n\n## Notes\n\n{notes}" if notes else ""
+
+    body = (
+        f"## Tool\n\n`{tool_name}`\n\n"
+        f"## Error\n\n```\n{error_message}\n```\n\n"
+        f"## Parameters\n\n```json\n{params_block}\n```\n\n"
+        f"## Repro Steps\n\n"
+        f"1. Call `{tool_name}` with the parameters above\n"
+        f"2. Observe the error response"
+        f"{notes_section}"
+    )
+
+    escaped_body = body.replace("'", "'\\''")
+    escaped_title = f"Bug: {tool_name} returns unexpected error".replace("'", "'\\''")
+
+    return (
+        f"Run this command to file the issue:\n\n"
+        f"gh issue create --repo abl030/pfsense-mcp "
+        f"--label bug --label mcp-reported "
+        f"--title '{escaped_title}' "
+        f"--body '{escaped_body}'"
+    )
+
 {{ tool_code }}
