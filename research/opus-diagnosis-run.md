@@ -112,3 +112,12 @@
 3. **New finding: replace_user_groups uniqueness.** Opus discovered a pfSense API bug where PUT replace validates uniqueness before clearing existing items. This causes false `FIELD_MUST_BE_UNIQUE` on idempotent replace-with-same-data.
 
 4. **IPsec encryption format.** Opus hit a different failure mode (encryption array item format) than Sonnet (conditional cert fields). Both are real issues but show different models stumble at different points.
+
+## Post-Fix Verification
+
+After implementing generator fixes (conditional required downgrade, BasicAuth detection, docstring improvements), two additional Opus runs were conducted:
+
+- **`run-20260209-083300`** (Phase A only): 5 failures — conditional downgrades worked, but HAProxy ACL and IPsec P2 hash hints had wrong operationId keys, so those 2 weren't fixed yet.
+- **`run-20260209-084301`** (all fixes): **3 failures — all pfSense API bugs.** Theoretical minimum achieved.
+
+Opus independently confirmed in run-084301: `generator_bug: 0, claude_code_bug: 0, openapi_spec_issue: 0`. All 12 generator-fixable errors eliminated. See `research/error-table-opus.md` for the complete breakdown.

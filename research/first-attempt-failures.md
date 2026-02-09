@@ -8,7 +8,9 @@ After fixing all task-config bugs (8 failures eliminated), the remaining failure
 **Total first-attempt failures**: 54 across 14 tasks
 **Self-correction rate**: 46/54 (85.2%)
 
-**NOTE**: 37 of these 54 failures are the MCP client serialization bug (#22), which is **Sonnet-only** — Opus 4.6 does not reproduce it. See `research/opus-diagnosis-run.md` and `research/error-table-opus.md` for the Opus-specific error table (15 errors, 12 fixable).
+**NOTE (Sonnet-specific analysis)**: This document captures Sonnet 4.5 failures. 37 of 54 are the MCP client serialization bug (#22), which is **Sonnet-only** — Opus 4.6 does not reproduce it. For the Opus-specific error table (15 errors → 3 after generator fixes), see `research/error-table-opus.md`.
+
+**Generator fixes applied**: The conditional required field problems documented below (10 failures, 18.5%) have been **fixed** in the generator — `schema_parser.py` now detects `"only available when"` in field descriptions and downgrades those fields from required to optional. The docstring improvements (enum prefix, PF table names, package ID format) have also been applied via `context_builder.py` parameter hints. See `research/error-table-opus.md` for verified results.
 
 ---
 
@@ -319,7 +321,7 @@ pfSense chose "mark required" for safety, which is the better default. The consu
 | NAT mode dependency | IPsec Phase 2 | `natlocalid_*` (when NAT enabled) |
 | Auth-mode dependency | FreeRADIUS user | `password` (when `motp_enable=false`) |
 
-**Potential generator fix**: Parse field descriptions for phrases like "only available when", "only needed for", "required when", "only used with". If found, downgrade from "required" to "optional with None default". This would eliminate most of these failures. Our generator already does this for fields where the description says "only available when" (finding #17), but doesn't cover all the phrase variants.
+**Generator fix (IMPLEMENTED)**: The generator now detects `"only available when"` in field descriptions and downgrades matching required fields to optional (`default=None`). This was implemented in `schema_parser.py` and eliminates all 10 conditional-required failures when running with Opus. Verified in `run-20260209-084301` (0 conditional-required failures).
 
 ### The MCP Client Bug (37 failures, 68.5%)
 

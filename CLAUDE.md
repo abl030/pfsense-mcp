@@ -430,9 +430,9 @@ Findings from building a 677-tool MCP server and testing it with an AI consumer 
 
 14. **Array parameters that are actually sub-resources cause `parameter_format` failures.** Some APIs expose array fields (e.g., WireGuard `addresses`, `allowedips`) in the create schema, but passing JSON arrays triggers validation errors. The correct pattern is to create the parent without the array, then add items via sub-resource endpoints (`tunnel/address`, `peer/allowed_ip`). Tool docstrings should explicitly note when an array parameter must be managed via sub-resources instead of inline.
 
-### Conditional Required Fields
+### Conditional Required Fields (Solved)
 
-15. **Unconditionally required fields that are actually conditional confuse consumers.** When an OpenAPI spec marks fields like `ecname` (only needed for ECDSA keys) or `caref` (only needed for intermediate CAs) as always-required, the consumer must guess to pass empty strings. Docstrings should document which "required" fields can be empty and under what conditions.
+15. **Conditional required fields must be downgraded to optional in the generator.** OpenAPI 3.0 can't express "required when X=Y", so specs mark conditionally-required fields (e.g., `ecname` for ECDSA, `caref` for intermediate CAs) as always-required. **Fix (implemented)**: the generator detects `"only available when"` in field descriptions and downgrades matching required fields to optional (`default=None`). The pfSense spec has 696 fields with this pattern. This eliminates 8 of 15 Opus first-attempt errors with a single pattern-matching change. See finding #25.
 
 ### Description Quality
 
@@ -468,18 +468,9 @@ Findings from building a 677-tool MCP server and testing it with an AI consumer 
 
 ### Generator Phase 4: Conditional Required + BasicAuth + Docstring Fixes
 
-25. **Conditional required field downgrade eliminates 8 of 15 Opus errors.** When a field's description contains `"only available when"` AND the spec marks it `required`, the generator now downgrades it to optional (`default=None`). The pfSense spec has 696 fields with this exact pattern. Combined with BasicAuth endpoint detection (finding #24, 4 operations) and docstring improvements (PF table names, package ID format, IPsec Phase 2 hash enums, HAProxy action ACL guidance), this reduces Opus first-attempt failures from 15 to 3 (all unfixable pfSense API bugs). See `research/error-table-opus.md`.
+25. **Conditional required field downgrade eliminates 8 of 15 Opus errors.** When a field's description contains `"only available when"` AND the spec marks it `required`, the generator now downgrades it to optional (`default=None`). The pfSense spec has 696 fields with this exact pattern. Combined with BasicAuth endpoint detection (4 operations) and docstring improvements (PF table names, package ID format, IPsec Phase 2 hash enums, HAProxy action ACL guidance), this reduces Opus first-attempt failures from 15 to 3 (all unfixable pfSense API bugs). See `research/error-table-opus.md`.
 
-### Bank Tester Results
-
-**Previous baseline** (`run-20260208-192434`): **42/42 tasks PASS**
-- 665 total tool calls, 14 first-attempt failures, **97.9% first-attempt success rate**
-- 448/677 tools invoked (**66.2% tool coverage**)
-- All 14 first-attempt failures self-corrected (conditional required fields, cascade deletes, encryption field names)
-- Runtime: ~66 minutes end-to-end
-- Failure categories: `missing_required_field` (6), `dependency_unknown` (5), `parameter_format` (3)
-
-### Coverage Expansion Run (Complete)
+### Bank Tester Results — Coverage Expansion Run (Complete)
 
 **Expanded suite**: 45 tasks (was 42), 533/677 tools referenced statically (78.7%).
 
@@ -517,17 +508,6 @@ Findings from building a 677-tool MCP server and testing it with an AI consumer 
 - `pfsense_get_services_ha_proxy_settings_dns_resolver` — 500 bug in pfSense
 - `pfsense_get_services_ha_proxy_settings_email_mailer` — 500 bug in pfSense
 - `pfsense_create_system_restapi_settings_sync` — requires BasicAuth + HA setup
-
-### Opus Error Table (Target Model)
-
-With Opus 4.6 as target, 15 first-attempt errors remain. 12 fixable in generator, 3 pfSense bugs. See `research/error-table-opus.md` for full analysis.
-
-**Unfixable pfSense API bugs** (3):
-- Limiter queue PATCH: `ecn` references non-existent `sched` from parent model
-- FreeRADIUS PATCH: requires `password` even when unchanged
-- PUT `replace_user_groups`: validates uniqueness before clearing existing items
-
-**Generator fixes applied** (Phase 4): Conditional required field downgrade, BasicAuth endpoint detection, docstring improvements. See finding #25.
 
 ### Notifications
 
