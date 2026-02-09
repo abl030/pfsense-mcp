@@ -515,3 +515,210 @@ When running long tasks autonomously, Claude will ping via Gotify on completion 
 ```bash
 gotify-ping "pfSense MCP" "Task complete / Need input — check session"
 ```
+
+---
+
+## Current Task: Coverage Expansion Sprints
+
+### Methodology — The Iterative Failure Analysis Loop
+
+This is the core testing methodology. Every sprint follows the same cycle:
+
+1. **Generate** new task files targeting uncovered tools (via `generate-tasks.py` + `task-config.yaml`)
+2. **Copy** generated tasks to a standalone test set (only the new tasks, not the full 44-task suite — saves time and credits)
+3. **Run with Opus** (`MODEL=opus nix develop -c bash bank-tester/run-bank-test.sh "51 52 53..."`)
+4. **Collect first-pass failures** — save raw results to `bank-tester/results/`
+5. **Categorize every failure** into `research/sprint-N-failures.md`:
+   - `generator_bug` — fixable in our generator/templates
+   - `openapi_spec_issue` — spec marks fields wrong, fixable via generator workarounds
+   - `pfsense_api_bug` — unfixable, document and accept
+   - `claude_code_bug` — MCP client issue
+   - `test_design_bug` — bad test values or missing dependencies
+6. **Run targeted diagnostic task** (like task 50) — have Opus independently classify each failure without hints. Compare its analysis against ours.
+7. **Fix** what's fixable in the generator, regenerate `server.py`
+8. **Retest** only the failing tasks — iterate until green or only pfSense bugs remain
+9. **Update docs** — merge findings into `research/error-table-opus.md`, update CLAUDE.md MCP best practices, update MEMORY.md
+
+This loop is what took us from 15 Opus errors → 3 (all pfSense bugs). Apply it to every sprint.
+
+### Coverage Baseline
+
+**Current**: 514/677 tools invoked (75.9%) across all runs
+
+| Gap Category | Count | Recoverable? |
+|--------------|-------|-------------|
+| PUT/replace (Sonnet bug #22, Opus unblocked) | 21 | YES — full Opus re-run |
+| Sub-resource CRUD + actions | 36 | YES — new task-config entries |
+| Singular DELETEs (cleanup gaps) | 14 | YES — expand existing tasks |
+| Bulk plural DELETEs | 85 | NEEDS DESIGN — ephemeral VMs or create-then-bulk-delete pattern |
+| Permanently untestable | 7 | NO |
+
+**Target**: 670/677 (98.9%) — everything except the 7 permanently untestable tools.
+
+### Sprint 1: PUT/Replace Recovery (Opus re-run)
+
+**Goal**: Recover ~21 PUT/replace tools that failed under Sonnet but work with Opus.
+
+**Tasks**: New task 51 — copy of task 39 (PUT/replace) but run with Opus only. Covers all 38 replace endpoints. 17 already work; expect ~20 more to pass. One (`replace_user_groups`) has known pfSense uniqueness bug.
+
+**Steps**:
+1. Copy task 39 content to `bank-tester/tasks/51-put-replace-opus-retest.md`
+2. Run: `MODEL=opus nix develop -c bash bank-tester/run-bank-test.sh 51`
+3. Collect failures → categorize → save to `research/sprint-1-failures.md`
+4. Run targeted diagnostic if any unexpected failures
+5. Fix generator if needed, retest
+
+**Expected yield**: +20 tools → 534/677 (78.9%)
+
+### Sprint 2: Sub-Resource CRUD + Actions
+
+**Goal**: Cover 36 uncovered create/get/list/update tools via new task-config entries.
+
+**New tasks** (52-57), each targeting a cluster of related sub-resources:
+
+| Task | Tools | Dependency Chain |
+|------|-------|-----------------|
+| 52: CRL Revoked Certs | 4 | CA → cert → CRL → revoked cert CRUD |
+| 53: Gateway Group Priorities | 3 | Gateway → gateway group → priority CRUD |
+| 54: Network Interface CRUD | 3 | Create/get/update a VLAN-based interface (safe, doesn't reassign WAN/LAN) |
+| 55: OpenVPN Client Export | 4 | CA → server cert → OVPN server → user cert → export config → export action |
+| 56: PKI Actions (renew/sign) | 3 | CA → cert → renew cert, CA renew, CSR sign |
+| 57: Service Actions + Missing PATCH | ~8 | `create_status_service` (restart a service), HAProxy sub-resource updates, BIND sync host update |
+| 58: Misc Gaps | ~11 | DHCP server CRUD, ACME cert domain, system package install, diagnostics singular deletes |
+
+**Steps**:
+1. Add entries to `task-config.yaml` for each task above
+2. Run `nix develop -c python bank-tester/generate-tasks.py` — generates only new tasks
+3. Copy generated tasks 52-58 to standalone test set
+4. Run: `MODEL=opus nix develop -c bash bank-tester/run-bank-test.sh "52 53 54 55 56 57 58"`
+5. Failure analysis loop (steps 4-9 from methodology)
+
+**Expected yield**: +36 tools → 570/677 (84.2%)
+
+### Sprint 3: Singular DELETE Coverage
+
+**Goal**: Cover 14 singular DELETE tools that were never invoked because their parent resource was never created or cleanup was skipped.
+
+**Approach**: Expand existing tasks or add to Sprint 2 tasks — ensure every CRUD endpoint has a proper `delete` step in cleanup. Specific fixes:
+
+| Tool | Fix |
+|------|-----|
+| `delete_auth_key` | Add to task 36 (auth) — create key, then delete it |
+| `delete_diagnostics_arp_table_entry` | Add to task 37 — delete single ARP entry |
+| `delete_diagnostics_config_history_revision` | Add to task 37 — delete single revision |
+| `delete_diagnostics_table` | Add to task 37 — delete PF table entries |
+| `delete_firewall_state` | Add to task 10 — delete single state |
+| `delete_system_package` | Skip — triggers nginx 504 (QEMU NAT too slow) |
+| `delete_network_interface` | Covered by Sprint 2 task 54 |
+| `delete_routing_gateway_group_priority` | Covered by Sprint 2 task 53 |
+| `delete_services_dhcp_server` | Covered by Sprint 2 task 58 |
+| `delete_system_crl_revoked_certificate` | Covered by Sprint 2 task 52 |
+| `delete_vpn_open_vpn_client_export_config` | Covered by Sprint 2 task 55 |
+| `delete_status_open_vpn_server_connection` | Read-only status — may not be deletable |
+| `delete_services_ha_proxy_settings_dns_resolver` | Blocked — pfSense 500 bug |
+| `delete_services_ha_proxy_settings_email_mailer` | Blocked — pfSense 500 bug |
+
+**Steps**:
+1. Update `task-config.yaml` for existing tasks (add delete steps)
+2. Regenerate affected task files
+3. Run only the modified tasks with Opus
+4. Failure analysis loop
+
+**Expected yield**: +10 tools (4 blocked) → 580/677 (85.7%)
+
+### Sprint 4: Bulk Plural DELETEs
+
+**Goal**: Cover ~85 bulk DELETE plural endpoints. These are the `DELETE /api/v2/.../resources` (no `id`, wipes all or filtered subset) endpoints.
+
+**Design challenge**: Bulk deletes wipe ALL resources of a type. Can't run in the main suite — would destroy resources needed by other tasks.
+
+**Approach**: Create-then-bulk-delete pattern in isolated tasks:
+1. Create 2 resources of the type
+2. Delete 1 via singular DELETE (already covered)
+3. Delete remaining via bulk plural DELETE (the uncovered tool)
+4. Verify collection is empty
+
+**New tasks** (60-69), grouped by subsystem:
+
+| Task | Bulk DELETEs | Count |
+|------|-------------|-------|
+| 60: Firewall bulk deletes | aliases, rules, NAT (3 types), schedules, time ranges, states, shapers, limiters, virtual IPs | ~13 |
+| 61: Interface bulk deletes | VLANs, GREs, groups, LAGGs, network interfaces | ~5 |
+| 62: Routing bulk deletes | gateways, gateway groups, priorities, static routes | ~4 |
+| 63: Services/DNS bulk deletes | resolver (access lists, networks, host overrides, domain overrides), forwarder | ~7 |
+| 64: Services/DHCP+misc bulk deletes | address pools, static mappings, custom options, cron jobs, NTP, watchdog, FreeRADIUS | ~10 |
+| 65: HAProxy bulk deletes | backends, frontends, files, all sub-resources | ~14 |
+| 66: VPN bulk deletes | IPsec P1/P2/encryptions, WireGuard tunnels/peers/addresses, OpenVPN | ~12 |
+| 67: System bulk deletes | CAs, certs, CRLs, tunables, REST API access list, packages | ~7 |
+| 68: Auth + User bulk deletes | auth keys, users, groups, auth servers, ACME, BIND | ~8 |
+| 69: Status + Diagnostics bulk deletes | DHCP leases, OVPN connections, ARP table, config history | ~5 |
+
+**IMPORTANT**: These tasks must run AFTER all other tasks, or in isolation. Each task is self-contained: create → bulk delete → verify empty.
+
+**Steps**:
+1. Add bulk delete task entries to `task-config.yaml`
+2. Add `bulk_delete: true` endpoint type support to `generate-tasks.py`
+3. Generate tasks 60-69
+4. Run each task individually with Opus (can't parallelize — they share the VM)
+5. Failure analysis loop per task
+
+**Expected yield**: +80 tools (5 blocked by pfSense bugs) → 660/677 (97.5%)
+
+### Sprint 5: Destructive / Ephemeral VM Tests
+
+**Goal**: Cover the remaining ~7 tools that require special handling.
+
+**Approach**: Use ephemeral one-shot VMs. Each test boots a fresh golden image copy, runs one destructive operation, and discards the VM.
+
+| Tool | Test Strategy |
+|------|--------------|
+| `pfsense_post_diagnostics_reboot` | Boot VM → reboot → wait for API → verify. Discard VM. |
+| `pfsense_post_diagnostics_halt_system` | Boot VM → halt → verify VM stopped. Discard VM. |
+| `pfsense_update_system_web_gui_settings` | Boot VM → change port → verify API on new port → discard. |
+| `pfsense_update_system_restapi_version` | Boot VM → attempt version change → record result → discard. |
+| `pfsense_get_services_ha_proxy_settings_dns_resolver` | Known 500 bug — run, record failure, classify as pfSense bug. |
+| `pfsense_get_services_ha_proxy_settings_email_mailer` | Known 500 bug — run, record failure, classify as pfSense bug. |
+| `pfsense_create_system_restapi_settings_sync` | Needs BasicAuth + HA — may remain untestable without HA peer. |
+
+**Implementation**: Modify `run-bank-test.sh` (or new `run-destructive-test.sh`) to:
+1. Copy golden → ephemeral disk per task
+2. Boot VM per task
+3. Run single task
+4. Kill VM, discard disk
+5. Repeat for next task
+
+**Expected yield**: +4-5 tools (2 are known pfSense 500 bugs, 1 needs HA) → 665/677 (98.2%)
+
+### Sprint 6: Final Sweep + Documentation
+
+**Goal**: Achieve maximum coverage, document everything.
+
+**Steps**:
+1. Re-run `analyze-results.py` across ALL runs — get definitive coverage number
+2. For any remaining uncovered tools, categorize as: permanently blocked (pfSense bug), infrastructure limitation (QEMU/HA), or missing test (add it)
+3. Run final full-suite Opus pass to confirm all tasks green
+4. Update CLAUDE.md coverage numbers, MCP best practices with any new findings
+5. Create `research/final-coverage-report.md` with per-tool status
+6. Save all failure analyses from sprints 1-5 into `research/` folder
+
+### Sprint Execution Order
+
+```
+Sprint 1 → Sprint 2+3 (parallel, independent) → Sprint 4 → Sprint 5 → Sprint 6
+```
+
+Sprints 2 and 3 can overlap since they target different task files. Sprint 4 (bulk deletes) must come after 2+3 since some bulk deletes need resources from sub-resource tasks. Sprint 5 needs a modified test harness. Sprint 6 is final documentation.
+
+### Estimated Coverage Progression
+
+| After Sprint | Tools Covered | Coverage | Delta |
+|-------------|--------------|---------|-------|
+| Baseline | 514 | 75.9% | — |
+| Sprint 1 (PUT/replace) | 534 | 78.9% | +20 |
+| Sprint 2+3 (CRUD + deletes) | 580 | 85.7% | +46 |
+| Sprint 4 (bulk deletes) | 660 | 97.5% | +80 |
+| Sprint 5 (destructive) | 665 | 98.2% | +5 |
+| Sprint 6 (sweep) | ~668 | 98.7% | +3 |
+| **Theoretical max** | **670** | **98.9%** | — |
+
+7 tools permanently untestable. 2 of those are pfSense 500 bugs that we document but can't fix.
