@@ -51,3 +51,6 @@ vm/upgrade-done
 
 # Bank tester results (large, regenerated per run)
 bank-tester/results/
+
+# Local notes (not tracked)
+NIXPKGS.md
