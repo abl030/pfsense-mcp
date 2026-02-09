@@ -1510,6 +1510,460 @@ tasks:
       Each replace call replaces the ENTIRE collection, so always fetch first.
       Do NOT pass empty arrays — that would delete all resources.
 
+  # ── Sprint 2: Sub-Resource CRUD + Actions + Singular Deletes (51-57) ──────
+
+  - number: 51
+    title: "HAProxy Sub-Resource Updates + BIND Sync Update"
+    subsystem: services/haproxy
+    endpoints:
+      # Setup: create backend with sub-resources
+      - path: /api/v2/services/haproxy/backend
+        crud: false
+        setup_only: true
+        create_values:
+          name: bt_sys51_be
+          agent_port: "0"
+          persist_cookie_name: SRVID
+      - path: /api/v2/services/haproxy/backend/acl
+        crud: false
+        setup_only: true
+        parent: /api/v2/services/haproxy/backend
+        parent_id_field: parent_id
+        create_values:
+          name: bt_sys51_bacl
+          expression: host_starts_with
+          value: test.example.com
+      - path: /api/v2/services/haproxy/backend/action
+        crud: true
+        parent: /api/v2/services/haproxy/backend
+        parent_id_field: parent_id
+        create_values:
+          action: http-request_lua
+          name: bt_sys51_bact
+          acl: bt_sys51_bacl
+        update_field: name
+        update_value: bt_sys51_bact_upd
+      - path: /api/v2/services/haproxy/backend/error_file
+        crud: true
+        parent: /api/v2/services/haproxy/backend
+        parent_id_field: parent_id
+        create_values:
+          errorcode: 503
+          errorfile: bt_sys51_file
+        update_field: errorcode
+        update_value: 502
+        setup:
+          - path: /api/v2/services/haproxy/file
+            create_values:
+              name: bt_sys51_file
+              content: "PCFET0NUWVBFIGh0bWw+"
+      - path: /api/v2/services/haproxy/backend/error_files
+        read_only: true
+        parent: /api/v2/services/haproxy/backend
+        parent_id_field: parent_id
+        notes: "List backend error files (plural)"
+      # Setup: create frontend with sub-resources
+      - path: /api/v2/services/haproxy/frontend
+        crud: false
+        setup_only: true
+        create_values:
+          name: bt_sys51_fe
+          type_: http
+          descr: Sprint 2 frontend
+      - path: /api/v2/services/haproxy/frontend/acl
+        crud: false
+        setup_only: true
+        parent: /api/v2/services/haproxy/frontend
+        parent_id_field: parent_id
+        create_values:
+          name: bt_sys51_facl
+          expression: host_starts_with
+          value: test.example.com
+      - path: /api/v2/services/haproxy/frontend/action
+        crud: true
+        parent: /api/v2/services/haproxy/frontend
+        parent_id_field: parent_id
+        create_values:
+          action: http-request_lua
+          name: bt_sys51_fact
+          acl: bt_sys51_facl
+        update_field: name
+        update_value: bt_sys51_fact_upd
+      - path: /api/v2/services/haproxy/frontend/address
+        crud: true
+        parent: /api/v2/services/haproxy/frontend
+        parent_id_field: parent_id
+        create_values:
+          extaddr: custom
+          extaddr_custom: "10.99.99.81:80"
+        update_field: extaddr_custom
+        update_value: "10.99.99.81:8080"
+      - path: /api/v2/services/haproxy/frontend/certificate
+        crud: true
+        parent: /api/v2/services/haproxy/frontend
+        parent_id_field: parent_id
+        create_values: {}
+        update_field: ssl_certificate
+        update_value: ""
+      - path: /api/v2/services/haproxy/apply
+        apply: true
+      # BIND sync remote host update
+      - path: /api/v2/services/bind/settings
+        settings: true
+        patch_field: enable_bind
+        patch_value: true
+      - path: /api/v2/services/bind/sync/remote_host
+        crud: true
+        create_values:
+          syncdestinenable: false
+          syncdesttimeout: "120"
+          syncprotocol: http
+          ipaddress: "10.99.99.60"
+          syncport: "80"
+          username: admin
+          password: pfsense
+        update_field: syncdesttimeout
+        update_value: "180"
+    notes: |
+      Tests HAProxy sub-resource PATCH operations (backend action/error_file, frontend action/address/certificate).
+      Also tests BIND sync remote host update.
+      Setup: create backend/frontend with ACLs, then CRUD sub-resources.
+      Cleanup: sub-resources → frontend → backend.
+
+  - number: 52
+    title: "Gateway Group Priority CRUD"
+    subsystem: routing
+    endpoints:
+      - path: /api/v2/routing/gateway
+        crud: false
+        setup_only: true
+        create_values:
+          name: bt_sys52_gw
+          gateway: "10.0.2.1"
+          interface: wan
+          ipprotocol: inet
+          descr: Sprint 2 gateway
+          latencylow: 200
+          latencyhigh: 500
+          losslow: 10
+          losshigh: 20
+          loss_interval: 2000
+          time_period: 60000
+          interval: 500
+          alert_interval: 1000
+      - path: /api/v2/routing/gateway/group
+        crud: false
+        setup_only: true
+        create_values:
+          name: bt_sys52_gg
+          descr: Sprint 2 gateway group
+          priorities:
+            - gateway: bt_sys52_gw
+              tier: 1
+        dependency: /api/v2/routing/gateway
+      - path: /api/v2/routing/gateway/group/priority
+        crud: true
+        parent: /api/v2/routing/gateway/group
+        parent_id_field: parent_id
+        create_values:
+          gateway: bt_sys52_gw
+          tier: 2
+        update_field: tier
+        update_value: 3
+      - path: /api/v2/routing/apply
+        apply: true
+    notes: |
+      Gateway group priority is a sub-resource of gateway group.
+      Setup: create gateway → create gateway group (with initial priority) → CRUD additional priorities.
+      Cleanup: priority → group → gateway.
+
+  - number: 53
+    title: "CRL Revoked Certificate CRUD + CRL Update"
+    subsystem: system/crl
+    endpoints:
+      - path: /api/v2/system/certificate_authority/generate
+        action: true
+        action_body:
+          descr: bt_sys53_ca
+          keytype: RSA
+          keylen: 2048
+          digest_alg: sha256
+          dn_commonname: "BT Sprint2 CA"
+          dn_country: US
+          dn_state: California
+          dn_city: "San Francisco"
+          dn_organization: pfSense Test
+          dn_organizationalunit: Testing
+          lifetime: 3650
+        cleanup_path: /api/v2/system/certificate_authority
+      - path: /api/v2/system/certificate/generate
+        action: true
+        action_body:
+          descr: bt_sys53_cert
+          keytype: RSA
+          keylen: 2048
+          digest_alg: sha256
+          dn_commonname: revoke-me.test
+          lifetime: 365
+          type_: server
+        needs_ca: true
+        cleanup_path: /api/v2/system/certificate
+        notes: "Needs CA refid as caref."
+      - path: /api/v2/system/crl
+        crud: true
+        parent: /api/v2/system/certificate_authority
+        inject_field: caref
+        inject_from: refid
+        create_values:
+          descr: bt_sys53_crl
+          method: internal
+          text: ""
+        update_field: descr
+        update_value: "Updated CRL"
+      - path: /api/v2/system/crl/revoked_certificate
+        crud: true
+        parent: /api/v2/system/crl
+        parent_id_field: parent_id
+        create_values:
+          reason: 0
+        inject_cert: true
+        update_field: reason
+        update_value: 1
+        notes: "Needs certref from generated cert. reason 0=unspecified, 1=keyCompromise."
+    notes: |
+      Full CRL chain: generate CA → generate cert → create CRL (referencing CA) → CRUD revoked certs.
+      CRL update (PATCH) tests the previously uncovered update_system_crl tool.
+      Cert serial numbers must be small (not 160-bit) to avoid PHP INT overflow.
+
+  - number: 54
+    title: "Network Interface CRUD"
+    subsystem: network
+    endpoints:
+      - path: /api/v2/interface/vlan
+        crud: false
+        setup_only: true
+        create_values:
+          if: em2
+          tag: 200
+          pcp: 0
+          descr: bt_sys54_vlan
+      - path: /api/v2/network/interface
+        crud: true
+        create_values:
+          if: em2.200
+          descr: bt_sys54_iface
+          enable: false
+          typev4: none
+        update_field: descr
+        update_value: "Updated interface"
+        dependency: /api/v2/interface/vlan
+      - path: /api/v2/interface/apply
+        apply: true
+    notes: |
+      Create a VLAN on em2 (spare NIC), then assign it as a network interface.
+      Network interface CRUD: create → list → get → update → delete.
+      Keep interface disabled (enable=false) to avoid disruption.
+      Cleanup: delete interface → delete VLAN.
+
+  - number: 55
+    title: "OpenVPN Client Export Chain"
+    subsystem: vpn/openvpn
+    endpoints:
+      # Setup: CA → server cert → OVPN server → user cert
+      - path: /api/v2/system/certificate_authority/generate
+        action: true
+        action_body:
+          descr: bt_sys55_ca
+          keytype: RSA
+          keylen: 2048
+          digest_alg: sha256
+          dn_commonname: "BT OVPN Export CA"
+          dn_country: US
+          dn_state: California
+          dn_city: "San Francisco"
+          dn_organization: pfSense Test
+          dn_organizationalunit: Testing
+          lifetime: 3650
+        cleanup_path: /api/v2/system/certificate_authority
+      - path: /api/v2/system/certificate/generate
+        action: true
+        action_body:
+          descr: bt_sys55_server_cert
+          keytype: RSA
+          keylen: 2048
+          digest_alg: sha256
+          dn_commonname: ovpn-server.test
+          lifetime: 365
+          type_: server
+        needs_ca: true
+        cleanup_path: /api/v2/system/certificate
+      - path: /api/v2/vpn/openvpn/server
+        crud: false
+        setup_only: true
+        create_values:
+          mode: server_tls
+          protocol: UDP4
+          dev_mode: tun
+          interface: wan
+          local_port: "11940"
+          tunnel_network: "10.110.0.0/24"
+          descr: bt_sys55_ovpn_srv
+        notes: "Needs caref and certref from generated CA/cert. server_tls mode."
+      - path: /api/v2/system/certificate/generate
+        action: true
+        action_body:
+          descr: bt_sys55_user_cert
+          keytype: RSA
+          keylen: 2048
+          digest_alg: sha256
+          dn_commonname: ovpn-user.test
+          lifetime: 365
+          type_: user
+        needs_ca: true
+        cleanup_path: /api/v2/system/certificate
+        notes: "User cert for client export."
+      # CRUD: export config
+      - path: /api/v2/vpn/openvpn/client_export/config
+        crud: true
+        create_values:
+          server: ""
+          pkcs11providers: []
+          pkcs11id: ""
+          pass: ""
+          proxyaddr: ""
+          proxyport: ""
+          useproxypass: false
+          proxyuser: ""
+          proxypass: ""
+        update_field: pass
+        update_value: "testpass"
+        notes: "server field gets OVPN server vpnid. Most fields can be empty."
+      # Action: export
+      - path: /api/v2/vpn/openvpn/client_export
+        action: true
+        action_body:
+          type: confinline
+        notes: "Export type must be 'confinline' (not 'inline'). Needs client_export config ID + certref."
+    notes: |
+      7-step dependency chain: CA → server cert → OVPN server → user cert → export config → export.
+      OVPN server in server_tls mode may produce log prefix before JSON.
+      local_port must be string. Export type is 'confinline'.
+      Cleanup: export config → OVPN server → certs → CA.
+
+  - number: 56
+    title: "PKI Actions + Service Restart + Read-Only Gaps"
+    subsystem: system
+    endpoints:
+      # Setup: generate CA and cert for renew/sign operations
+      - path: /api/v2/system/certificate_authority/generate
+        action: true
+        action_body:
+          descr: bt_sys56_ca
+          keytype: RSA
+          keylen: 2048
+          digest_alg: sha256
+          dn_commonname: "BT PKI Actions CA"
+          dn_country: US
+          dn_state: California
+          dn_city: "San Francisco"
+          dn_organization: pfSense Test
+          dn_organizationalunit: Testing
+          lifetime: 3650
+        cleanup_path: /api/v2/system/certificate_authority
+      - path: /api/v2/system/certificate/generate
+        action: true
+        action_body:
+          descr: bt_sys56_cert
+          keytype: RSA
+          keylen: 2048
+          digest_alg: sha256
+          dn_commonname: renew-me.test
+          lifetime: 365
+          type_: server
+        needs_ca: true
+        cleanup_path: /api/v2/system/certificate
+      - path: /api/v2/system/certificate/signing_request
+        action: true
+        action_body:
+          descr: bt_sys56_csr
+          keytype: RSA
+          keylen: 2048
+          digest_alg: sha256
+          dn_commonname: sign-me.test
+        cleanup_path: /api/v2/system/certificate
+      # PKI actions
+      - path: /api/v2/system/certificate_authority/renew
+        action: true
+        action_body: {}
+        notes: "Renew the generated CA. Needs CA refid."
+      - path: /api/v2/system/certificate/renew
+        action: true
+        action_body: {}
+        notes: "Renew the generated cert. Needs cert refid."
+      - path: /api/v2/system/certificate/signing_request/sign
+        action: true
+        action_body: {}
+        notes: "Sign the CSR with the CA. Needs CSR refid and CA refid."
+      # Service restart
+      - path: /api/v2/status/service
+        action: true
+        action_body:
+          name: sshd
+        notes: "Restart sshd service via POST."
+      # Read-only gaps
+      - path: /api/v2/status/openvpn/server/connection
+        read_only: true
+        notes: "Get singular OVPN server connection — may 404 if none active"
+    notes: |
+      PKI actions: renew CA, renew cert, sign CSR. All need refids from generated resources.
+      Service restart: POST to status/service to restart sshd.
+      Cleanup: delete generated certs and CA.
+
+  - number: 57
+    title: "Singular Deletes + Misc Gaps"
+    subsystem: diagnostics
+    endpoints:
+      # Singular deletes that need existing data
+      - path: /api/v2/diagnostics/arp_table/entry
+        action: true
+        action_body: {}
+        notes: "List ARP table first, pick an entry, DELETE it by ID."
+      - path: /api/v2/diagnostics/config_history/revision
+        action: true
+        action_body: {}
+        notes: "List config history revisions, DELETE one by ID."
+      - path: /api/v2/diagnostics/table
+        action: true
+        action_body: {}
+        notes: "List PF tables, pick 'virusprot', DELETE entries from it."
+      - path: /api/v2/firewall/state
+        action: true
+        action_body: {}
+        notes: "List firewall states, DELETE one by ID (if any exist)."
+      # REST API access list entry delete
+      - path: /api/v2/system/restapi/access_list/entry
+        crud: true
+        create_values:
+          type_: allow
+          network: "172.16.0.0/12"
+          descr: bt_sys57_acl_del
+        update_field: descr
+        update_value: "Updated for delete test"
+      # Auth key create+delete (via command_prompt workaround)
+      - path: /api/v2/auth/key
+        action: true
+        action_body: {}
+        notes: "Create an API key via command_prompt (BasicAuth workaround), then delete it via DELETE endpoint."
+    notes: |
+      Singular delete operations for diagnostic/status resources.
+      These don't follow standard CRUD — they need existing data to delete.
+      ARP entries: list table, pick entry, delete by ID.
+      Config history: list revisions, delete one revision by ID.
+      PF tables: list tables, pick 'virusprot', delete entries.
+      Firewall states: list states, delete one (if any exist).
+      REST API ACL: create entry, then delete it.
+      Auth key: use diagnostics/command_prompt to create a key via PHP, then delete via API.
+
   # ── Adversarial tasks (40-44) ──────────────────────────────────────────────
 
   - number: 40
