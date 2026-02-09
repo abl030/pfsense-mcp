@@ -9,6 +9,9 @@
 > *"Tried to `halt_system` without `confirm=True`. Got a polite preview instead of a bricked firewall. 10/10 safety design."*
 > — Claude, narrowly avoiding a production outage
 
+> *"The old hand-written server had 20 tools and 5 bugs. This one has 599 tools and 0 bugs. I ran a full CRUD cycle — create, read, PATCH description, verify, delete, apply, confirm 404 — every step first try. Auto-generation ate hand-written wrappers for breakfast."*
+> — Claude, A/B testing MCP servers against a live firewall
+
 An MCP (Model Context Protocol) server that gives AI agents full control over pfSense firewalls via the REST API v2. **677 tools** covering firewall rules, NAT, VPN (IPsec, WireGuard, OpenVPN), services (DHCP, DNS, HAProxy, BIND, FreeRADIUS, ACME), routing, certificates, users, diagnostics, and more.
 
 Auto-generated from the official OpenAPI spec. Tested by AI, for AI.
