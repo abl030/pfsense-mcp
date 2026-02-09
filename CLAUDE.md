@@ -149,10 +149,6 @@ packages.x86_64-linux.default = writeShellApplication {
 };
 ```
 
-## Integration
-
-See `examples/nixosconfig-integration.md` for NixOS fleet deployment.
-
 ## Notifications
 
 Long autonomous tasks ping via Gotify:
