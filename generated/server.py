@@ -219,6 +219,10 @@ async def pfsense_delete_auth_keys(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/auth/keys
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
@@ -287,9 +291,13 @@ async def pfsense_delete_diagnostics_arp_table(
 
     WARNING: DANGEROUS: Clears the entire ARP table.
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
-    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request. Note: the `interface` filter uses display names like 'WAN', 'LAN' — not device names like 'em0', 'em1'.
     """
     if not confirm:
         return (
@@ -466,6 +474,10 @@ async def pfsense_delete_diagnostics_config_history_revisions(
     """DELETE /api/v2/diagnostics/config_history/revisions
 
     WARNING: DANGEROUS: Deletes all config history.
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
@@ -902,6 +914,10 @@ async def pfsense_delete_firewall_aliases(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/aliases
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -1194,6 +1210,10 @@ async def pfsense_delete_firewall_nat_one_to_one_mappings(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/nat/one_to_one/mappings
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     Note: Call pfsense_firewall_apply after this to apply changes.
 
@@ -1515,6 +1535,10 @@ async def pfsense_delete_firewall_nat_outbound_mappings(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/nat/outbound/mappings
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     Note: Call pfsense_firewall_apply after this to apply changes.
 
@@ -1866,6 +1890,10 @@ async def pfsense_delete_firewall_nat_port_forwards(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/nat/port_forwards
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     Note: Call pfsense_firewall_apply after this to apply changes.
 
@@ -2264,6 +2292,10 @@ async def pfsense_delete_firewall_rules(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/rules
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -2320,7 +2352,7 @@ async def pfsense_create_firewall_schedule(
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     name: The unique name to assign this schedule.
-    timerange: The date/times this firewall schedule will be active.
+    timerange: The date/times this firewall schedule will be active. Each object accepts: - position (array) - month (array) - day (array) - hour (string) - rangedescr (string)
     descr: A description of this schedules purpose.
     """
     if not confirm:
@@ -2358,7 +2390,7 @@ async def pfsense_update_firewall_schedule(
     id: The ID of the object or resource to interact with.
     descr: A description of this schedules purpose.
     name: The unique name to assign this schedule.
-    timerange: The date/times this firewall schedule will be active.
+    timerange: The date/times this firewall schedule will be active. Each object accepts: - position (array) - month (array) - day (array) - hour (string) - rangedescr (string)
     """
     if not confirm:
         return (
@@ -2603,6 +2635,10 @@ async def pfsense_delete_firewall_schedule_time_ranges(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/schedule/time_ranges
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -2696,6 +2732,10 @@ async def pfsense_delete_firewall_schedules(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/schedules
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     Note: Call pfsense_firewall_apply after this to apply changes.
 
@@ -2813,6 +2853,10 @@ async def pfsense_delete_firewall_states(
 
     WARNING: DANGEROUS: Clears all firewall states.
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -2918,7 +2962,7 @@ async def pfsense_create_firewall_traffic_shaper(
     scheduler: The scheduler type to use for this traffic shaper. Changing this value will automatically update any child queues assigned to this traffic shaper. Valid values: ['HFSC', 'CBQ', 'FAIRQ', 'CODELQ', 'PRIQ']
     enabled: Enables or disables this traffic shaper.
     qlimit: The number of packets that can be held in a queue waiting to be transmitted by the shaper.This field is only available when the following conditions are met:- `scheduler` must not be one of [ CODELQ ]
-    queue: The child queues assigned to this traffic shaper.
+    queue: The child queues assigned to this traffic shaper. Each object accepts: - interface (string) - enabled (boolean) - name (string) - priority (integer) - qlimit (integer) - description (string) - default (boolean) - red (boolean) - rio (boolean) - ecn (boolean) - codel (boolean) - bandwidthtype (string): valid=['%', 'b', 'Kb', 'Mb', 'Gb'] ... and 16 more fields
     tbrconfig: The size, in bytes, of the token bucket regulator. If `null`, heuristics based on the interface bandwidth are used to determine the size.
     """
     if not confirm:
@@ -2974,7 +3018,7 @@ async def pfsense_update_firewall_traffic_shaper(
     enabled: Enables or disables this traffic shaper.
     interface: The interface this traffic shaper will be applied to.
     qlimit: The number of packets that can be held in a queue waiting to be transmitted by the shaper.This field is only available when the following conditions are met:- `scheduler` must not be one of [ CODELQ ]
-    queue: The child queues assigned to this traffic shaper.
+    queue: The child queues assigned to this traffic shaper. Each object accepts: - interface (string) - enabled (boolean) - name (string) - priority (integer) - qlimit (integer) - description (string) - default (boolean) - red (boolean) - rio (boolean) - ecn (boolean) - codel (boolean) - bandwidthtype (string): valid=['%', 'b', 'Kb', 'Mb', 'Gb'] ... and 16 more fields
     scheduler: The scheduler type to use for this traffic shaper. Changing this value will automatically update any child queues assigned to this traffic shaper. Valid values: ['HFSC', 'CBQ', 'FAIRQ', 'CODELQ', 'PRIQ']
     tbrconfig: The size, in bytes, of the token bucket regulator. If `null`, heuristics based on the interface bandwidth are used to determine the size.
     """
@@ -3219,6 +3263,10 @@ async def pfsense_delete_firewall_traffic_shaper_limiter_bandwidths(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/traffic_shaper/limiter/bandwidths
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -3323,7 +3371,7 @@ async def pfsense_create_firewall_traffic_shaper_limiter(
     aqm: The Active Queue Management (AQM) algorithm to use for this limiter. AQM is the intelligent drop of network packets inside the limiter, when it becomes full or gets close to becoming full, with the goal of reducing network congestion. Valid values: ['droptail', 'codel', 'pie', 'red', 'gred']
     name: The unique name for this limiter.
     sched: The scheduler to use for this limiter. The scheduler manages the sequence of network packets in the limiter's queue. Valid values: ['wf2q+', 'fifo', 'qfq', 'rr', 'prio', 'fq_codel', 'fq_pie']
-    bandwidth: The bandwidth profiles for this limiter.
+    bandwidth: The bandwidth profiles for this limiter. Each object accepts: - bw (integer) - bwscale (string): valid=['b', 'Kb', 'Mb'] - bwsched (string)
     buckets: The limiter's bucket size (slots).
     delay: The amount of delay (in milliseconds) added to traffic passing through this limiter.
     description: The verbose description for this limiter.
@@ -3368,7 +3416,7 @@ async def pfsense_create_firewall_traffic_shaper_limiter(
     pie_qdelay: Set queue delay type to timestamps (true) or departure rate estimation (false).This field is only available when the following conditions are met:- `aqm` must be equal to `'pie'`
     plr: The amount of packet loss (in percentage) added to traffic passing through the limiter.
     qlimit: The length of the limiter's queue which the scheduler and AQM are responsible for. Set to `null` to assume default.
-    queue: The child queues for this limiter.
+    queue: The child queues for this limiter. Each object accepts: - name (string) - number (integer) - enabled (boolean) - mask (string): valid=['none', 'srcaddress', 'dstaddress'] - maskbits (integer) - maskbitsv6 (integer) - qlimit (integer) - ecn (boolean) - description (string) - aqm (string): valid=['droptail', 'codel', 'pie', 'red', 'gred'] - param_codel_target (integer) - param_codel_interval (integer) ... and 21 more fields
     """
     if not confirm:
         return (
@@ -3542,7 +3590,7 @@ async def pfsense_update_firewall_traffic_shaper_limiter(
 
     id: The ID of the object or resource to interact with.
     aqm: The Active Queue Management (AQM) algorithm to use for this limiter. AQM is the intelligent drop of network packets inside the limiter, when it becomes full or gets close to becoming full, with the goal of reducing network congestion. Valid values: ['droptail', 'codel', 'pie', 'red', 'gred']
-    bandwidth: The bandwidth profiles for this limiter.
+    bandwidth: The bandwidth profiles for this limiter. Each object accepts: - bw (integer) - bwscale (string): valid=['b', 'Kb', 'Mb'] - bwsched (string)
     buckets: The limiter's bucket size (slots).
     delay: The amount of delay (in milliseconds) added to traffic passing through this limiter.
     description: The verbose description for this limiter.
@@ -3588,7 +3636,7 @@ async def pfsense_update_firewall_traffic_shaper_limiter(
     pie_qdelay: Set queue delay type to timestamps (true) or departure rate estimation (false).This field is only available when the following conditions are met:- `aqm` must be equal to `'pie'`
     plr: The amount of packet loss (in percentage) added to traffic passing through the limiter.
     qlimit: The length of the limiter's queue which the scheduler and AQM are responsible for. Set to `null` to assume default.
-    queue: The child queues for this limiter.
+    queue: The child queues for this limiter. Each object accepts: - name (string) - number (integer) - enabled (boolean) - mask (string): valid=['none', 'srcaddress', 'dstaddress'] - maskbits (integer) - maskbitsv6 (integer) - qlimit (integer) - ecn (boolean) - description (string) - aqm (string): valid=['droptail', 'codel', 'pie', 'red', 'gred'] - param_codel_target (integer) - param_codel_interval (integer) ... and 21 more fields
     sched: The scheduler to use for this limiter. The scheduler manages the sequence of network packets in the limiter's queue. Valid values: ['wf2q+', 'fifo', 'qfq', 'rr', 'prio', 'fq_codel', 'fq_pie']
     """
     if not confirm:
@@ -4150,6 +4198,10 @@ async def pfsense_delete_firewall_traffic_shaper_limiter_queues(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/traffic_shaper/limiter/queues
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -4609,6 +4661,10 @@ async def pfsense_delete_firewall_traffic_shaper_queues(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/traffic_shaper/queues
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_firewall_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -4702,6 +4758,10 @@ async def pfsense_delete_firewall_traffic_shapers(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/traffic_shapers
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     Note: Call pfsense_firewall_apply after this to apply changes.
 
@@ -5002,6 +5062,10 @@ async def pfsense_delete_firewall_virtual_i_ps(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/virtual_ips
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     Note: Call pfsense_firewall_apply after this to apply changes.
 
@@ -5485,6 +5549,10 @@ async def pfsense_delete_interface_gr_es(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/interface/gres
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_interface_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -5698,6 +5766,10 @@ async def pfsense_delete_interface_groups(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/interface/groups
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_interface_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -5910,6 +5982,10 @@ async def pfsense_delete_interface_lag_gs(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/interface/laggs
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_interface_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -6105,6 +6181,10 @@ async def pfsense_delete_interface_vla_ns(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/interface/vlans
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     Note: Call pfsense_interface_apply after this to apply changes.
 
@@ -6618,6 +6698,10 @@ async def pfsense_delete_network_interfaces(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/interfaces
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
@@ -7025,7 +7109,7 @@ async def pfsense_create_routing_gateway_group(
     Note: Call pfsense_routing_apply after this to apply changes.
 
     name: The name of the gateway group.
-    priorities: The priorities of the gateways in this group.
+    priorities: The priorities of the gateways in this group. Each object accepts: - gateway (string) - tier (integer) - virtual_ip (string)
     descr: A description of the gateway group.
     trigger: The trigger that will cause a gateway to be excluded from the group. Valid values: ['down', 'downloss', 'downlatency', 'downlosslatency']
     """
@@ -7067,7 +7151,7 @@ async def pfsense_update_routing_gateway_group(
     id: The ID of the object or resource to interact with.
     descr: A description of the gateway group.
     name: The name of the gateway group.
-    priorities: The priorities of the gateways in this group.
+    priorities: The priorities of the gateways in this group. Each object accepts: - gateway (string) - tier (integer) - virtual_ip (string)
     trigger: The trigger that will cause a gateway to be excluded from the group. Valid values: ['down', 'downloss', 'downlatency', 'downlosslatency']
     """
     if not confirm:
@@ -7167,6 +7251,10 @@ async def pfsense_delete_routing_gateway_group_priorities(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/routing/gateway/group/priorities
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     Note: Call pfsense_routing_apply after this to apply changes.
 
@@ -7376,6 +7464,10 @@ async def pfsense_delete_routing_gateway_groups(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/routing/gateway/groups
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_routing_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -7444,6 +7536,10 @@ async def pfsense_delete_routing_gateways(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/routing/gateways
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     Note: Call pfsense_routing_apply after this to apply changes.
 
@@ -7644,6 +7740,10 @@ async def pfsense_delete_routing_static_routes(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/routing/static_routes
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     Note: Call pfsense_routing_apply after this to apply changes.
 
@@ -7919,6 +8019,10 @@ async def pfsense_delete_services_acme_account_keys(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/acme/account_keys
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
@@ -10567,10 +10671,10 @@ async def pfsense_create_services_acme_certificate(
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/acme/certificate
 
-    a_domainlist: The list of domain verifications to include in the ACME certificate.
+    a_domainlist: The list of domain verifications to include in the ACME certificate. Each object accepts: - name (string) - status (string): valid=['enable', 'disable'] - method (string) - webrootfolder (string) - webrootftpftpserver (string) - webrootftpusername (string) - webrootftppassword (string) - webrootftpfolder (string) - standaloneport (string) - standaloneipv6 (boolean) - standalonetlsport (string) - nsupdate_server (string) ... and 283 more fields
     acmeaccount: The ACME account key to use for the ACME certificate.
     name: The name of the ACME certificate.
-    a_actionlist: The list of actions to perform on the ACME certificate after being issued/renewed.
+    a_actionlist: The list of actions to perform on the ACME certificate after being issued/renewed. Each object accepts: - status (string): valid=['active', 'disabled'] - command (string) - method (string): valid=['shellcommand', 'php_command', 'servicerestart', 'xmlrpcservicerestart']
     descr: A description of the ACME certificate.
     dnssleep: The number of seconds to wait for DNS propagation before requesting verification.
     keylength: The length of the private key to use for the ACME certificate. Valid values: ['2048', '3072', '4096', 'ec-256', 'ec-384', 'custom']
@@ -10637,8 +10741,8 @@ async def pfsense_update_services_acme_certificate(
     """PATCH /api/v2/services/acme/certificate
 
     id: The ID of the object or resource to interact with.
-    a_actionlist: The list of actions to perform on the ACME certificate after being issued/renewed.
-    a_domainlist: The list of domain verifications to include in the ACME certificate.
+    a_actionlist: The list of actions to perform on the ACME certificate after being issued/renewed. Each object accepts: - status (string): valid=['active', 'disabled'] - command (string) - method (string): valid=['shellcommand', 'php_command', 'servicerestart', 'xmlrpcservicerestart']
+    a_domainlist: The list of domain verifications to include in the ACME certificate. Each object accepts: - name (string) - status (string): valid=['enable', 'disable'] - method (string) - webrootfolder (string) - webrootftpftpserver (string) - webrootftpusername (string) - webrootftppassword (string) - webrootftpfolder (string) - standaloneport (string) - standaloneipv6 (boolean) - standalonetlsport (string) - nsupdate_server (string) ... and 283 more fields
     acmeaccount: The ACME account key to use for the ACME certificate.
     descr: A description of the ACME certificate.
     dnssleep: The number of seconds to wait for DNS propagation before requesting verification.
@@ -10894,6 +10998,10 @@ async def pfsense_delete_services_acme_certificates(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/acme/certificates
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
@@ -10983,7 +11091,7 @@ async def pfsense_create_services_bind_access_list(
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/bind/access_list
 
-    entries: The network entries for this access list.
+    entries: The network entries for this access list. Each object accepts: - value (string) - description (string)
     name: The name of the access list.
     description: A description for the access list.
     """
@@ -11018,7 +11126,7 @@ async def pfsense_update_services_bind_access_list(
 
     id: The ID of the object or resource to interact with.
     description: A description for the access list.
-    entries: The network entries for this access list.
+    entries: The network entries for this access list. Each object accepts: - value (string) - description (string)
     name: The name of the access list.
     """
     if not confirm:
@@ -11108,6 +11216,10 @@ async def pfsense_delete_services_bind_access_list_entries(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/bind/access_list/entries
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
@@ -11314,6 +11426,10 @@ async def pfsense_delete_services_bind_access_lists(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/bind/access_lists
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
@@ -11644,6 +11760,10 @@ async def pfsense_delete_services_bind_sync_remote_hosts(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/bind/sync/remote_hosts
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
@@ -11909,6 +12029,10 @@ async def pfsense_delete_services_bind_views(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/bind/views
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
@@ -12003,7 +12127,7 @@ async def pfsense_create_services_bind_zone(
     mail: The SOA email address (RNAME) for this zone. This must be in an FQDN format.This field is only available when the following conditions are met:- `type` must be one of [ master, redirect ]
     minimum: The SOA minimum TTL interval (in seconds) for this zone. This is also referred to as the negative TTL. TTL-style time-unit suffixes are supported (e.g. 1h, 1d, 1w), otherwise time in seconds is assumed.This field is only available when the following conditions are met:- `type` must be one of [ master, redirect ]
     nameserver: The SOA nameserver for this zone.This field is only available when the following conditions are met:- `type` must be one of [ master, redirect ]
-    records: The records for this BIND zone.
+    records: The records for this BIND zone. Each object accepts: - name (string) - type (string) - rdata (string) - priority (integer)
     refresh: The SOA refresh interval for this zone. TTL-style time-unit suffixes are supported (e.g. 1h, 1d, 1w), otherwise time in seconds is assumed.This field is only available when the following conditions are met:- `type` must be one of [ master, redirect ]
     regdhcpstatic: Register DHCP static mappings as records in this BIND zone.
     retry: The SOA retry interval for this zone. TTL-style time-unit suffixes are supported (e.g. 1h, 1d, 1w), otherwise time in seconds is assumed.This field is only available when the following conditions are met:- `type` must be one of [ master, redirect ]
@@ -12145,7 +12269,7 @@ async def pfsense_update_services_bind_zone(
     minimum: The SOA minimum TTL interval (in seconds) for this zone. This is also referred to as the negative TTL. TTL-style time-unit suffixes are supported (e.g. 1h, 1d, 1w), otherwise time in seconds is assumed.This field is only available when the following conditions are met:- `type` must be one of [ master, redirect ]
     name: The name of this BIND zone.
     nameserver: The SOA nameserver for this zone.This field is only available when the following conditions are met:- `type` must be one of [ master, redirect ]
-    records: The records for this BIND zone.
+    records: The records for this BIND zone. Each object accepts: - name (string) - type (string) - rdata (string) - priority (integer)
     refresh: The SOA refresh interval for this zone. TTL-style time-unit suffixes are supported (e.g. 1h, 1d, 1w), otherwise time in seconds is assumed.This field is only available when the following conditions are met:- `type` must be one of [ master, redirect ]
     regdhcpstatic: Register DHCP static mappings as records in this BIND zone.
     retry: The SOA retry interval for this zone. TTL-style time-unit suffixes are supported (e.g. 1h, 1d, 1w), otherwise time in seconds is assumed.This field is only available when the following conditions are met:- `type` must be one of [ master, redirect ]
@@ -12457,6 +12581,10 @@ async def pfsense_delete_services_bind_zones(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/bind/zones
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
@@ -12686,6 +12814,10 @@ async def pfsense_delete_services_cron_jobs(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/cron/jobs
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
@@ -13039,6 +13171,10 @@ async def pfsense_delete_services_dhcp_server_address_pools(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dhcp_server/address_pools
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_services_dhcp_server_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -13302,6 +13438,10 @@ async def pfsense_delete_services_dhcp_server_custom_options(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dhcp_server/custom_options
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_services_dhcp_server_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -13398,12 +13538,12 @@ async def pfsense_create_services_dhcp_server(
     maxleasetime: The maximum DHCP lease validity period (in seconds) a client can request.
     nonak: Ignore denied clients rather than reject. This option is not compatible with failover and cannot be enabled when a Failover Peer IP address is configured.
     ntpserver: The NTP servers to provide via DHCP.
-    numberoptions: The custom DHCP options to apply to this DHCP server.
-    pool: Additional address pools applied to this DHCP server.
+    numberoptions: The custom DHCP options to apply to this DHCP server. Each object accepts: - number (integer) - type (string) - value (string)
+    pool: Additional address pools applied to this DHCP server. Each object accepts: - range_from (string) - range_to (string) - domain (string) - mac_allow (array) - mac_deny (array) - domainsearchlist (array) - defaultleasetime (integer) - maxleasetime (integer) - gateway (string) - dnsserver (array) - winsserver (array) - ntpserver (array) ... and 3 more fields
     range_from: The starting IP address for the primary DHCP pool. This address must be less than or equal to the `range_to` field.
     range_to: The ending IP address for the primary DHCP pool. This address must be greater than or equal to the `range_to` field.
     staticarp: Assign static ARP entries for DHCP leases provided by this server.
-    staticmap: Static mappings applied to this DHCP server.
+    staticmap: Static mappings applied to this DHCP server. Each object accepts: - mac (string) - ipaddr (string) - cid (string) - hostname (string) - domain (string) - domainsearchlist (array) - defaultleasetime (integer) - maxleasetime (integer) - gateway (string) - dnsserver (array) - winsserver (array) - ntpserver (array) ... and 2 more fields
     statsgraph: Enable adding DHCP lease statistics to the pfSense Monitoring graphs.
     winsserver: The WINS servers to provide via DHCP.
     """
@@ -13527,12 +13667,12 @@ async def pfsense_update_services_dhcp_server(
     maxleasetime: The maximum DHCP lease validity period (in seconds) a client can request.
     nonak: Ignore denied clients rather than reject. This option is not compatible with failover and cannot be enabled when a Failover Peer IP address is configured.
     ntpserver: The NTP servers to provide via DHCP.
-    numberoptions: The custom DHCP options to apply to this DHCP server.
-    pool: Additional address pools applied to this DHCP server.
+    numberoptions: The custom DHCP options to apply to this DHCP server. Each object accepts: - number (integer) - type (string) - value (string)
+    pool: Additional address pools applied to this DHCP server. Each object accepts: - range_from (string) - range_to (string) - domain (string) - mac_allow (array) - mac_deny (array) - domainsearchlist (array) - defaultleasetime (integer) - maxleasetime (integer) - gateway (string) - dnsserver (array) - winsserver (array) - ntpserver (array) ... and 3 more fields
     range_from: The starting IP address for the primary DHCP pool. This address must be less than or equal to the `range_to` field.
     range_to: The ending IP address for the primary DHCP pool. This address must be greater than or equal to the `range_to` field.
     staticarp: Assign static ARP entries for DHCP leases provided by this server.
-    staticmap: Static mappings applied to this DHCP server.
+    staticmap: Static mappings applied to this DHCP server. Each object accepts: - mac (string) - ipaddr (string) - cid (string) - hostname (string) - domain (string) - domainsearchlist (array) - defaultleasetime (integer) - maxleasetime (integer) - gateway (string) - dnsserver (array) - winsserver (array) - ntpserver (array) ... and 2 more fields
     statsgraph: Enable adding DHCP lease statistics to the pfSense Monitoring graphs.
     winsserver: The WINS servers to provide via DHCP.
     """
@@ -13905,6 +14045,10 @@ async def pfsense_delete_services_dhcp_server_static_mappings(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dhcp_server/static_mappings
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_services_dhcp_server_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -14197,6 +14341,10 @@ async def pfsense_delete_services_dns_forwarder_host_override_aliases(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dns_forwarder/host_override/aliases
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_services_dns_forwarder_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -14257,7 +14405,7 @@ async def pfsense_create_services_dns_forwarder_host_override(
     domain: The domain of this override.
     host: The hostname of this override.
     ip: The IP address of this override.
-    aliases: The aliases for this override.
+    aliases: The aliases for this override. Each object accepts: - host (string) - domain (string) - description (string)
     descr: The description for this override.
     """
     if not confirm:
@@ -14299,7 +14447,7 @@ async def pfsense_update_services_dns_forwarder_host_override(
     Note: Call pfsense_services_dns_forwarder_apply after this to apply changes.
 
     id: The ID of the object or resource to interact with.
-    aliases: The aliases for this override.
+    aliases: The aliases for this override. Each object accepts: - host (string) - domain (string) - description (string)
     descr: The description for this override.
     domain: The domain of this override.
     host: The hostname of this override.
@@ -14430,6 +14578,10 @@ async def pfsense_delete_services_dns_forwarder_host_overrides(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dns_forwarder/host_overrides
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_services_dns_forwarder_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -14488,7 +14640,7 @@ async def pfsense_create_services_dns_resolver_access_list(
 
     action: The action to take when an access list match is found. Valid values: ['allow', 'deny', 'refuse', 'allow snoop', 'deny nonlocal', 'refuse nonlocal']
     name: The name of this access list.
-    networks: The DNS Resolver access list network entries to include in this access list.
+    networks: The DNS Resolver access list network entries to include in this access list. Each object accepts: - network (string) - mask (integer) - description (string)
     description: A description for this access list.
     """
     if not confirm:
@@ -14530,7 +14682,7 @@ async def pfsense_update_services_dns_resolver_access_list(
     action: The action to take when an access list match is found. Valid values: ['allow', 'deny', 'refuse', 'allow snoop', 'deny nonlocal', 'refuse nonlocal']
     description: A description for this access list.
     name: The name of this access list.
-    networks: The DNS Resolver access list network entries to include in this access list.
+    networks: The DNS Resolver access list network entries to include in this access list. Each object accepts: - network (string) - mask (integer) - description (string)
     """
     if not confirm:
         return (
@@ -14769,6 +14921,10 @@ async def pfsense_delete_services_dns_resolver_access_list_networks(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dns_resolver/access_list/networks
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -14862,6 +15018,10 @@ async def pfsense_delete_services_dns_resolver_access_lists(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dns_resolver/access_lists
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
 
@@ -15124,6 +15284,10 @@ async def pfsense_delete_services_dns_resolver_domain_overrides(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dns_resolver/domain_overrides
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -15332,6 +15496,10 @@ async def pfsense_delete_services_dns_resolver_host_override_aliases(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dns_resolver/host_override/aliases
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -15392,7 +15560,7 @@ async def pfsense_create_services_dns_resolver_host_override(
     domain: The hostname portion of the host override.
     host: The hostname portion of the host override.
     ip: The IP addresses this host override will resolve.
-    aliases: Additional alias hostnames that should resolve the same IP(s).
+    aliases: Additional alias hostnames that should resolve the same IP(s). Each object accepts: - host (string) - domain (string) - descr (string)
     descr: A detailed description for this host override.
     """
     if not confirm:
@@ -15434,7 +15602,7 @@ async def pfsense_update_services_dns_resolver_host_override(
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
 
     id: The ID of the object or resource to interact with.
-    aliases: Additional alias hostnames that should resolve the same IP(s).
+    aliases: Additional alias hostnames that should resolve the same IP(s). Each object accepts: - host (string) - domain (string) - descr (string)
     descr: A detailed description for this host override.
     domain: The hostname portion of the host override.
     host: The hostname portion of the host override.
@@ -15564,6 +15732,10 @@ async def pfsense_delete_services_dns_resolver_host_overrides(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dns_resolver/host_overrides
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
 
@@ -15936,6 +16108,10 @@ async def pfsense_delete_services_free_radius_clients(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/freeradius/clients
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
@@ -16149,6 +16325,10 @@ async def pfsense_delete_services_free_radius_interfaces(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/freeradius/interfaces
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
@@ -16412,6 +16592,10 @@ async def pfsense_delete_services_free_radius_users(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/freeradius/users
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
@@ -16656,6 +16840,10 @@ async def pfsense_delete_services_ha_proxy_backend_ac_ls(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/backend/acls
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
@@ -16957,6 +17145,10 @@ async def pfsense_delete_services_ha_proxy_backend_actions(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/backend/actions
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -17067,8 +17259,8 @@ async def pfsense_create_services_ha_proxy_backend(
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
     name: The unique name for this backend.
-    acls: The ACLs to apply to this backend.
-    actions: The actions to apply to this backend.
+    acls: The ACLs to apply to this backend. Each object accepts: - name (string) - expression (string) - value (string) - casesensitive (boolean) - not (boolean)
+    actions: The actions to apply to this backend. Each object accepts: - action (string) - acl (string) - server (string) - customaction (string) - deny_status (string) - realm (string) - rule (string) - lua_function (string) - name (string) - fmt (string) - find (string) - replace (string) ... and 3 more fields
     advanced: The per server pass thru to apply to each server line.
     advanced_backend: The backend pass thru to apply to the backend section.
     agent_checks: Enables or disables using a TCP connection to read an ASCII string of the form.
@@ -17084,7 +17276,7 @@ async def pfsense_create_services_ha_proxy_backend(
     cookie_attribute_secure: Enables or disables assigning the secure attributes on cookies for this backend.
     email_level: The maximum log level to send emails for. Leave empty to disable sending email alerts. If left empty, the value set in the global settings will be used. Valid values: ['', 'dontlog', 'emerg', 'alert', 'crit', 'err', 'warning', 'notice', 'info', 'debug']
     email_to: The email address to send emails to. If left empty, the value set in the global settings will be used.
-    errorfiles: The HAProxy error file mappings to use for this backend.
+    errorfiles: The HAProxy error file mappings to use for this backend. Each object accepts: - errorcode (integer) - errorfile (string)
     haproxy_cookie_domains: The domains to set the cookies for.This field is only available when the following conditions are met:- `persist_cookie_enabled` must be equal to `true`
     haproxy_cookie_dynamic_cookie_key: The dynamic cookie secret key. This is will be used to generate dynamic cookies for this backend.This field is only available when the following conditions are met:- `persist_cookie_enabled` must be equal to `true`
     haproxy_cookie_maxidle: The max-idle time to allow. This option only applies to insert mode cookies.This field is only available when the following conditions are met:- `persist_cookie_enabled` must be equal to `true`
@@ -17109,7 +17301,7 @@ async def pfsense_create_services_ha_proxy_backend(
     persist_sticky_type: The sticky table mode to use for this backend. These options are used to make sure subsequent requests from a single client go to the same backend. Valid values: ['none', 'stick_sslsessionid', 'stick_sourceipv4', 'stick_sourceipv6', 'stick_cookie_value', 'stick_rdp_cookie']
     retries: The number of retry attempts to allow after a connection failure to the server.
     server_timeout: The amount of time (in milliseconds) to wait for data transferred to or from the server.
-    servers: The pool of servers this backend will use.
+    servers: The pool of servers this backend will use. Each object accepts: - name (string) - status (string): valid=['active', 'backup', 'disabled', 'inactive'] - address (string) - port (string) - weight (integer) - ssl (boolean) - sslserververify (boolean) - serverid (integer) - advanced (string)
     stats_admin: The admin to make use of the options disable/enable/softstop/softstart/killsessions from the stats page.This field is only available when the following conditions are met:- `stats_enabled` must be equal to `true`
     stats_desc: The verbose description for this node.This field is only available when the following conditions are met:- `stats_enabled` must be equal to `true`
     stats_enabled: Enables or disables the HAProxy statistics page for this backend.
@@ -17319,8 +17511,8 @@ async def pfsense_update_services_ha_proxy_backend(
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
     id: The ID of the object or resource to interact with.
-    acls: The ACLs to apply to this backend.
-    actions: The actions to apply to this backend.
+    acls: The ACLs to apply to this backend. Each object accepts: - name (string) - expression (string) - value (string) - casesensitive (boolean) - not (boolean)
+    actions: The actions to apply to this backend. Each object accepts: - action (string) - acl (string) - server (string) - customaction (string) - deny_status (string) - realm (string) - rule (string) - lua_function (string) - name (string) - fmt (string) - find (string) - replace (string) ... and 3 more fields
     advanced: The per server pass thru to apply to each server line.
     advanced_backend: The backend pass thru to apply to the backend section.
     agent_checks: Enables or disables using a TCP connection to read an ASCII string of the form.
@@ -17336,7 +17528,7 @@ async def pfsense_update_services_ha_proxy_backend(
     cookie_attribute_secure: Enables or disables assigning the secure attributes on cookies for this backend.
     email_level: The maximum log level to send emails for. Leave empty to disable sending email alerts. If left empty, the value set in the global settings will be used. Valid values: ['', 'dontlog', 'emerg', 'alert', 'crit', 'err', 'warning', 'notice', 'info', 'debug']
     email_to: The email address to send emails to. If left empty, the value set in the global settings will be used.
-    errorfiles: The HAProxy error file mappings to use for this backend.
+    errorfiles: The HAProxy error file mappings to use for this backend. Each object accepts: - errorcode (integer) - errorfile (string)
     haproxy_cookie_domains: The domains to set the cookies for.This field is only available when the following conditions are met:- `persist_cookie_enabled` must be equal to `true`
     haproxy_cookie_dynamic_cookie_key: The dynamic cookie secret key. This is will be used to generate dynamic cookies for this backend.This field is only available when the following conditions are met:- `persist_cookie_enabled` must be equal to `true`
     haproxy_cookie_maxidle: The max-idle time to allow. This option only applies to insert mode cookies.This field is only available when the following conditions are met:- `persist_cookie_enabled` must be equal to `true`
@@ -17362,7 +17554,7 @@ async def pfsense_update_services_ha_proxy_backend(
     persist_sticky_type: The sticky table mode to use for this backend. These options are used to make sure subsequent requests from a single client go to the same backend. Valid values: ['none', 'stick_sslsessionid', 'stick_sourceipv4', 'stick_sourceipv6', 'stick_cookie_value', 'stick_rdp_cookie']
     retries: The number of retry attempts to allow after a connection failure to the server.
     server_timeout: The amount of time (in milliseconds) to wait for data transferred to or from the server.
-    servers: The pool of servers this backend will use.
+    servers: The pool of servers this backend will use. Each object accepts: - name (string) - status (string): valid=['active', 'backup', 'disabled', 'inactive'] - address (string) - port (string) - weight (integer) - ssl (boolean) - sslserververify (boolean) - serverid (integer) - advanced (string)
     stats_admin: The admin to make use of the options disable/enable/softstop/softstart/killsessions from the stats page.This field is only available when the following conditions are met:- `stats_enabled` must be equal to `true`
     stats_desc: The verbose description for this node.This field is only available when the following conditions are met:- `stats_enabled` must be equal to `true`
     stats_enabled: Enables or disables the HAProxy statistics page for this backend.
@@ -17704,6 +17896,10 @@ async def pfsense_delete_services_ha_proxy_backend_error_files(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/backend/errorfiles
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -17948,6 +18144,10 @@ async def pfsense_delete_services_ha_proxy_backend_servers(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/backend/servers
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -18041,6 +18241,10 @@ async def pfsense_delete_services_ha_proxy_backends(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/backends
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
@@ -18254,6 +18458,10 @@ async def pfsense_delete_services_ha_proxy_files(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/files
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
@@ -18474,6 +18682,10 @@ async def pfsense_delete_services_ha_proxy_frontend_ac_ls(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/frontend/acls
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
@@ -18775,6 +18987,10 @@ async def pfsense_delete_services_ha_proxy_frontend_actions(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/frontend/actions
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -18995,6 +19211,10 @@ async def pfsense_delete_services_ha_proxy_frontend_addresses(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/frontend/addresses
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -19183,6 +19403,10 @@ async def pfsense_delete_services_ha_proxy_frontend_certificates(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/frontend/certificates
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -19259,9 +19483,9 @@ async def pfsense_create_services_ha_proxy_frontend(
 
     name: The unique name for this HAProxy frontend.
     type_: The processing type for this frontend. Valid values: ['http', 'https', 'tcp']
-    a_actionitems: The actions to take when an ACL match is found.
-    a_errorfiles: The custom error files to use for this frontend.
-    a_extaddr: The external addresses assigned to this frontend.
+    a_actionitems: The actions to take when an ACL match is found. Each object accepts: - action (string) - acl (string) - backend (string) - customaction (string) - deny_status (string) - realm (string) - rule (string) - lua_function (string) - name (string) - fmt (string) - find (string) - replace (string) ... and 3 more fields
+    a_errorfiles: The custom error files to use for this frontend. Each object accepts: - errorcode (integer) - errorfile (string)
+    a_extaddr: The external addresses assigned to this frontend. Each object accepts: - extaddr (string): valid=['custom', 'any_ipv4', 'any_ipv6', 'localhost_ipv4', 'localhost_ipv6'] - extaddr_custom (string) - extaddr_port (string) - extaddr_ssl (boolean) - exaddr_advanced (string)
     advanced: Custom configuration to pass to this frontend.
     advanced_bind: Custom value to pass behind each bind option.
     backend_serverpool: The default backend to use for this frontend.
@@ -19270,8 +19494,8 @@ async def pfsense_create_services_ha_proxy_frontend(
     dontlog_normal: Enables or disables only logging anomalous (not normal) connection.
     dontlognull: Enables or disables logging connections with no data transferred.
     forwardfor: Enables or disables the HTTP X-Forwarded-For header which contains the client's IP address.This field is only available when the following conditions are met:- `type` must be equal to `'http'`
-    ha_acls: The ACLs to apply to this frontend.
-    ha_certificates: The additional SSL/TLS certificates to use on this frontend.
+    ha_acls: The ACLs to apply to this frontend. Each object accepts: - name (string) - expression (string) - value (string) - casesensitive (boolean) - not (boolean)
+    ha_certificates: The additional SSL/TLS certificates to use on this frontend. Each object accepts: - ssl_certificate (string)
     httpclose: The `httpclose` option this frontend will operate. Valid values: ['http-keep-alive', 'http-tunnel', 'httpclose', 'http-server-close', 'forceclose']
     log_detailed: Enables or disables more detailed logging.
     log_separate_errors: Enables or disables changing the log level from info to err on potentially interesting info.
@@ -19370,9 +19594,9 @@ async def pfsense_update_services_ha_proxy_frontend(
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
     id: The ID of the object or resource to interact with.
-    a_actionitems: The actions to take when an ACL match is found.
-    a_errorfiles: The custom error files to use for this frontend.
-    a_extaddr: The external addresses assigned to this frontend.
+    a_actionitems: The actions to take when an ACL match is found. Each object accepts: - action (string) - acl (string) - backend (string) - customaction (string) - deny_status (string) - realm (string) - rule (string) - lua_function (string) - name (string) - fmt (string) - find (string) - replace (string) ... and 3 more fields
+    a_errorfiles: The custom error files to use for this frontend. Each object accepts: - errorcode (integer) - errorfile (string)
+    a_extaddr: The external addresses assigned to this frontend. Each object accepts: - extaddr (string): valid=['custom', 'any_ipv4', 'any_ipv6', 'localhost_ipv4', 'localhost_ipv6'] - extaddr_custom (string) - extaddr_port (string) - extaddr_ssl (boolean) - exaddr_advanced (string)
     advanced: Custom configuration to pass to this frontend.
     advanced_bind: Custom value to pass behind each bind option.
     backend_serverpool: The default backend to use for this frontend.
@@ -19381,8 +19605,8 @@ async def pfsense_update_services_ha_proxy_frontend(
     dontlog_normal: Enables or disables only logging anomalous (not normal) connection.
     dontlognull: Enables or disables logging connections with no data transferred.
     forwardfor: Enables or disables the HTTP X-Forwarded-For header which contains the client's IP address.This field is only available when the following conditions are met:- `type` must be equal to `'http'`
-    ha_acls: The ACLs to apply to this frontend.
-    ha_certificates: The additional SSL/TLS certificates to use on this frontend.
+    ha_acls: The ACLs to apply to this frontend. Each object accepts: - name (string) - expression (string) - value (string) - casesensitive (boolean) - not (boolean)
+    ha_certificates: The additional SSL/TLS certificates to use on this frontend. Each object accepts: - ssl_certificate (string)
     httpclose: The `httpclose` option this frontend will operate. Valid values: ['http-keep-alive', 'http-tunnel', 'httpclose', 'http-server-close', 'forceclose']
     log_detailed: Enables or disables more detailed logging.
     log_separate_errors: Enables or disables changing the log level from info to err on potentially interesting info.
@@ -19650,6 +19874,10 @@ async def pfsense_delete_services_ha_proxy_frontend_error_files(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/frontend/error_files
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -19743,6 +19971,10 @@ async def pfsense_delete_services_ha_proxy_frontends(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/frontends
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
@@ -19932,6 +20164,10 @@ async def pfsense_delete_services_ha_proxy_settings_dns_resolvers(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/settings/dns_resolvers
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -20120,6 +20356,10 @@ async def pfsense_delete_services_ha_proxy_settings_email_mailers(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/settings/email_mailers
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -20193,10 +20433,10 @@ async def pfsense_update_services_ha_proxy_settings(
 
     advanced: Additional HAProxy options to include in the global settings area.
     carpdev: The CARP interface IP to monitor. HAProxy will only run on the firewall whose interface is MASTER.
-    dns_resolvers: The DNS resolvers HAProxy will use for DNS queries.
+    dns_resolvers: The DNS resolvers HAProxy will use for DNS queries. Each object accepts: - name (string) - server (string) - port (string)
     email_from: The email address to be used as the sender of the emails.
     email_level: The maximum log level to send emails for. Leave empty to disable sending email alerts. Valid values: ['', 'emerg', 'alert', 'crit', 'err', 'warning', 'notice', 'info', 'debug']
-    email_mailers: The email servers HAProxy will use to send SMTP alerts.
+    email_mailers: The email servers HAProxy will use to send SMTP alerts. Each object accepts: - name (string) - mailserver (string) - mailserverport (string)
     email_myhostname: The hostname to use as the origin of the email.
     email_to: The email address to send emails to.
     enable: Enables or disable HAProxy on the system.
@@ -20566,6 +20806,10 @@ async def pfsense_delete_services_ntp_time_servers(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/ntp/time_servers
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
@@ -20803,6 +21047,10 @@ async def pfsense_delete_services_service_watchdogs(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/service_watchdogs
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
@@ -20935,6 +21183,10 @@ async def pfsense_delete_status_dhcp_server_leases(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/status/dhcp_server/leases
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
@@ -21615,6 +21867,10 @@ async def pfsense_delete_status_open_vpn_server_connections(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/status/openvpn/server/connections
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
@@ -21835,7 +22091,7 @@ async def pfsense_create_system_crl(
     caref: The unique ID of the CA that this CRL is associated with.
     descr: The unique name/description for this CRL.
     method: The method used to generate this CRL. Valid values: ['existing', 'internal']
-    cert: The list of revoked certificates in this CRL.This field is only available when the following conditions are met:- `method` must be equal to `'internal'`
+    cert: The list of revoked certificates in this CRL.This field is only available when the following conditions are met:- `method` must be equal to `'internal'` Each object accepts: - certref (string) - serial (string) - reason (integer) - revoke_time (integer) - caref (string) - descr (string) - type (string) - crt (string) - prv (string)
     lifetime: The lifetime of this CRL in days.This field is only available when the following conditions are met:- `method` must be equal to `'internal'`
     serial: The serial number of the CRL.This field is only available when the following conditions are met:- `method` must be equal to `'internal'`
     text: The raw x509 CRL data.This field is only available when the following conditions are met:- `method` must be equal to `'existing'`
@@ -21883,11 +22139,11 @@ async def pfsense_update_system_crl(
 
     id: The ID of the object or resource to interact with.
     caref: The unique ID of the CA that this CRL is associated with.
-    cert: The list of revoked certificates in this CRL.This field is only available when the following conditions are met:- `method` must be equal to `'internal'`
-    descr: The unique name/description for this CRL.
-    lifetime: The lifetime of this CRL in days.This field is only available when the following conditions are met:- `method` must be equal to `'internal'`
+    cert: The list of revoked certificates in this CRL.This field is only available when the following conditions are met:- `method` must be equal to `'internal'` Each object accepts: - certref (string) - serial (string) - reason (integer) - revoke_time (integer) - caref (string) - descr (string) - type (string) - crt (string) - prv (string)
+    descr: The unique name/description for this CRL. WARNING: This field is read-only after creation — PATCH will return FIELD_VALUE_CHANGED_WHEN_NOT_EDITABLE if a different value is sent.
+    lifetime: The lifetime of this CRL in days.This field is only available when the following conditions are met:- `method` must be equal to `'internal'` WARNING: This field is read-only after creation — PATCH will return FIELD_VALUE_CHANGED_WHEN_NOT_EDITABLE if a different value is sent.
     method: The method used to generate this CRL. Valid values: ['existing', 'internal']
-    serial: The serial number of the CRL.This field is only available when the following conditions are met:- `method` must be equal to `'internal'`
+    serial: The serial number of the CRL.This field is only available when the following conditions are met:- `method` must be equal to `'internal'` WARNING: This field is read-only after creation — PATCH will return FIELD_VALUE_CHANGED_WHEN_NOT_EDITABLE if a different value is sent.
     text: The raw x509 CRL data.This field is only available when the following conditions are met:- `method` must be equal to `'existing'`
     """
     if not confirm:
@@ -22160,6 +22416,10 @@ async def pfsense_delete_system_cr_ls(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/system/crls
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
@@ -22225,6 +22485,10 @@ async def pfsense_delete_system_certificate_authorities(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/system/certificate_authorities
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
@@ -22980,6 +23244,10 @@ async def pfsense_delete_system_certificates(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/system/certificates
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
@@ -23338,6 +23606,10 @@ async def pfsense_delete_system_packages(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/system/packages
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
@@ -23425,6 +23697,10 @@ async def pfsense_delete_system_restapi_access_list(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/system/restapi/access_list
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
@@ -23966,6 +24242,10 @@ async def pfsense_delete_system_tunables(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/system/tunables
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
@@ -24442,6 +24722,10 @@ async def pfsense_delete_user_auth_servers(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/user/auth_servers
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
@@ -24814,6 +25098,10 @@ async def pfsense_delete_user_groups(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/user/groups
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
@@ -24879,6 +25167,10 @@ async def pfsense_delete_users(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/users
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
@@ -25129,6 +25421,10 @@ async def pfsense_delete_vpni_psec_phase1_encryptions(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/ipsec/phase1/encryptions
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_vpn_ipsec_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -25213,7 +25509,7 @@ async def pfsense_create_vpni_psec_phase1(
     Note: Call pfsense_vpn_ipsec_apply after this to apply changes.
 
     authentication_method: The IPsec authentication method this tunnel will use. Valid values: ['pre_shared_key', 'cert']
-    encryption: The encryption algorithms supported by this P1 encryption.
+    encryption: The encryption algorithms supported by this P1 encryption. Each object accepts: - encryption_algorithm_name (string): valid=['aes', 'aes128gcm', 'aes192gcm', 'aes256gcm', 'chacha20poly1305'] - encryption_algorithm_keylen (integer) - hash_algorithm (string): valid=['sha1', 'sha256', 'sha384', 'sha512', 'aesxcbc'] - dhgroup (integer) - prf_algorithm (string): valid=['sha1', 'sha256', 'sha384', 'sha512', 'aesxcbc']
     iketype: The IKE protocol version this phase 1 entry will use. Valid values: ['ikev1', 'ikev2', 'auto']
     interface: The interface for the local endpoint of this phase 1 entry. This should be an interface that is reachable by the remote peer.
     myid_type: The identifier type used by the local end of the tunnel. Valid values: ['myaddress', 'address', 'fqdn', 'user_fqdn', 'asn1dn', 'keyid tag', 'dyn_dns', 'auto']
@@ -25369,7 +25665,7 @@ async def pfsense_update_vpni_psec_phase1(
     disabled: Disables this IPsec phase 1 entry.
     dpd_delay: The delay (in seconds) between sending peer acknowledgement messages.
     dpd_maxfail: The number of consecutive failures allowed before disconnecting.
-    encryption: The encryption algorithms supported by this P1 encryption.
+    encryption: The encryption algorithms supported by this P1 encryption. Each object accepts: - encryption_algorithm_name (string): valid=['aes', 'aes128gcm', 'aes192gcm', 'aes256gcm', 'chacha20poly1305'] - encryption_algorithm_keylen (integer) - hash_algorithm (string): valid=['sha1', 'sha256', 'sha384', 'sha512', 'aesxcbc'] - dhgroup (integer) - prf_algorithm (string): valid=['sha1', 'sha256', 'sha384', 'sha512', 'aesxcbc']
     gw_duplicates: Enables or disables the allowance of multiple phase 1 configurations with the same remote gateway endpoint.
     ikeport: The UDP port for IKE on the remote gateway. Valid options are: a TCP/UDP port number
     iketype: The IKE protocol version this phase 1 entry will use. Valid values: ['ikev1', 'ikev2', 'auto']
@@ -25569,6 +25865,10 @@ async def pfsense_delete_vpni_psec_phase1s(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/ipsec/phase1s
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     Note: Call pfsense_vpn_ipsec_apply after this to apply changes.
 
@@ -25770,6 +26070,10 @@ async def pfsense_delete_vpni_psec_phase2_encryptions(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/ipsec/phase2/encryptions
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_vpn_ipsec_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -25849,7 +26153,7 @@ async def pfsense_create_vpni_psec_phase2(
     mode: The IPsec phase 2 mode this entry will use. Valid values: ['tunnel', 'tunnel6', 'transport', 'vti']
     descr: A description for this IPsec phase 2 entry.
     disabled: Disables this IPsec phase 2 entry.
-    encryption_algorithm_option: The encryption algorithms to be used by this phase 2 entry.This field is only available when the following conditions are met:- `protocol` must be equal to `'esp'`
+    encryption_algorithm_option: The encryption algorithms to be used by this phase 2 entry.This field is only available when the following conditions are met:- `protocol` must be equal to `'esp'` Each object accepts: - name (string): valid=['aes', 'aes128gcm', 'aes192gcm', 'aes256gcm', 'chacha20poly1305'] - keylen (integer)
     keepalive: Enables or disables checking this P2 and initiating if disconnected; does not send traffic inside the tunnel. This check ignores the P1 option 'Child SA Start Action' and works for both VTI and tunnel mode P2s. For IKEv2 without split connections, this only needs to be enabled on one P2.
     lifetime: The hard IKE SA lifetime (in seconds) after which the IKE SA will be expired.
     localid_address: The local network IP component of this IPsec security association.This field is only available when the following conditions are met:- `localid_type` must be one of [ address, network ]
@@ -25959,7 +26263,7 @@ async def pfsense_update_vpni_psec_phase2(
     id: The ID of the object or resource to interact with.
     descr: A description for this IPsec phase 2 entry.
     disabled: Disables this IPsec phase 2 entry.
-    encryption_algorithm_option: The encryption algorithms to be used by this phase 2 entry.This field is only available when the following conditions are met:- `protocol` must be equal to `'esp'`
+    encryption_algorithm_option: The encryption algorithms to be used by this phase 2 entry.This field is only available when the following conditions are met:- `protocol` must be equal to `'esp'` Each object accepts: - name (string): valid=['aes', 'aes128gcm', 'aes192gcm', 'aes256gcm', 'chacha20poly1305'] - keylen (integer)
     hash_algorithm_option: The hashing algorithms used by this IPsec phase 2 entry. Note: Hash is ignored with GCM algorithms. SHA1 provides weak security and should be avoided. Valid values: ['hmac_sha1', 'hmac_sha256', 'hmac_sha384', 'hmac_sha512', 'aesxcbc']. Note: use hmac_ prefix (not plain sha256).
     ikeid: The `ikeid` of the parent IPsec phase 1 entry this IPsec phase 2 entry belongs to.
     keepalive: Enables or disables checking this P2 and initiating if disconnected; does not send traffic inside the tunnel. This check ignores the P1 option 'Child SA Start Action' and works for both VTI and tunnel mode P2s. For IKEv2 without split connections, this only needs to be enabled on one P2.
@@ -26138,6 +26442,10 @@ async def pfsense_delete_vpni_psec_phase2s(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/ipsec/phase2s
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     Note: Call pfsense_vpn_ipsec_apply after this to apply changes.
 
@@ -26509,6 +26817,10 @@ async def pfsense_delete_vpn_open_vpncs_os(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/openvpn/csos
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
@@ -27354,6 +27666,10 @@ async def pfsense_delete_vpn_open_vpn_client_export_configs(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/openvpn/client_export/configs
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
@@ -27547,6 +27863,10 @@ async def pfsense_delete_vpn_open_vpn_clients(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/openvpn/clients
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
@@ -28268,6 +28588,10 @@ async def pfsense_delete_vpn_open_vpn_servers(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/openvpn/servers
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
     query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
@@ -28497,6 +28821,10 @@ async def pfsense_delete_vpn_wire_guard_peer_allowed_i_ps(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/wireguard/peer/allowed_ips
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_vpn_wireguard_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -28559,7 +28887,7 @@ async def pfsense_create_vpn_wire_guard_peer(
     Note: Call pfsense_vpn_wireguard_apply after this to apply changes.
 
     publickey: The public key for this peer.
-    allowedips: The allowed IP/subnets for this WireGuard peer.
+    allowedips: The allowed IP/subnets for this WireGuard peer. Each object accepts: - address (string) - mask (integer) - descr (string)
     descr: The description for this peer.
     enabled: Enables or disables this WireGuard peer.
     endpoint: The IP address or hostname of the remote peer. Set to `null` to make this a dynamic endpoint.
@@ -28619,7 +28947,7 @@ async def pfsense_update_vpn_wire_guard_peer(
     Note: Call pfsense_vpn_wireguard_apply after this to apply changes.
 
     id: The ID of the object or resource to interact with.
-    allowedips: The allowed IP/subnets for this WireGuard peer.
+    allowedips: The allowed IP/subnets for this WireGuard peer. Each object accepts: - address (string) - mask (integer) - descr (string)
     descr: The description for this peer.
     enabled: Enables or disables this WireGuard peer.
     endpoint: The IP address or hostname of the remote peer. Set to `null` to make this a dynamic endpoint.
@@ -28761,6 +29089,10 @@ async def pfsense_delete_vpn_wire_guard_peers(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/wireguard/peers
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     Note: Call pfsense_vpn_wireguard_apply after this to apply changes.
 
@@ -29028,6 +29360,10 @@ async def pfsense_delete_vpn_wire_guard_tunnel_addresses(
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/wireguard/tunnel/addresses
 
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
+
     Note: Call pfsense_vpn_wireguard_apply after this to apply changes.
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
@@ -29086,8 +29422,8 @@ async def pfsense_create_vpn_wire_guard_tunnel(
 
     Note: Call pfsense_vpn_wireguard_apply after this to apply changes.
 
-    privatekey: The private key for this tunnel.
-    addresses: The IPv4 or IPv6 addresses to assign this WireGuard tunnel interface. This field is ignored if this tunnel interface is assigned to an existing pfSense interface object.
+    privatekey: The private key for this tunnel. Must be a valid WireGuard Curve25519 private key (base64-encoded, 32 bytes with proper bit clamping). Generate with `wg genkey`.
+    addresses: The IPv4 or IPv6 addresses to assign this WireGuard tunnel interface. This field is ignored if this tunnel interface is assigned to an existing pfSense interface object. Each object accepts: - address (string) - mask (integer) - descr (string)
     descr: A description for this WireGuard tunnel.
     enabled: Enables or disables this tunnels and any associated peers.
     listenport: The port WireGuard will listen on for this tunnel. Valid options are: a TCP/UDP port number
@@ -29135,12 +29471,12 @@ async def pfsense_update_vpn_wire_guard_tunnel(
     Note: Call pfsense_vpn_wireguard_apply after this to apply changes.
 
     id: The ID of the object or resource to interact with.
-    addresses: The IPv4 or IPv6 addresses to assign this WireGuard tunnel interface. This field is ignored if this tunnel interface is assigned to an existing pfSense interface object.
+    addresses: The IPv4 or IPv6 addresses to assign this WireGuard tunnel interface. This field is ignored if this tunnel interface is assigned to an existing pfSense interface object. Each object accepts: - address (string) - mask (integer) - descr (string)
     descr: A description for this WireGuard tunnel.
     enabled: Enables or disables this tunnels and any associated peers.
     listenport: The port WireGuard will listen on for this tunnel. Valid options are: a TCP/UDP port number
     mtu: The MTU for this WireGuard tunnel interface. This value is ignored if this tunnel is assigned as a pfSense interface.
-    privatekey: The private key for this tunnel.
+    privatekey: The private key for this tunnel. Must be a valid WireGuard Curve25519 private key (base64-encoded, 32 bytes with proper bit clamping). Generate with `wg genkey`.
     """
     if not confirm:
         return (
@@ -29268,6 +29604,10 @@ async def pfsense_delete_vpn_wire_guard_tunnels(
     query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/wireguard/tunnels
+
+    Note: At least one query parameter is required for bulk deletion
+    (e.g., query={"name": "value"}). The query dict keys become URL
+    query params to filter which items to delete.
 
     Note: Call pfsense_vpn_wireguard_apply after this to apply changes.
 

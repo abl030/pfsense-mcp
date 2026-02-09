@@ -319,7 +319,7 @@ Exclude from generation or add extra warnings:
 
 OpenAPI spec: 258 paths, 677 operations. Generated MCP server: 677 tools.
 
-Bank tester: **71 tasks across 4 sprints**, 668/677 tools invoked (**98.7% tool coverage**). 9 uncovered: 6 HAProxy singular 500 bug, 3 system package 504 (QEMU NAT), plus 4 destructive/endpoint-altering tools tested only in isolation.
+Bank tester: **72 tasks across 4 sprints**, 670/677 tools invoked (**99.0% tool coverage**). 7 uncovered: 4 destructive/endpoint-altering, 1 bulk pkg delete, 1 HA sync, 1 OVPN connection.
 
 Testing is done via the bank tester (`bank-tester/run-bank-test.sh`), which boots a VM, runs Claude against the MCP server, and validates results. See the Phase 3 section for details.
 
@@ -470,6 +470,8 @@ Findings from building a 677-tool MCP server and testing it with an AI consumer 
 
 26. **Always re-validate assumed-broken endpoints.** The HAProxy settings dns_resolver/email_mailer endpoints were marked as "all 12 tools broken" based on manual GET testing during v2.7.1 upgrade. Sprint 4 ran a full Opus diagnostic (task 71) that tested all 12 tools and discovered 6 actually work (LIST, CREATE, bulk DELETE). Only singular GET/PATCH/DELETE are broken. Old assumptions carried forward without validation wasted 6 coverage points. **Rule**: Never mark an endpoint as permanently broken without running it through the Opus diagnostic loop first.
 
+27. **Diagnostic tasks catch false assumptions.** Task 72 re-tested all Sprint 1-4 first-attempt failures independently. Key finding: system package install/delete was assumed permanently blocked (504 timeout), but Opus proved both operations work. This recovered 2 tools and moved coverage from 98.7% to 99.0%. The diagnostic loop (have a fresh Opus attempt the exact failing operations) consistently uncovers wrong assumptions.
+
 ### Generator Phase 4: Conditional Required + BasicAuth + Docstring Fixes
 
 25. **Conditional required field downgrade eliminates 8 of 15 Opus errors.** When a field's description contains `"only available when"` AND the spec marks it `required`, the generator now downgrades it to optional (`default=None`). The pfSense spec has 696 fields with this exact pattern. Combined with BasicAuth endpoint detection (4 operations) and docstring improvements (PF table names, package ID format, IPsec Phase 2 hash enums, HAProxy action ACL guidance), this reduces Opus first-attempt failures from 15 to 3 (all unfixable pfSense API bugs). See `research/error-table-opus.md`.
@@ -489,22 +491,19 @@ Findings from building a 677-tool MCP server and testing it with an AI consumer 
 
 **Results** (13 runs across 4 sprints):
 - **71 tasks total** (44 baseline + 8 Sprint 1 PUT/replace + 7 Sprint 2 sub-resource CRUD + 10 Sprint 3 bulk DELETEs + 2 Sprint 4 recoverable/validation)
-- **668/677 unique tools invoked (98.7% tool coverage)**
+- **670/677 unique tools invoked (99.0% tool coverage)**
 
-**Remaining uncovered** (9 tools):
+**Remaining uncovered** (7 tools — all infrastructure/safety blocked):
 
-| Category | Count | Notes |
-|----------|-------|-------|
-| HAProxy singular 500 bug | 6 | GET/PATCH/DELETE for dns_resolver + email_mailer (LIST/CREATE/bulk DELETE work) |
-| System package 504 | 3 | QEMU NAT too slow for pkg install/delete |
-
-**Not in standard suite** (tested in isolation or blocked):
-- `pfsense_post_diagnostics_halt_system` — shuts down VM (destructive)
-- `pfsense_post_diagnostics_reboot` — reboots VM (task 99 only)
-- `pfsense_update_system_restapi_version` — breaks API connectivity
-- `pfsense_update_system_web_gui_settings` — breaks API connectivity
-- `pfsense_create_system_restapi_settings_sync` — requires BasicAuth + HA setup
-- `pfsense_delete_status_open_vpn_server_connection` — needs active OVPN client
+| Tool | Reason |
+|------|--------|
+| `post_diagnostics_halt_system` | Shuts down VM |
+| `post_diagnostics_reboot` | Reboots VM |
+| `update_system_restapi_version` | Breaks API connectivity |
+| `update_system_web_gui_settings` | Breaks API connectivity |
+| `delete_system_packages` | Bulk pkg delete (singular works) |
+| `create_system_restapi_settings_sync` | Requires BasicAuth + HA peer |
+| `delete_status_open_vpn_server_connection` | Needs active OVPN client |
 
 ### Notifications
 
@@ -663,7 +662,7 @@ This loop is what took us from 15 Opus errors → 3 (all pfSense bugs). Apply it
 
 ### TODO: Ephemeral VM Tests for Remaining 9 Tools
 
-9 uncovered tools need ephemeral one-shot VMs or infrastructure changes (halt, reboot, webgui, restapi version, system packages, sync, OVPN connection) — low priority at 98.7% coverage.
+7 uncovered tools need ephemeral one-shot VMs or infrastructure changes (halt, reboot, webgui, restapi version, bulk pkg delete, sync, OVPN connection) — low priority at 99.0% coverage.
 
 ### Coverage Progression (Actual)
 
@@ -673,4 +672,4 @@ This loop is what took us from 15 Opus errors → 3 (all pfSense bugs). Apply it
 | Sprint 1 (PUT/replace) | 544 | 80.4% | +40 |
 | Sprint 2 (sub-resource CRUD) | 579 | 85.5% | +35 |
 | Sprint 3 (bulk DELETEs) | 641 | 94.7% | +62 |
-| Sprint 4 (recoverable + HAProxy) | **668** | **98.7%** | +27 |
+| Sprint 4 (recoverable + HAProxy + diagnostic) | **670** | **99.0%** | +29 |

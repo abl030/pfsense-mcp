@@ -74,6 +74,19 @@ def _gen_docstring(tool: ToolContext) -> str:
         doc_lines.append("")
         doc_lines.append(f"    WARNING: {tool.danger_warning}")
 
+    # Bulk DELETE hint — plural DELETE endpoints require at least one query filter
+    if tool.method == "delete" and any(p.name == "query" for p in tool.parameters):
+        doc_lines.append("")
+        doc_lines.append(
+            '    Note: At least one query parameter is required for bulk deletion'
+        )
+        doc_lines.append(
+            '    (e.g., query={"name": "value"}). The query dict keys become URL'
+        )
+        doc_lines.append(
+            "    query params to filter which items to delete."
+        )
+
     if tool.needs_apply and tool.apply_tool_name:
         doc_lines.append("")
         doc_lines.append(

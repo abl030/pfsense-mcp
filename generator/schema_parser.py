@@ -198,6 +198,13 @@ def extract_tool_parameters(
                 # Normalize body params to match.
                 if prop_name in ("parent_id", "id") and python_type == "int":
                     python_type = "str | int"
+                desc = _clean_description(resolved_prop.get("description", ""))
+                # For list[dict] params, resolve inner object fields and append
+                # to description so consumers know the expected structure.
+                if python_type == "list[dict[str, Any]]":
+                    nested_desc = _describe_nested_fields(spec, resolved_prop)
+                    if nested_desc:
+                        desc += nested_desc
                 params.append(
                     ToolParameter(
                         name=safe,
@@ -205,9 +212,7 @@ def extract_tool_parameters(
                         required=is_required,
                         default=default,
                         has_default=has_default,
-                        description=_clean_description(
-                            resolved_prop.get("description", "")
-                        ),
+                        description=desc,
                         enum=resolved_prop.get("enum"),
                         source="body",
                         api_name=prop_name,
@@ -230,3 +235,48 @@ def _clean_description(desc: str) -> str:
     # Normalize whitespace
     desc = re.sub(r"\s+", " ", desc).strip()
     return desc
+
+
+def _describe_nested_fields(
+    spec: dict[str, Any], prop_schema: dict[str, Any]
+) -> str | None:
+    """If a property is an array of objects, describe inner fields for the docstring.
+
+    Returns a short summary of inner field names, types, and enum values.
+    Only triggered for list[dict] parameters where inner schema is resolvable.
+    """
+    resolved = resolve_schema(spec, prop_schema)
+    if resolved.get("type") != "array":
+        return None
+    items = resolved.get("items", {})
+
+    # Collect properties from items schema (handles $ref, allOf, direct object)
+    properties: dict[str, Any] = {}
+    if "allOf" in items:
+        for sub in items["allOf"]:
+            resolved_sub = resolve_schema(spec, sub)
+            properties.update(resolved_sub.get("properties", {}))
+    elif "$ref" in items:
+        resolved_items = resolve_schema(spec, items)
+        properties = resolved_items.get("properties", {})
+    else:
+        resolved_items = resolve_schema(spec, items)
+        properties = resolved_items.get("properties", {})
+
+    if not properties:
+        return None
+
+    # Build concise field summary (limit to 12 fields)
+    parts: list[str] = []
+    for i, (name, field_schema) in enumerate(properties.items()):
+        if i >= 12:
+            parts.append(f"  ... and {len(properties) - 12} more fields")
+            break
+        resolved_field = resolve_schema(spec, field_schema)
+        ftype = resolved_field.get("type", "any")
+        enum = resolved_field.get("enum")
+        if enum and len(enum) <= 8:
+            parts.append(f"  - {name} ({ftype}): valid={enum}")
+        else:
+            parts.append(f"  - {name} ({ftype})")
+    return " Each object accepts:\n" + "\n".join(parts)

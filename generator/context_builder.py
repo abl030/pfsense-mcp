@@ -36,6 +36,37 @@ _PARAM_DESCRIPTION_HINTS: dict[tuple[str, str], str] = {
         " Valid values: ['hmac_sha1', 'hmac_sha256', 'hmac_sha384', 'hmac_sha512', 'aesxcbc']."
         " Note: use hmac_ prefix (not plain sha256)."
     ),
+    # WireGuard private key must be valid Curve25519
+    ("postVPNWireGuardTunnelEndpoint", "privatekey"): (
+        " Must be a valid WireGuard Curve25519 private key (base64-encoded, 32 bytes"
+        " with proper bit clamping). Generate with `wg genkey`."
+    ),
+    ("patchVPNWireGuardTunnelEndpoint", "privatekey"): (
+        " Must be a valid WireGuard Curve25519 private key (base64-encoded, 32 bytes"
+        " with proper bit clamping). Generate with `wg genkey`."
+    ),
+    # ARP table interface uses display names (WAN, LAN), not device names (em0, em1)
+    ("deleteDiagnosticsARPTableEndpoint", "query"): (
+        " Note: the `interface` filter uses display names like 'WAN', 'LAN'"
+        " — not device names like 'em0', 'em1'."
+    ),
+    ("deleteDiagnosticsARPTableEntryEndpoint", "query"): (
+        " Note: the `interface` filter uses display names like 'WAN', 'LAN'"
+        " — not device names like 'em0', 'em1'."
+    ),
+    # CRL fields are non-editable after creation (pfSense marks them immutable)
+    ("patchSystemCRLEndpoint", "descr"): (
+        " WARNING: This field is read-only after creation — PATCH will return"
+        " FIELD_VALUE_CHANGED_WHEN_NOT_EDITABLE if a different value is sent."
+    ),
+    ("patchSystemCRLEndpoint", "lifetime"): (
+        " WARNING: This field is read-only after creation — PATCH will return"
+        " FIELD_VALUE_CHANGED_WHEN_NOT_EDITABLE if a different value is sent."
+    ),
+    ("patchSystemCRLEndpoint", "serial"): (
+        " WARNING: This field is read-only after creation — PATCH will return"
+        " FIELD_VALUE_CHANGED_WHEN_NOT_EDITABLE if a different value is sent."
+    ),
 }
 
 # Subsystem prefixes that require an explicit "apply" call after mutations.
@@ -119,8 +150,8 @@ def _find_apply_info(
 
 def _build_docstring(
     op: Operation,
-    tool_name: str,
-    params: list[ToolParameter],
+    _tool_name: str,
+    _params: list[ToolParameter],
     needs_apply: bool,
     apply_tool_name: str | None,
     is_dangerous: bool,
