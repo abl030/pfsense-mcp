@@ -38,7 +38,7 @@
     - `tag`: `300`
     - `pcp`: `0`
 2. **List** using `pfsense_list_interface_vla_ns` — verify resource exists
-3. **Bulk delete** using `pfsense_delete_interface_vla_ns` with `confirm=True` — delete ALL resources in this collection
+3. **Bulk delete** using `pfsense_delete_interface_vla_ns` with `confirm=True` — use `query` parameter to filter (e.g., `query={"id": "<id>"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={"name": "<name>"}` from the list results)
 4. **List** using `pfsense_list_interface_vla_ns` — verify collection is empty
 5. **Create** a test resource using `pfsense_create_interface_gre` with `confirm=True`:
     - `if`: `wan`
@@ -47,22 +47,22 @@
     - `tunnel_remote_addr`: `10.255.0.2`
     - `tunnel_remote_addr6`: ``
 6. **List** using `pfsense_list_interface_gr_es` — verify resource exists
-7. **Bulk delete** using `pfsense_delete_interface_gr_es` with `confirm=True` — delete ALL resources in this collection
+7. **Bulk delete** using `pfsense_delete_interface_gr_es` with `confirm=True` — use `query` parameter to filter (e.g., `query={"id": "<id>"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={"name": "<name>"}` from the list results)
 8. **List** using `pfsense_list_interface_gr_es` — verify collection is empty
 9. **Create** a test resource using `pfsense_create_interface_group` with `confirm=True`:
     - `ifname`: `bt62grp`
     - `members`: `['wan']`
 10. **List** using `pfsense_list_interface_groups` — verify resource exists
-11. **Bulk delete** using `pfsense_delete_interface_groups` with `confirm=True` — delete ALL resources in this collection
+11. **Bulk delete** using `pfsense_delete_interface_groups` with `confirm=True` — use `query` parameter to filter (e.g., `query={"id": "<id>"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={"name": "<name>"}` from the list results)
 12. **List** using `pfsense_list_interface_groups` — verify collection is empty
 13. **Create** a test resource using `pfsense_create_interface_lagg` with `confirm=True`:
     - `members`: `['em2']`
     - `proto`: `none`
 14. **List** using `pfsense_list_interface_lag_gs` — verify resource exists
-15. **Bulk delete** using `pfsense_delete_interface_lag_gs` with `confirm=True` — delete ALL resources in this collection
+15. **Bulk delete** using `pfsense_delete_interface_lag_gs` with `confirm=True` — use `query` parameter to filter (e.g., `query={"id": "<id>"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={"name": "<name>"}` from the list results)
 16. **List** using `pfsense_list_interface_lag_gs` — verify collection is empty
 17. **List** using `pfsense_list_network_interfaces` — verify resource exists (Bulk delete network interfaces — careful, may include system interfaces)
-18. **Bulk delete** using `pfsense_delete_network_interfaces` with `confirm=True` — delete ALL resources in this collection
+18. **Bulk delete** using `pfsense_delete_network_interfaces` with `confirm=True` — use `query` parameter to filter (e.g., `query={"id": "<id>"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={"name": "<name>"}` from the list results)
 19. **List** using `pfsense_list_network_interfaces` — verify collection is empty
 20. **Create** a test resource using `pfsense_create_routing_gateway` with `confirm=True`:
     - `name`: `bt_bd62_gw`
@@ -78,26 +78,26 @@
     - `interval`: `500`
     - `alert_interval`: `1000`
 21. **List** using `pfsense_list_routing_gateways` — verify resource exists
-22. **Bulk delete** using `pfsense_delete_routing_gateways` with `confirm=True` — delete ALL resources in this collection
+22. **Bulk delete** using `pfsense_delete_routing_gateways` with `confirm=True` — use `query` parameter to filter (e.g., `query={"id": "<id>"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={"name": "<name>"}` from the list results)
 23. **List** using `pfsense_list_routing_gateways` — verify collection is empty
 24. **Create** a test resource using `pfsense_create_routing_gateway_group` with `confirm=True`:
     - `name`: `bt_bd62_gg`
     - `descr`: `bulk delete group`
     - `priorities`: `[{'gateway': 'bt_bd62_gw', 'tier': 1}]`
 25. **List** using `pfsense_list_routing_gateway_groups` — verify resource exists (Needs gateway created first)
-26. **Bulk delete** using `pfsense_delete_routing_gateway_groups` with `confirm=True` — delete ALL resources in this collection
+26. **Bulk delete** using `pfsense_delete_routing_gateway_groups` with `confirm=True` — use `query` parameter to filter (e.g., `query={"id": "<id>"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={"name": "<name>"}` from the list results)
 27. **List** using `pfsense_list_routing_gateway_groups` — verify collection is empty
 28. **Create** a test resource using `pfsense_create_routing_gateway_group_priority` with `confirm=True` (use parent_id from the parent resource):
     - `gateway`: `bt_bd62_gw`
     - `tier`: `2`
 29. **List** using `pfsense_list_routing_gateway_group_priorities` — verify resource exists (Needs gateway group parent_id)
-30. **Bulk delete** using `pfsense_delete_routing_gateway_group_priorities` with `confirm=True` — delete ALL resources in this collection
+30. **Bulk delete** using `pfsense_delete_routing_gateway_group_priorities` with `confirm=True` — use `query` parameter to filter (e.g., `query={"id": "<id>"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={"name": "<name>"}` from the list results)
 31. **List** using `pfsense_list_routing_gateway_group_priorities` — verify collection is empty
 32. **Create** a test resource using `pfsense_create_routing_static_route` with `confirm=True`:
     - `network`: `10.200.0.0/24`
     - `gateway`: `bt_bd62_gw`
 33. **List** using `pfsense_list_routing_static_routes` — verify resource exists (Needs gateway name)
-34. **Bulk delete** using `pfsense_delete_routing_static_routes` with `confirm=True` — delete ALL resources in this collection
+34. **Bulk delete** using `pfsense_delete_routing_static_routes` with `confirm=True` — use `query` parameter to filter (e.g., `query={"id": "<id>"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={"name": "<name>"}` from the list results)
 35. **List** using `pfsense_list_routing_static_routes` — verify collection is empty
 
 **Important notes**:

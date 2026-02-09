@@ -383,9 +383,16 @@ def generate_bulk_delete_steps(
     tools_exercised.append(list_tool)
     step_num += 1
 
-    # Step 3: Bulk delete
+    # Step 3: Bulk delete — must use query parameter for filtering
+    # (API requires at least one content-filtering query param for mass deletion)
+    filter_field = ep.get("filter_field", "")
+    filter_value = ep.get("filter_value", "")
+    if filter_field and filter_value:
+        query_hint = f', `query={{"{filter_field}": "{filter_value}"}}`'
+    else:
+        query_hint = " — use `query` parameter to filter (e.g., `query={\"id\": \"<id>\"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={\"name\": \"<name>\"}` from the list results)"
     all_steps.append(
-        f"{step_num}. **Bulk delete** using `{delete_plural_tool}` with `confirm=True` — delete ALL resources in this collection"
+        f"{step_num}. **Bulk delete** using `{delete_plural_tool}` with `confirm=True`{query_hint}"
     )
     tools_exercised.append(delete_plural_tool)
     step_num += 1

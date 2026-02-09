@@ -140,8 +140,15 @@ def _gen_body(tool: ToolContext) -> str:
         lines.append("    params: dict[str, Any] = {}")
         for p in tool.query_params:
             api_key = p.api_name or p.name
-            lines.append(f"    if {p.name} is not None:")
-            lines.append(f'        params["{api_key}"] = {p.name}')
+            if api_key == "query":
+                # The 'query' parameter is a catch-all dict (style: form, explode: true).
+                # Merge its keys into params so they become individual query params
+                # (e.g., query={"name": "foo"} → ?name=foo) instead of ?query={...}
+                lines.append(f"    if {p.name} is not None:")
+                lines.append(f"        params.update({p.name})")
+            else:
+                lines.append(f"    if {p.name} is not None:")
+                lines.append(f'        params["{api_key}"] = {p.name}')
 
     # Request body
     if tool.has_request_body and tool.method != "put":

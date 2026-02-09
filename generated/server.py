@@ -215,11 +215,13 @@ async def pfsense_delete_auth_keys(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/auth/keys
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -231,6 +233,8 @@ async def pfsense_delete_auth_keys(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/auth/keys",
@@ -277,6 +281,7 @@ async def pfsense_delete_diagnostics_arp_table(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/diagnostics/arp_table
 
@@ -284,6 +289,7 @@ async def pfsense_delete_diagnostics_arp_table(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -296,6 +302,8 @@ async def pfsense_delete_diagnostics_arp_table(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/diagnostics/arp_table",
@@ -453,6 +461,7 @@ async def pfsense_delete_diagnostics_config_history_revisions(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/diagnostics/config_history/revisions
 
@@ -460,6 +469,7 @@ async def pfsense_delete_diagnostics_config_history_revisions(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -472,6 +482,8 @@ async def pfsense_delete_diagnostics_config_history_revisions(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/diagnostics/config_history/revisions",
@@ -886,6 +898,7 @@ async def pfsense_delete_firewall_aliases(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/aliases
 
@@ -893,6 +906,7 @@ async def pfsense_delete_firewall_aliases(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -905,6 +919,8 @@ async def pfsense_delete_firewall_aliases(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/firewall/aliases",
@@ -1175,6 +1191,7 @@ async def pfsense_delete_firewall_nat_one_to_one_mappings(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/nat/one_to_one/mappings
 
@@ -1182,6 +1199,7 @@ async def pfsense_delete_firewall_nat_one_to_one_mappings(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -1194,6 +1212,8 @@ async def pfsense_delete_firewall_nat_one_to_one_mappings(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/firewall/nat/one_to_one/mappings",
@@ -1492,6 +1512,7 @@ async def pfsense_delete_firewall_nat_outbound_mappings(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/nat/outbound/mappings
 
@@ -1499,6 +1520,7 @@ async def pfsense_delete_firewall_nat_outbound_mappings(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -1511,6 +1533,8 @@ async def pfsense_delete_firewall_nat_outbound_mappings(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/firewall/nat/outbound/mappings",
@@ -1839,6 +1863,7 @@ async def pfsense_delete_firewall_nat_port_forwards(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/nat/port_forwards
 
@@ -1846,6 +1871,7 @@ async def pfsense_delete_firewall_nat_port_forwards(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -1858,6 +1884,8 @@ async def pfsense_delete_firewall_nat_port_forwards(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/firewall/nat/port_forwards",
@@ -2232,6 +2260,7 @@ async def pfsense_delete_firewall_rules(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/rules
 
@@ -2239,6 +2268,7 @@ async def pfsense_delete_firewall_rules(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -2251,6 +2281,8 @@ async def pfsense_delete_firewall_rules(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/firewall/rules",
@@ -2567,6 +2599,7 @@ async def pfsense_delete_firewall_schedule_time_ranges(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/schedule/time_ranges
 
@@ -2574,6 +2607,7 @@ async def pfsense_delete_firewall_schedule_time_ranges(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -2586,6 +2620,8 @@ async def pfsense_delete_firewall_schedule_time_ranges(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/firewall/schedule/time_ranges",
@@ -2657,6 +2693,7 @@ async def pfsense_delete_firewall_schedules(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/schedules
 
@@ -2664,6 +2701,7 @@ async def pfsense_delete_firewall_schedules(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -2676,6 +2714,8 @@ async def pfsense_delete_firewall_schedules(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/firewall/schedules",
@@ -2767,6 +2807,7 @@ async def pfsense_delete_firewall_states(
     confirm: bool = False,
     limit: int | None = 100,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/states
 
@@ -2776,6 +2817,7 @@ async def pfsense_delete_firewall_states(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -2789,6 +2831,8 @@ async def pfsense_delete_firewall_states(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/firewall/states",
@@ -3171,6 +3215,7 @@ async def pfsense_delete_firewall_traffic_shaper_limiter_bandwidths(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/traffic_shaper/limiter/bandwidths
 
@@ -3178,6 +3223,7 @@ async def pfsense_delete_firewall_traffic_shaper_limiter_bandwidths(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -3190,6 +3236,8 @@ async def pfsense_delete_firewall_traffic_shaper_limiter_bandwidths(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/firewall/traffic_shaper/limiter/bandwidths",
@@ -4098,6 +4146,7 @@ async def pfsense_delete_firewall_traffic_shaper_limiter_queues(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/traffic_shaper/limiter/queues
 
@@ -4105,6 +4154,7 @@ async def pfsense_delete_firewall_traffic_shaper_limiter_queues(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -4117,6 +4167,8 @@ async def pfsense_delete_firewall_traffic_shaper_limiter_queues(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/firewall/traffic_shaper/limiter/queues",
@@ -4553,6 +4605,7 @@ async def pfsense_delete_firewall_traffic_shaper_queues(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/traffic_shaper/queues
 
@@ -4560,6 +4613,7 @@ async def pfsense_delete_firewall_traffic_shaper_queues(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -4572,6 +4626,8 @@ async def pfsense_delete_firewall_traffic_shaper_queues(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/firewall/traffic_shaper/queues",
@@ -4643,6 +4699,7 @@ async def pfsense_delete_firewall_traffic_shapers(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/traffic_shapers
 
@@ -4650,6 +4707,7 @@ async def pfsense_delete_firewall_traffic_shapers(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -4662,6 +4720,8 @@ async def pfsense_delete_firewall_traffic_shapers(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/firewall/traffic_shapers",
@@ -4939,6 +4999,7 @@ async def pfsense_delete_firewall_virtual_i_ps(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/firewall/virtual_ips
 
@@ -4946,6 +5007,7 @@ async def pfsense_delete_firewall_virtual_i_ps(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -4958,6 +5020,8 @@ async def pfsense_delete_firewall_virtual_i_ps(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/firewall/virtual_ips",
@@ -5417,6 +5481,7 @@ async def pfsense_delete_interface_gr_es(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/interface/gres
 
@@ -5424,6 +5489,7 @@ async def pfsense_delete_interface_gr_es(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -5436,6 +5502,8 @@ async def pfsense_delete_interface_gr_es(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/interface/gres",
@@ -5626,6 +5694,7 @@ async def pfsense_delete_interface_groups(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/interface/groups
 
@@ -5633,6 +5702,7 @@ async def pfsense_delete_interface_groups(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -5645,6 +5715,8 @@ async def pfsense_delete_interface_groups(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/interface/groups",
@@ -5834,6 +5906,7 @@ async def pfsense_delete_interface_lag_gs(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/interface/laggs
 
@@ -5841,6 +5914,7 @@ async def pfsense_delete_interface_lag_gs(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -5853,6 +5927,8 @@ async def pfsense_delete_interface_lag_gs(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/interface/laggs",
@@ -6026,6 +6102,7 @@ async def pfsense_delete_interface_vla_ns(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/interface/vlans
 
@@ -6033,6 +6110,7 @@ async def pfsense_delete_interface_vla_ns(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -6045,6 +6123,8 @@ async def pfsense_delete_interface_vla_ns(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/interface/vlans",
@@ -6534,11 +6614,13 @@ async def pfsense_delete_network_interfaces(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/interfaces
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -6550,6 +6632,8 @@ async def pfsense_delete_network_interfaces(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/interfaces",
@@ -7080,6 +7164,7 @@ async def pfsense_delete_routing_gateway_group_priorities(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/routing/gateway/group/priorities
 
@@ -7087,6 +7172,7 @@ async def pfsense_delete_routing_gateway_group_priorities(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -7099,6 +7185,8 @@ async def pfsense_delete_routing_gateway_group_priorities(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/routing/gateway/group/priorities",
@@ -7284,6 +7372,7 @@ async def pfsense_delete_routing_gateway_groups(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/routing/gateway/groups
 
@@ -7291,6 +7380,7 @@ async def pfsense_delete_routing_gateway_groups(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -7303,6 +7393,8 @@ async def pfsense_delete_routing_gateway_groups(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/routing/gateway/groups",
@@ -7349,6 +7441,7 @@ async def pfsense_delete_routing_gateways(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/routing/gateways
 
@@ -7356,6 +7449,7 @@ async def pfsense_delete_routing_gateways(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -7368,6 +7462,8 @@ async def pfsense_delete_routing_gateways(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/routing/gateways",
@@ -7545,6 +7641,7 @@ async def pfsense_delete_routing_static_routes(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/routing/static_routes
 
@@ -7552,6 +7649,7 @@ async def pfsense_delete_routing_static_routes(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -7564,6 +7662,8 @@ async def pfsense_delete_routing_static_routes(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/routing/static_routes",
@@ -7816,11 +7916,13 @@ async def pfsense_delete_services_acme_account_keys(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/acme/account_keys
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -7832,6 +7934,8 @@ async def pfsense_delete_services_acme_account_keys(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/acme/account_keys",
@@ -10786,11 +10890,13 @@ async def pfsense_delete_services_acme_certificates(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/acme/certificates
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -10802,6 +10908,8 @@ async def pfsense_delete_services_acme_certificates(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/acme/certificates",
@@ -10997,11 +11105,13 @@ async def pfsense_delete_services_bind_access_list_entries(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/bind/access_list/entries
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -11013,6 +11123,8 @@ async def pfsense_delete_services_bind_access_list_entries(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/bind/access_list/entries",
@@ -11199,11 +11311,13 @@ async def pfsense_delete_services_bind_access_lists(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/bind/access_lists
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -11215,6 +11329,8 @@ async def pfsense_delete_services_bind_access_lists(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/bind/access_lists",
@@ -11524,11 +11640,13 @@ async def pfsense_delete_services_bind_sync_remote_hosts(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/bind/sync/remote_hosts
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -11540,6 +11658,8 @@ async def pfsense_delete_services_bind_sync_remote_hosts(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/bind/sync/remote_hosts",
@@ -11785,11 +11905,13 @@ async def pfsense_delete_services_bind_views(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/bind/views
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -11801,6 +11923,8 @@ async def pfsense_delete_services_bind_views(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/bind/views",
@@ -12329,11 +12453,13 @@ async def pfsense_delete_services_bind_zones(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/bind/zones
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -12345,6 +12471,8 @@ async def pfsense_delete_services_bind_zones(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/bind/zones",
@@ -12555,11 +12683,13 @@ async def pfsense_delete_services_cron_jobs(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/cron/jobs
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -12571,6 +12701,8 @@ async def pfsense_delete_services_cron_jobs(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/cron/jobs",
@@ -12903,6 +13035,7 @@ async def pfsense_delete_services_dhcp_server_address_pools(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dhcp_server/address_pools
 
@@ -12910,6 +13043,7 @@ async def pfsense_delete_services_dhcp_server_address_pools(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -12922,6 +13056,8 @@ async def pfsense_delete_services_dhcp_server_address_pools(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/dhcp_server/address_pools",
@@ -13162,6 +13298,7 @@ async def pfsense_delete_services_dhcp_server_custom_options(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dhcp_server/custom_options
 
@@ -13169,6 +13306,7 @@ async def pfsense_delete_services_dhcp_server_custom_options(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -13181,6 +13319,8 @@ async def pfsense_delete_services_dhcp_server_custom_options(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/dhcp_server/custom_options",
@@ -13761,6 +13901,7 @@ async def pfsense_delete_services_dhcp_server_static_mappings(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dhcp_server/static_mappings
 
@@ -13768,6 +13909,7 @@ async def pfsense_delete_services_dhcp_server_static_mappings(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -13780,6 +13922,8 @@ async def pfsense_delete_services_dhcp_server_static_mappings(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/dhcp_server/static_mappings",
@@ -14049,6 +14193,7 @@ async def pfsense_delete_services_dns_forwarder_host_override_aliases(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dns_forwarder/host_override/aliases
 
@@ -14056,6 +14201,7 @@ async def pfsense_delete_services_dns_forwarder_host_override_aliases(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -14068,6 +14214,8 @@ async def pfsense_delete_services_dns_forwarder_host_override_aliases(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/dns_forwarder/host_override/aliases",
@@ -14278,6 +14426,7 @@ async def pfsense_delete_services_dns_forwarder_host_overrides(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dns_forwarder/host_overrides
 
@@ -14285,6 +14434,7 @@ async def pfsense_delete_services_dns_forwarder_host_overrides(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -14297,6 +14447,8 @@ async def pfsense_delete_services_dns_forwarder_host_overrides(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/dns_forwarder/host_overrides",
@@ -14613,6 +14765,7 @@ async def pfsense_delete_services_dns_resolver_access_list_networks(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dns_resolver/access_list/networks
 
@@ -14620,6 +14773,7 @@ async def pfsense_delete_services_dns_resolver_access_list_networks(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -14632,6 +14786,8 @@ async def pfsense_delete_services_dns_resolver_access_list_networks(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/dns_resolver/access_list/networks",
@@ -14703,6 +14859,7 @@ async def pfsense_delete_services_dns_resolver_access_lists(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dns_resolver/access_lists
 
@@ -14710,6 +14867,7 @@ async def pfsense_delete_services_dns_resolver_access_lists(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -14722,6 +14880,8 @@ async def pfsense_delete_services_dns_resolver_access_lists(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/dns_resolver/access_lists",
@@ -14960,6 +15120,7 @@ async def pfsense_delete_services_dns_resolver_domain_overrides(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dns_resolver/domain_overrides
 
@@ -14967,6 +15128,7 @@ async def pfsense_delete_services_dns_resolver_domain_overrides(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -14979,6 +15141,8 @@ async def pfsense_delete_services_dns_resolver_domain_overrides(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/dns_resolver/domain_overrides",
@@ -15164,6 +15328,7 @@ async def pfsense_delete_services_dns_resolver_host_override_aliases(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dns_resolver/host_override/aliases
 
@@ -15171,6 +15336,7 @@ async def pfsense_delete_services_dns_resolver_host_override_aliases(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -15183,6 +15349,8 @@ async def pfsense_delete_services_dns_resolver_host_override_aliases(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/dns_resolver/host_override/aliases",
@@ -15393,6 +15561,7 @@ async def pfsense_delete_services_dns_resolver_host_overrides(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/dns_resolver/host_overrides
 
@@ -15400,6 +15569,7 @@ async def pfsense_delete_services_dns_resolver_host_overrides(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -15412,6 +15582,8 @@ async def pfsense_delete_services_dns_resolver_host_overrides(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/dns_resolver/host_overrides",
@@ -15760,11 +15932,13 @@ async def pfsense_delete_services_free_radius_clients(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/freeradius/clients
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -15776,6 +15950,8 @@ async def pfsense_delete_services_free_radius_clients(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/freeradius/clients",
@@ -15970,11 +16146,13 @@ async def pfsense_delete_services_free_radius_interfaces(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/freeradius/interfaces
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -15986,6 +16164,8 @@ async def pfsense_delete_services_free_radius_interfaces(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/freeradius/interfaces",
@@ -16228,11 +16408,13 @@ async def pfsense_delete_services_free_radius_users(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/freeradius/users
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -16244,6 +16426,8 @@ async def pfsense_delete_services_free_radius_users(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/freeradius/users",
@@ -16469,6 +16653,7 @@ async def pfsense_delete_services_ha_proxy_backend_ac_ls(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/backend/acls
 
@@ -16476,6 +16661,7 @@ async def pfsense_delete_services_ha_proxy_backend_ac_ls(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -16488,6 +16674,8 @@ async def pfsense_delete_services_ha_proxy_backend_ac_ls(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/haproxy/backend/acls",
@@ -16765,6 +16953,7 @@ async def pfsense_delete_services_ha_proxy_backend_actions(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/backend/actions
 
@@ -16772,6 +16961,7 @@ async def pfsense_delete_services_ha_proxy_backend_actions(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -16784,6 +16974,8 @@ async def pfsense_delete_services_ha_proxy_backend_actions(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/haproxy/backend/actions",
@@ -17508,6 +17700,7 @@ async def pfsense_delete_services_ha_proxy_backend_error_files(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/backend/errorfiles
 
@@ -17515,6 +17708,7 @@ async def pfsense_delete_services_ha_proxy_backend_error_files(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -17527,6 +17721,8 @@ async def pfsense_delete_services_ha_proxy_backend_error_files(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/haproxy/backend/errorfiles",
@@ -17748,6 +17944,7 @@ async def pfsense_delete_services_ha_proxy_backend_servers(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/backend/servers
 
@@ -17755,6 +17952,7 @@ async def pfsense_delete_services_ha_proxy_backend_servers(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -17767,6 +17965,8 @@ async def pfsense_delete_services_ha_proxy_backend_servers(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/haproxy/backend/servers",
@@ -17838,6 +18038,7 @@ async def pfsense_delete_services_ha_proxy_backends(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/backends
 
@@ -17845,6 +18046,7 @@ async def pfsense_delete_services_ha_proxy_backends(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -17857,6 +18059,8 @@ async def pfsense_delete_services_ha_proxy_backends(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/haproxy/backends",
@@ -18047,6 +18251,7 @@ async def pfsense_delete_services_ha_proxy_files(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/files
 
@@ -18054,6 +18259,7 @@ async def pfsense_delete_services_ha_proxy_files(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -18066,6 +18272,8 @@ async def pfsense_delete_services_ha_proxy_files(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/haproxy/files",
@@ -18263,6 +18471,7 @@ async def pfsense_delete_services_ha_proxy_frontend_ac_ls(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/frontend/acls
 
@@ -18270,6 +18479,7 @@ async def pfsense_delete_services_ha_proxy_frontend_ac_ls(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -18282,6 +18492,8 @@ async def pfsense_delete_services_ha_proxy_frontend_ac_ls(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/haproxy/frontend/acls",
@@ -18559,6 +18771,7 @@ async def pfsense_delete_services_ha_proxy_frontend_actions(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/frontend/actions
 
@@ -18566,6 +18779,7 @@ async def pfsense_delete_services_ha_proxy_frontend_actions(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -18578,6 +18792,8 @@ async def pfsense_delete_services_ha_proxy_frontend_actions(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/haproxy/frontend/actions",
@@ -18775,6 +18991,7 @@ async def pfsense_delete_services_ha_proxy_frontend_addresses(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/frontend/addresses
 
@@ -18782,6 +18999,7 @@ async def pfsense_delete_services_ha_proxy_frontend_addresses(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -18794,6 +19012,8 @@ async def pfsense_delete_services_ha_proxy_frontend_addresses(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/haproxy/frontend/addresses",
@@ -18959,6 +19179,7 @@ async def pfsense_delete_services_ha_proxy_frontend_certificates(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/frontend/certificates
 
@@ -18966,6 +19187,7 @@ async def pfsense_delete_services_ha_proxy_frontend_certificates(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -18978,6 +19200,8 @@ async def pfsense_delete_services_ha_proxy_frontend_certificates(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/haproxy/frontend/certificates",
@@ -19422,6 +19646,7 @@ async def pfsense_delete_services_ha_proxy_frontend_error_files(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/frontend/error_files
 
@@ -19429,6 +19654,7 @@ async def pfsense_delete_services_ha_proxy_frontend_error_files(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -19441,6 +19667,8 @@ async def pfsense_delete_services_ha_proxy_frontend_error_files(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/haproxy/frontend/error_files",
@@ -19512,6 +19740,7 @@ async def pfsense_delete_services_ha_proxy_frontends(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/frontends
 
@@ -19519,6 +19748,7 @@ async def pfsense_delete_services_ha_proxy_frontends(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -19531,6 +19761,8 @@ async def pfsense_delete_services_ha_proxy_frontends(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/haproxy/frontends",
@@ -19696,6 +19928,7 @@ async def pfsense_delete_services_ha_proxy_settings_dns_resolvers(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/settings/dns_resolvers
 
@@ -19703,6 +19936,7 @@ async def pfsense_delete_services_ha_proxy_settings_dns_resolvers(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -19715,6 +19949,8 @@ async def pfsense_delete_services_ha_proxy_settings_dns_resolvers(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/haproxy/settings/dns_resolvers",
@@ -19880,6 +20116,7 @@ async def pfsense_delete_services_ha_proxy_settings_email_mailers(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/haproxy/settings/email_mailers
 
@@ -19887,6 +20124,7 @@ async def pfsense_delete_services_ha_proxy_settings_email_mailers(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -19899,6 +20137,8 @@ async def pfsense_delete_services_ha_proxy_settings_email_mailers(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/haproxy/settings/email_mailers",
@@ -20322,11 +20562,13 @@ async def pfsense_delete_services_ntp_time_servers(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/ntp/time_servers
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -20338,6 +20580,8 @@ async def pfsense_delete_services_ntp_time_servers(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/ntp/time_servers",
@@ -20555,11 +20799,13 @@ async def pfsense_delete_services_service_watchdogs(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/services/service_watchdogs
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -20571,6 +20817,8 @@ async def pfsense_delete_services_service_watchdogs(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/services/service_watchdogs",
@@ -20684,11 +20932,13 @@ async def pfsense_delete_status_dhcp_server_leases(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/status/dhcp_server/leases
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -20700,6 +20950,8 @@ async def pfsense_delete_status_dhcp_server_leases(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/status/dhcp_server/leases",
@@ -21359,11 +21611,13 @@ async def pfsense_delete_status_open_vpn_server_connections(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/status/openvpn/server/connections
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -21375,6 +21629,8 @@ async def pfsense_delete_status_open_vpn_server_connections(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/status/openvpn/server/connections",
@@ -21900,11 +22156,13 @@ async def pfsense_delete_system_cr_ls(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/system/crls
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -21916,6 +22174,8 @@ async def pfsense_delete_system_cr_ls(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/system/crls",
@@ -21962,11 +22222,13 @@ async def pfsense_delete_system_certificate_authorities(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/system/certificate_authorities
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -21978,6 +22240,8 @@ async def pfsense_delete_system_certificate_authorities(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/system/certificate_authorities",
@@ -22712,11 +22976,13 @@ async def pfsense_delete_system_certificates(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/system/certificates
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -22728,6 +22994,8 @@ async def pfsense_delete_system_certificates(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/system/certificates",
@@ -23066,11 +23334,13 @@ async def pfsense_delete_system_packages(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/system/packages
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -23082,6 +23352,8 @@ async def pfsense_delete_system_packages(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/system/packages",
@@ -23150,11 +23422,13 @@ async def pfsense_delete_system_restapi_access_list(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/system/restapi/access_list
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -23166,6 +23440,8 @@ async def pfsense_delete_system_restapi_access_list(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/system/restapi/access_list",
@@ -23686,11 +23962,13 @@ async def pfsense_delete_system_tunables(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/system/tunables
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -23702,6 +23980,8 @@ async def pfsense_delete_system_tunables(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/system/tunables",
@@ -24158,11 +24438,13 @@ async def pfsense_delete_user_auth_servers(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/user/auth_servers
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -24174,6 +24456,8 @@ async def pfsense_delete_user_auth_servers(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/user/auth_servers",
@@ -24526,11 +24810,13 @@ async def pfsense_delete_user_groups(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/user/groups
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -24542,6 +24828,8 @@ async def pfsense_delete_user_groups(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/user/groups",
@@ -24588,11 +24876,13 @@ async def pfsense_delete_users(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/users
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -24604,6 +24894,8 @@ async def pfsense_delete_users(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/users",
@@ -24833,6 +25125,7 @@ async def pfsense_delete_vpni_psec_phase1_encryptions(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/ipsec/phase1/encryptions
 
@@ -24840,6 +25133,7 @@ async def pfsense_delete_vpni_psec_phase1_encryptions(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -24852,6 +25146,8 @@ async def pfsense_delete_vpni_psec_phase1_encryptions(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/vpn/ipsec/phase1/encryptions",
@@ -25270,6 +25566,7 @@ async def pfsense_delete_vpni_psec_phase1s(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/ipsec/phase1s
 
@@ -25277,6 +25574,7 @@ async def pfsense_delete_vpni_psec_phase1s(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -25289,6 +25587,8 @@ async def pfsense_delete_vpni_psec_phase1s(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/vpn/ipsec/phase1s",
@@ -25466,6 +25766,7 @@ async def pfsense_delete_vpni_psec_phase2_encryptions(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/ipsec/phase2/encryptions
 
@@ -25473,6 +25774,7 @@ async def pfsense_delete_vpni_psec_phase2_encryptions(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -25485,6 +25787,8 @@ async def pfsense_delete_vpni_psec_phase2_encryptions(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/vpn/ipsec/phase2/encryptions",
@@ -25831,6 +26135,7 @@ async def pfsense_delete_vpni_psec_phase2s(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/ipsec/phase2s
 
@@ -25838,6 +26143,7 @@ async def pfsense_delete_vpni_psec_phase2s(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -25850,6 +26156,8 @@ async def pfsense_delete_vpni_psec_phase2s(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/vpn/ipsec/phase2s",
@@ -26198,11 +26506,13 @@ async def pfsense_delete_vpn_open_vpncs_os(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/openvpn/csos
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -26214,6 +26524,8 @@ async def pfsense_delete_vpn_open_vpncs_os(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/vpn/openvpn/csos",
@@ -27038,11 +27350,13 @@ async def pfsense_delete_vpn_open_vpn_client_export_configs(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/openvpn/client_export/configs
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -27054,6 +27368,8 @@ async def pfsense_delete_vpn_open_vpn_client_export_configs(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/vpn/openvpn/client_export/configs",
@@ -27228,11 +27544,13 @@ async def pfsense_delete_vpn_open_vpn_clients(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/openvpn/clients
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -27244,6 +27562,8 @@ async def pfsense_delete_vpn_open_vpn_clients(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/vpn/openvpn/clients",
@@ -27944,11 +28264,13 @@ async def pfsense_delete_vpn_open_vpn_servers(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/openvpn/servers
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -27960,6 +28282,8 @@ async def pfsense_delete_vpn_open_vpn_servers(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/vpn/openvpn/servers",
@@ -28169,6 +28493,7 @@ async def pfsense_delete_vpn_wire_guard_peer_allowed_i_ps(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/wireguard/peer/allowed_ips
 
@@ -28176,6 +28501,7 @@ async def pfsense_delete_vpn_wire_guard_peer_allowed_i_ps(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -28188,6 +28514,8 @@ async def pfsense_delete_vpn_wire_guard_peer_allowed_i_ps(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/vpn/wireguard/peer/allowed_ips",
@@ -28430,6 +28758,7 @@ async def pfsense_delete_vpn_wire_guard_peers(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/wireguard/peers
 
@@ -28437,6 +28766,7 @@ async def pfsense_delete_vpn_wire_guard_peers(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -28449,6 +28779,8 @@ async def pfsense_delete_vpn_wire_guard_peers(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/vpn/wireguard/peers",
@@ -28692,6 +29024,7 @@ async def pfsense_delete_vpn_wire_guard_tunnel_addresses(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/wireguard/tunnel/addresses
 
@@ -28699,6 +29032,7 @@ async def pfsense_delete_vpn_wire_guard_tunnel_addresses(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -28711,6 +29045,8 @@ async def pfsense_delete_vpn_wire_guard_tunnel_addresses(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/vpn/wireguard/tunnel/addresses",
@@ -28929,6 +29265,7 @@ async def pfsense_delete_vpn_wire_guard_tunnels(
     confirm: bool = False,
     limit: int | None = 0,
     offset: int | None = 0,
+    query: dict[str, Any] | None = {},
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/vpn/wireguard/tunnels
 
@@ -28936,6 +29273,7 @@ async def pfsense_delete_vpn_wire_guard_tunnels(
 
     limit: The maximum number of objects to delete at once. Set to 0 for no limit.
     offset: The starting point in the dataset to begin fetching objects.
+    query: The arbitrary query parameters to include in the request.Note: This does not define an actual parameter, rather it allows for any arbitrary query parameters to be included in the request.
     """
     if not confirm:
         return (
@@ -28948,6 +29286,8 @@ async def pfsense_delete_vpn_wire_guard_tunnels(
         params["limit"] = limit
     if offset is not None:
         params["offset"] = offset
+    if query is not None:
+        params.update(query)
     return await _client.request(
         "DELETE",
         "/api/v2/vpn/wireguard/tunnels",

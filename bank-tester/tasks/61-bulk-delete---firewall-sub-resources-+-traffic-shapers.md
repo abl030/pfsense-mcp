@@ -27,7 +27,7 @@
     - `day`: `[15, 16]`
     - `hour`: `10:00-18:00`
 2. **List** using `pfsense_list_firewall_schedule_time_ranges` — verify resource exists (Needs schedule parent_id)
-3. **Bulk delete** using `pfsense_delete_firewall_schedule_time_ranges` with `confirm=True` — delete ALL resources in this collection
+3. **Bulk delete** using `pfsense_delete_firewall_schedule_time_ranges` with `confirm=True` — use `query` parameter to filter (e.g., `query={"id": "<id>"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={"name": "<name>"}` from the list results)
 4. **List** using `pfsense_list_firewall_schedule_time_ranges` — verify collection is empty
 5. **Create** a test resource using `pfsense_create_firewall_traffic_shaper` with `confirm=True`:
     - `bandwidth`: `100`
@@ -39,7 +39,7 @@
     - `queue`: `[]`
     - `tbrconfig`: `1`
 6. **List** using `pfsense_list_firewall_traffic_shapers` — verify resource exists
-7. **Bulk delete** using `pfsense_delete_firewall_traffic_shapers` with `confirm=True` — delete ALL resources in this collection
+7. **Bulk delete** using `pfsense_delete_firewall_traffic_shapers` with `confirm=True` — use `query` parameter to filter (e.g., `query={"id": "<id>"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={"name": "<name>"}` from the list results)
 8. **List** using `pfsense_list_firewall_traffic_shapers` — verify collection is empty
 9. **Create** a test resource using `pfsense_create_firewall_traffic_shaper_queue` with `confirm=True` (use parent_id from the parent resource):
     - `name`: `bt_bd61_tsq`
@@ -47,19 +47,19 @@
     - `bandwidth`: `100`
     - `linkshare_m2`: `10%`
 10. **List** using `pfsense_list_firewall_traffic_shaper_queues` — verify resource exists (Needs traffic shaper parent_id)
-11. **Bulk delete** using `pfsense_delete_firewall_traffic_shaper_queues` with `confirm=True` — delete ALL resources in this collection
+11. **Bulk delete** using `pfsense_delete_firewall_traffic_shaper_queues` with `confirm=True` — use `query` parameter to filter (e.g., `query={"id": "<id>"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={"name": "<name>"}` from the list results)
 12. **List** using `pfsense_list_firewall_traffic_shaper_queues` — verify collection is empty
 13. **Create** a test resource using `pfsense_create_firewall_traffic_shaper_limiter_queue` with `confirm=True` (use parent_id from the parent resource):
     - `name`: `bt_bd61_limq`
     - `aqm`: `droptail`
 14. **List** using `pfsense_list_firewall_traffic_shaper_limiter_queues` — verify resource exists (Needs limiter parent_id)
-15. **Bulk delete** using `pfsense_delete_firewall_traffic_shaper_limiter_queues` with `confirm=True` — delete ALL resources in this collection
+15. **Bulk delete** using `pfsense_delete_firewall_traffic_shaper_limiter_queues` with `confirm=True` — use `query` parameter to filter (e.g., `query={"id": "<id>"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={"name": "<name>"}` from the list results)
 16. **List** using `pfsense_list_firewall_traffic_shaper_limiter_queues` — verify collection is empty
 17. **Create** a test resource using `pfsense_create_firewall_traffic_shaper_limiter_bandwidth` with `confirm=True` (use parent_id from the parent resource):
     - `bw`: `50`
     - `bwscale`: `Mb`
 18. **List** using `pfsense_list_firewall_traffic_shaper_limiter_bandwidths` — verify resource exists (Needs limiter parent_id)
-19. **Bulk delete** using `pfsense_delete_firewall_traffic_shaper_limiter_bandwidths` with `confirm=True` — delete ALL resources in this collection
+19. **Bulk delete** using `pfsense_delete_firewall_traffic_shaper_limiter_bandwidths` with `confirm=True` — use `query` parameter to filter (e.g., `query={"id": "<id>"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={"name": "<name>"}` from the list results)
 20. **List** using `pfsense_list_firewall_traffic_shaper_limiter_bandwidths` — verify collection is empty
 
 **Important notes**:

@@ -103,8 +103,11 @@ def extract_tool_parameters(
 
     # 1. Query/path parameters
     for p in operation.parameters:
-        # Skip the catch-all 'query' parameter
-        if p.name == "query":
+        # Include the catch-all 'query' parameter for DELETE methods (required
+        # for bulk deletion — API enforces at least one content-filtering query
+        # param via MODEL_DELETE_MANY_REQUIRES_QUERY_PARAMS). Skip for other
+        # methods where individual params (limit, offset, sort_by) suffice.
+        if p.name == "query" and operation.method != "delete":
             continue
         safe = _safe_name(p.name)
         params.append(
