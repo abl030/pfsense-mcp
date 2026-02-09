@@ -40,6 +40,7 @@ class Operation:
     response_schema: dict[str, Any] | None = None
     description: str = ""
     summary: str = ""
+    requires_basic_auth: bool = False  # True if endpoint only accepts BasicAuth
 
 
 def load_spec(spec_path: str | Path) -> dict[str, Any]:
@@ -153,6 +154,18 @@ def parse_operations(spec: dict[str, Any]) -> list[Operation]:
             # Response schema
             response_schema = _extract_response_schema(spec, op.get("responses", {}))
 
+            # Detect BasicAuth-only endpoints: security field overrides global
+            # default. If security is exactly [{"BasicAuth": []}], this endpoint
+            # only accepts BasicAuth (not API key or JWT).
+            requires_basic_auth = False
+            op_security = op.get("security")
+            if op_security is not None:
+                scheme_names = {
+                    k for item in op_security for k in item.keys()
+                }
+                if scheme_names == {"BasicAuth"}:
+                    requires_basic_auth = True
+
             operations.append(
                 Operation(
                     operation_id=operation_id,
@@ -165,6 +178,7 @@ def parse_operations(spec: dict[str, Any]) -> list[Operation]:
                     response_schema=response_schema,
                     description=op.get("description", ""),
                     summary=op.get("summary", ""),
+                    requires_basic_auth=requires_basic_auth,
                 )
             )
 

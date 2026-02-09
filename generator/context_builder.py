@@ -14,6 +14,30 @@ from .loader import Operation, load_spec, parse_operations
 from .naming import operation_id_to_tool_name
 from .schema_parser import ToolParameter, extract_tool_parameters
 
+# Per-endpoint parameter description enhancements.
+# key = (operationId, param_name), value = text to append to description.
+_PARAM_DESCRIPTION_HINTS: dict[tuple[str, str], str] = {
+    ("getDiagnosticsTableEndpoint", "id"): (
+        " Common pfSense PF table names: virusprot, bogons, snort2c, "
+        "LAN_NETWORK, WAN_NETWORK."
+    ),
+    ("getSystemPackageEndpoint", "id"): (
+        " NOTE: The id is an integer array index (0, 1, 2, ...), not a package name string."
+    ),
+    ("postServicesHAProxyFrontendActionEndpoint", "acl"): (
+        " For unconditional actions, use the name of any existing ACL"
+        " (the action will apply regardless). Cannot be empty."
+    ),
+    ("postVPNIPsecPhase2Endpoint", "hash_algorithm_option"): (
+        " Valid values: ['hmac_sha1', 'hmac_sha256', 'hmac_sha384', 'hmac_sha512', 'aesxcbc']."
+        " Note: use hmac_ prefix (not plain sha256)."
+    ),
+    ("patchVPNIPsecPhase2Endpoint", "hash_algorithm_option"): (
+        " Valid values: ['hmac_sha1', 'hmac_sha256', 'hmac_sha384', 'hmac_sha512', 'aesxcbc']."
+        " Note: use hmac_ prefix (not plain sha256)."
+    ),
+}
+
 # Subsystem prefixes that require an explicit "apply" call after mutations.
 _APPLY_SUBSYSTEMS = [
     "/api/v2/firewall/virtual_ip",
@@ -57,6 +81,7 @@ class ToolContext:
     apply_tool_name: str | None  # e.g. "pfsense_firewall_apply"
     is_dangerous: bool
     danger_warning: str | None
+    requires_basic_auth: bool  # True if endpoint only accepts BasicAuth
     has_request_body: bool
     body_params: list[ToolParameter]  # params that go in JSON body
     query_params: list[ToolParameter]  # params that go in URL query
@@ -113,6 +138,14 @@ def _build_docstring(
     if summary:
         parts.append(summary)
 
+    # BasicAuth warning — these endpoints cannot work with API key auth
+    if op.requires_basic_auth:
+        parts.append(
+            "\nWARNING: This endpoint requires HTTP BasicAuth (username:password). "
+            "It does NOT accept API key or JWT authentication. "
+            "If the MCP server is configured with API key auth, this tool will return 401."
+        )
+
     # Danger warning
     if is_dangerous and danger_warning:
         parts.append(f"\nWARNING: {danger_warning}")
@@ -145,6 +178,12 @@ def build_tool_contexts(spec: dict[str, Any]) -> list[ToolContext]:
 
         # Extract parameters
         params = extract_tool_parameters(spec, op)
+
+        # Apply per-endpoint parameter description hints
+        for p in params:
+            hint_key = (op.operation_id, p.api_name or p.name)
+            if hint_key in _PARAM_DESCRIPTION_HINTS:
+                p.description += _PARAM_DESCRIPTION_HINTS[hint_key]
 
         # Mutation detection
         is_mutation = op.method in ("post", "patch", "put", "delete")
@@ -193,6 +232,7 @@ def build_tool_contexts(spec: dict[str, Any]) -> list[ToolContext]:
                 apply_tool_name=apply_tool_name,
                 is_dangerous=is_dangerous,
                 danger_warning=danger_warning,
+                requires_basic_auth=op.requires_basic_auth,
                 has_request_body=has_request_body,
                 body_params=body_params,
                 query_params=query_params,

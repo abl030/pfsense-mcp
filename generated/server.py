@@ -91,6 +91,9 @@ async def pfsense_post_auth_jwt(
     confirm: bool = False,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/auth/jwt
+
+    WARNING: This endpoint requires HTTP BasicAuth (username:password).
+    It does NOT accept API key or JWT auth. Will return 401 via MCP.
     """
     if not confirm:
         return (
@@ -113,6 +116,9 @@ async def pfsense_create_auth_key(
     length_bytes: int | None = 24,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/auth/key
+
+    WARNING: This endpoint requires HTTP BasicAuth (username:password).
+    It does NOT accept API key or JWT auth. Will return 401 via MCP.
 
     descr: Sets a description for this API key. This is used to identify the key's purpose and cannot be changed once created.
     hash: The hash of the generated API key
@@ -149,6 +155,9 @@ async def pfsense_delete_auth_key(
     confirm: bool = False,
 ) -> dict[str, Any] | list[Any] | str:
     """DELETE /api/v2/auth/key
+
+    WARNING: This endpoint requires HTTP BasicAuth (username:password).
+    It does NOT accept API key or JWT auth. Will return 401 via MCP.
 
     id: The ID of the object to target.
     """
@@ -562,7 +571,7 @@ async def pfsense_get_diagnostics_table(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/diagnostics/table
 
-    id: The ID of the object to target.
+    id: The ID of the object to target. Common pfSense PF table names: virusprot, bogons, snort2c, LAN_NETWORK, WAN_NETWORK.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -1215,7 +1224,6 @@ async def pfsense_create_firewall_nat_outbound_mapping(
     destination: str,
     interface: str,
     source: str,
-    target: str,
     confirm: bool = False,
     descr: str | None = None,
     destination_port: str | None = None,
@@ -1228,6 +1236,7 @@ async def pfsense_create_firewall_nat_outbound_mapping(
     source_hash_key: str | None = None,
     source_port: str | None = None,
     static_nat_port: bool | None = None,
+    target: str | None = None,
     target_subnet: int | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/firewall/nat/outbound/mapping
@@ -1237,7 +1246,6 @@ async def pfsense_create_firewall_nat_outbound_mapping(
     destination: The destination network this rule should match. Valid value options are: an existing interface, a subnet CIDR, an existing alias, `any`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
     interface: The interface on which traffic is matched as it exits the firewall. In most cases this is a WAN-type or another externally-connected interface.
     source: The source network this rule should match. Valid value options are: an existing interface, a subnet CIDR, an existing alias, `any`, `(self)`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
-    target: The target network traffic matching this rule should be translated to. Valid value options are: an IP address, an existing alias. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.This field is only available when the following conditions are met:- `nonat` must be equal to `false`
     descr: A description for the outbound NAT mapping.
     destination_port: The destination port this rule should match. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`, an existing port type firewall alias
     disabled: Disable this outbound NAT rule.
@@ -1249,6 +1257,7 @@ async def pfsense_create_firewall_nat_outbound_mapping(
     source_hash_key: The key that is fed to the hashing algorithm in hex format. This must be a 16 byte (32 character) hex string prefixed with `0x`. If a value is not provided, one will automatically be generatedThis field is only available when the following conditions are met:- `poolopts` must be equal to `'source-hash'`- `nonat` must be equal to `false`
     source_port: The source port this rule should match. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`, an existing port type firewall alias
     static_nat_port: Do not rewrite source port for traffic matching this rule.This field is only available when the following conditions are met:- `nonat` must be equal to `false`
+    target: The target network traffic matching this rule should be translated to. Valid value options are: an IP address, an existing alias. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.This field is only available when the following conditions are met:- `nonat` must be equal to `false`
     target_subnet: The subnet bits for the assigned `target`. This field is only applicable if `target` is set to an IP address. This has no affect for alias or interface `targets`.This field is only available when the following conditions are met:- `nonat` must be equal to `false`
     """
     if not confirm:
@@ -1264,8 +1273,6 @@ async def pfsense_create_firewall_nat_outbound_mapping(
         body["interface"] = interface
     if source is not None:
         body["source"] = source
-    if target is not None:
-        body["target"] = target
     if descr is not None:
         body["descr"] = descr
     if destination_port is not None:
@@ -1288,6 +1295,8 @@ async def pfsense_create_firewall_nat_outbound_mapping(
         body["source_port"] = source_port
     if static_nat_port is not None:
         body["static_nat_port"] = static_nat_port
+    if target is not None:
+        body["target"] = target
     if target_subnet is not None:
         body["target_subnet"] = target_subnet
     return await _client.request(
@@ -1569,7 +1578,6 @@ async def pfsense_get_firewall_nat_port_forward(
 async def pfsense_create_firewall_nat_port_forward(
     destination: str,
     interface: str,
-    local_port: str,
     protocol: str,
     source: str,
     target: str,
@@ -1579,6 +1587,7 @@ async def pfsense_create_firewall_nat_port_forward(
     destination_port: str | None = None,
     disabled: bool | None = None,
     ipprotocol: str | None = 'inet',
+    local_port: str | None = None,
     natreflection: str | None = None,
     nordr: bool | None = None,
     nosync: bool | None = None,
@@ -1590,7 +1599,6 @@ async def pfsense_create_firewall_nat_port_forward(
 
     destination: The destination address this rule applies to. Valid value options are: an existing interface, an IP address, a subnet CIDR, an existing alias, `any`, `(self)`, `l2tp`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
     interface: The interface this port forward rule applies to.
-    local_port: The port on the internal host to forward matching traffic to. In most cases, this must match the `destination_port` value. In the event that the `desintation_port` is a range, this value should be the first value in that range. Valid options are: a TCP/UDP port number, an existing port type firewall aliasThis field is only available when the following conditions are met:- `protocol` must be one of [ tcp, udp, tcp/udp ]
     protocol: The IP/transport protocol this port forward rule should match. Valid values: ['any', 'tcp', 'udp', 'tcp/udp', 'icmp', 'esp', 'ah', 'gre', 'ipv6', 'igmp', 'pim', 'ospf']
     source: The source address this port forward rule applies to. Valid value options are: an existing interface, an IP address, a subnet CIDR, an existing alias, `any`, `(self)`, `l2tp`, `pppoe`. The context of this address can be inverted by prefixing the value with `!`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
     target: The IP address or alias of the internal host to forward matching traffic to. Valid value options are: an IP address, an existing alias. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.
@@ -1599,6 +1607,7 @@ async def pfsense_create_firewall_nat_port_forward(
     destination_port: The destination port this port forward rule applies to. Set to `null` to allow any destination port. Valid options are: a TCP/UDP port number, a TCP/UDP port range separated by `:`, an existing port type firewall aliasThis field is only available when the following conditions are met:- `protocol` must be one of [ tcp, udp, tcp/udp ]
     disabled: Disables this port forward rule.
     ipprotocol: The IP protocol this port forward rule should match. Valid values: ['inet', 'inet6', 'inet46']
+    local_port: The port on the internal host to forward matching traffic to. In most cases, this must match the `destination_port` value. In the event that the `desintation_port` is a range, this value should be the first value in that range. Valid options are: a TCP/UDP port number, an existing port type firewall aliasThis field is only available when the following conditions are met:- `protocol` must be one of [ tcp, udp, tcp/udp ]
     natreflection: The NAT reflection mode to use for traffic matching this port forward rule. Set to `null` to use the system default. Valid values: ['enable', 'disable', 'purenat']
     nordr: Disables redirection for traffic matching this rule.
     nosync: Prevents this port forward rule from being synced to non-primary CARP members.
@@ -1615,8 +1624,6 @@ async def pfsense_create_firewall_nat_port_forward(
         body["destination"] = destination
     if interface is not None:
         body["interface"] = interface
-    if local_port is not None:
-        body["local_port"] = local_port
     if protocol is not None:
         body["protocol"] = protocol
     if source is not None:
@@ -1633,6 +1640,8 @@ async def pfsense_create_firewall_nat_port_forward(
         body["disabled"] = disabled
     if ipprotocol is not None:
         body["ipprotocol"] = ipprotocol
+    if local_port is not None:
+        body["local_port"] = local_port
     if natreflection is not None:
         body["natreflection"] = natreflection
     if nordr is not None:
@@ -2392,11 +2401,11 @@ async def pfsense_get_firewall_schedule_time_range(
 
 @mcp.tool()
 async def pfsense_create_firewall_schedule_time_range(
-    day: list[int],
     hour: str,
-    month: list[int],
     parent_id: str | int,
     confirm: bool = False,
+    day: list[int] | None = None,
+    month: list[int] | None = None,
     position: list[int] | None = None,
     rangedescr: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
@@ -2404,10 +2413,10 @@ async def pfsense_create_firewall_schedule_time_range(
 
     Note: Call pfsense_firewall_apply after this to apply changes.
 
-    day: The day for each specified `month` value. Each value specified must correspond with a `month` field value and must match the order exactly. For example, a `month` value of `[3, 6]` and a `day` value of `[2, 17]` would evaluate to March 2nd and June 17th respectively.This field is only available when the following conditions are met:- `position` must be equal to `NULL`
     hour: The start time and end time for this time range in 24-hour format (i.e. HH:MM-HH:MM).
-    month: The month for each specified `day` value. Each value specified must correspond with a `day` field value and must match the order exactly. For example, a `month` value of `[3, 6]` and a `day` value of `[2, 17]` would evaluate to March 2nd and June 17th respectively.This field is only available when the following conditions are met:- `position` must be equal to `NULL`
     parent_id: The ID of the parent this object is nested under.
+    day: The day for each specified `month` value. Each value specified must correspond with a `month` field value and must match the order exactly. For example, a `month` value of `[3, 6]` and a `day` value of `[2, 17]` would evaluate to March 2nd and June 17th respectively.This field is only available when the following conditions are met:- `position` must be equal to `NULL`
+    month: The month for each specified `day` value. Each value specified must correspond with a `day` field value and must match the order exactly. For example, a `month` value of `[3, 6]` and a `day` value of `[2, 17]` would evaluate to March 2nd and June 17th respectively.This field is only available when the following conditions are met:- `position` must be equal to `NULL`
     position: The day of the week this schedule should be active for. Use `1` for every Monday, `2` for every Tuesday, `3` for every Wednesday, `4` for every Thursday, `5` for every Friday, `6` for every Saturday, or `7` for every Sunday. If this field has a value specified, the `month` and `day` fields will be unavailable.
     rangedescr: A description detailing this firewall schedule time range's purpose.
     """
@@ -2418,14 +2427,14 @@ async def pfsense_create_firewall_schedule_time_range(
             "\n\nNote: After this operation, call pfsense_firewall_apply to apply changes."
         )
     body: dict[str, Any] = {}
-    if day is not None:
-        body["day"] = day
     if hour is not None:
         body["hour"] = hour
-    if month is not None:
-        body["month"] = month
     if parent_id is not None:
         body["parent_id"] = parent_id
+    if day is not None:
+        body["day"] = day
+    if month is not None:
+        body["month"] = month
     if position is not None:
         body["position"] = position
     if rangedescr is not None:
@@ -4198,14 +4207,11 @@ async def pfsense_get_firewall_traffic_shaper_queue(
 
 @mcp.tool()
 async def pfsense_create_firewall_traffic_shaper_queue(
-    bandwidth: int,
-    linkshare_m2: str,
     name: str,
     parent_id: str | int,
     qlimit: int,
-    realtime_m2: str,
-    upperlimit_m2: str,
     confirm: bool = False,
+    bandwidth: int | None = None,
     bandwidthtype: str | None = None,
     borrow: bool | None = None,
     buckets: int | None = None,
@@ -4218,27 +4224,27 @@ async def pfsense_create_firewall_traffic_shaper_queue(
     linkshare: bool | None = None,
     linkshare_d: int | None = None,
     linkshare_m1: str | None = None,
+    linkshare_m2: str | None = None,
     priority: int | None = None,
     realtime: bool | None = None,
     realtime_d: int | None = None,
     realtime_m1: str | None = None,
+    realtime_m2: str | None = None,
     red: bool | None = None,
     rio: bool | None = None,
     upperlimit: bool | None = None,
     upperlimit_d: int | None = None,
     upperlimit_m1: str | None = None,
+    upperlimit_m2: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/firewall/traffic_shaper/queue
 
     Note: Call pfsense_firewall_apply after this to apply changes.
 
-    bandwidth: The total bandwidth amount allowed by this traffic shaper.This field is only available when the following conditions are met:- Parent field `scheduler` must be one of [ FAIRQ, CBQ, HFSC ]
-    linkshare_m2: The maximum bandwidth this traffic shaper queue is allowed to use. Note: This behaves exactly the same as the `bandwidth` field. If this field is set, it will override whatever value is current assigned to the `bandwidth` field.This field is only available when the following conditions are met:- `linkshare` must be equal to `true`
     name: The name to assign this traffic shaper queue.
     parent_id: The ID of the parent this object is nested under.
     qlimit: The number of packets that can be held in a queue waiting to be transmitted by the shaper.
-    realtime_m2: The maximum bandwidth this traffic shaper queue is allowed to use. Note: This value should not exceed 30% of parent queue's maximum bandwidth.This field is only available when the following conditions are met:- `realtime` must be equal to `true`
-    upperlimit_m2: The normal bandwidth limit for this traffic shaper queue. If `upperlimit_m1` is not defined, this limit will always be in effect. If `upperlimit_m1` is defined, this limit will take effect after the `upperlimit_d` duration has expired.This field is only available when the following conditions are met:- `upperlimit` must be equal to `true`
+    bandwidth: The total bandwidth amount allowed by this traffic shaper.This field is only available when the following conditions are met:- Parent field `scheduler` must be one of [ FAIRQ, CBQ, HFSC ]
     bandwidthtype: The scale type of the `bandwidth` field's value.This field is only available when the following conditions are met:- Parent field `scheduler` must be one of [ FAIRQ, CBQ, HFSC ] Valid values: ['%', 'b', 'Kb', 'Mb', 'Gb']
     borrow: Allow this queue to borrow from other queues when available.This field is only available when the following conditions are met:- Parent field `scheduler` must be equal to `'CBQ'`
     buckets: This field is only available when the following conditions are met:- Parent field `scheduler` must be equal to `'FAIRQ'`
@@ -4251,15 +4257,18 @@ async def pfsense_create_firewall_traffic_shaper_queue(
     linkshare: Allow sharing bandwidth from this queue for other queues as long as the real time values have been satisfied.This field is only available when the following conditions are met:- Parent field `scheduler` must be equal to `'HFSC'`
     linkshare_d: The duration (in milliseconds) that the initial bandwidth limit (`linkshare_m1`) is in effect.This field is only available when the following conditions are met:- `linkshare` must be equal to `true`
     linkshare_m1: The initial bandwidth limit for this traffic shaper queue when link sharing.This field is only available when the following conditions are met:- `linkshare` must be equal to `true`
+    linkshare_m2: The maximum bandwidth this traffic shaper queue is allowed to use. Note: This behaves exactly the same as the `bandwidth` field. If this field is set, it will override whatever value is current assigned to the `bandwidth` field.This field is only available when the following conditions are met:- `linkshare` must be equal to `true`
     priority: The priority level for this traffic shaper queue.This field is only available when the following conditions are met:- Parent field `scheduler` must be one of [ FAIRQ, CBQ, PRIQ ]
     realtime: Allow setting the guaranteed bandwidth minimum allotted to the queue.This field is only available when the following conditions are met:- Parent field `scheduler` must be equal to `'HFSC'`
     realtime_d: The duration (in milliseconds) that the guaranteed bandwidth limit (`realtime_m1`) is in effect.This field is only available when the following conditions are met:- `realtime` must be equal to `true`
     realtime_m1: The guaranteed minimum bandwidth limit for this traffic shaper queue during real time.This field is only available when the following conditions are met:- `realtime` must be equal to `true`
+    realtime_m2: The maximum bandwidth this traffic shaper queue is allowed to use. Note: This value should not exceed 30% of parent queue's maximum bandwidth.This field is only available when the following conditions are met:- `realtime` must be equal to `true`
     red: Use the 'Random Early Detection' scheduler option for this traffic shaper queue.
     rio: Use the 'Random Early Detection In and Out' scheduler option for this traffic shaper queue.
     upperlimit: Allow setting the maximum bandwidth allowed for the queue. Will force hard bandwidth limiting.This field is only available when the following conditions are met:- Parent field `scheduler` must be equal to `'HFSC'`
     upperlimit_d: The duration (in milliseconds) that the burst-able bandwidth limit (`upperlimit_m1` is in effect.This field is only available when the following conditions are met:- `upperlimit` must be equal to `true`
     upperlimit_m1: The burst-able bandwidth limit for this traffic shaper queue.This field is only available when the following conditions are met:- `upperlimit` must be equal to `true`
+    upperlimit_m2: The normal bandwidth limit for this traffic shaper queue. If `upperlimit_m1` is not defined, this limit will always be in effect. If `upperlimit_m1` is defined, this limit will take effect after the `upperlimit_d` duration has expired.This field is only available when the following conditions are met:- `upperlimit` must be equal to `true`
     """
     if not confirm:
         return (
@@ -4268,20 +4277,14 @@ async def pfsense_create_firewall_traffic_shaper_queue(
             "\n\nNote: After this operation, call pfsense_firewall_apply to apply changes."
         )
     body: dict[str, Any] = {}
-    if bandwidth is not None:
-        body["bandwidth"] = bandwidth
-    if linkshare_m2 is not None:
-        body["linkshare_m2"] = linkshare_m2
     if name is not None:
         body["name"] = name
     if parent_id is not None:
         body["parent_id"] = parent_id
     if qlimit is not None:
         body["qlimit"] = qlimit
-    if realtime_m2 is not None:
-        body["realtime_m2"] = realtime_m2
-    if upperlimit_m2 is not None:
-        body["upperlimit_m2"] = upperlimit_m2
+    if bandwidth is not None:
+        body["bandwidth"] = bandwidth
     if bandwidthtype is not None:
         body["bandwidthtype"] = bandwidthtype
     if borrow is not None:
@@ -4306,6 +4309,8 @@ async def pfsense_create_firewall_traffic_shaper_queue(
         body["linkshare_d"] = linkshare_d
     if linkshare_m1 is not None:
         body["linkshare_m1"] = linkshare_m1
+    if linkshare_m2 is not None:
+        body["linkshare_m2"] = linkshare_m2
     if priority is not None:
         body["priority"] = priority
     if realtime is not None:
@@ -4314,6 +4319,8 @@ async def pfsense_create_firewall_traffic_shaper_queue(
         body["realtime_d"] = realtime_d
     if realtime_m1 is not None:
         body["realtime_m1"] = realtime_m1
+    if realtime_m2 is not None:
+        body["realtime_m2"] = realtime_m2
     if red is not None:
         body["red"] = red
     if rio is not None:
@@ -4324,6 +4331,8 @@ async def pfsense_create_firewall_traffic_shaper_queue(
         body["upperlimit_d"] = upperlimit_d
     if upperlimit_m1 is not None:
         body["upperlimit_m1"] = upperlimit_m1
+    if upperlimit_m2 is not None:
+        body["upperlimit_m2"] = upperlimit_m2
     return await _client.request(
         "POST",
         "/api/v2/firewall/traffic_shaper/queue",
@@ -4708,38 +4717,38 @@ async def pfsense_get_firewall_virtual_ip(
 
 @mcp.tool()
 async def pfsense_create_firewall_virtual_ip(
-    carp_peer: str,
     interface: str,
     mode: str,
-    password: str,
     subnet: str,
     subnet_bits: int,
-    vhid: int,
     confirm: bool = False,
     advbase: int | None = None,
     advskew: int | None = None,
     carp_mode: str | None = None,
+    carp_peer: str | None = None,
     descr: str | None = None,
     noexpand: bool | None = None,
+    password: str | None = None,
     type_: str | None = 'single',
+    vhid: int | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/firewall/virtual_ip
 
     Note: Call pfsense_firewall_virtual_ip_apply after this to apply changes.
 
-    carp_peer: The IP address of the CARP peer. Please note this field is exclusive to pfSense Plus and has no effect on CE.This field is only available when the following conditions are met:- `carp_mode` must be equal to `'ucast'`
     interface: The interface this virtual IP will apply to.
     mode: The virtual IP mode to use for this virtual IP. Valid values: ['ipalias', 'proxyarp', 'carp', 'other']
-    password: The VHID group password shared by all CARP members.This field is only available when the following conditions are met:- `mode` must be equal to `'carp'`
     subnet: The address for this virtual IP.
     subnet_bits: The subnet bits for this virtual IP. For `proxyarp` and `other` virtual IPs, this value specifies a block of many IP address. For all other virtual IP modes, this specifies the subnet mask
-    vhid: The VHID group that the machines will share.This field is only available when the following conditions are met:- `mode` must be equal to `'carp'`
     advbase: The base frequency that this machine will advertise.This field is only available when the following conditions are met:- `mode` must be equal to `'carp'`
     advskew: The frequency skew that this machine will advertise.This field is only available when the following conditions are met:- `mode` must be equal to `'carp'`
     carp_mode: The CARP mode to use for this virtual IP. Please note this field is exclusive to pfSense Plus and has no effect on CE.This field is only available when the following conditions are met:- `mode` must be equal to `'carp'` Valid values: ['mcast', 'ucast']
+    carp_peer: The IP address of the CARP peer. Please note this field is exclusive to pfSense Plus and has no effect on CE.This field is only available when the following conditions are met:- `carp_mode` must be equal to `'ucast'`
     descr: A description for administrative reference
     noexpand: Disable expansion of this entry into IPs on NAT lists (e.g. 192.168.1.0/24 expands to 256 entries.)This field is only available when the following conditions are met:- `mode` must be one of [ proxyarp, other ]
+    password: The VHID group password shared by all CARP members.This field is only available when the following conditions are met:- `mode` must be equal to `'carp'`
     type_: The virtual IP scope type. The `network` option is only applicable to the `proxyarp` and `other` virtual IP modes. Valid values: ['single', 'network']
+    vhid: The VHID group that the machines will share.This field is only available when the following conditions are met:- `mode` must be equal to `'carp'`
     """
     if not confirm:
         return (
@@ -4748,32 +4757,32 @@ async def pfsense_create_firewall_virtual_ip(
             "\n\nNote: After this operation, call pfsense_firewall_virtual_ip_apply to apply changes."
         )
     body: dict[str, Any] = {}
-    if carp_peer is not None:
-        body["carp_peer"] = carp_peer
     if interface is not None:
         body["interface"] = interface
     if mode is not None:
         body["mode"] = mode
-    if password is not None:
-        body["password"] = password
     if subnet is not None:
         body["subnet"] = subnet
     if subnet_bits is not None:
         body["subnet_bits"] = subnet_bits
-    if vhid is not None:
-        body["vhid"] = vhid
     if advbase is not None:
         body["advbase"] = advbase
     if advskew is not None:
         body["advskew"] = advskew
     if carp_mode is not None:
         body["carp_mode"] = carp_mode
+    if carp_peer is not None:
+        body["carp_peer"] = carp_peer
     if descr is not None:
         body["descr"] = descr
     if noexpand is not None:
         body["noexpand"] = noexpand
+    if password is not None:
+        body["password"] = password
     if type_ is not None:
         body["type"] = type_
+    if vhid is not None:
+        body["vhid"] = vhid
     return await _client.request(
         "POST",
         "/api/v2/firewall/virtual_ip",
@@ -5216,13 +5225,13 @@ async def pfsense_get_interface_gre(
 async def pfsense_create_interface_gre(
     if_: str,
     remote_addr: str,
-    tunnel_remote_addr: str,
-    tunnel_remote_addr6: str,
     confirm: bool = False,
     add_static_route: bool | None = None,
     descr: str | None = None,
     tunnel_local_addr: str | None = None,
     tunnel_local_addr6: str | None = None,
+    tunnel_remote_addr: str | None = None,
+    tunnel_remote_addr6: str | None = None,
     tunnel_remote_net: int | None = None,
     tunnel_remote_net6: int | None = None,
 ) -> dict[str, Any] | list[Any] | str:
@@ -5232,12 +5241,12 @@ async def pfsense_create_interface_gre(
 
     if_: The pfSense interface interface serving as the local address to be used for the GRE tunnel.
     remote_addr: The remote address to use for the GRE tunnel.
-    tunnel_remote_addr: The remote IPv4 address to use for the GRE tunnel.This field is only available when the following conditions are met:- `tunnel_local_addr` must not be equal to `NULL`
-    tunnel_remote_addr6: The remote IPv6 address to use for the GRE tunnel.This field is only available when the following conditions are met:- `tunnel_local_addr6` must not be equal to `NULL`
     add_static_route: Whether to add an explicit static route for the remote inner tunnel address/subnet via the local tunnel address.
     descr: A description for this GRE interface.
     tunnel_local_addr: The local IPv4 address to use for the GRE tunnel.
     tunnel_local_addr6: The local IPv6 address to use for the GRE tunnel.
+    tunnel_remote_addr: The remote IPv4 address to use for the GRE tunnel.This field is only available when the following conditions are met:- `tunnel_local_addr` must not be equal to `NULL`
+    tunnel_remote_addr6: The remote IPv6 address to use for the GRE tunnel.This field is only available when the following conditions are met:- `tunnel_local_addr6` must not be equal to `NULL`
     tunnel_remote_net: The remote IPv4 subnet bitmask to use for the GRE tunnel.This field is only available when the following conditions are met:- `tunnel_local_addr` must not be equal to `NULL`
     tunnel_remote_net6: The remote IPv6 subnet bitmask to use for the GRE tunnel.This field is only available when the following conditions are met:- `tunnel_local_addr6` must not be equal to `NULL`
     """
@@ -5252,10 +5261,6 @@ async def pfsense_create_interface_gre(
         body["if"] = if_
     if remote_addr is not None:
         body["remote_addr"] = remote_addr
-    if tunnel_remote_addr is not None:
-        body["tunnel_remote_addr"] = tunnel_remote_addr
-    if tunnel_remote_addr6 is not None:
-        body["tunnel_remote_addr6"] = tunnel_remote_addr6
     if add_static_route is not None:
         body["add_static_route"] = add_static_route
     if descr is not None:
@@ -5264,6 +5269,10 @@ async def pfsense_create_interface_gre(
         body["tunnel_local_addr"] = tunnel_local_addr
     if tunnel_local_addr6 is not None:
         body["tunnel_local_addr6"] = tunnel_local_addr6
+    if tunnel_remote_addr is not None:
+        body["tunnel_remote_addr"] = tunnel_remote_addr
+    if tunnel_remote_addr6 is not None:
+        body["tunnel_remote_addr6"] = tunnel_remote_addr6
     if tunnel_remote_net is not None:
         body["tunnel_remote_net"] = tunnel_remote_net
     if tunnel_remote_net6 is not None:
@@ -6064,15 +6073,7 @@ async def pfsense_get_network_interface(
 @mcp.tool()
 async def pfsense_create_network_interface(
     descr: str,
-    gateway_6rd: str,
     if_: str,
-    ipaddr: str,
-    ipaddrv6: str,
-    prefix_6rd: str,
-    prefix_6rd_v4plen: int,
-    subnet: int,
-    subnetv6: int,
-    track6_interface: str,
     typev4: str,
     confirm: bool = False,
     adv_dhcp_config_advanced: bool | None = None,
@@ -6097,14 +6098,22 @@ async def pfsense_create_network_interface(
     dhcprejectfrom: list[str] | None = None,
     enable: bool | None = None,
     gateway: str | None = None,
+    gateway_6rd: str | None = None,
     gatewayv6: str | None = None,
+    ipaddr: str | None = None,
+    ipaddrv6: str | None = None,
     ipv6usev4iface: bool | None = None,
     media: str | None = None,
     mediaopt: str | None = None,
     mss: int | None = None,
     mtu: int | None = None,
+    prefix_6rd: str | None = None,
+    prefix_6rd_v4plen: int | None = None,
     slaacusev4iface: bool | None = None,
     spoofmac: str | None = None,
+    subnet: int | None = None,
+    subnetv6: int | None = None,
+    track6_interface: str | None = None,
     track6_prefix_id_hex: str | None = None,
     typev6: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
@@ -6113,15 +6122,7 @@ async def pfsense_create_network_interface(
     Note: Call pfsense_interface_apply after this to apply changes.
 
     descr: The descriptive name for this interface.
-    gateway_6rd: Sets the 6RD IPv4 gateway address assigned by the ISP for this interface.This field is only available when the following conditions are met:- `typev6` must be equal to `'6rd'`
     if_: The real interface this configuration will be applied to.
-    ipaddr: Sets the IPv4 address to assign to this interface.This field is only available when the following conditions are met:- `typev4` must be one of [ static, dhcp ]
-    ipaddrv6: Sets the IPv6 address to assign to this interface.This field is only available when the following conditions are met:- `typev6` must be one of [ staticv6, dhcp6, slaac, 6rd, track6, 6to4 ]
-    prefix_6rd: Sets the 6RD IPv6 prefix assigned by the ISP for this interface.This field is only available when the following conditions are met:- `typev6` must be equal to `'6rd'`
-    prefix_6rd_v4plen: Sets the 6RD IPv4 prefix length. Normally specified by the ISP. A value of 0 means embed theentire IPv4 address in the 6RD prefix.This field is only available when the following conditions are met:- `typev6` must be equal to `'6rd'`
-    subnet: Sets the subnet bit count to assign this interface.This field is only available when the following conditions are met:- `typev4` must be equal to `'static'`
-    subnetv6: Sets the subnet bit count to assign this interface.This field is only available when the following conditions are met:- `typev6` must be equal to `'staticv6'`
-    track6_interface: Sets the dynamic IPv6 WAN interface to track for configuration.This field is only available when the following conditions are met:- `typev6` must be equal to `'track6'`
     typev4: Selects the IPv4 address type to assign this interface. Valid values: ['static', 'dhcp', 'none']
     adv_dhcp_config_advanced: Enables or disables the advanced DHCP settings on this interface.This field is only available when the following conditions are met:- `typev4` must be equal to `'dhcp'`
     adv_dhcp_config_file_override: Enables or disables overriding the entire DHCP configuration file for this interface.This field is only available when the following conditions are met:- `typev4` must be equal to `'dhcp'`
@@ -6145,14 +6146,22 @@ async def pfsense_create_network_interface(
     dhcprejectfrom: Sets a list of IPv4 DHCP server addresses to reject DHCP offers for on this interface.This field is only available when the following conditions are met:- `typev4` must be equal to `'dhcp'`
     enable: Enable or disable this interface.
     gateway: Sets the upstream gateway this interface will use. This is only applicable for WAN-type interfaces.This field is only available when the following conditions are met:- `typev4` must be equal to `'static'`
+    gateway_6rd: Sets the 6RD IPv4 gateway address assigned by the ISP for this interface.This field is only available when the following conditions are met:- `typev6` must be equal to `'6rd'`
     gatewayv6: Sets the upstream IPv6 gateway this interface will use. This is only applicable for WAN-type interfaces.This field is only available when the following conditions are met:- `typev6` must be equal to `'staticv6'`
+    ipaddr: Sets the IPv4 address to assign to this interface.This field is only available when the following conditions are met:- `typev4` must be one of [ static, dhcp ]
+    ipaddrv6: Sets the IPv6 address to assign to this interface.This field is only available when the following conditions are met:- `typev6` must be one of [ staticv6, dhcp6, slaac, 6rd, track6, 6to4 ]
     ipv6usev4iface: Enable or disable IPv6 using the IPv4 connectivity link (PPPoE).This field is only available when the following conditions are met:- `typev6` must be equal to `'staticv6'`
     media: Sets the link speed for this interface. In most situations this can be left as the default.
     mediaopt: Sets the link duplex for this interface. In most situations this can be left as the default.
     mss: Sets the MSS for this interface. Assumes default MSS if value is `null`.
     mtu: Sets the MTU for this interface. Assumes default MTU if value is `null`.
+    prefix_6rd: Sets the 6RD IPv6 prefix assigned by the ISP for this interface.This field is only available when the following conditions are met:- `typev6` must be equal to `'6rd'`
+    prefix_6rd_v4plen: Sets the 6RD IPv4 prefix length. Normally specified by the ISP. A value of 0 means embed theentire IPv4 address in the 6RD prefix.This field is only available when the following conditions are met:- `typev6` must be equal to `'6rd'`
     slaacusev4iface: Enable or disable IPv6 using the IPv4 connectivity link (PPPoE).This field is only available when the following conditions are met:- `typev6` must be equal to `'slaac'`
     spoofmac: Assigns (spoofs) the MAC address for this interface instead of using the interface's real MAC.
+    subnet: Sets the subnet bit count to assign this interface.This field is only available when the following conditions are met:- `typev4` must be equal to `'static'`
+    subnetv6: Sets the subnet bit count to assign this interface.This field is only available when the following conditions are met:- `typev6` must be equal to `'staticv6'`
+    track6_interface: Sets the dynamic IPv6 WAN interface to track for configuration.This field is only available when the following conditions are met:- `typev6` must be equal to `'track6'`
     track6_prefix_id_hex: Sets the hexadecimal IPv6 prefix ID. This determines the configurable network ID based on the dynamic IPv6 connection.This field is only available when the following conditions are met:- `typev6` must be equal to `'track6'`
     typev6: Selects the IPv6 address type to assign this interface. Valid values: ['staticv6', 'dhcp6', 'slaac', '6rd', 'track6', '6to4', 'none']
     """
@@ -6165,24 +6174,8 @@ async def pfsense_create_network_interface(
     body: dict[str, Any] = {}
     if descr is not None:
         body["descr"] = descr
-    if gateway_6rd is not None:
-        body["gateway_6rd"] = gateway_6rd
     if if_ is not None:
         body["if"] = if_
-    if ipaddr is not None:
-        body["ipaddr"] = ipaddr
-    if ipaddrv6 is not None:
-        body["ipaddrv6"] = ipaddrv6
-    if prefix_6rd is not None:
-        body["prefix_6rd"] = prefix_6rd
-    if prefix_6rd_v4plen is not None:
-        body["prefix_6rd_v4plen"] = prefix_6rd_v4plen
-    if subnet is not None:
-        body["subnet"] = subnet
-    if subnetv6 is not None:
-        body["subnetv6"] = subnetv6
-    if track6_interface is not None:
-        body["track6_interface"] = track6_interface
     if typev4 is not None:
         body["typev4"] = typev4
     if adv_dhcp_config_advanced is not None:
@@ -6229,8 +6222,14 @@ async def pfsense_create_network_interface(
         body["enable"] = enable
     if gateway is not None:
         body["gateway"] = gateway
+    if gateway_6rd is not None:
+        body["gateway_6rd"] = gateway_6rd
     if gatewayv6 is not None:
         body["gatewayv6"] = gatewayv6
+    if ipaddr is not None:
+        body["ipaddr"] = ipaddr
+    if ipaddrv6 is not None:
+        body["ipaddrv6"] = ipaddrv6
     if ipv6usev4iface is not None:
         body["ipv6usev4iface"] = ipv6usev4iface
     if media is not None:
@@ -6241,10 +6240,20 @@ async def pfsense_create_network_interface(
         body["mss"] = mss
     if mtu is not None:
         body["mtu"] = mtu
+    if prefix_6rd is not None:
+        body["prefix_6rd"] = prefix_6rd
+    if prefix_6rd_v4plen is not None:
+        body["prefix_6rd_v4plen"] = prefix_6rd_v4plen
     if slaacusev4iface is not None:
         body["slaacusev4iface"] = slaacusev4iface
     if spoofmac is not None:
         body["spoofmac"] = spoofmac
+    if subnet is not None:
+        body["subnet"] = subnet
+    if subnetv6 is not None:
+        body["subnetv6"] = subnetv6
+    if track6_interface is not None:
+        body["track6_interface"] = track6_interface
     if track6_prefix_id_hex is not None:
         body["track6_prefix_id_hex"] = track6_prefix_id_hex
     if typev6 is not None:
@@ -10440,13 +10449,13 @@ async def pfsense_get_services_acme_certificate(
 async def pfsense_create_services_acme_certificate(
     a_domainlist: list[dict[str, Any]],
     acmeaccount: str,
-    keypaste: str,
     name: str,
     confirm: bool = False,
     a_actionlist: list[dict[str, Any]] | None = None,
     descr: str | None = None,
     dnssleep: int | None = None,
     keylength: str | None = '2048',
+    keypaste: str | None = None,
     oscpstaple: bool | None = None,
     preferredchain: str | None = None,
     renewafter: int | None = 60,
@@ -10456,12 +10465,12 @@ async def pfsense_create_services_acme_certificate(
 
     a_domainlist: The list of domain verifications to include in the ACME certificate.
     acmeaccount: The ACME account key to use for the ACME certificate.
-    keypaste: The custom private key to use for the ACME certificate.This field is only available when the following conditions are met:- `keylength` must be equal to `'custom'`
     name: The name of the ACME certificate.
     a_actionlist: The list of actions to perform on the ACME certificate after being issued/renewed.
     descr: A description of the ACME certificate.
     dnssleep: The number of seconds to wait for DNS propagation before requesting verification.
     keylength: The length of the private key to use for the ACME certificate. Valid values: ['2048', '3072', '4096', 'ec-256', 'ec-384', 'custom']
+    keypaste: The custom private key to use for the ACME certificate.This field is only available when the following conditions are met:- `keylength` must be equal to `'custom'`
     oscpstaple: Whether to enable OCSP Stapling for the ACME certificate.
     preferredchain: The preferred certificate chain to use for the ACME certificate.
     renewafter: The number of days before expiration to renew the ACME certificate.
@@ -10477,8 +10486,6 @@ async def pfsense_create_services_acme_certificate(
         body["a_domainlist"] = a_domainlist
     if acmeaccount is not None:
         body["acmeaccount"] = acmeaccount
-    if keypaste is not None:
-        body["keypaste"] = keypaste
     if name is not None:
         body["name"] = name
     if a_actionlist is not None:
@@ -10489,6 +10496,8 @@ async def pfsense_create_services_acme_certificate(
         body["dnssleep"] = dnssleep
     if keylength is not None:
         body["keylength"] = keylength
+    if keypaste is not None:
+        body["keypaste"] = keypaste
     if oscpstaple is not None:
         body["oscpstaple"] = oscpstaple
     if preferredchain is not None:
@@ -11226,11 +11235,11 @@ async def pfsense_get_services_bind_settings(
 
 @mcp.tool()
 async def pfsense_update_services_bind_settings(
-    bind_forwarder_ips: list[str],
     confirm: bool = False,
     bind_custom_options: str | None = None,
     bind_dnssec_validation: str | None = None,
     bind_forwarder: bool | None = None,
+    bind_forwarder_ips: list[str] | None = None,
     bind_global_settings: str | None = None,
     bind_hide_version: bool | None = None,
     bind_ip_version: str | None = None,
@@ -11249,10 +11258,10 @@ async def pfsense_update_services_bind_settings(
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/bind/settings
 
-    bind_forwarder_ips: The IP addresses of the DNS servers to forward queries to.This field is only available when the following conditions are met:- `bind_forwarder` must be equal to `true`
     bind_custom_options: Custom BIND options to include in the configuration file.
     bind_dnssec_validation: Enable DNSSEC validation when BIND is acting as a recursive resolver. Valid values: ['auto', 'on', 'off']
     bind_forwarder: Enable forwarding queries to other DNS servers listed below rather than this server performing its own recursion.
+    bind_forwarder_ips: The IP addresses of the DNS servers to forward queries to.This field is only available when the following conditions are met:- `bind_forwarder` must be equal to `true`
     bind_global_settings: Global BIND settings to include in the configuration file.
     bind_hide_version: Hide the BIND version in responses.
     bind_ip_version: The IP version to use for the BIND service. Leave empty to use both IPv4 and IPv6. Valid values: ['', '-4', '-6']
@@ -11275,14 +11284,14 @@ async def pfsense_update_services_bind_settings(
             "Set confirm=True to execute."
         )
     body: dict[str, Any] = {}
-    if bind_forwarder_ips is not None:
-        body["bind_forwarder_ips"] = bind_forwarder_ips
     if bind_custom_options is not None:
         body["bind_custom_options"] = bind_custom_options
     if bind_dnssec_validation is not None:
         body["bind_dnssec_validation"] = bind_dnssec_validation
     if bind_forwarder is not None:
         body["bind_forwarder"] = bind_forwarder
+    if bind_forwarder_ips is not None:
+        body["bind_forwarder_ips"] = bind_forwarder_ips
     if bind_global_settings is not None:
         body["bind_global_settings"] = bind_global_settings
     if bind_hide_version is not None:
@@ -11819,17 +11828,13 @@ async def pfsense_get_services_bind_zone(
 
 @mcp.tool()
 async def pfsense_create_services_bind_zone(
-    baseip: str,
-    forwarders: list[str],
-    mail: str,
     name: str,
-    nameserver: str,
-    serial: int,
     confirm: bool = False,
     allowquery: list[str] | None = None,
     allowtransfer: list[str] | None = None,
     allowupdate: list[str] | None = None,
     backupkeys: bool | None = None,
+    baseip: str | None = None,
     custom: str | None = None,
     customzonerecords: str | None = None,
     description: str | None = None,
@@ -11837,7 +11842,10 @@ async def pfsense_create_services_bind_zone(
     dnssec: bool | None = None,
     enable_updatepolicy: bool | None = None,
     expire: str | None = None,
+    forwarders: list[str] | None = None,
+    mail: str | None = None,
     minimum: str | None = None,
+    nameserver: str | None = None,
     records: list[dict[str, Any]] | None = None,
     refresh: str | None = None,
     regdhcpstatic: bool | None = None,
@@ -11845,6 +11853,7 @@ async def pfsense_create_services_bind_zone(
     reversev4: bool | None = None,
     reversev6: bool | None = None,
     rpz: bool | None = None,
+    serial: int | None = None,
     slaveip: str | None = None,
     ttl: int | None = None,
     type_: str | None = 'master',
@@ -11853,16 +11862,12 @@ async def pfsense_create_services_bind_zone(
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/bind/zone
 
-    baseip: The IP address of the base domain for this zone. This sets an A record for the base domain.This field is only available when the following conditions are met:- `type` must be equal to `'master'`
-    forwarders: The forwarders for this BIND zone.This field is only available when the following conditions are met:- `type` must be equal to `'forward'`
-    mail: The SOA email address (RNAME) for this zone. This must be in an FQDN format.This field is only available when the following conditions are met:- `type` must be one of [ master, redirect ]
     name: The name of this BIND zone.
-    nameserver: The SOA nameserver for this zone.This field is only available when the following conditions are met:- `type` must be one of [ master, redirect ]
-    serial: The SOA serial number for this zone.This field is only available when the following conditions are met:- `type` must be one of [ master, redirect ]
     allowquery: The access lists that are allowed to query this BIND zone.
     allowtransfer: The access lists that are allowed to transfer this BIND zone.This field is only available when the following conditions are met:- `type` must be equal to `'master'`
     allowupdate: The access lists that are allowed to submit dynamic updates for 'master' zones (e.g. dynamic DNS).This field is only available when the following conditions are met:- `type` must be equal to `'master'`- `enable_updatepolicy` must be equal to `false`
     backupkeys: Enable backing up DNSSEC keys in the XML configuration for this BIND zone.This field is only available when the following conditions are met:- `dnssec` must be equal to `true`
+    baseip: The IP address of the base domain for this zone. This sets an A record for the base domain.This field is only available when the following conditions are met:- `type` must be equal to `'master'`
     custom: Custom BIND options for this BIND zone.
     customzonerecords: Custom records for this BIND zone.
     description: A description for this BIND zone.
@@ -11870,7 +11875,10 @@ async def pfsense_create_services_bind_zone(
     dnssec: Enable DNSSEC for this BIND zone.This field is only available when the following conditions are met:- `type` must be one of [ master, slave ]
     enable_updatepolicy: Enable a specific dynamic update policy for this BIND zone.This field is only available when the following conditions are met:- `type` must be equal to `'master'`
     expire: The SOA expiry interval for this zone. TTL-style time-unit suffixes are supported (e.g. 1h, 1d, 1w), otherwise time in seconds is assumed.This field is only available when the following conditions are met:- `type` must be one of [ master, redirect ]
+    forwarders: The forwarders for this BIND zone.This field is only available when the following conditions are met:- `type` must be equal to `'forward'`
+    mail: The SOA email address (RNAME) for this zone. This must be in an FQDN format.This field is only available when the following conditions are met:- `type` must be one of [ master, redirect ]
     minimum: The SOA minimum TTL interval (in seconds) for this zone. This is also referred to as the negative TTL. TTL-style time-unit suffixes are supported (e.g. 1h, 1d, 1w), otherwise time in seconds is assumed.This field is only available when the following conditions are met:- `type` must be one of [ master, redirect ]
+    nameserver: The SOA nameserver for this zone.This field is only available when the following conditions are met:- `type` must be one of [ master, redirect ]
     records: The records for this BIND zone.
     refresh: The SOA refresh interval for this zone. TTL-style time-unit suffixes are supported (e.g. 1h, 1d, 1w), otherwise time in seconds is assumed.This field is only available when the following conditions are met:- `type` must be one of [ master, redirect ]
     regdhcpstatic: Register DHCP static mappings as records in this BIND zone.
@@ -11878,6 +11886,7 @@ async def pfsense_create_services_bind_zone(
     reversev4: Enable reverse DNS for this BIND zone.This field is only available when the following conditions are met:- `type` must be one of [ master, slave ]
     reversev6: Enable reverse IPv6 DNS for this BIND zone.This field is only available when the following conditions are met:- `type` must be one of [ master, slave ]
     rpz: Enable this zone as part of a response policy.This field is only available when the following conditions are met:- `type` must be one of [ master, slave ]
+    serial: The SOA serial number for this zone.This field is only available when the following conditions are met:- `type` must be one of [ master, redirect ]
     slaveip: The IP address of the slave server for this BIND zone.This field is only available when the following conditions are met:- `type` must be equal to `'slave'`
     ttl: The default TTL interval (in seconds) for records within this BIND zone without a specific TTL.This field is only available when the following conditions are met:- `type` must be equal to `'master'`
     type_: The type of this BIND zone. Valid values: ['master', 'slave', 'forward', 'redirect']
@@ -11890,18 +11899,8 @@ async def pfsense_create_services_bind_zone(
             "Set confirm=True to execute."
         )
     body: dict[str, Any] = {}
-    if baseip is not None:
-        body["baseip"] = baseip
-    if forwarders is not None:
-        body["forwarders"] = forwarders
-    if mail is not None:
-        body["mail"] = mail
     if name is not None:
         body["name"] = name
-    if nameserver is not None:
-        body["nameserver"] = nameserver
-    if serial is not None:
-        body["serial"] = serial
     if allowquery is not None:
         body["allowquery"] = allowquery
     if allowtransfer is not None:
@@ -11910,6 +11909,8 @@ async def pfsense_create_services_bind_zone(
         body["allowupdate"] = allowupdate
     if backupkeys is not None:
         body["backupkeys"] = backupkeys
+    if baseip is not None:
+        body["baseip"] = baseip
     if custom is not None:
         body["custom"] = custom
     if customzonerecords is not None:
@@ -11924,8 +11925,14 @@ async def pfsense_create_services_bind_zone(
         body["enable_updatepolicy"] = enable_updatepolicy
     if expire is not None:
         body["expire"] = expire
+    if forwarders is not None:
+        body["forwarders"] = forwarders
+    if mail is not None:
+        body["mail"] = mail
     if minimum is not None:
         body["minimum"] = minimum
+    if nameserver is not None:
+        body["nameserver"] = nameserver
     if records is not None:
         body["records"] = records
     if refresh is not None:
@@ -11940,6 +11947,8 @@ async def pfsense_create_services_bind_zone(
         body["reversev6"] = reversev6
     if rpz is not None:
         body["rpz"] = rpz
+    if serial is not None:
+        body["serial"] = serial
     if slaveip is not None:
         body["slaveip"] = slaveip
     if ttl is not None:
@@ -12151,18 +12160,18 @@ async def pfsense_get_services_bind_zone_record(
 async def pfsense_create_services_bind_zone_record(
     name: str,
     parent_id: str | int,
-    priority: int,
     rdata: str,
     type_: str,
     confirm: bool = False,
+    priority: int | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/bind/zone/record
 
     name: The domain name for this record.
     parent_id: The ID of the parent this object is nested under.
-    priority: The priority for this record.This field is only available when the following conditions are met:- `type` must be one of [ MX, SRV ]
     rdata: The data for this record. This can be an IP address, domain name, or other data depending on the record type.
     type_: The type of record. Valid values: ['A', 'AAAA', 'CNAME', 'MX', 'NS', 'LOC', 'PTR', 'SRV', 'TXT', 'SPF']
+    priority: The priority for this record.This field is only available when the following conditions are met:- `type` must be one of [ MX, SRV ]
     """
     if not confirm:
         return (
@@ -12174,12 +12183,12 @@ async def pfsense_create_services_bind_zone_record(
         body["name"] = name
     if parent_id is not None:
         body["parent_id"] = parent_id
-    if priority is not None:
-        body["priority"] = priority
     if rdata is not None:
         body["rdata"] = rdata
     if type_ is not None:
         body["type"] = type_
+    if priority is not None:
+        body["priority"] = priority
     return await _client.request(
         "POST",
         "/api/v2/services/bind/zone/record",
@@ -12364,23 +12373,23 @@ async def pfsense_get_services_cron_job(
 @mcp.tool()
 async def pfsense_create_services_cron_job(
     command: str,
-    hour: str,
-    mday: str,
     minute: str,
-    month: str,
-    wday: str,
     who: str,
     confirm: bool = False,
+    hour: str | None = None,
+    mday: str | None = None,
+    month: str | None = None,
+    wday: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/cron/job
 
     command: The command to run. Use full file paths for this command and include an command parameters.
+    minute: The minute(s) at which the command will be executed or a special @ event string. (0-59, ranges, divided, @ event or delay, *=all). When using a special @ event, such as @reboot, the other time fields must be empty.
+    who: The OS user to use when cron runs the command.
     hour: The hour(s) at which the command will be executed. (0-23, ranges, or divided, *=all)This field is only available when the following conditions are met:- `minute` must not be one of [ @reboot, @yearly, @annually, @monthly, @weekly, @daily, @midnight, @hourly, @every_minute, @every_second ]
     mday: The day(s) of the month on which the command will be executed. (1-31, ranges, or divided, *=all).This field is only available when the following conditions are met:- `minute` must not be one of [ @reboot, @yearly, @annually, @monthly, @weekly, @daily, @midnight, @hourly, @every_minute, @every_second ]
-    minute: The minute(s) at which the command will be executed or a special @ event string. (0-59, ranges, divided, @ event or delay, *=all). When using a special @ event, such as @reboot, the other time fields must be empty.
     month: The month(s) of the year in which the command will be executed. (1-31, ranges, or divided, *=all).This field is only available when the following conditions are met:- `minute` must not be one of [ @reboot, @yearly, @annually, @monthly, @weekly, @daily, @midnight, @hourly, @every_minute, @every_second ]
     wday: The day(s) of the week on which the command will be executed. (0-7, 7=Sun or use names, ranges, or divided, *=all).This field is only available when the following conditions are met:- `minute` must not be one of [ @reboot, @yearly, @annually, @monthly, @weekly, @daily, @midnight, @hourly, @every_minute, @every_second ]
-    who: The OS user to use when cron runs the command.
     """
     if not confirm:
         return (
@@ -12390,18 +12399,18 @@ async def pfsense_create_services_cron_job(
     body: dict[str, Any] = {}
     if command is not None:
         body["command"] = command
+    if minute is not None:
+        body["minute"] = minute
+    if who is not None:
+        body["who"] = who
     if hour is not None:
         body["hour"] = hour
     if mday is not None:
         body["mday"] = mday
-    if minute is not None:
-        body["minute"] = minute
     if month is not None:
         body["month"] = month
     if wday is not None:
         body["wday"] = wday
-    if who is not None:
-        body["who"] = who
     return await _client.request(
         "POST",
         "/api/v2/services/cron/job",
@@ -15423,7 +15432,6 @@ async def pfsense_get_services_dns_resolver_settings(
 
 @mcp.tool()
 async def pfsense_update_services_dns_resolver_settings(
-    sslcertref: str,
     confirm: bool = False,
     active_interface: list[str] | None = None,
     custom_options: str | None = None,
@@ -15439,6 +15447,7 @@ async def pfsense_update_services_dns_resolver_settings(
     regdhcp: bool | None = None,
     regdhcpstatic: bool | None = None,
     regovpnclients: bool | None = None,
+    sslcertref: str | None = None,
     strictout: bool | None = None,
     system_domain_local_zone_type: str | None = None,
     tlsport: str | None = None,
@@ -15447,7 +15456,6 @@ async def pfsense_update_services_dns_resolver_settings(
 
     Note: Call pfsense_services_dns_resolver_apply after this to apply changes.
 
-    sslcertref: The SSL/TLS certificate to use for the DNS Resolver service.This field is only available when the following conditions are met:- `enablessl` must be equal to `true`
     active_interface: The interface on which the DNS Resolver service listens for DNS queries. Set empty value ". "to listen on all interfaces.
     custom_options: Custom options to add to the DNS Resolver configuration.
     dnssec: Enables or disables DNSSEC validation.
@@ -15462,6 +15470,7 @@ async def pfsense_update_services_dns_resolver_settings(
     regdhcp: Enables or disables registering DHCP leases in the DNS Resolver service.
     regdhcpstatic: Enables or disables registering static DHCP mappings in the DNS Resolver service.
     regovpnclients: Enables or disables registering OpenVPN clients in the DNS Resolver service.
+    sslcertref: The SSL/TLS certificate to use for the DNS Resolver service.This field is only available when the following conditions are met:- `enablessl` must be equal to `true`
     strictout: Enables or disables sending recursive queries if none of the selected Outgoing Network ". "Interfaces are available.
     system_domain_local_zone_type: The type of local zone used for the system domain. Valid values: ['deny', 'refuse', 'static', 'transparent', 'typetransparent', 'redirect', 'inform', 'inform_deny', 'nodefault']
     tlsport: The port on which the DNS Resolver service listens for SSL/TLS connections. Valid options are: a TCP/UDP port numberThis field is only available when the following conditions are met:- `enablessl` must be equal to `true`
@@ -15473,8 +15482,6 @@ async def pfsense_update_services_dns_resolver_settings(
             "\n\nNote: After this operation, call pfsense_services_dns_resolver_apply to apply changes."
         )
     body: dict[str, Any] = {}
-    if sslcertref is not None:
-        body["sslcertref"] = sslcertref
     if active_interface is not None:
         body["active_interface"] = active_interface
     if custom_options is not None:
@@ -15503,6 +15510,8 @@ async def pfsense_update_services_dns_resolver_settings(
         body["regdhcpstatic"] = regdhcpstatic
     if regovpnclients is not None:
         body["regovpnclients"] = regovpnclients
+    if sslcertref is not None:
+        body["sslcertref"] = sslcertref
     if strictout is not None:
         body["strictout"] = strictout
     if system_domain_local_zone_type is not None:
@@ -16004,9 +16013,6 @@ async def pfsense_get_services_free_radius_user(
 
 @mcp.tool()
 async def pfsense_create_services_free_radius_user(
-    motp_pin: str,
-    motp_secret: str,
-    password: str,
     username: str,
     confirm: bool = False,
     description: str | None = None,
@@ -16015,13 +16021,13 @@ async def pfsense_create_services_free_radius_user(
     motp_authmethod: str | None = None,
     motp_enable: bool | None = None,
     motp_offset: int | None = None,
+    motp_pin: str | None = None,
+    motp_secret: str | None = None,
+    password: str | None = None,
     password_encryption: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/freeradius/user
 
-    motp_pin: The PIN for the Mobile One-Time Password (MOTP). It must be exactly 4 digits.This field is only available when the following conditions are met:- `motp_enable` must be equal to `true`
-    motp_secret: The secret for the Mobile One-Time Password (MOTP).This field is only available when the following conditions are met:- `motp_enable` must be equal to `true`
-    password: The password for this username.This field is only available when the following conditions are met:- `motp_enable` must be equal to `false`
     username: The username for this user.
     description: A description for this user.
     framed_ip_address: Framed-IP-Address MUST be supported by NAS. If the OpenVPN server uses a subnet style Topology the RADIUS server MUST also send back an appropriate Framed-IP-Netmask value matching the VPN Tunnel Network.
@@ -16029,6 +16035,9 @@ async def pfsense_create_services_free_radius_user(
     motp_authmethod: The authentication method for the Mobile One-Time Password (MOTP).This field is only available when the following conditions are met:- `motp_enable` must be equal to `true` Valid values: ['motp', 'googleauth']
     motp_enable: Enable or disable the use of Mobile One-Time Password (MOTP) for this user.
     motp_offset: The timezone offset for this user.This field is only available when the following conditions are met:- `motp_enable` must be equal to `true`
+    motp_pin: The PIN for the Mobile One-Time Password (MOTP). It must be exactly 4 digits.This field is only available when the following conditions are met:- `motp_enable` must be equal to `true`
+    motp_secret: The secret for the Mobile One-Time Password (MOTP).This field is only available when the following conditions are met:- `motp_enable` must be equal to `true`
+    password: The password for this username.This field is only available when the following conditions are met:- `motp_enable` must be equal to `false`
     password_encryption: The encryption method for the password.This field is only available when the following conditions are met:- `motp_enable` must be equal to `false` Valid values: ['Cleartext-Password', 'MD5-Password', 'MD5-Password-hashed', 'NT-Password-hashed']
     """
     if not confirm:
@@ -16037,12 +16046,6 @@ async def pfsense_create_services_free_radius_user(
             "Set confirm=True to execute."
         )
     body: dict[str, Any] = {}
-    if motp_pin is not None:
-        body["motp_pin"] = motp_pin
-    if motp_secret is not None:
-        body["motp_secret"] = motp_secret
-    if password is not None:
-        body["password"] = password
     if username is not None:
         body["username"] = username
     if description is not None:
@@ -16057,6 +16060,12 @@ async def pfsense_create_services_free_radius_user(
         body["motp_enable"] = motp_enable
     if motp_offset is not None:
         body["motp_offset"] = motp_offset
+    if motp_pin is not None:
+        body["motp_pin"] = motp_pin
+    if motp_secret is not None:
+        body["motp_secret"] = motp_secret
+    if password is not None:
+        body["password"] = password
     if password_encryption is not None:
         body["password_encryption"] = password_encryption
     return await _client.request(
@@ -16512,21 +16521,21 @@ async def pfsense_get_services_ha_proxy_backend_action(
 async def pfsense_create_services_ha_proxy_backend_action(
     acl: str,
     action: str,
-    customaction: str,
-    deny_status: str,
-    find: str,
-    fmt: str,
-    lua_function: str,
-    name: str,
     parent_id: str | int,
-    path: str,
-    realm: str,
-    reason: str,
-    replace: str,
-    rule: str,
-    server: str,
-    status: str,
     confirm: bool = False,
+    customaction: str | None = None,
+    deny_status: str | None = None,
+    find: str | None = None,
+    fmt: str | None = None,
+    lua_function: str | None = None,
+    name: str | None = None,
+    path: str | None = None,
+    realm: str | None = None,
+    reason: str | None = None,
+    replace: str | None = None,
+    rule: str | None = None,
+    server: str | None = None,
+    status: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/haproxy/backend/action
 
@@ -16534,13 +16543,13 @@ async def pfsense_create_services_ha_proxy_backend_action(
 
     acl: The name of the backend ACL this action is associated with.
     action: The action to take when an ACL match is found. Valid values: ['use_server', 'custom', 'http-request_allow', 'http-request_deny', 'http-request_tarpit', 'http-request_auth', 'http-request_redirect', 'http-request_lua', 'http-request_use-service', 'http-request_add-header', 'http-request_set-header', 'http-request_del-header', 'http-request_replace-header', 'http-request_replace-path', 'http-request_replace-value', 'http-request_set-method', 'http-request_set-path', 'http-request_set-query', 'http-request_set-uri', 'http-response_allow', 'http-response_deny', 'http-response_lua', 'http-response_add-header', 'http-response_set-header', 'http-response_del-header', 'http-response_replace-header', 'http-response_replace-value', 'http-response_set-status', 'http-after-response_add-header', 'http-after-response_set-header', 'http-after-response_del-header', 'http-after-response_replace-header', 'http-after-response_replace-value', 'http-after-response_set-status', 'tcp-request_connection_accept', 'tcp-request_connection_reject', 'tcp-request_content_accept', 'tcp-request_content_reject', 'tcp-request_content_lua', 'tcp-request_content_use-service', 'tcp-response_content_accept', 'tcp-response_content_close', 'tcp-response_content_reject', 'tcp-response_content_lua']
+    parent_id: The ID of the parent this object is nested under.
     customaction: The custom action to take when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'custom'`
     deny_status: The deny status to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_deny, http-request_tarpit ]
     find: The value to find when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_replace-header, http-request_replace-value, http-response_replace-header, http-request_replace-path, http-response_replace-value, http-after-response_replace-header, http-after-response_replace-value ]
     fmt: The fmt value to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_add-header, http-request_set-header, http-request_set-method, http-request_set-path, http-request_set-query, http-request_set-uri, http-response_add-header, http-response_set-header, http-after-response_add-header, http-after-response_set-header ]
     lua_function: The Lua function to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_lua, http-request_use-service, http-response_lua, tcp-request_content_lua, tcp-request_content_use-service, tcp-response_content_lua ]
     name: The name to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_add-header, http-request_set-header, http-request_del-header, http-request_replace-header, http-request_replace-value, http-response_add-header, http-response_set-header, http-response_del-header, http-response_replace-header, http-response_replace-value, http-after-response_add-header, http-after-response_set-header, http-after-response_del-header, http-after-response_replace-header, http-after-response_replace-value ]
-    parent_id: The ID of the parent this object is nested under.
     path: The path to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'http-request_replace-path'`
     realm: The authentication realm to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'http-request_auth'`
     reason: The status reason to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-response_set-status, http-after-response_set-status ]
@@ -16560,6 +16569,8 @@ async def pfsense_create_services_ha_proxy_backend_action(
         body["acl"] = acl
     if action is not None:
         body["action"] = action
+    if parent_id is not None:
+        body["parent_id"] = parent_id
     if customaction is not None:
         body["customaction"] = customaction
     if deny_status is not None:
@@ -16572,8 +16583,6 @@ async def pfsense_create_services_ha_proxy_backend_action(
         body["lua_function"] = lua_function
     if name is not None:
         body["name"] = name
-    if parent_id is not None:
-        body["parent_id"] = parent_id
     if path is not None:
         body["path"] = path
     if realm is not None:
@@ -16802,9 +16811,7 @@ async def pfsense_get_services_ha_proxy_backend(
 
 @mcp.tool()
 async def pfsense_create_services_ha_proxy_backend(
-    agent_port: str,
     name: str,
-    persist_cookie_name: str,
     confirm: bool = False,
     acls: list[dict[str, Any]] | None = None,
     actions: list[dict[str, Any]] | None = None,
@@ -16812,6 +16819,7 @@ async def pfsense_create_services_ha_proxy_backend(
     advanced_backend: str | None = None,
     agent_checks: bool | None = None,
     agent_inter: int | None = None,
+    agent_port: str | None = None,
     balance: str | None = None,
     balance_uridepth: int | None = None,
     balance_urilen: int | None = None,
@@ -16837,6 +16845,7 @@ async def pfsense_create_services_ha_proxy_backend(
     persist_cookie_enabled: bool | None = None,
     persist_cookie_httponly: bool | None = None,
     persist_cookie_mode: str | None = None,
+    persist_cookie_name: str | None = None,
     persist_cookie_postonly: bool | None = None,
     persist_cookie_secure: bool | None = None,
     persist_stick_cookiename: str | None = None,
@@ -16865,15 +16874,14 @@ async def pfsense_create_services_ha_proxy_backend(
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
-    agent_port: Valid options are: a TCP/UDP port numberThis field is only available when the following conditions are met:- `agent_checks` must be equal to `true`
     name: The unique name for this backend.
-    persist_cookie_name: The string name to track in Set-Cookie and Cookie HTTP headers.This field is only available when the following conditions are met:- `persist_cookie_enabled` must be equal to `true`
     acls: The ACLs to apply to this backend.
     actions: The actions to apply to this backend.
     advanced: The per server pass thru to apply to each server line.
     advanced_backend: The backend pass thru to apply to the backend section.
     agent_checks: Enables or disables using a TCP connection to read an ASCII string of the form.
     agent_inter: The interval (in milliseconds) between agent checks.This field is only available when the following conditions are met:- `agent_checks` must be equal to `true`
+    agent_port: Valid options are: a TCP/UDP port numberThis field is only available when the following conditions are met:- `agent_checks` must be equal to `true`
     balance: The load balancing option to use for servers assigned to this backend. Valid values: ['', 'roundrobin', 'static-rr', 'leastconn', 'source', 'uri']
     balance_uridepth: The maximum directory depth to be used to compute the hash. One level is counted for each slash in the request.This field is only available when the following conditions are met:- `balance` must be equal to `'uri'`
     balance_urilen: The number of URI characters the algorithm should consider when hashing.This field is only available when the following conditions are met:- `balance` must be equal to `'uri'`
@@ -16899,6 +16907,7 @@ async def pfsense_create_services_ha_proxy_backend(
     persist_cookie_enabled: Enables or disables cookie based persistence.
     persist_cookie_httponly: Enables or disables preventing the use of cookies with non-HTTP components.This field is only available when the following conditions are met:- `persist_cookie_enabled` must be equal to `true`
     persist_cookie_mode: The mode HAProxy uses to insert/prefix/replace or examine cookie and set-cookie headers.This field is only available when the following conditions are met:- `persist_cookie_enabled` must be equal to `true` Valid values: ['passive', 'passive-silent', 'reset', 'set', 'set-silent', 'insert-only', 'insert-only-silent', 'session-prefix', 'passive-session-prefix']
+    persist_cookie_name: The string name to track in Set-Cookie and Cookie HTTP headers.This field is only available when the following conditions are met:- `persist_cookie_enabled` must be equal to `true`
     persist_cookie_postonly: Enables or disables only inserting cookies on POST requests.This field is only available when the following conditions are met:- `persist_cookie_enabled` must be equal to `true`
     persist_cookie_secure: Enables or disables prevention of cookie usage over non-secure channels.This field is only available when the following conditions are met:- `persist_cookie_enabled` must be equal to `true`
     persist_stick_cookiename: The cookie name to use for stick table.This field is only available when the following conditions are met:- `persist_sticky_type` must be one of [ stick_cookie_value, stick_rdp_cookie ]
@@ -16930,12 +16939,8 @@ async def pfsense_create_services_ha_proxy_backend(
             "\n\nNote: After this operation, call pfsense_services_haproxy_apply to apply changes."
         )
     body: dict[str, Any] = {}
-    if agent_port is not None:
-        body["agent_port"] = agent_port
     if name is not None:
         body["name"] = name
-    if persist_cookie_name is not None:
-        body["persist_cookie_name"] = persist_cookie_name
     if acls is not None:
         body["acls"] = acls
     if actions is not None:
@@ -16948,6 +16953,8 @@ async def pfsense_create_services_ha_proxy_backend(
         body["agent_checks"] = agent_checks
     if agent_inter is not None:
         body["agent_inter"] = agent_inter
+    if agent_port is not None:
+        body["agent_port"] = agent_port
     if balance is not None:
         body["balance"] = balance
     if balance_uridepth is not None:
@@ -16998,6 +17005,8 @@ async def pfsense_create_services_ha_proxy_backend(
         body["persist_cookie_httponly"] = persist_cookie_httponly
     if persist_cookie_mode is not None:
         body["persist_cookie_mode"] = persist_cookie_mode
+    if persist_cookie_name is not None:
+        body["persist_cookie_name"] = persist_cookie_name
     if persist_cookie_postonly is not None:
         body["persist_cookie_postonly"] = persist_cookie_postonly
     if persist_cookie_secure is not None:
@@ -18306,28 +18315,29 @@ async def pfsense_get_services_ha_proxy_frontend_action(
 async def pfsense_create_services_ha_proxy_frontend_action(
     acl: str,
     action: str,
-    backend: str,
-    customaction: str,
-    deny_status: str,
-    find: str,
-    fmt: str,
-    lua_function: str,
-    name: str,
     parent_id: str | int,
-    path: str,
-    realm: str,
-    reason: str,
-    replace: str,
-    rule: str,
-    status: str,
     confirm: bool = False,
+    backend: str | None = None,
+    customaction: str | None = None,
+    deny_status: str | None = None,
+    find: str | None = None,
+    fmt: str | None = None,
+    lua_function: str | None = None,
+    name: str | None = None,
+    path: str | None = None,
+    realm: str | None = None,
+    reason: str | None = None,
+    replace: str | None = None,
+    rule: str | None = None,
+    status: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/services/haproxy/frontend/action
 
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
-    acl: The name of the frontend ACL this action is associated with.
+    acl: The name of the frontend ACL this action is associated with. For unconditional actions, use the name of any existing ACL (the action will apply regardless). Cannot be empty.
     action: The action to take when an ACL match is found. Valid values: ['use_backend', 'custom', 'http-request_allow', 'http-request_deny', 'http-request_tarpit', 'http-request_auth', 'http-request_redirect', 'http-request_lua', 'http-request_use-service', 'http-request_add-header', 'http-request_set-header', 'http-request_del-header', 'http-request_replace-header', 'http-request_replace-path', 'http-request_replace-value', 'http-request_set-method', 'http-request_set-path', 'http-request_set-query', 'http-request_set-uri', 'http-response_allow', 'http-response_deny', 'http-response_lua', 'http-response_add-header', 'http-response_set-header', 'http-response_del-header', 'http-response_replace-header', 'http-response_replace-value', 'http-response_set-status', 'http-after-response_add-header', 'http-after-response_set-header', 'http-after-response_del-header', 'http-after-response_replace-header', 'http-after-response_replace-value', 'http-after-response_set-status', 'tcp-request_connection_accept', 'tcp-request_connection_reject', 'tcp-request_content_accept', 'tcp-request_content_reject', 'tcp-request_content_lua', 'tcp-request_content_use-service', 'tcp-response_content_accept', 'tcp-response_content_close', 'tcp-response_content_reject', 'tcp-response_content_lua']
+    parent_id: The ID of the parent this object is nested under.
     backend: The backend to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'use_backend'`
     customaction: The custom action to take when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'custom'`
     deny_status: The deny status to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_deny, http-request_tarpit ]
@@ -18335,7 +18345,6 @@ async def pfsense_create_services_ha_proxy_frontend_action(
     fmt: The fmt value to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_add-header, http-request_set-header, http-request_set-method, http-request_set-path, http-request_set-query, http-request_set-uri, http-response_add-header, http-response_set-header, http-after-response_add-header, http-after-response_set-header ]
     lua_function: The Lua function to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_lua, http-request_use-service, http-response_lua, tcp-request_content_lua, tcp-request_content_use-service, tcp-response_content_lua ]
     name: The name to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-request_add-header, http-request_set-header, http-request_del-header, http-request_replace-header, http-request_replace-value, http-response_add-header, http-response_set-header, http-response_del-header, http-response_replace-header, http-response_replace-value, http-after-response_add-header, http-after-response_set-header, http-after-response_del-header, http-after-response_replace-header, http-after-response_replace-value ]
-    parent_id: The ID of the parent this object is nested under.
     path: The path to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'http-request_replace-path'`
     realm: The authentication realm to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be equal to `'http-request_auth'`
     reason: The status reason to use when an ACL match is found.This field is only available when the following conditions are met:- `action` must be one of [ http-response_set-status, http-after-response_set-status ]
@@ -18354,6 +18363,8 @@ async def pfsense_create_services_ha_proxy_frontend_action(
         body["acl"] = acl
     if action is not None:
         body["action"] = action
+    if parent_id is not None:
+        body["parent_id"] = parent_id
     if backend is not None:
         body["backend"] = backend
     if customaction is not None:
@@ -18368,8 +18379,6 @@ async def pfsense_create_services_ha_proxy_frontend_action(
         body["lua_function"] = lua_function
     if name is not None:
         body["name"] = name
-    if parent_id is not None:
-        body["parent_id"] = parent_id
     if path is not None:
         body["path"] = path
     if realm is not None:
@@ -18601,10 +18610,10 @@ async def pfsense_get_services_ha_proxy_frontend_address(
 @mcp.tool()
 async def pfsense_create_services_ha_proxy_frontend_address(
     extaddr: str,
-    extaddr_custom: str,
     parent_id: str | int,
     confirm: bool = False,
     exaddr_advanced: str | None = None,
+    extaddr_custom: str | None = None,
     extaddr_port: str | None = None,
     extaddr_ssl: bool | None = None,
 ) -> dict[str, Any] | list[Any] | str:
@@ -18613,9 +18622,9 @@ async def pfsense_create_services_ha_proxy_frontend_address(
     Note: Call pfsense_services_haproxy_apply after this to apply changes.
 
     extaddr: The external address to use. Valid values: ['custom', 'any_ipv4', 'any_ipv6', 'localhost_ipv4', 'localhost_ipv6']
-    extaddr_custom: The custom IPv4 or IPv6 address to use as the external address.This field is only available when the following conditions are met:- `extaddr` must be equal to `'custom'`
     parent_id: The ID of the parent this object is nested under.
     exaddr_advanced: The advanced configuration to apply to this address.
+    extaddr_custom: The custom IPv4 or IPv6 address to use as the external address.This field is only available when the following conditions are met:- `extaddr` must be equal to `'custom'`
     extaddr_port: The port to bind to for this address. Valid options are: a TCP/UDP port number
     extaddr_ssl: Enables or disables using SSL/TLS for this address.
     """
@@ -18628,12 +18637,12 @@ async def pfsense_create_services_ha_proxy_frontend_address(
     body: dict[str, Any] = {}
     if extaddr is not None:
         body["extaddr"] = extaddr
-    if extaddr_custom is not None:
-        body["extaddr_custom"] = extaddr_custom
     if parent_id is not None:
         body["parent_id"] = parent_id
     if exaddr_advanced is not None:
         body["exaddr_advanced"] = exaddr_advanced
+    if extaddr_custom is not None:
+        body["extaddr_custom"] = extaddr_custom
     if extaddr_port is not None:
         body["extaddr_port"] = extaddr_port
     if extaddr_ssl is not None:
@@ -20048,7 +20057,6 @@ async def pfsense_get_services_ntp_settings(
 
 @mcp.tool()
 async def pfsense_update_services_ntp_settings(
-    serverauthkey: str,
     confirm: bool = False,
     clockstats: bool | None = None,
     dnsresolv: str | None = None,
@@ -20065,11 +20073,11 @@ async def pfsense_update_services_ntp_settings(
     peerstats: bool | None = None,
     serverauth: bool | None = None,
     serverauthalgo: str | None = None,
+    serverauthkey: str | None = None,
     statsgraph: bool | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/services/ntp/settings
 
-    serverauthkey: The NTP server authentication key.This field is only available when the following conditions are met:- `serverauth` must be equal to `true`
     clockstats: Enable or disable logging reference clock statistics.
     dnsresolv: The IP protocol peers are forced to use for DNS resolution. Valid values: ['auto', 'inet', 'inet6']
     enable: Enables or disabled the NTP server.
@@ -20085,6 +20093,7 @@ async def pfsense_update_services_ntp_settings(
     peerstats: Enable or disable logging peer statistics.
     serverauth: Enable or disable NTPv3 server authentication. (RFC 1305)
     serverauthalgo: The digest algorithm for the server authentication key. Valid values: ['md5', 'sha1', 'sha256']
+    serverauthkey: The NTP server authentication key.This field is only available when the following conditions are met:- `serverauth` must be equal to `true`
     statsgraph: Enable or disable RRD graphs for NTP statistics.
     """
     if not confirm:
@@ -20093,8 +20102,6 @@ async def pfsense_update_services_ntp_settings(
             "Set confirm=True to execute."
         )
     body: dict[str, Any] = {}
-    if serverauthkey is not None:
-        body["serverauthkey"] = serverauthkey
     if clockstats is not None:
         body["clockstats"] = clockstats
     if dnsresolv is not None:
@@ -20125,6 +20132,8 @@ async def pfsense_update_services_ntp_settings(
         body["serverauth"] = serverauth
     if serverauthalgo is not None:
         body["serverauthalgo"] = serverauthalgo
+    if serverauthkey is not None:
+        body["serverauthkey"] = serverauthkey
     if statsgraph is not None:
         body["statsgraph"] = statsgraph
     return await _client.request(
@@ -21559,21 +21568,21 @@ async def pfsense_create_system_crl(
     caref: str,
     descr: str,
     method: str,
-    text: str,
     confirm: bool = False,
     cert: list[dict[str, Any]] | None = None,
     lifetime: int | None = None,
     serial: int | None = None,
+    text: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/system/crl
 
     caref: The unique ID of the CA that this CRL is associated with.
     descr: The unique name/description for this CRL.
     method: The method used to generate this CRL. Valid values: ['existing', 'internal']
-    text: The raw x509 CRL data.This field is only available when the following conditions are met:- `method` must be equal to `'existing'`
     cert: The list of revoked certificates in this CRL.This field is only available when the following conditions are met:- `method` must be equal to `'internal'`
     lifetime: The lifetime of this CRL in days.This field is only available when the following conditions are met:- `method` must be equal to `'internal'`
     serial: The serial number of the CRL.This field is only available when the following conditions are met:- `method` must be equal to `'internal'`
+    text: The raw x509 CRL data.This field is only available when the following conditions are met:- `method` must be equal to `'existing'`
     """
     if not confirm:
         return (
@@ -21587,14 +21596,14 @@ async def pfsense_create_system_crl(
         body["descr"] = descr
     if method is not None:
         body["method"] = method
-    if text is not None:
-        body["text"] = text
     if cert is not None:
         body["cert"] = cert
     if lifetime is not None:
         body["lifetime"] = lifetime
     if serial is not None:
         body["serial"] = serial
+    if text is not None:
+        body["text"] = text
     return await _client.request(
         "POST",
         "/api/v2/system/crl",
@@ -21702,11 +21711,11 @@ async def pfsense_get_system_crl_revoked_certificate(
 
 @mcp.tool()
 async def pfsense_create_system_crl_revoked_certificate(
-    certref: str,
     parent_id: str | int,
     revoke_time: int,
     confirm: bool = False,
     caref: str | None = None,
+    certref: str | None = None,
     crt: str | None = None,
     descr: str | None = None,
     prv: str | None = None,
@@ -21716,10 +21725,10 @@ async def pfsense_create_system_crl_revoked_certificate(
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/system/crl/revoked_certificate
 
-    certref: The reference ID of the certificate to be revokedThis field is only available when the following conditions are met:- `serial` must be equal to `NULL`
     parent_id: The ID of the parent this object is nested under.
     revoke_time: The unix timestamp of when the certificate was revoked.
     caref: The unique ID of the CA that signed the revoked certificate.
+    certref: The reference ID of the certificate to be revokedThis field is only available when the following conditions are met:- `serial` must be equal to `NULL`
     crt: The X509 certificate string.
     descr: The unique name/description for this CRL.
     prv: The X509 private key string.
@@ -21733,14 +21742,14 @@ async def pfsense_create_system_crl_revoked_certificate(
             "Set confirm=True to execute."
         )
     body: dict[str, Any] = {}
-    if certref is not None:
-        body["certref"] = certref
     if parent_id is not None:
         body["parent_id"] = parent_id
     if revoke_time is not None:
         body["revoke_time"] = revoke_time
     if caref is not None:
         body["caref"] = caref
+    if certref is not None:
+        body["certref"] = certref
     if crt is not None:
         body["crt"] = crt
     if descr is not None:
@@ -22112,39 +22121,39 @@ async def pfsense_delete_system_certificate_authority(
 
 @mcp.tool()
 async def pfsense_create_system_certificate_authority_generate(
-    caref: str,
     descr: str,
     digest_alg: str,
-    ecname: str,
-    keylen: int,
     keytype: str,
     confirm: bool = False,
+    caref: str | None = None,
     dn_city: str | None = None,
     dn_commonname: str | None = 'internal-ca',
     dn_country: str | None = None,
     dn_organization: str | None = None,
     dn_organizationalunit: str | None = None,
     dn_state: str | None = None,
+    ecname: str | None = None,
     is_intermediate: bool | None = None,
+    keylen: int | None = None,
     lifetime: int | None = 3650,
     randomserial: bool | None = None,
     trust: bool | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/system/certificate_authority/generate
 
-    caref: The certificate authority to use as the parent for this intermediate certificate authority.This field is only available when the following conditions are met:- `is_intermediate` must be equal to `true`
     descr: The descriptive name for this certificate authority.
     digest_alg: The digest algorithm to use when signing certificates.
-    ecname: The name of the elliptic curve to use for the ECDSA key pair.This field is only available when the following conditions are met:- `keytype` must be equal to `'ECDSA'`
-    keylen: The length of the RSA key pair to generate.This field is only available when the following conditions are met:- `keytype` must be equal to `'RSA'` Valid values: [1024, 2048, 3072, 4096, 6144, 7680, 8192, 15360, 16384]
     keytype: The type of key pair to generate. Valid values: ['RSA', 'ECDSA']
+    caref: The certificate authority to use as the parent for this intermediate certificate authority.This field is only available when the following conditions are met:- `is_intermediate` must be equal to `true`
     dn_city: The city for the certificate authority.
     dn_commonname: The common name for the certificate authority.
     dn_country: The country for the certificate authority.
     dn_organization: The organization for the certificate authority.
     dn_organizationalunit: The organizational unit for the certificate authority.
     dn_state: The state for the certificate authority.
+    ecname: The name of the elliptic curve to use for the ECDSA key pair.This field is only available when the following conditions are met:- `keytype` must be equal to `'ECDSA'`
     is_intermediate: Indicates if this certificate authority is an intermediate certificate authority.
+    keylen: The length of the RSA key pair to generate.This field is only available when the following conditions are met:- `keytype` must be equal to `'RSA'` Valid values: [1024, 2048, 3072, 4096, 6144, 7680, 8192, 15360, 16384]
     lifetime: The number of days the certificate authority is valid for.
     randomserial: Enables or disables the randomization of serial numbers for certificates signed by this CA.
     trust: Adds or removes this certificate authority from the operating system's trust stored.
@@ -22155,18 +22164,14 @@ async def pfsense_create_system_certificate_authority_generate(
             "Set confirm=True to execute."
         )
     body: dict[str, Any] = {}
-    if caref is not None:
-        body["caref"] = caref
     if descr is not None:
         body["descr"] = descr
     if digest_alg is not None:
         body["digest_alg"] = digest_alg
-    if ecname is not None:
-        body["ecname"] = ecname
-    if keylen is not None:
-        body["keylen"] = keylen
     if keytype is not None:
         body["keytype"] = keytype
+    if caref is not None:
+        body["caref"] = caref
     if dn_city is not None:
         body["dn_city"] = dn_city
     if dn_commonname is not None:
@@ -22179,8 +22184,12 @@ async def pfsense_create_system_certificate_authority_generate(
         body["dn_organizationalunit"] = dn_organizationalunit
     if dn_state is not None:
         body["dn_state"] = dn_state
+    if ecname is not None:
+        body["ecname"] = ecname
     if is_intermediate is not None:
         body["is_intermediate"] = is_intermediate
+    if keylen is not None:
+        body["keylen"] = keylen
     if lifetime is not None:
         body["lifetime"] = lifetime
     if randomserial is not None:
@@ -22354,8 +22363,6 @@ async def pfsense_create_system_certificate_generate(
     descr: str,
     digest_alg: str,
     dn_commonname: str,
-    ecname: str,
-    keylen: int,
     keytype: str,
     confirm: bool = False,
     dn_city: str | None = None,
@@ -22367,6 +22374,8 @@ async def pfsense_create_system_certificate_generate(
     dn_organizationalunit: str | None = None,
     dn_state: str | None = None,
     dn_uri_sans: list[str] | None = None,
+    ecname: str | None = None,
+    keylen: int | None = None,
     lifetime: int | None = 3650,
     prv: str | None = None,
     type_: str | None = 'user',
@@ -22377,8 +22386,6 @@ async def pfsense_create_system_certificate_generate(
     descr: The descriptive name for this certificate.
     digest_alg: The digest method used when the certificate is signed.
     dn_commonname: The common name of the certificate.
-    ecname: The name of the elliptic curve to use for the ECDSA key pair.This field is only available when the following conditions are met:- `keytype` must be equal to `'ECDSA'`
-    keylen: The length of the RSA key pair to generate.This field is only available when the following conditions are met:- `keytype` must be equal to `'RSA'` Valid values: [1024, 2048, 3072, 4096, 6144, 7680, 8192, 15360, 16384]
     keytype: The type of key pair to generate. Valid values: ['RSA', 'ECDSA']
     dn_city: The city of the certificate.
     dn_country: The country of the certificate.
@@ -22389,6 +22396,8 @@ async def pfsense_create_system_certificate_generate(
     dn_organizationalunit: The organizational unit of the certificate.
     dn_state: The state/province of the certificate.
     dn_uri_sans: The URI Subject Alternative Names (SANs) for the certificate.
+    ecname: The name of the elliptic curve to use for the ECDSA key pair.This field is only available when the following conditions are met:- `keytype` must be equal to `'ECDSA'`
+    keylen: The length of the RSA key pair to generate.This field is only available when the following conditions are met:- `keytype` must be equal to `'RSA'` Valid values: [1024, 2048, 3072, 4096, 6144, 7680, 8192, 15360, 16384]
     lifetime: The number of days the certificate is valid for.
     prv: The X509 private key string.
     type_: The type of certificate to generate. Valid values: ['server', 'user']
@@ -22407,10 +22416,6 @@ async def pfsense_create_system_certificate_generate(
         body["digest_alg"] = digest_alg
     if dn_commonname is not None:
         body["dn_commonname"] = dn_commonname
-    if ecname is not None:
-        body["ecname"] = ecname
-    if keylen is not None:
-        body["keylen"] = keylen
     if keytype is not None:
         body["keytype"] = keytype
     if dn_city is not None:
@@ -22431,6 +22436,10 @@ async def pfsense_create_system_certificate_generate(
         body["dn_state"] = dn_state
     if dn_uri_sans is not None:
         body["dn_uri_sans"] = dn_uri_sans
+    if ecname is not None:
+        body["ecname"] = ecname
+    if keylen is not None:
+        body["keylen"] = keylen
     if lifetime is not None:
         body["lifetime"] = lifetime
     if prv is not None:
@@ -22517,8 +22526,6 @@ async def pfsense_create_system_certificate_signing_request(
     descr: str,
     digest_alg: str,
     dn_commonname: str,
-    ecname: str,
-    keylen: int,
     keytype: str,
     confirm: bool = False,
     dn_city: str | None = None,
@@ -22530,6 +22537,8 @@ async def pfsense_create_system_certificate_signing_request(
     dn_organizationalunit: str | None = None,
     dn_state: str | None = None,
     dn_uri_sans: list[str] | None = None,
+    ecname: str | None = None,
+    keylen: int | None = None,
     lifetime: int | None = 3650,
     type_: str | None = 'user',
 ) -> dict[str, Any] | list[Any] | str:
@@ -22538,8 +22547,6 @@ async def pfsense_create_system_certificate_signing_request(
     descr: The descriptive name for this certificate.
     digest_alg: The digest method used when the certificate is signed.
     dn_commonname: The common name of the certificate.
-    ecname: The name of the elliptic curve to use for the ECDSA key pair.This field is only available when the following conditions are met:- `keytype` must be equal to `'ECDSA'`
-    keylen: The length of the RSA key pair to generate.This field is only available when the following conditions are met:- `keytype` must be equal to `'RSA'` Valid values: [1024, 2048, 3072, 4096, 6144, 7680, 8192, 15360, 16384]
     keytype: The type of key pair to generate. Valid values: ['RSA', 'ECDSA']
     dn_city: The city of the certificate.
     dn_country: The country of the certificate.
@@ -22550,6 +22557,8 @@ async def pfsense_create_system_certificate_signing_request(
     dn_organizationalunit: The organizational unit of the certificate.
     dn_state: The state/province of the certificate.
     dn_uri_sans: The URI Subject Alternative Names (SANs) for the certificate.
+    ecname: The name of the elliptic curve to use for the ECDSA key pair.This field is only available when the following conditions are met:- `keytype` must be equal to `'ECDSA'`
+    keylen: The length of the RSA key pair to generate.This field is only available when the following conditions are met:- `keytype` must be equal to `'RSA'` Valid values: [1024, 2048, 3072, 4096, 6144, 7680, 8192, 15360, 16384]
     lifetime: The number of days the certificate is valid for.
     type_: The type of certificate to generate. Valid values: ['server', 'user']
     """
@@ -22565,10 +22574,6 @@ async def pfsense_create_system_certificate_signing_request(
         body["digest_alg"] = digest_alg
     if dn_commonname is not None:
         body["dn_commonname"] = dn_commonname
-    if ecname is not None:
-        body["ecname"] = ecname
-    if keylen is not None:
-        body["keylen"] = keylen
     if keytype is not None:
         body["keytype"] = keytype
     if dn_city is not None:
@@ -22589,6 +22594,10 @@ async def pfsense_create_system_certificate_signing_request(
         body["dn_state"] = dn_state
     if dn_uri_sans is not None:
         body["dn_uri_sans"] = dn_uri_sans
+    if ecname is not None:
+        body["ecname"] = ecname
+    if keylen is not None:
+        body["keylen"] = keylen
     if lifetime is not None:
         body["lifetime"] = lifetime
     if type_ is not None:
@@ -22856,32 +22865,32 @@ async def pfsense_list_system_notifications_email_settings(
 
 @mcp.tool()
 async def pfsense_update_system_notifications_email_settings(
-    password: str,
-    username: str,
     confirm: bool = False,
     authentication_mechanism: str | None = None,
     disable: bool | None = None,
     fromaddress: str | None = None,
     ipaddress: str | None = None,
     notifyemailaddress: str | None = None,
+    password: str | None = None,
     port: str | None = None,
     ssl: bool | None = None,
     sslvalidate: bool | None = None,
     timeout: int | None = None,
+    username: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """PATCH /api/v2/system/notifications/email_settings
 
-    password: The password to use for SMTP authentication.This field is only available when the following conditions are met:- `authentication_mechanism` must be equal to `'LOGIN'`
-    username: The username to use for SMTP authentication.This field is only available when the following conditions are met:- `authentication_mechanism` must be equal to `'LOGIN'`
     authentication_mechanism: The authentication mechanism to use for the SMTP connection. Valid values: ['PLAIN', 'LOGIN']
     disable: Disables SMTP notifications.
     fromaddress: The email address to use as the "From" address in notifications.
     ipaddress: The IP address or hostname of the SMTP server.
     notifyemailaddress: The email address to send notifications to.
+    password: The password to use for SMTP authentication.This field is only available when the following conditions are met:- `authentication_mechanism` must be equal to `'LOGIN'`
     port: The port number of the SMTP server. Valid options are: a TCP/UDP port number
     ssl: Enables or disables SSL/TLS for the SMTP connection.
     sslvalidate: Enables or disables SSL/TLS certificate validation for the SMTP connection.
     timeout: The timeout (in seconds) for the SMTP connection.
+    username: The username to use for SMTP authentication.This field is only available when the following conditions are met:- `authentication_mechanism` must be equal to `'LOGIN'`
     """
     if not confirm:
         return (
@@ -22889,10 +22898,6 @@ async def pfsense_update_system_notifications_email_settings(
             "Set confirm=True to execute."
         )
     body: dict[str, Any] = {}
-    if password is not None:
-        body["password"] = password
-    if username is not None:
-        body["username"] = username
     if authentication_mechanism is not None:
         body["authentication_mechanism"] = authentication_mechanism
     if disable is not None:
@@ -22903,6 +22908,8 @@ async def pfsense_update_system_notifications_email_settings(
         body["ipaddress"] = ipaddress
     if notifyemailaddress is not None:
         body["notifyemailaddress"] = notifyemailaddress
+    if password is not None:
+        body["password"] = password
     if port is not None:
         body["port"] = port
     if ssl is not None:
@@ -22911,6 +22918,8 @@ async def pfsense_update_system_notifications_email_settings(
         body["sslvalidate"] = sslvalidate
     if timeout is not None:
         body["timeout"] = timeout
+    if username is not None:
+        body["username"] = username
     return await _client.request(
         "PATCH",
         "/api/v2/system/notifications/email_settings",
@@ -22958,7 +22967,7 @@ async def pfsense_get_system_package(
 ) -> dict[str, Any] | list[Any] | str:
     """GET /api/v2/system/package
 
-    id: The ID of the object to target.
+    id: The ID of the object to target. NOTE: The id is an integer array index (0, 1, 2, ...), not a package name string.
     """
     params: dict[str, Any] = {}
     if id is not None:
@@ -23412,6 +23421,9 @@ async def pfsense_create_system_restapi_settings_sync(
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/system/restapi/settings/sync
 
+    WARNING: This endpoint requires HTTP BasicAuth (username:password).
+    It does NOT accept API key or JWT auth. Will return 401 via MCP.
+
     sync_data: The serialized REST API settings data to be synced.
     """
     if not confirm:
@@ -23772,13 +23784,7 @@ async def pfsense_get_user_auth_server(
 @mcp.tool()
 async def pfsense_create_user_auth_server(
     host: str,
-    ldap_bindpw: str,
-    ldap_port: str,
-    ldap_scope: str,
-    ldap_urltype: str,
     name: str,
-    radius_nasip_attribute: str,
-    radius_secret: str,
     type_: str,
     confirm: bool = False,
     ldap_allow_unauthenticated: bool | None = None,
@@ -23789,31 +23795,31 @@ async def pfsense_create_user_auth_server(
     ldap_authcn: str | None = None,
     ldap_basedn: str | None = None,
     ldap_binddn: str | None = None,
+    ldap_bindpw: str | None = None,
     ldap_caref: str | None = None,
     ldap_extended_enabled: bool | None = None,
     ldap_extended_query: str | None = None,
     ldap_nostrip_at: bool | None = None,
     ldap_pam_groupdn: str | None = None,
+    ldap_port: str | None = None,
     ldap_protver: int | None = None,
     ldap_rfc2307: bool | None = None,
     ldap_rfc2307_userdn: bool | None = None,
+    ldap_scope: str | None = None,
     ldap_timeout: int | None = None,
+    ldap_urltype: str | None = None,
     ldap_utf8: bool | None = None,
     radius_acct_port: str | None = None,
     radius_auth_port: str | None = None,
+    radius_nasip_attribute: str | None = None,
     radius_protocol: str | None = None,
+    radius_secret: str | None = None,
     radius_timeout: int | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/user/auth_server
 
     host: The remote IP address or hostname of the authentication server.
-    ldap_bindpw: The password to use when binding to this authentication server.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'`- `ldap_binddn` must not be equal to `NULL`
-    ldap_port: The LDAP port to connect to on this LDAP authentication server. Valid options are: a TCP/UDP port numberThis field is only available when the following conditions are met:- `type` must be equal to `'ldap'`
-    ldap_scope: The LDAP search scope. Use `one` to limit the scope to a single level, or `subtree` to allow the entire subtree to be searched.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'` Valid values: ['one', 'subtree']
-    ldap_urltype: The encryption mode to use when connecting to this authentication server. Use `Standard TCP` for unencrypted LDAP connections, use `STARTTLS Encrypt` to start an encrypted connection via STARTTLS if it's available, or `SSL/TLS Encrypted` to only use LDAPS encrypted connections.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'` Valid values: ['Standard TCP', 'STARTTLS Encrypt', 'SSL/TLS Encrypted']
     name: The descriptive name for this authentication server.
-    radius_nasip_attribute: The interface whose IP will be used as the 'NAS-IP-Address' attribute during RADIUS Access-Requests. This choice will not change the interface used for contacting the RADIUS server.This field is only available when the following conditions are met:- `type` must be equal to `'radius'`
-    radius_secret: The shared secret to use when authenticating to this RADIUS server.This field is only available when the following conditions are met:- `type` must be equal to `'radius'`
     type_: The type of this authentication server. Valid values: ['ldap', 'radius']
     ldap_allow_unauthenticated: Enables or disables unauthenticated binding. Unauthenticated binds are bind with an existing login but with an empty password. Some LDAP servers (Microsoft AD) allow this type of bind without any possibility to disable it.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'`
     ldap_attr_group: The LDAP group attribute.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'`
@@ -23823,19 +23829,25 @@ async def pfsense_create_user_auth_server(
     ldap_authcn: The LDAP authentication container.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'`
     ldap_basedn: The root for LDAP searches on this authentication server.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'`
     ldap_binddn: The DN to use when binding to this authentication server. Set to `null` to bind anonymously.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'`
+    ldap_bindpw: The password to use when binding to this authentication server.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'`- `ldap_binddn` must not be equal to `NULL`
     ldap_caref: The certificate authority used to validate the LDAP server certificate.This field is only available when the following conditions are met:- `ldap_urltype` must be one of [ starttls, encrypted ]
     ldap_extended_enabled: Enable LDAP extended queries.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'`
     ldap_extended_query: The extended LDAP query to make during LDAP searches.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'`- `ldap_extended_enabled` must be equal to `true`
     ldap_nostrip_at: Do not strip away parts of the username after the @ symbol.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'`
     ldap_pam_groupdn: The group DN to use for shell authentication. Users must be a member of this group and have valid posixAccount attributes to sign in.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'`
+    ldap_port: The LDAP port to connect to on this LDAP authentication server. Valid options are: a TCP/UDP port numberThis field is only available when the following conditions are met:- `type` must be equal to `'ldap'`
     ldap_protver: The LDAP protocol version to use for connections to this LDAP authentication server.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'` Valid values: [2, 3]
     ldap_rfc2307: Enables or disable RFC2307 LDAP options.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'`
     ldap_rfc2307_userdn: Enables or disable the use of DNs for username searches.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'`- `ldap_rfc2307` must be equal to `true`
+    ldap_scope: The LDAP search scope. Use `one` to limit the scope to a single level, or `subtree` to allow the entire subtree to be searched.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'` Valid values: ['one', 'subtree']
     ldap_timeout: The timeout (in seconds) for connections to the LDAP authentication server.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'`
+    ldap_urltype: The encryption mode to use when connecting to this authentication server. Use `Standard TCP` for unencrypted LDAP connections, use `STARTTLS Encrypt` to start an encrypted connection via STARTTLS if it's available, or `SSL/TLS Encrypted` to only use LDAPS encrypted connections.This field is only available when the following conditions are met:- `type` must be equal to `'ldap'` Valid values: ['Standard TCP', 'STARTTLS Encrypt', 'SSL/TLS Encrypted']
     ldap_utf8: Enables or disables UTF-8 encoding LDAP parameters before sending them to this authentication serverThis field is only available when the following conditions are met:- `type` must be equal to `'ldap'`
     radius_acct_port: The port used by RADIUS for accounting. Set to `null` to disable use of accounting services. Valid options are: a TCP/UDP port numberThis field is only available when the following conditions are met:- `type` must be equal to `'radius'`
     radius_auth_port: The port used by RADIUS for authentication. Set to `null` to disable use of authentication services. Valid options are: a TCP/UDP port numberThis field is only available when the following conditions are met:- `type` must be equal to `'radius'`
+    radius_nasip_attribute: The interface whose IP will be used as the 'NAS-IP-Address' attribute during RADIUS Access-Requests. This choice will not change the interface used for contacting the RADIUS server.This field is only available when the following conditions are met:- `type` must be equal to `'radius'`
     radius_protocol: The RADIUS protocol to use when authenticating.This field is only available when the following conditions are met:- `type` must be equal to `'radius'` Valid values: ['MSCHAPv2', 'MSCHAPv1', 'CHAP_MD5', 'PAP']
+    radius_secret: The shared secret to use when authenticating to this RADIUS server.This field is only available when the following conditions are met:- `type` must be equal to `'radius'`
     radius_timeout: The timeout (in seconds) for connections to this RADIUS authentication server.This field is only available when the following conditions are met:- `type` must be equal to `'radius'`
     """
     if not confirm:
@@ -23846,20 +23858,8 @@ async def pfsense_create_user_auth_server(
     body: dict[str, Any] = {}
     if host is not None:
         body["host"] = host
-    if ldap_bindpw is not None:
-        body["ldap_bindpw"] = ldap_bindpw
-    if ldap_port is not None:
-        body["ldap_port"] = ldap_port
-    if ldap_scope is not None:
-        body["ldap_scope"] = ldap_scope
-    if ldap_urltype is not None:
-        body["ldap_urltype"] = ldap_urltype
     if name is not None:
         body["name"] = name
-    if radius_nasip_attribute is not None:
-        body["radius_nasip_attribute"] = radius_nasip_attribute
-    if radius_secret is not None:
-        body["radius_secret"] = radius_secret
     if type_ is not None:
         body["type"] = type_
     if ldap_allow_unauthenticated is not None:
@@ -23878,6 +23878,8 @@ async def pfsense_create_user_auth_server(
         body["ldap_basedn"] = ldap_basedn
     if ldap_binddn is not None:
         body["ldap_binddn"] = ldap_binddn
+    if ldap_bindpw is not None:
+        body["ldap_bindpw"] = ldap_bindpw
     if ldap_caref is not None:
         body["ldap_caref"] = ldap_caref
     if ldap_extended_enabled is not None:
@@ -23888,22 +23890,32 @@ async def pfsense_create_user_auth_server(
         body["ldap_nostrip_at"] = ldap_nostrip_at
     if ldap_pam_groupdn is not None:
         body["ldap_pam_groupdn"] = ldap_pam_groupdn
+    if ldap_port is not None:
+        body["ldap_port"] = ldap_port
     if ldap_protver is not None:
         body["ldap_protver"] = ldap_protver
     if ldap_rfc2307 is not None:
         body["ldap_rfc2307"] = ldap_rfc2307
     if ldap_rfc2307_userdn is not None:
         body["ldap_rfc2307_userdn"] = ldap_rfc2307_userdn
+    if ldap_scope is not None:
+        body["ldap_scope"] = ldap_scope
     if ldap_timeout is not None:
         body["ldap_timeout"] = ldap_timeout
+    if ldap_urltype is not None:
+        body["ldap_urltype"] = ldap_urltype
     if ldap_utf8 is not None:
         body["ldap_utf8"] = ldap_utf8
     if radius_acct_port is not None:
         body["radius_acct_port"] = radius_acct_port
     if radius_auth_port is not None:
         body["radius_auth_port"] = radius_auth_port
+    if radius_nasip_attribute is not None:
+        body["radius_nasip_attribute"] = radius_nasip_attribute
     if radius_protocol is not None:
         body["radius_protocol"] = radius_protocol
+    if radius_secret is not None:
+        body["radius_secret"] = radius_secret
     if radius_timeout is not None:
         body["radius_timeout"] = radius_timeout
     return await _client.request(
@@ -24652,11 +24664,11 @@ async def pfsense_get_vpni_psec_phase1_encryption(
 @mcp.tool()
 async def pfsense_create_vpni_psec_phase1_encryption(
     dhgroup: int,
-    encryption_algorithm_keylen: int,
     encryption_algorithm_name: str,
     hash_algorithm: str,
     parent_id: str | int,
     confirm: bool = False,
+    encryption_algorithm_keylen: int | None = None,
     prf_algorithm: str | None = 'sha256',
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/vpn/ipsec/phase1/encryption
@@ -24664,10 +24676,10 @@ async def pfsense_create_vpni_psec_phase1_encryption(
     Note: Call pfsense_vpn_ipsec_apply after this to apply changes.
 
     dhgroup: The Diffie-Hellman (DH) group to use for this P1 encryption item. Valid values: [1, 2, 5, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]
-    encryption_algorithm_keylen: The key length for the encryption algorithm.This field is only available when the following conditions are met:- `encryption_algorithm_name` must be one of [ aes, aes128gcm, aes192gcm, aes256gcm ]
     encryption_algorithm_name: The name of the encryption algorithm to use for this P1 encryption item. Valid values: ['aes', 'aes128gcm', 'aes192gcm', 'aes256gcm', 'chacha20poly1305']
     hash_algorithm: The hash algorithm to use for this P1 encryption item. Valid values: ['sha1', 'sha256', 'sha384', 'sha512', 'aesxcbc']
     parent_id: The ID of the parent this object is nested under.
+    encryption_algorithm_keylen: The key length for the encryption algorithm.This field is only available when the following conditions are met:- `encryption_algorithm_name` must be one of [ aes, aes128gcm, aes192gcm, aes256gcm ]
     prf_algorithm: The PRF algorithm to use for this P1 encryption item. This value has no affect unless the P1 entry has PRF enabled. Valid values: ['sha1', 'sha256', 'sha384', 'sha512', 'aesxcbc']
     """
     if not confirm:
@@ -24679,14 +24691,14 @@ async def pfsense_create_vpni_psec_phase1_encryption(
     body: dict[str, Any] = {}
     if dhgroup is not None:
         body["dhgroup"] = dhgroup
-    if encryption_algorithm_keylen is not None:
-        body["encryption_algorithm_keylen"] = encryption_algorithm_keylen
     if encryption_algorithm_name is not None:
         body["encryption_algorithm_name"] = encryption_algorithm_name
     if hash_algorithm is not None:
         body["hash_algorithm"] = hash_algorithm
     if parent_id is not None:
         body["parent_id"] = parent_id
+    if encryption_algorithm_keylen is not None:
+        body["encryption_algorithm_keylen"] = encryption_algorithm_keylen
     if prf_algorithm is not None:
         body["prf_algorithm"] = prf_algorithm
     return await _client.request(
@@ -24868,20 +24880,16 @@ async def pfsense_get_vpni_psec_phase1(
 @mcp.tool()
 async def pfsense_create_vpni_psec_phase1(
     authentication_method: str,
-    caref: str,
-    certref: str,
     encryption: list[dict[str, Any]],
     iketype: str,
     interface: str,
-    mode: str,
-    myid_data: str,
     myid_type: str,
-    peerid_data: str,
     peerid_type: str,
-    pre_shared_key: str,
     protocol: str,
     remote_gateway: str,
     confirm: bool = False,
+    caref: str | None = None,
+    certref: str | None = None,
     closeaction: str | None = None,
     descr: str | None = None,
     disabled: bool | None = None,
@@ -24891,8 +24899,12 @@ async def pfsense_create_vpni_psec_phase1(
     ikeport: str | None = '500',
     lifetime: int | None = 28800,
     mobike: bool | None = None,
+    mode: str | None = None,
+    myid_data: str | None = None,
     nat_traversal: str | None = 'on',
     nattport: str | None = '4500',
+    peerid_data: str | None = None,
+    pre_shared_key: str | None = None,
     prfselect_enable: bool | None = None,
     rand_time: int | None = 2880,
     reauth_time: int | None = None,
@@ -24905,19 +24917,15 @@ async def pfsense_create_vpni_psec_phase1(
     Note: Call pfsense_vpn_ipsec_apply after this to apply changes.
 
     authentication_method: The IPsec authentication method this tunnel will use. Valid values: ['pre_shared_key', 'cert']
-    caref: The certificate authority to use when validating the peer certificate.This field is only available when the following conditions are met:- `authentication_method` must be equal to `'cert'`
-    certref: The certificate which identifies this system. The certificate must have at least one non-wildcard SAN.This field is only available when the following conditions are met:- `authentication_method` must be equal to `'cert'`
     encryption: The encryption algorithms supported by this P1 encryption.
     iketype: The IKE protocol version this phase 1 entry will use. Valid values: ['ikev1', 'ikev2', 'auto']
     interface: The interface for the local endpoint of this phase 1 entry. This should be an interface that is reachable by the remote peer.
-    mode: The IKEv1 negotiation mode this phase 1 entry will use.This field is only available when the following conditions are met:- `iketype` must be one of [ ikev1, auto ] Valid values: ['main', 'aggressive']
-    myid_data: The identifier value used by the local end of the tunnel. This must be a value that corresponds with the current `myid_type` value.This field is only available when the following conditions are met:- `myid_type` must not be equal to `'myaddress'`
     myid_type: The identifier type used by the local end of the tunnel. Valid values: ['myaddress', 'address', 'fqdn', 'user_fqdn', 'asn1dn', 'keyid tag', 'dyn_dns', 'auto']
-    peerid_data: The identifier value used by the remote end of the tunnel. This must be a value that corresponds with the current `peerid_type` value.This field is only available when the following conditions are met:- `peerid_type` must not be one of [ any, peeraddress ]
     peerid_type: The identifier type used by the remote end of the tunnel. Valid values: ['any', 'peeraddress', 'address', 'fqdn', 'user_fqdn', 'asn1dn', 'keyid tag', 'dyn_dns', 'auto']
-    pre_shared_key: The Pre-Shared Key (PSK) value. This key must match on both peers and should be long and random to protect the tunnel and its contents. A weak Pre-Shared Key can lead to a tunnel compromise.This field is only available when the following conditions are met:- `authentication_method` must be equal to `'pre_shared_key'`
     protocol: The IP version this phase 1 entry will use. Valid values: ['inet', 'inet6', 'both']
     remote_gateway: The IP address or hostname of the remote gateway.
+    caref: The certificate authority to use when validating the peer certificate.This field is only available when the following conditions are met:- `authentication_method` must be equal to `'cert'`
+    certref: The certificate which identifies this system. The certificate must have at least one non-wildcard SAN.This field is only available when the following conditions are met:- `authentication_method` must be equal to `'cert'`
     closeaction: The option used to control the behavior when the remote peer unexpectedly closes a child SA (P2) Valid values: ['', 'none', 'start', 'trap']
     descr: A description for this IPsec phase 1 entry.
     disabled: Disables this IPsec phase 1 entry.
@@ -24927,8 +24935,12 @@ async def pfsense_create_vpni_psec_phase1(
     ikeport: The UDP port for IKE on the remote gateway. Valid options are: a TCP/UDP port number
     lifetime: The hard child SA lifetime (in seconds) after which the child SA will be expired.
     mobike: Enables or disables the use of MOBIKE for this tunnel.
+    mode: The IKEv1 negotiation mode this phase 1 entry will use.This field is only available when the following conditions are met:- `iketype` must be one of [ ikev1, auto ] Valid values: ['main', 'aggressive']
+    myid_data: The identifier value used by the local end of the tunnel. This must be a value that corresponds with the current `myid_type` value.This field is only available when the following conditions are met:- `myid_type` must not be equal to `'myaddress'`
     nat_traversal: The option used to enable the use of NAT-T (i.e. the encapsulation of ESP in UDP packets) if needed, which can help with clients that are behind restrictive firewalls. Valid values: ['on', 'force']
     nattport: The UDP port for NAT-T on the remote gateway. Valid options are: a TCP/UDP port number
+    peerid_data: The identifier value used by the remote end of the tunnel. This must be a value that corresponds with the current `peerid_type` value.This field is only available when the following conditions are met:- `peerid_type` must not be one of [ any, peeraddress ]
+    pre_shared_key: The Pre-Shared Key (PSK) value. This key must match on both peers and should be long and random to protect the tunnel and its contents. A weak Pre-Shared Key can lead to a tunnel compromise.This field is only available when the following conditions are met:- `authentication_method` must be equal to `'pre_shared_key'`
     prfselect_enable: Enables or disables manual Pseudo-Random Function (PRF) selection.
     rand_time: A random value up to this amount will be subtracted from the `rekey_time` to avoid simultaneous renegotiation.
     reauth_time: The amount of time (in seconds) before an child SA is torn down and recreated from scratch, including authentication.
@@ -24945,32 +24957,24 @@ async def pfsense_create_vpni_psec_phase1(
     body: dict[str, Any] = {}
     if authentication_method is not None:
         body["authentication_method"] = authentication_method
-    if caref is not None:
-        body["caref"] = caref
-    if certref is not None:
-        body["certref"] = certref
     if encryption is not None:
         body["encryption"] = encryption
     if iketype is not None:
         body["iketype"] = iketype
     if interface is not None:
         body["interface"] = interface
-    if mode is not None:
-        body["mode"] = mode
-    if myid_data is not None:
-        body["myid_data"] = myid_data
     if myid_type is not None:
         body["myid_type"] = myid_type
-    if peerid_data is not None:
-        body["peerid_data"] = peerid_data
     if peerid_type is not None:
         body["peerid_type"] = peerid_type
-    if pre_shared_key is not None:
-        body["pre_shared_key"] = pre_shared_key
     if protocol is not None:
         body["protocol"] = protocol
     if remote_gateway is not None:
         body["remote_gateway"] = remote_gateway
+    if caref is not None:
+        body["caref"] = caref
+    if certref is not None:
+        body["certref"] = certref
     if closeaction is not None:
         body["closeaction"] = closeaction
     if descr is not None:
@@ -24989,10 +24993,18 @@ async def pfsense_create_vpni_psec_phase1(
         body["lifetime"] = lifetime
     if mobike is not None:
         body["mobike"] = mobike
+    if mode is not None:
+        body["mode"] = mode
+    if myid_data is not None:
+        body["myid_data"] = myid_data
     if nat_traversal is not None:
         body["nat_traversal"] = nat_traversal
     if nattport is not None:
         body["nattport"] = nattport
+    if peerid_data is not None:
+        body["peerid_data"] = peerid_data
+    if pre_shared_key is not None:
+        body["pre_shared_key"] = pre_shared_key
     if prfselect_enable is not None:
         body["prfselect_enable"] = prfselect_enable
     if rand_time is not None:
@@ -25308,18 +25320,18 @@ async def pfsense_get_vpni_psec_phase2_encryption(
 
 @mcp.tool()
 async def pfsense_create_vpni_psec_phase2_encryption(
-    keylen: int,
     name: str,
     parent_id: str | int,
     confirm: bool = False,
+    keylen: int | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/vpn/ipsec/phase2/encryption
 
     Note: Call pfsense_vpn_ipsec_apply after this to apply changes.
 
-    keylen: The key length for the encryption algorithm.This field is only available when the following conditions are met:- `name` must be one of [ aes, aes128gcm, aes192gcm, aes256gcm ]
     name: The name of the encryption algorithm to use for this P2 encryption item. Valid values: ['aes', 'aes128gcm', 'aes192gcm', 'aes256gcm', 'chacha20poly1305']
     parent_id: The ID of the parent this object is nested under.
+    keylen: The key length for the encryption algorithm.This field is only available when the following conditions are met:- `name` must be one of [ aes, aes128gcm, aes192gcm, aes256gcm ]
     """
     if not confirm:
         return (
@@ -25328,12 +25340,12 @@ async def pfsense_create_vpni_psec_phase2_encryption(
             "\n\nNote: After this operation, call pfsense_vpn_ipsec_apply to apply changes."
         )
     body: dict[str, Any] = {}
-    if keylen is not None:
-        body["keylen"] = keylen
     if name is not None:
         body["name"] = name
     if parent_id is not None:
         body["parent_id"] = parent_id
+    if keylen is not None:
+        body["keylen"] = keylen
     return await _client.request(
         "POST",
         "/api/v2/vpn/ipsec/phase2/encryption",
@@ -25500,56 +25512,56 @@ async def pfsense_get_vpni_psec_phase2(
 
 @mcp.tool()
 async def pfsense_create_vpni_psec_phase2(
-    encryption_algorithm_option: list[dict[str, Any]],
     hash_algorithm_option: list[str],
     ikeid: int,
-    localid_address: str,
-    localid_netbits: int,
-    localid_type: str,
     mode: str,
-    natlocalid_address: str,
-    natlocalid_netbits: int,
-    remoteid_address: str,
-    remoteid_netbits: int,
-    remoteid_type: str,
     confirm: bool = False,
     descr: str | None = None,
     disabled: bool | None = None,
+    encryption_algorithm_option: list[dict[str, Any]] | None = None,
     keepalive: bool | None = None,
     lifetime: int | None = 3600,
+    localid_address: str | None = None,
+    localid_netbits: int | None = None,
+    localid_type: str | None = None,
+    natlocalid_address: str | None = None,
+    natlocalid_netbits: int | None = None,
     natlocalid_type: str | None = None,
     pfsgroup: int | None = 14,
     pinghost: str | None = None,
     protocol: str | None = 'esp',
     rand_time: int | None = 360,
     rekey_time: int | None = 3240,
+    remoteid_address: str | None = None,
+    remoteid_netbits: int | None = None,
+    remoteid_type: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/vpn/ipsec/phase2
 
     Note: Call pfsense_vpn_ipsec_apply after this to apply changes.
 
-    encryption_algorithm_option: The encryption algorithms to be used by this phase 2 entry.This field is only available when the following conditions are met:- `protocol` must be equal to `'esp'`
-    hash_algorithm_option: The hashing algorithms used by this IPsec phase 2 entry. Note: Hash is ignored with GCM algorithms. SHA1 provides weak security and should be avoided.
+    hash_algorithm_option: The hashing algorithms used by this IPsec phase 2 entry. Note: Hash is ignored with GCM algorithms. SHA1 provides weak security and should be avoided. Valid values: ['hmac_sha1', 'hmac_sha256', 'hmac_sha384', 'hmac_sha512', 'aesxcbc']. Note: use hmac_ prefix (not plain sha256).
     ikeid: The `ikeid` of the parent IPsec phase 1 entry this IPsec phase 2 entry belongs to.
+    mode: The IPsec phase 2 mode this entry will use. Valid values: ['tunnel', 'tunnel6', 'transport', 'vti']
+    descr: A description for this IPsec phase 2 entry.
+    disabled: Disables this IPsec phase 2 entry.
+    encryption_algorithm_option: The encryption algorithms to be used by this phase 2 entry.This field is only available when the following conditions are met:- `protocol` must be equal to `'esp'`
+    keepalive: Enables or disables checking this P2 and initiating if disconnected; does not send traffic inside the tunnel. This check ignores the P1 option 'Child SA Start Action' and works for both VTI and tunnel mode P2s. For IKEv2 without split connections, this only needs to be enabled on one P2.
+    lifetime: The hard IKE SA lifetime (in seconds) after which the IKE SA will be expired.
     localid_address: The local network IP component of this IPsec security association.This field is only available when the following conditions are met:- `localid_type` must be one of [ address, network ]
     localid_netbits: The subnet bits of the `localid_address` network.This field is only available when the following conditions are met:- `localid_type` must be equal to `'network'`
     localid_type: The local ID type to use for this phase 2 entry. Valid value options are: an existing interface, `address`, `network`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.This field is only available when the following conditions are met:- `mode` must not be equal to `'transport'`
-    mode: The IPsec phase 2 mode this entry will use. Valid values: ['tunnel', 'tunnel6', 'transport', 'vti']
     natlocalid_address: The NAT/BINAT local network IP component of this IPsec security association.This field is only available when the following conditions are met:- `natlocalid_type` must be one of [ address, network ]
     natlocalid_netbits: The subnet bits of the `natlocalid_address` network.This field is only available when the following conditions are met:- `natlocalid_type` must be equal to `'network'`
-    remoteid_address: The remote network IP component of this IPsec security association.This field is only available when the following conditions are met:- `remoteid_type` must be one of [ address, network ]
-    remoteid_netbits: The subnet bits of the `remoteid_address` network.This field is only available when the following conditions are met:- `remoteid_type` must be equal to `'network'`
-    remoteid_type: The remote ID type to use for this phase 2 entry. Valid value options are: `address`, `network`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.This field is only available when the following conditions are met:- `mode` must not be equal to `'transport'`
-    descr: A description for this IPsec phase 2 entry.
-    disabled: Disables this IPsec phase 2 entry.
-    keepalive: Enables or disables checking this P2 and initiating if disconnected; does not send traffic inside the tunnel. This check ignores the P1 option 'Child SA Start Action' and works for both VTI and tunnel mode P2s. For IKEv2 without split connections, this only needs to be enabled on one P2.
-    lifetime: The hard IKE SA lifetime (in seconds) after which the IKE SA will be expired.
     natlocalid_type: The NAT/BINAT translation type for this IPsec phase 2 entry. Leave as `null` if NAT/BINAT is not needed. Valid value options are: an existing interface, `address`, `network`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.This field is only available when the following conditions are met:- `mode` must not be one of [ transport, vti ]
     pfsgroup: The PFS key group this IPsec phase 2 entry should use. Note: Groups 1, 2, 5, 22, 23, and 24 provide weak security and should be avoided. Valid values: [0, 1, 2, 5, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]
     pinghost: The IP address to send an ICMP echo request to inside the tunnel. Can trigger initiation of a tunnel mode P2, but does not trigger initiation of a VTI mode P2.
     protocol: the IPsec phase 2 proposal protocol for this entry. Encapsulating Security Payload (`esp`) performs encryption and authentication, Authentication Header (`ah`) is authentication only. Valid values: ['esp', 'ah']
     rand_time: A random value up to this amount will be subtracted from the `rekey_time` and `reauth_time` to avoid simultaneous renegotiation.
     rekey_time: The amount of time (in seconds) before an IKE SA establishes new keys.
+    remoteid_address: The remote network IP component of this IPsec security association.This field is only available when the following conditions are met:- `remoteid_type` must be one of [ address, network ]
+    remoteid_netbits: The subnet bits of the `remoteid_address` network.This field is only available when the following conditions are met:- `remoteid_type` must be equal to `'network'`
+    remoteid_type: The remote ID type to use for this phase 2 entry. Valid value options are: `address`, `network`. For interface values, the `:ip` modifier can be appended to the value to use the interface's IP address instead of its entire subnet.This field is only available when the following conditions are met:- `mode` must not be equal to `'transport'`
     """
     if not confirm:
         return (
@@ -25558,38 +25570,32 @@ async def pfsense_create_vpni_psec_phase2(
             "\n\nNote: After this operation, call pfsense_vpn_ipsec_apply to apply changes."
         )
     body: dict[str, Any] = {}
-    if encryption_algorithm_option is not None:
-        body["encryption_algorithm_option"] = encryption_algorithm_option
     if hash_algorithm_option is not None:
         body["hash_algorithm_option"] = hash_algorithm_option
     if ikeid is not None:
         body["ikeid"] = ikeid
+    if mode is not None:
+        body["mode"] = mode
+    if descr is not None:
+        body["descr"] = descr
+    if disabled is not None:
+        body["disabled"] = disabled
+    if encryption_algorithm_option is not None:
+        body["encryption_algorithm_option"] = encryption_algorithm_option
+    if keepalive is not None:
+        body["keepalive"] = keepalive
+    if lifetime is not None:
+        body["lifetime"] = lifetime
     if localid_address is not None:
         body["localid_address"] = localid_address
     if localid_netbits is not None:
         body["localid_netbits"] = localid_netbits
     if localid_type is not None:
         body["localid_type"] = localid_type
-    if mode is not None:
-        body["mode"] = mode
     if natlocalid_address is not None:
         body["natlocalid_address"] = natlocalid_address
     if natlocalid_netbits is not None:
         body["natlocalid_netbits"] = natlocalid_netbits
-    if remoteid_address is not None:
-        body["remoteid_address"] = remoteid_address
-    if remoteid_netbits is not None:
-        body["remoteid_netbits"] = remoteid_netbits
-    if remoteid_type is not None:
-        body["remoteid_type"] = remoteid_type
-    if descr is not None:
-        body["descr"] = descr
-    if disabled is not None:
-        body["disabled"] = disabled
-    if keepalive is not None:
-        body["keepalive"] = keepalive
-    if lifetime is not None:
-        body["lifetime"] = lifetime
     if natlocalid_type is not None:
         body["natlocalid_type"] = natlocalid_type
     if pfsgroup is not None:
@@ -25602,6 +25608,12 @@ async def pfsense_create_vpni_psec_phase2(
         body["rand_time"] = rand_time
     if rekey_time is not None:
         body["rekey_time"] = rekey_time
+    if remoteid_address is not None:
+        body["remoteid_address"] = remoteid_address
+    if remoteid_netbits is not None:
+        body["remoteid_netbits"] = remoteid_netbits
+    if remoteid_type is not None:
+        body["remoteid_type"] = remoteid_type
     return await _client.request(
         "POST",
         "/api/v2/vpn/ipsec/phase2",
@@ -25644,7 +25656,7 @@ async def pfsense_update_vpni_psec_phase2(
     descr: A description for this IPsec phase 2 entry.
     disabled: Disables this IPsec phase 2 entry.
     encryption_algorithm_option: The encryption algorithms to be used by this phase 2 entry.This field is only available when the following conditions are met:- `protocol` must be equal to `'esp'`
-    hash_algorithm_option: The hashing algorithms used by this IPsec phase 2 entry. Note: Hash is ignored with GCM algorithms. SHA1 provides weak security and should be avoided.
+    hash_algorithm_option: The hashing algorithms used by this IPsec phase 2 entry. Note: Hash is ignored with GCM algorithms. SHA1 provides weak security and should be avoided. Valid values: ['hmac_sha1', 'hmac_sha256', 'hmac_sha384', 'hmac_sha512', 'aesxcbc']. Note: use hmac_ prefix (not plain sha256).
     ikeid: The `ikeid` of the parent IPsec phase 1 entry this IPsec phase 2 entry belongs to.
     keepalive: Enables or disables checking this P2 and initiating if disconnected; does not send traffic inside the tunnel. This check ignores the P1 option 'Child SA Start Action' and works for both VTI and tunnel mode P2s. For IKEv2 without split connections, this only needs to be enabled on one P2.
     lifetime: The hard IKE SA lifetime (in seconds) after which the IKE SA will be expired.
@@ -26234,14 +26246,10 @@ async def pfsense_create_vpn_open_vpn_client(
     data_ciphers_fallback: str,
     dev_mode: str,
     digest: str,
-    interface: str,
     mode: str,
     protocol: str,
-    proxy_passwd: str,
-    proxy_user: str,
     server_addr: str,
     server_port: str,
-    tls_type: str,
     confirm: bool = False,
     allow_compression: str | None = 'no',
     auth_pass: str | None = None,
@@ -26255,6 +26263,7 @@ async def pfsense_create_vpn_open_vpn_client(
     dns_add: bool | None = None,
     exit_notify: str | None = 'none',
     inactive_seconds: int | None = 300,
+    interface: str | None = None,
     keepalive_interval: int | None = None,
     keepalive_timeout: int | None = None,
     local_port: str | None = None,
@@ -26265,7 +26274,9 @@ async def pfsense_create_vpn_open_vpn_client(
     ping_seconds: int | None = None,
     proxy_addr: str | None = None,
     proxy_authtype: str | None = 'none',
+    proxy_passwd: str | None = None,
     proxy_port: str | None = None,
+    proxy_user: str | None = None,
     remote_cert_tls: bool | None = True,
     remote_network: list[str] | None = None,
     remote_networkv6: list[str] | None = None,
@@ -26273,6 +26284,7 @@ async def pfsense_create_vpn_open_vpn_client(
     route_no_pull: bool | None = None,
     sndrcvbuf: int | None = None,
     tls: str | None = None,
+    tls_type: str | None = None,
     tlsauth_keydir: str | None = None,
     topology: str | None = None,
     tunnel_network: str | None = None,
@@ -26288,14 +26300,10 @@ async def pfsense_create_vpn_open_vpn_client(
     data_ciphers_fallback: The fallback encryption algorithm/cipher used for data channel packets when communicating with clients that do not support data encryption algorithm negotiation (e.g. Shared Key).
     dev_mode: The carrier mode for this OpenVPN client. `tun` mode carries IPv4 and IPv6 (layer 3) and is the most common and compatible mode across all platforms. `tap` mode is capable of carrying 802.3 (layer 2). Valid values: ['tun', 'tap']
     digest: The algorithm used to authenticate data channel packets, and control channel packets if a TLS Key is present.
-    interface: The interface used by the firewall to originate this OpenVPN client connection.This field is only available when the following conditions are met:- `protocol` must not be one of [ UDP, TCP ]
     mode: The OpenVPN client mode. Valid values: ['p2p_tls']
     protocol: The protocol used by this OpenVPN client. Valid values: ['UDP4', 'UDP6', 'UDP', 'TCP4', 'TCP6', 'TCP']
-    proxy_passwd: The username to use for authentication to the remote proxy.This field is only available when the following conditions are met:- `proxy_authtype` must not be equal to `'none'`
-    proxy_user: The username to use for authentication to the remote proxy.This field is only available when the following conditions are met:- `proxy_authtype` must not be equal to `'none'`
     server_addr: The IP address or hostname of the OpenVPN server this client will connect to.
     server_port: The port used by the server to receive client connections. Valid options are: a TCP/UDP port number
-    tls_type: The TLS key usage type. In `auth` mode, the TLS key is used only as HMAC authentication for the control channel, protecting the peers from unauthorized connections. The `crypt` mode encrypts the control channel communication in addition to providing authentication, providing more privacy and traffic control channel obfuscation.This field is only available when the following conditions are met:- `tls` must not be equal to `NULL` Valid values: ['auth', 'crypt']
     allow_compression: The compression mode allowed by this OpenVPN client. Compression can potentially increase throughput but may allow an attacker to extract secrets if they can control compressed plaintext traversing the VPN (e.g. HTTP) Valid values: ['no', 'yes', 'asym']
     auth_pass: The password used to authenticate with the OpenVPN server.This field is only available when the following conditions are met:- `auth_user` must not be equal to `NULL`
     auth_retry_none: Disables retrying authentication if an authentication failed error is received from the server
@@ -26308,6 +26316,7 @@ async def pfsense_create_vpn_open_vpn_client(
     dns_add: Enables or disables using the DNS server(s) provided by the OpenVPN server.
     exit_notify: The number of times this client will attempt to send an exit notifications. Valid values: ['1', '2', '3', '4', '5', 'none']
     inactive_seconds: The amount of time (in seconds) until a client connection is closed for inactivity.
+    interface: The interface used by the firewall to originate this OpenVPN client connection.This field is only available when the following conditions are met:- `protocol` must not be one of [ UDP, TCP ]
     keepalive_interval: The keepalive interval parameter.This field is only available when the following conditions are met:- `ping_method` must be equal to `'keepalive'`
     keepalive_timeout: The keepalive timeout parameter.This field is only available when the following conditions are met:- `ping_method` must be equal to `'keepalive'`
     local_port: The port binding used by OpenVPN for client connections. Valid options are: a TCP/UDP port number
@@ -26318,7 +26327,9 @@ async def pfsense_create_vpn_open_vpn_client(
     ping_seconds: The number of seconds to accept no packets before sending a ping to the remote peer over the TCP/UDP control channel.This field is only available when the following conditions are met:- `ping_method` must be equal to `'ping'`
     proxy_addr: The address for an HTTP Proxy this client can use to connect to a remote server.
     proxy_authtype: The type of authentication used by the proxy server. Valid values: ['none', 'basic', 'ntlm']
+    proxy_passwd: The username to use for authentication to the remote proxy.This field is only available when the following conditions are met:- `proxy_authtype` must not be equal to `'none'`
     proxy_port: The port used by the HTTP Proxy. Valid options are: a TCP/UDP port number
+    proxy_user: The username to use for authentication to the remote proxy.This field is only available when the following conditions are met:- `proxy_authtype` must not be equal to `'none'`
     remote_cert_tls: Enables or disables requiring hosts to have a client certificate to connect.
     remote_network: IPv4 networks that will be routed through the tunnel, so that a site-to-site VPN can be established without manually changing the routing tables. Expressed as a list of one or more CIDR ranges or host/network type aliases. If this is a site-to-site VPN, enter the remote LAN/s here. May be left empty for non site-to-site VPN.
     remote_networkv6: IPv6 networks that will be routed through the tunnel, so that a site-to-site VPN can be established without manually changing the routing tables. Expressed as a list of one or more CIDR ranges or host/network type aliases. If this is a site-to-site VPN, enter the remote LAN/s here. May be left empty for non site-to-site VPN.
@@ -26326,6 +26337,7 @@ async def pfsense_create_vpn_open_vpn_client(
     route_no_pull: Enables or disables the servers ability to add routes to the client's routing table.
     sndrcvbuf: The send and receive buffer size for OpenVPN. Set to null to use the system default. Valid values: [65536, 131072, 262144, 524288, 1048576, 2097152]
     tls: The TLS key this OpenVPN client will use to sign control channel packets with an HMAC signature for authentication when establishing the tunnel.
+    tls_type: The TLS key usage type. In `auth` mode, the TLS key is used only as HMAC authentication for the control channel, protecting the peers from unauthorized connections. The `crypt` mode encrypts the control channel communication in addition to providing authentication, providing more privacy and traffic control channel obfuscation.This field is only available when the following conditions are met:- `tls` must not be equal to `NULL` Valid values: ['auth', 'crypt']
     tlsauth_keydir: The TLS key direction. This must be set to complementary values on the client and client. For example, if the client is set to 0, the client must be set to 1. Both may be set to omit the direction, in which case the TLS Key will be used bidirectionally.This field is only available when the following conditions are met:- `tls` must not be equal to `NULL` Valid values: ['default', '0', '1', '2']
     topology: The method used to supply a virtual adapter IP address to clients when using TUN mode on IPv4.This field is only available when the following conditions are met:- `dev_mode` must be equal to `'tun'` Valid values: ['subnet', 'net30']
     tunnel_network: The IPv4 virtual network used for private communications between this client and client hosts.
@@ -26350,22 +26362,14 @@ async def pfsense_create_vpn_open_vpn_client(
         body["dev_mode"] = dev_mode
     if digest is not None:
         body["digest"] = digest
-    if interface is not None:
-        body["interface"] = interface
     if mode is not None:
         body["mode"] = mode
     if protocol is not None:
         body["protocol"] = protocol
-    if proxy_passwd is not None:
-        body["proxy_passwd"] = proxy_passwd
-    if proxy_user is not None:
-        body["proxy_user"] = proxy_user
     if server_addr is not None:
         body["server_addr"] = server_addr
     if server_port is not None:
         body["server_port"] = server_port
-    if tls_type is not None:
-        body["tls_type"] = tls_type
     if allow_compression is not None:
         body["allow_compression"] = allow_compression
     if auth_pass is not None:
@@ -26390,6 +26394,8 @@ async def pfsense_create_vpn_open_vpn_client(
         body["exit_notify"] = exit_notify
     if inactive_seconds is not None:
         body["inactive_seconds"] = inactive_seconds
+    if interface is not None:
+        body["interface"] = interface
     if keepalive_interval is not None:
         body["keepalive_interval"] = keepalive_interval
     if keepalive_timeout is not None:
@@ -26410,8 +26416,12 @@ async def pfsense_create_vpn_open_vpn_client(
         body["proxy_addr"] = proxy_addr
     if proxy_authtype is not None:
         body["proxy_authtype"] = proxy_authtype
+    if proxy_passwd is not None:
+        body["proxy_passwd"] = proxy_passwd
     if proxy_port is not None:
         body["proxy_port"] = proxy_port
+    if proxy_user is not None:
+        body["proxy_user"] = proxy_user
     if remote_cert_tls is not None:
         body["remote_cert_tls"] = remote_cert_tls
     if remote_network is not None:
@@ -26426,6 +26436,8 @@ async def pfsense_create_vpn_open_vpn_client(
         body["sndrcvbuf"] = sndrcvbuf
     if tls is not None:
         body["tls"] = tls
+    if tls_type is not None:
+        body["tls_type"] = tls_type
     if tlsauth_keydir is not None:
         body["tlsauth_keydir"] = tlsauth_keydir
     if topology is not None:
@@ -26715,33 +26727,39 @@ async def pfsense_get_vpn_open_vpn_client_export_config(
 
 @mcp.tool()
 async def pfsense_create_vpn_open_vpn_client_export_config(
-    pass_: str,
-    pkcs11id: str,
-    pkcs11providers: list[str],
-    proxyaddr: str,
-    proxypass: str,
-    proxyport: str,
-    proxyuser: str,
     server: int,
-    useproxypass: str,
     confirm: bool = False,
     advancedoptions: str | None = None,
     bindmode: str | None = 'nobind',
     blockoutsidedns: bool | None = None,
     legacy: bool | None = None,
     p12encryption: str | None = 'high',
+    pass_: str | None = None,
+    pkcs11id: str | None = None,
+    pkcs11providers: list[str] | None = None,
+    proxyaddr: str | None = None,
+    proxypass: str | None = None,
+    proxyport: str | None = None,
+    proxyuser: str | None = None,
     silent: bool | None = None,
     useaddr: str | None = 'serveraddr',
     useaddr_hostname: str | None = None,
     usepass: bool | None = None,
     usepkcs11: bool | None = None,
     useproxy: bool | None = None,
+    useproxypass: str | None = None,
     useproxytype: str | None = None,
     usetoken: bool | None = None,
     verifyservercn: str | None = 'auto',
 ) -> dict[str, Any] | list[Any] | str:
     """POST /api/v2/vpn/openvpn/client_export/config
 
+    server: The VPN ID of the OpenVPN server this client export corresponds to.
+    advancedoptions: Additional options to add to the OpenVPN client export configuration.
+    bindmode: The port binding mode to use. If OpenVPN client binds to the default OpenVPN port (1194), two clients may not run concurrently. Valid values: ['nobind', 'lport0', 'bind']
+    blockoutsidedns: Block access to DNS servers except across OpenVPN while connected, forcing clients to use only VPN DNS servers.
+    legacy: Do not include OpenVPN 2.5 and later settings in the client configuration.
+    p12encryption: The level of encryption to use when exporting a PKCS#12 archive. Encryption support varies by Operating System and program Valid values: ['high', 'low', 'legacy']
     pass_: Password used to protect the certificate file contents.This field is only available when the following conditions are met:- `usepass` must be equal to `true`
     pkcs11id: The object's ID on the PKCS#11 device.This field is only available when the following conditions are met:- `usepkcs11` must be equal to `true`
     pkcs11providers: The client local path to the PKCS#11 provider(s) (DLL, module)This field is only available when the following conditions are met:- `usepkcs11` must be equal to `true`
@@ -26749,19 +26767,13 @@ async def pfsense_create_vpn_open_vpn_client_export_config(
     proxypass: The password to use to authenticate with the proxy server.This field is only available when the following conditions are met:- `useproxy` must be equal to `true`- `useproxypass` must be one of [ basic, ntlm ]
     proxyport: The port where the proxy server is listening. Valid options are: a TCP/UDP port numberThis field is only available when the following conditions are met:- `useproxy` must be equal to `true`
     proxyuser: The username to use to authenticate with the proxy server.This field is only available when the following conditions are met:- `useproxy` must be equal to `true`- `useproxypass` must be one of [ basic, ntlm ]
-    server: The VPN ID of the OpenVPN server this client export corresponds to.
-    useproxypass: The type of authentication to use for the proxy server.This field is only available when the following conditions are met:- `useproxy` must be equal to `true` Valid values: ['none', 'basic', 'ntlm']
-    advancedoptions: Additional options to add to the OpenVPN client export configuration.
-    bindmode: The port binding mode to use. If OpenVPN client binds to the default OpenVPN port (1194), two clients may not run concurrently. Valid values: ['nobind', 'lport0', 'bind']
-    blockoutsidedns: Block access to DNS servers except across OpenVPN while connected, forcing clients to use only VPN DNS servers.
-    legacy: Do not include OpenVPN 2.5 and later settings in the client configuration.
-    p12encryption: The level of encryption to use when exporting a PKCS#12 archive. Encryption support varies by Operating System and program Valid values: ['high', 'low', 'legacy']
     silent: Create Windows installer for unattended deploy.
     useaddr: The method to use for the OpenVPN server address listed in the config export. Valid values: ['serveraddr', 'servermagic', 'servermagichost', 'serverhostname', 'other']
     useaddr_hostname: The hostname to use for the OpenVPN server address.This field is only available when the following conditions are met:- `useaddr` must be equal to `'other'`
     usepass: Use a password to protect the PKCS#12 file contents or key in Viscosity bundles.
     usepkcs11: Use PKCS#11 storage device (cryptographic token, HSM, smart card) instead of local files.
     useproxy: Use proxy to communicate with the OpenVPN server.
+    useproxypass: The type of authentication to use for the proxy server.This field is only available when the following conditions are met:- `useproxy` must be equal to `true` Valid values: ['none', 'basic', 'ntlm']
     useproxytype: The proxy type to use.This field is only available when the following conditions are met:- `useproxy` must be equal to `true` Valid values: ['http', 'socks']
     usetoken: Use Microsoft Certificate Storage instead of local files.
     verifyservercn: Verify the server certificate Common Name (CN) when the client connects. Valid values: ['auto', 'none']
@@ -26772,6 +26784,18 @@ async def pfsense_create_vpn_open_vpn_client_export_config(
             "Set confirm=True to execute."
         )
     body: dict[str, Any] = {}
+    if server is not None:
+        body["server"] = server
+    if advancedoptions is not None:
+        body["advancedoptions"] = advancedoptions
+    if bindmode is not None:
+        body["bindmode"] = bindmode
+    if blockoutsidedns is not None:
+        body["blockoutsidedns"] = blockoutsidedns
+    if legacy is not None:
+        body["legacy"] = legacy
+    if p12encryption is not None:
+        body["p12encryption"] = p12encryption
     if pass_ is not None:
         body["pass"] = pass_
     if pkcs11id is not None:
@@ -26786,20 +26810,6 @@ async def pfsense_create_vpn_open_vpn_client_export_config(
         body["proxyport"] = proxyport
     if proxyuser is not None:
         body["proxyuser"] = proxyuser
-    if server is not None:
-        body["server"] = server
-    if useproxypass is not None:
-        body["useproxypass"] = useproxypass
-    if advancedoptions is not None:
-        body["advancedoptions"] = advancedoptions
-    if bindmode is not None:
-        body["bindmode"] = bindmode
-    if blockoutsidedns is not None:
-        body["blockoutsidedns"] = blockoutsidedns
-    if legacy is not None:
-        body["legacy"] = legacy
-    if p12encryption is not None:
-        body["p12encryption"] = p12encryption
     if silent is not None:
         body["silent"] = silent
     if useaddr is not None:
@@ -26812,6 +26822,8 @@ async def pfsense_create_vpn_open_vpn_client_export_config(
         body["usepkcs11"] = usepkcs11
     if useproxy is not None:
         body["useproxy"] = useproxy
+    if useproxypass is not None:
+        body["useproxypass"] = useproxypass
     if useproxytype is not None:
         body["useproxytype"] = useproxytype
     if usetoken is not None:
@@ -27267,13 +27279,8 @@ async def pfsense_create_vpn_open_vpn_server(
     dh_length: str,
     digest: str,
     ecdh_curve: str,
-    interface: str,
     mode: str,
     protocol: str,
-    serverbridge_dhcp_end: str,
-    serverbridge_dhcp_start: str,
-    serverbridge_interface: str,
-    tls_type: str,
     confirm: bool = False,
     allow_compression: str | None = 'no',
     authmode: list[str] | None = None,
@@ -27294,6 +27301,7 @@ async def pfsense_create_vpn_open_vpn_server(
     gwredir: bool | None = None,
     gwredir6: bool | None = None,
     inactive_seconds: int | None = 300,
+    interface: str | None = None,
     keepalive_interval: int | None = None,
     keepalive_timeout: int | None = None,
     local_network: list[str] | None = None,
@@ -27318,10 +27326,14 @@ async def pfsense_create_vpn_open_vpn_server(
     remote_network: list[str] | None = None,
     remote_networkv6: list[str] | None = None,
     serverbridge_dhcp: bool | None = None,
+    serverbridge_dhcp_end: str | None = None,
+    serverbridge_dhcp_start: str | None = None,
+    serverbridge_interface: str | None = None,
     serverbridge_routegateway: bool | None = None,
     sndrcvbuf: int | None = None,
     strictusercn: bool | None = None,
     tls: str | None = None,
+    tls_type: str | None = None,
     tlsauth_keydir: str | None = None,
     topology: str | None = None,
     tunnel_network: str | None = None,
@@ -27342,13 +27354,8 @@ async def pfsense_create_vpn_open_vpn_server(
     dh_length: The Diffie-Hellman (DH) parameter set used for key exchange.
     digest: The algorithm used to authenticate data channel packets, and control channel packets if a TLS Key is present.
     ecdh_curve: The Elliptic Curve to use for key exchange. The curve from the server certificate is used by default when the server uses an ECDSA certificate. Otherwise, secp384r1 is used as a fallback.
-    interface: The interface or Virtual IP address where OpenVPN will receive client connections.This field is only available when the following conditions are met:- `protocol` must not be one of [ UDP, TCP ]
     mode: The OpenVPN server mode. Valid values: ['p2p_tls', 'server_tls', 'server_user', 'server_tls_user']
     protocol: The protocol used by this OpenVPN server. Valid values: ['UDP4', 'UDP6', 'UDP', 'TCP4', 'TCP6', 'TCP']
-    serverbridge_dhcp_end: The bridge DHCP range's end address.This field is only available when the following conditions are met:- `serverbridge_dhcp` must be equal to `true`
-    serverbridge_dhcp_start: The bridge DHCP range's start address.This field is only available when the following conditions are met:- `serverbridge_dhcp` must be equal to `true`
-    serverbridge_interface: The interface to which this TAP instance will be bridged. This is not done automatically. This interface must be assigned and the bridge created separately. This setting controls which existing IP address and subnet mask are used by OpenVPN for the bridge.This field is only available when the following conditions are met:- `serverbridge_dhcp` must be equal to `true`
-    tls_type: The TLS key usage type. In `auth` mode, the TLS key is used only as HMAC authentication for the control channel, protecting the peers from unauthorized connections. The `crypt` mode encrypts the control channel communication in addition to providing authentication, providing more privacy and traffic control channel obfuscation.This field is only available when the following conditions are met:- `use_tls` must be equal to `true` Valid values: ['auth', 'crypt']
     allow_compression: The compression mode allowed by this OpenVPN server. Compression can potentially increase throughput but may allow an attacker to extract secrets if they can control compressed plaintext traversing the VPN (e.g. HTTP) Valid values: ['no', 'yes', 'asym']
     authmode: The name of the authentication server to use as the authentication backend for this OpenVPN serverThis field is only available when the following conditions are met:- `mode` must be one of [ server_user, server_tls_user ]
     cert_depth: The depth of the certificate chain to check when a certificate based client signs in. Certificates below this depth are not accepted. This is useful for denying certificates made with intermediate CAs generated from the same CA as the server. Set to null to use system default. Valid values: [1, 2, 3, 4, 5]
@@ -27368,6 +27375,7 @@ async def pfsense_create_vpn_open_vpn_server(
     gwredir: Enable forcing all client-generated IPv4 traffic through the tunnel.
     gwredir6: Enable forcing all client-generated IPv6 traffic through the tunnel.
     inactive_seconds: The amount of time (in seconds) until a client connection is closed for inactivity.
+    interface: The interface or Virtual IP address where OpenVPN will receive client connections.This field is only available when the following conditions are met:- `protocol` must not be one of [ UDP, TCP ]
     keepalive_interval: The keepalive interval parameter.This field is only available when the following conditions are met:- `ping_method` must be equal to `'keepalive'`
     keepalive_timeout: The keepalive timeout parameter.This field is only available when the following conditions are met:- `ping_method` must be equal to `'keepalive'`
     local_network: The IPv4 networks that will be accessible from the remote endpoint. Expressed as a list of one or more CIDR ranges or host/network type aliases. This may be left blank if not adding a route to the local network through this tunnel on the remote machine. This is generally set to the LAN network.This field is only available when the following conditions are met:- `gwredir` must be equal to `false`
@@ -27392,10 +27400,14 @@ async def pfsense_create_vpn_open_vpn_server(
     remote_network: IPv4 networks that will be routed through the tunnel, so that a site-to-site VPN can be established without manually changing the routing tables. Expressed as a list of one or more CIDR ranges or host/network type aliases. If this is a site-to-site VPN, enter the remote LAN/s here. May be left empty for non site-to-site VPN.
     remote_networkv6: IPv6 networks that will be routed through the tunnel, so that a site-to-site VPN can be established without manually changing the routing tables. Expressed as a list of one or more CIDR ranges or host/network type aliases. If this is a site-to-site VPN, enter the remote LAN/s here. May be left empty for non site-to-site VPN.
     serverbridge_dhcp: Enables or disables clients on the bridge to obtain DHCP.This field is only available when the following conditions are met:- `dev_mode` must be equal to `'tap'`
+    serverbridge_dhcp_end: The bridge DHCP range's end address.This field is only available when the following conditions are met:- `serverbridge_dhcp` must be equal to `true`
+    serverbridge_dhcp_start: The bridge DHCP range's start address.This field is only available when the following conditions are met:- `serverbridge_dhcp` must be equal to `true`
+    serverbridge_interface: The interface to which this TAP instance will be bridged. This is not done automatically. This interface must be assigned and the bridge created separately. This setting controls which existing IP address and subnet mask are used by OpenVPN for the bridge.This field is only available when the following conditions are met:- `serverbridge_dhcp` must be equal to `true`
     serverbridge_routegateway: Enables or disables pushing the bridge interface's IPv4 address to connecting clients as a route gateway.This field is only available when the following conditions are met:- `serverbridge_dhcp` must be equal to `true`
     sndrcvbuf: The send and receive buffer size for OpenVPN. Set to null to use the system default. Valid values: [65536, 131072, 262144, 524288, 1048576, 2097152]
     strictusercn: Enables or disables enforcing a match between the common name of the client certificate and the username given at login.This field is only available when the following conditions are met:- `mode` must be one of [ server_user, server_tls_user ]
     tls: The TLS key this OpenVPN server will use to sign control channel packets with an HMAC signature for authentication when establishing the tunnel.This field is only available when the following conditions are met:- `use_tls` must be equal to `true`
+    tls_type: The TLS key usage type. In `auth` mode, the TLS key is used only as HMAC authentication for the control channel, protecting the peers from unauthorized connections. The `crypt` mode encrypts the control channel communication in addition to providing authentication, providing more privacy and traffic control channel obfuscation.This field is only available when the following conditions are met:- `use_tls` must be equal to `true` Valid values: ['auth', 'crypt']
     tlsauth_keydir: The TLS key direction. This must be set to complementary values on the client and server. For example, if the server is set to 0, the client must be set to 1. Both may be set to omit the direction, in which case the TLS Key will be used bidirectionally.This field is only available when the following conditions are met:- `use_tls` must be equal to `true` Valid values: ['default', '0', '1', '2']
     topology: The method used to supply a virtual adapter IP address to clients when using TUN mode on IPv4.This field is only available when the following conditions are met:- `dev_mode` must be equal to `'tun'` Valid values: ['subnet', 'net30']
     tunnel_network: The IPv4 virtual network used for private communications between this server and client hosts.
@@ -27428,20 +27440,10 @@ async def pfsense_create_vpn_open_vpn_server(
         body["digest"] = digest
     if ecdh_curve is not None:
         body["ecdh_curve"] = ecdh_curve
-    if interface is not None:
-        body["interface"] = interface
     if mode is not None:
         body["mode"] = mode
     if protocol is not None:
         body["protocol"] = protocol
-    if serverbridge_dhcp_end is not None:
-        body["serverbridge_dhcp_end"] = serverbridge_dhcp_end
-    if serverbridge_dhcp_start is not None:
-        body["serverbridge_dhcp_start"] = serverbridge_dhcp_start
-    if serverbridge_interface is not None:
-        body["serverbridge_interface"] = serverbridge_interface
-    if tls_type is not None:
-        body["tls_type"] = tls_type
     if allow_compression is not None:
         body["allow_compression"] = allow_compression
     if authmode is not None:
@@ -27480,6 +27482,8 @@ async def pfsense_create_vpn_open_vpn_server(
         body["gwredir6"] = gwredir6
     if inactive_seconds is not None:
         body["inactive_seconds"] = inactive_seconds
+    if interface is not None:
+        body["interface"] = interface
     if keepalive_interval is not None:
         body["keepalive_interval"] = keepalive_interval
     if keepalive_timeout is not None:
@@ -27528,6 +27532,12 @@ async def pfsense_create_vpn_open_vpn_server(
         body["remote_networkv6"] = remote_networkv6
     if serverbridge_dhcp is not None:
         body["serverbridge_dhcp"] = serverbridge_dhcp
+    if serverbridge_dhcp_end is not None:
+        body["serverbridge_dhcp_end"] = serverbridge_dhcp_end
+    if serverbridge_dhcp_start is not None:
+        body["serverbridge_dhcp_start"] = serverbridge_dhcp_start
+    if serverbridge_interface is not None:
+        body["serverbridge_interface"] = serverbridge_interface
     if serverbridge_routegateway is not None:
         body["serverbridge_routegateway"] = serverbridge_routegateway
     if sndrcvbuf is not None:
@@ -27536,6 +27546,8 @@ async def pfsense_create_vpn_open_vpn_server(
         body["strictusercn"] = strictusercn
     if tls is not None:
         body["tls"] = tls
+    if tls_type is not None:
+        body["tls_type"] = tls_type
     if tlsauth_keydir is not None:
         body["tlsauth_keydir"] = tlsauth_keydir
     if topology is not None:

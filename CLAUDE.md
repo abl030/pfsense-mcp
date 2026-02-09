@@ -351,6 +351,7 @@ nix develop -c bash bank-tester/run-bank-test.sh 01            # single task
 nix develop -c bash bank-tester/run-bank-test.sh "01 03 05"    # subset
 nix develop -c bash bank-tester/run-bank-test.sh 35            # recommended: start with read-only
 INCLUDE_DESTRUCTIVE=1 nix develop -c bash bank-tester/run-bank-test.sh  # include task 99
+MODEL=opus nix develop -c bash bank-tester/run-bank-test.sh 50  # run with Opus (default: sonnet)
 ```
 
 ### Bank tester structure
@@ -455,7 +456,19 @@ Findings from building a 677-tool MCP server and testing it with an AI consumer 
 
 ### MCP Client Serialization Bug
 
-22. **Claude Code MCP client inconsistently serializes `list` parameters as strings.** When a tool has `items: list[dict[str, Any]]`, the MCP client sometimes passes the JSON array as a string (`'[]'`) instead of a parsed list. This causes Pydantic validation failures: `Input should be a valid list [type=list_type, input_value='[]', input_type=str]`. The bug is non-deterministic — `pfsense_replace_firewall_aliases` works but all 37 other identically-typed `replace_*` tools fail. The generated server code, OpenAPI schemas, and tool schemas are verified identical across all 38 endpoints. This blocks all PUT/replace testing except one tool.
+22. **Claude Code MCP client inconsistently serializes `list` parameters as strings (Sonnet only).** When a tool has `items: list[dict[str, Any]]`, the Sonnet MCP client sometimes passes the JSON array as a string (`'[]'`) instead of a parsed list. This causes Pydantic validation failures: `Input should be a valid list [type=list_type, input_value='[]', input_type=str]`. The bug is non-deterministic — `pfsense_replace_firewall_aliases` works but all 37 other identically-typed `replace_*` tools fail. **UPDATE**: Opus 4.6 does NOT reproduce this bug — all 4 replace operations tested with Opus succeeded. The bug is model-specific (Sonnet serialization behavior). Since Opus is the target model, this is no longer a blocking issue.
+
+### PUT Replace Uniqueness Validation
+
+23. **pfSense PUT replace validates uniqueness before clearing existing items.** When using PUT to replace a collection with the same data (idempotent no-op), pfSense validates uniqueness constraints against the existing items before clearing them. This causes false `FIELD_MUST_BE_UNIQUE` errors on resources with unique name constraints (e.g., user groups). Discovered by Opus diagnostic run. Not fixable — pfSense API bug.
+
+### Opus 4.6 Diagnostic Run
+
+24. **Independent Opus diagnosis validates our analysis.** An Opus 4.6 diagnostic run (task 50, `run-20260209-080902`) independently classified all 15 Opus-relevant errors. Agreement rate: 75% full agreement, 25% different-but-valid classification. Opus's top finding matches ours: conditional-required fields from polymorphic schemas is the #1 systemic issue. See `research/opus-diagnosis-run.md` and `research/error-table-opus.md` for full analysis.
+
+### Generator Phase 4: Conditional Required + BasicAuth + Docstring Fixes
+
+25. **Conditional required field downgrade eliminates 8 of 15 Opus errors.** When a field's description contains `"only available when"` AND the spec marks it `required`, the generator now downgrades it to optional (`default=None`). The pfSense spec has 696 fields with this exact pattern. Combined with BasicAuth endpoint detection (finding #24, 4 operations) and docstring improvements (PF table names, package ID format, IPsec Phase 2 hash enums, HAProxy action ACL guidance), this reduces Opus first-attempt failures from 15 to 3 (all unfixable pfSense API bugs). See `research/error-table-opus.md`.
 
 ### Bank Tester Results
 
@@ -490,9 +503,11 @@ Findings from building a 677-tool MCP server and testing it with an AI consumer 
 | Category | Count | Notes |
 |----------|-------|-------|
 | Bulk DELETE (plural) | 101 | Intentionally skipped (destructive) |
-| PUT replace | 37 | Blocked by MCP client serialization bug (#22) |
+| PUT replace | 37 | Blocked by Sonnet MCP client bug (#22); Opus unblocked (finding #24) |
 | Sub-resource CRUD | ~28 | CRL revoked certs, gateway group priorities, network interface, OpenVPN client export |
 | Permanently untestable | 7 | See below |
+
+**Note**: With Opus as the target model, the 37 PUT/replace tools are no longer blocked. A full Opus re-run of the suite would recover most of this coverage gap. One replace tool (`replace_user_groups`) has a pfSense uniqueness validation bug (finding #23).
 
 **Permanently untestable** (~7 tools):
 - `pfsense_post_diagnostics_halt_system` — shuts down VM
@@ -503,13 +518,20 @@ Findings from building a 677-tool MCP server and testing it with an AI consumer 
 - `pfsense_get_services_ha_proxy_settings_email_mailer` — 500 bug in pfSense
 - `pfsense_create_system_restapi_settings_sync` — requires BasicAuth + HA setup
 
-### Known Self-Correcting Failures (Partial Run `run-20260208-222134`)
+### Opus Error Table (Target Model)
 
-First 23/44 tasks ran before rate limit. 7 first-attempt failures, all self-corrected. 3 were task-config bugs (now fixed). The remaining 4 are expected and tolerable:
+With Opus 4.6 as target, 15 first-attempt errors remain. 12 fixable in generator, 3 pfSense bugs. See `research/error-table-opus.md` for full analysis.
 
-| Task | Tool | Category | Root Cause | Fixable? |
-|------|------|----------|------------|----------|
-| 13 | `update_firewall_traffic_shaper_limiter_queue` | `unexpected_error` | pfSense API bug: limiter queue conditional validation references non-existent `sched` field from parent limiter | No — pfSense bug. Tester updates `name` instead of `aqm`. |
-| 18 | `update_services_dns_resolver_settings` | `missing_required_field` | `sslcertref` marked required in spec but is conditional (only when `enablessl=true`) | Generator limitation — conditional required fields on PATCH. Tester passes empty string. |
-| 23 | `create_services_ha_proxy_frontend_action` | `missing_required_field` | Spec marks all conditional fields required for frontend actions regardless of action type | Spec limitation — polymorphic schemas. Tester passes empty strings for irrelevant fields. |
-| 23 | `create_services_ha_proxy_frontend_certificate` | `dependency_unknown` | Frontend cert needs valid `ssl_certificate` refid; without one, object not persisted (404 on GET) | Could add CA+cert setup chain, but complex. Tool works correctly with valid input. |
+**Unfixable pfSense API bugs** (3):
+- Limiter queue PATCH: `ecn` references non-existent `sched` from parent model
+- FreeRADIUS PATCH: requires `password` even when unchanged
+- PUT `replace_user_groups`: validates uniqueness before clearing existing items
+
+**Generator fixes applied** (Phase 4): Conditional required field downgrade, BasicAuth endpoint detection, docstring improvements. See finding #25.
+
+### Notifications
+
+When running long tasks autonomously, Claude will ping via Gotify on completion or when input is needed:
+```bash
+gotify-ping "pfSense MCP" "Task complete / Need input — check session"
+```

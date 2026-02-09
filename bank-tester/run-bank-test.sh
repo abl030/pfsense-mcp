@@ -33,6 +33,7 @@ TESTER_PROMPT="bank-tester/TESTER-CLAUDE.md"
 TASKS_DIR="bank-tester/tasks"
 TASK_FILTER="${1:-}"
 INCLUDE_DESTRUCTIVE="${INCLUDE_DESTRUCTIVE:-0}"
+MODEL="${MODEL:-sonnet}"
 
 # --- Preflight checks ---
 [[ -f "$GOLDEN" ]] || { log "FATAL: $GOLDEN not found. Run vm/setup.sh first."; exit 1; }
@@ -48,6 +49,7 @@ if [[ -z "$FASTMCP_PATH" ]]; then
     exit 1
 fi
 log "Using fastmcp: $FASTMCP_PATH"
+log "Using model: $MODEL"
 
 # --- Create results directory ---
 RUN_ID="$(date +%Y%m%d-%H%M%S)"
@@ -206,7 +208,7 @@ for task_file in "${TASK_FILES[@]}"; do
     task_content="$(cat "$task_file")"
 
     # Log the claude CLI invocation (without the full prompt, just the flags)
-    CLAUDE_CMD="claude -p --mcp-config $LIVE_MCP_CONFIG --strict-mcp-config --permission-mode bypassPermissions --output-format text --model sonnet --max-budget-usd 200.00"
+    CLAUDE_CMD="claude -p --mcp-config $LIVE_MCP_CONFIG --strict-mcp-config --permission-mode bypassPermissions --output-format text --model $MODEL --max-budget-usd 200.00"
     logf "  cmd: $CLAUDE_CMD"
     logf "  task file: $task_file ($(wc -c < "$task_file") bytes)"
 
@@ -234,7 +236,7 @@ for task_file in "${TASK_FILES[@]}"; do
         --strict-mcp-config \
         --permission-mode bypassPermissions \
         --output-format text \
-        --model sonnet \
+        --model "$MODEL" \
         --max-budget-usd 200.00 \
         --append-system-prompt "$TESTER_SYSTEM_PROMPT" \
         "$task_content" \

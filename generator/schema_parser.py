@@ -169,11 +169,20 @@ def extract_tool_parameters(
                 if operation.method == "patch" and not is_required and has_default and default is not None:
                     default = None
                     has_default = True
-                # Conditional fields should default to None — sending a spec
-                # default when the condition isn't met causes validation errors
-                # (e.g., target_subnet=128 fails for IPv4 addresses)
+                # Conditional required field downgrade: when a field's description
+                # says "only available when", it's conditionally required — the spec
+                # marks it required because OpenAPI 3.0 can't express "required when X=Y".
+                # Downgrade to optional so consumers don't have to guess empty strings.
+                # (696 fields in pfSense spec use this exact pattern.)
                 desc_text = resolved_prop.get("description", "")
-                if has_default and default is not None and "only available when" in desc_text:
+                if is_required and "only available when" in desc_text.lower():
+                    is_required = False
+                    default = None
+                    has_default = True
+                # Also handle non-required conditional fields with spec defaults —
+                # sending a spec default when the condition isn't met causes validation
+                # errors (e.g., target_subnet=128 fails for IPv4 addresses)
+                elif has_default and default is not None and "only available when" in desc_text.lower():
                     default = None
                     has_default = True  # still has a default (None), just not the spec's
 

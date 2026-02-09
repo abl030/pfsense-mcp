@@ -1,11 +1,14 @@
 # Bank Tester First-Attempt Failures — Complete Analysis
 
 **Source runs**: `run-20260208-222134` (23 tasks) + `run-20260209-062124` (26 tasks, 5 overlap)
+**Model**: Claude Sonnet 4.5
 
 After fixing all task-config bugs (8 failures eliminated), the remaining failures are:
 
 **Total first-attempt failures**: 54 across 14 tasks
 **Self-correction rate**: 46/54 (85.2%)
+
+**NOTE**: 37 of these 54 failures are the MCP client serialization bug (#22), which is **Sonnet-only** — Opus 4.6 does not reproduce it. See `research/opus-diagnosis-run.md` and `research/error-table-opus.md` for the Opus-specific error table (15 errors, 12 fixable).
 
 ---
 

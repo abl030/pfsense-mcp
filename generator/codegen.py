@@ -61,6 +61,15 @@ def _gen_docstring(tool: ToolContext) -> str:
     doc_lines = []
     doc_lines.append(f'    """{tool.method.upper()} {tool.path}')
 
+    if tool.requires_basic_auth:
+        doc_lines.append("")
+        doc_lines.append(
+            "    WARNING: This endpoint requires HTTP BasicAuth (username:password)."
+        )
+        doc_lines.append(
+            "    It does NOT accept API key or JWT auth. Will return 401 via MCP."
+        )
+
     if tool.is_dangerous and tool.danger_warning:
         doc_lines.append("")
         doc_lines.append(f"    WARNING: {tool.danger_warning}")
