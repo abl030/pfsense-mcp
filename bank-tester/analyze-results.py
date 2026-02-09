@@ -304,39 +304,47 @@ def generate_summary(results_dir: Path, reports: list[dict]) -> str:
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python analyze-results.py <results-dir>", file=sys.stderr)
+        print("Usage: python analyze-results.py <results-dir> [results-dir2 ...]", file=sys.stderr)
         sys.exit(1)
 
-    results_dir = Path(sys.argv[1])
-    if not results_dir.is_dir():
-        print(f"Error: {results_dir} is not a directory", file=sys.stderr)
-        sys.exit(1)
+    results_dirs = [Path(d) for d in sys.argv[1:]]
+    for d in results_dirs:
+        if not d.is_dir():
+            print(f"Error: {d} is not a directory", file=sys.stderr)
+            sys.exit(1)
 
-    # Collect all reports from text files
+    # Collect all reports from text files across all directories
     all_reports = []
-    txt_files = sorted(results_dir.glob("*.txt"))
+    total_files = 0
 
-    if not txt_files:
-        print(f"No .txt files found in {results_dir}", file=sys.stderr)
+    for results_dir in results_dirs:
+        txt_files = sorted(results_dir.glob("*.txt"))
+        if not txt_files:
+            continue
+        total_files += len(txt_files)
+        print(f"Analyzing {len(txt_files)} result files from {results_dir.name}...")
+
+        for tf in txt_files:
+            reports = extract_reports_from_text(tf)
+            if reports:
+                all_reports.extend(reports)
+                print(f"  {tf.name}: {len(reports)} report(s)")
+            else:
+                print(f"  {tf.name}: no reports found")
+
+    if total_files == 0:
+        print("No .txt files found in any directory", file=sys.stderr)
         sys.exit(1)
-
-    print(f"Analyzing {len(txt_files)} result files...")
-
-    for tf in txt_files:
-        reports = extract_reports_from_text(tf)
-        if reports:
-            all_reports.extend(reports)
-            print(f"  {tf.name}: {len(reports)} report(s)")
-        else:
-            print(f"  {tf.name}: no reports found")
 
     if not all_reports:
         print("Warning: No task reports found in any file.", file=sys.stderr)
 
-    summary = generate_summary(results_dir, all_reports)
+    # Use last directory for summary output, or first if single
+    output_dir = results_dirs[-1]
+    summary = generate_summary(output_dir, all_reports)
 
     # Write summary
-    summary_path = results_dir / "summary.md"
+    summary_path = output_dir / "summary.md"
     with open(summary_path, "w") as f:
         f.write(summary)
 

@@ -319,7 +319,7 @@ Exclude from generation or add extra warnings:
 
 OpenAPI spec: 258 paths, 677 operations. Generated MCP server: 677 tools.
 
-Bank tester: **44/44 tasks PASS**, 504/677 tools invoked (**74.4% tool coverage**), 926 tool calls across 2 runs. 173 uncovered tools: 101 bulk DELETEs (intentionally skipped), 37 PUT/replace (MCP client bug #22), ~28 sub-resource CRUD gaps, 7 permanently untestable.
+Bank tester: **71 tasks across 4 sprints**, 668/677 tools invoked (**98.7% tool coverage**). 9 uncovered: 6 HAProxy singular 500 bug, 3 system package 504 (QEMU NAT), plus 4 destructive/endpoint-altering tools tested only in isolation.
 
 Testing is done via the bank tester (`bank-tester/run-bank-test.sh`), which boots a VM, runs Claude against the MCP server, and validates results. See the Phase 3 section for details.
 
@@ -466,6 +466,10 @@ Findings from building a 677-tool MCP server and testing it with an AI consumer 
 
 24. **Independent Opus diagnosis validates our analysis.** An Opus 4.6 diagnostic run (task 50, `run-20260209-080902`) independently classified all 15 Opus-relevant errors. Agreement rate: 75% full agreement, 25% different-but-valid classification. Opus's top finding matches ours: conditional-required fields from polymorphic schemas is the #1 systemic issue. See `research/opus-diagnosis-run.md` and `research/error-table-opus.md` for full analysis.
 
+### Validating "Known Bugs" Through Diagnostic Runs
+
+26. **Always re-validate assumed-broken endpoints.** The HAProxy settings dns_resolver/email_mailer endpoints were marked as "all 12 tools broken" based on manual GET testing during v2.7.1 upgrade. Sprint 4 ran a full Opus diagnostic (task 71) that tested all 12 tools and discovered 6 actually work (LIST, CREATE, bulk DELETE). Only singular GET/PATCH/DELETE are broken. Old assumptions carried forward without validation wasted 6 coverage points. **Rule**: Never mark an endpoint as permanently broken without running it through the Opus diagnostic loop first.
+
 ### Generator Phase 4: Conditional Required + BasicAuth + Docstring Fixes
 
 25. **Conditional required field downgrade eliminates 8 of 15 Opus errors.** When a field's description contains `"only available when"` AND the spec marks it `required`, the generator now downgrades it to optional (`default=None`). The pfSense spec has 696 fields with this exact pattern. Combined with BasicAuth endpoint detection (4 operations) and docstring improvements (PF table names, package ID format, IPsec Phase 2 hash enums, HAProxy action ACL guidance), this reduces Opus first-attempt failures from 15 to 3 (all unfixable pfSense API bugs). See `research/error-table-opus.md`.
@@ -483,31 +487,24 @@ Findings from building a 677-tool MCP server and testing it with an AI consumer 
 - New task 39: 38 PUT/replace endpoints (GET→PUT same data→verify)
 - Task 99 expanded: +ARP table clear, +firewall states clear
 
-**Results** (two runs combined: `run-20260208-222134` + `run-20260209-062124`):
-- **44/44 tasks PASS** (all exit code 0; 23 in run 1, 26 in run 2 — 5 overlap)
-- 926 total tool calls across both runs
-- **504/677 unique tools invoked (74.4% tool coverage)**
-- Runtime: ~56 min (run 2, 26 tasks)
+**Results** (13 runs across 4 sprints):
+- **71 tasks total** (44 baseline + 8 Sprint 1 PUT/replace + 7 Sprint 2 sub-resource CRUD + 10 Sprint 3 bulk DELETEs + 2 Sprint 4 recoverable/validation)
+- **668/677 unique tools invoked (98.7% tool coverage)**
 
-**Coverage gap analysis** (173 uncovered tools):
+**Remaining uncovered** (9 tools):
 
 | Category | Count | Notes |
 |----------|-------|-------|
-| Bulk DELETE (plural) | 101 | Intentionally skipped (destructive) |
-| PUT replace | 37 | Blocked by Sonnet MCP client bug (#22); Opus unblocked (finding #24) |
-| Sub-resource CRUD | ~28 | CRL revoked certs, gateway group priorities, network interface, OpenVPN client export |
-| Permanently untestable | 7 | See below |
+| HAProxy singular 500 bug | 6 | GET/PATCH/DELETE for dns_resolver + email_mailer (LIST/CREATE/bulk DELETE work) |
+| System package 504 | 3 | QEMU NAT too slow for pkg install/delete |
 
-**Note**: With Opus as the target model, the 37 PUT/replace tools are no longer blocked. A full Opus re-run of the suite would recover most of this coverage gap. One replace tool (`replace_user_groups`) has a pfSense uniqueness validation bug (finding #23).
-
-**Permanently untestable** (~7 tools):
-- `pfsense_post_diagnostics_halt_system` — shuts down VM
+**Not in standard suite** (tested in isolation or blocked):
+- `pfsense_post_diagnostics_halt_system` — shuts down VM (destructive)
 - `pfsense_post_diagnostics_reboot` — reboots VM (task 99 only)
 - `pfsense_update_system_restapi_version` — breaks API connectivity
 - `pfsense_update_system_web_gui_settings` — breaks API connectivity
-- `pfsense_get_services_ha_proxy_settings_dns_resolver` — 500 bug in pfSense
-- `pfsense_get_services_ha_proxy_settings_email_mailer` — 500 bug in pfSense
 - `pfsense_create_system_restapi_settings_sync` — requires BasicAuth + HA setup
+- `pfsense_delete_status_open_vpn_server_connection` — needs active OVPN client
 
 ### Notifications
 

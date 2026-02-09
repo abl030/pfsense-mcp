@@ -525,11 +525,9 @@ tasks:
         apply: true
     notes: |
       Apply haproxy after mutations.
-    skip:
-      - path: /api/v2/services/haproxy/settings/dns_resolver
-        reason: "500 parent Model not constructed (v2.7.1 bug)"
-      - path: /api/v2/services/haproxy/settings/email_mailer
-        reason: "500 parent Model not constructed (v2.7.1 bug)"
+    # HAProxy settings dns_resolver/email_mailer: LIST, CREATE, bulk DELETE work.
+    # Only singular GET/PATCH/DELETE are broken (500 MODEL_CANNOT_GET_CONFIG_PATH_WITHOUT_PARENT_MODEL).
+    # Validated by task 71 (Sprint 4). No longer skipped — covered separately.
 
   - number: 22
     title: "HAProxy Backend Sub-Resources — ACL, Action, Server, Error File"
