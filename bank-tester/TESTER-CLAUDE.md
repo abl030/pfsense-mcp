@@ -77,3 +77,9 @@ Use exactly one of these for each failure:
 - `error_quality_clear` — (adversarial only) error message was clear and helpful
 - `error_quality_unclear` — (adversarial only) error message existed but wasn't helpful
 - `error_quality_missing` — (adversarial only) no useful error information returned
+
+## CRITICAL OUTPUT REQUIREMENT
+
+Your ENTIRE output MUST be the structured report between `---TASK-REPORT-START---` and `---TASK-REPORT-END---` markers. Do NOT output a brief summary instead. Do NOT skip the `tools_invoked` list. The coverage tracking system parses your output programmatically — if you output prose instead of the structured report, the tools you invoked will not be counted.
+
+Even if the task is large (30+ tools), you MUST list every single `pfsense_*` tool you called in the `tools_invoked` section. This is non-negotiable.
