@@ -18,7 +18,7 @@
 - `pfsense_get_services_ha_proxy_backend_error_file`
 - `pfsense_update_services_ha_proxy_backend_error_file`
 - `pfsense_delete_services_ha_proxy_backend_error_file`
-- `pfsense_get_/api/v2/services/haproxy/backend/error_files`
+- `pfsense_list_services_ha_proxy_backend_error_files`
 - `pfsense_create_services_ha_proxy_frontend`
 - `pfsense_delete_services_ha_proxy_frontend`
 - `pfsense_create_services_ha_proxy_frontend_acl`
@@ -71,7 +71,7 @@
 9. **Get** using `pfsense_get_services_ha_proxy_backend_error_file` with the ID from the create response
 10. **Update** using `pfsense_update_services_ha_proxy_backend_error_file` with `confirm=True` — set `errorcode` to `502`
 11. **Get** again using `pfsense_get_services_ha_proxy_backend_error_file` — verify `errorcode` was updated
-12. **Read** using `pfsense_get_/api/v2/services/haproxy/backend/error_files` (List backend error files (plural))
+12. **Read** using `pfsense_list_services_ha_proxy_backend_error_files` (List backend error files (plural))
 13. **Create** using `pfsense_create_services_ha_proxy_frontend` with `confirm=True`:
     - `name`: `bt_sys51_fe`
     - `type_`: `http`

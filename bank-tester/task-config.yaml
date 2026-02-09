@@ -1557,7 +1557,7 @@ tasks:
             create_values:
               name: bt_sys51_file
               content: "PCFET0NUWVBFIGh0bWw+"
-      - path: /api/v2/services/haproxy/backend/error_files
+      - path: /api/v2/services/haproxy/backend/errorfiles
         read_only: true
         parent: /api/v2/services/haproxy/backend
         parent_id_field: parent_id
@@ -1747,7 +1747,7 @@ tasks:
           tag: 200
           pcp: 0
           descr: bt_sys54_vlan
-      - path: /api/v2/network/interface
+      - path: /api/v2/interface
         crud: true
         create_values:
           if: em2.200
@@ -1926,18 +1926,22 @@ tasks:
       # Singular deletes that need existing data
       - path: /api/v2/diagnostics/arp_table/entry
         action: true
+        action_method: delete
         action_body: {}
         notes: "List ARP table first, pick an entry, DELETE it by ID."
       - path: /api/v2/diagnostics/config_history/revision
         action: true
+        action_method: delete
         action_body: {}
         notes: "List config history revisions, DELETE one by ID."
       - path: /api/v2/diagnostics/table
         action: true
+        action_method: delete
         action_body: {}
         notes: "List PF tables, pick 'virusprot', DELETE entries from it."
       - path: /api/v2/firewall/state
         action: true
+        action_method: delete
         action_body: {}
         notes: "List firewall states, DELETE one by ID (if any exist)."
       # REST API access list entry delete
@@ -1963,6 +1967,719 @@ tasks:
       Firewall states: list states, delete one (if any exist).
       REST API ACL: create entry, then delete it.
       Auth key: use diagnostics/command_prompt to create a key via PHP, then delete via API.
+
+  # ── Sprint 3: Bulk Plural DELETEs (60-67) ─────────────────────────────────
+
+  - number: 60
+    title: "Bulk Delete — Firewall Core"
+    subsystem: firewall
+    endpoints:
+      - path: /api/v2/firewall/aliases
+        bulk_delete: true
+        singular_path: /api/v2/firewall/alias
+        create_values:
+          name: bt_bd60_alias
+          type_: host
+          address: ["10.99.60.1"]
+      - path: /api/v2/firewall/rules
+        bulk_delete: true
+        singular_path: /api/v2/firewall/rule
+        create_values:
+          type_: pass
+          interface: wan
+          ipprotocol: inet
+          protocol: tcp
+          source: any
+          destination: any
+          descr: bt_bd60_rule
+      - path: /api/v2/firewall/nat/port_forwards
+        bulk_delete: true
+        singular_path: /api/v2/firewall/nat/port_forward
+        create_values:
+          interface: wan
+          protocol: tcp
+          source: any
+          destination: "wan:ip"
+          destination_port: "8060"
+          target: "10.99.60.1"
+          local_port: "80"
+          associated_rule_id: ""
+      - path: /api/v2/firewall/nat/outbound/mappings
+        bulk_delete: true
+        singular_path: /api/v2/firewall/nat/outbound/mapping
+        create_values:
+          interface: wan
+          protocol: tcp
+          source: any
+          destination: any
+          target: "wan:ip"
+      - path: /api/v2/firewall/nat/one_to_one/mappings
+        bulk_delete: true
+        singular_path: /api/v2/firewall/nat/one_to_one/mapping
+        create_values:
+          interface: wan
+          external: "10.99.60.2"
+          source: "10.0.0.0/8"
+          destination: any
+      - path: /api/v2/firewall/schedules
+        bulk_delete: true
+        singular_path: /api/v2/firewall/schedule
+        create_values:
+          name: bt_bd60_sched
+          timerange:
+            - month: "1,2,3"
+              day: "1,2,3"
+              hour: "0:00-23:59"
+              position: []
+      - path: /api/v2/firewall/virtual_ips
+        bulk_delete: true
+        singular_path: /api/v2/firewall/virtual_ip
+        create_values:
+          mode: ipalias
+          interface: wan
+          subnet: "10.99.60.100"
+          subnet_bits: 32
+      - path: /api/v2/firewall/states
+        bulk_delete: true
+        notes: "Bulk clear all firewall states — no create needed, states auto-generate"
+    notes: |
+      Bulk delete all resources in each firewall collection.
+      Pattern: create resource → list → bulk DELETE → verify empty.
+      Firewall states auto-exist — just bulk delete without create.
+      WARNING: This deletes ALL aliases, rules, NAT entries, schedules, VIPs.
+      Run on an ephemeral/test VM only.
+
+  - number: 61
+    title: "Bulk Delete — Firewall Sub-Resources + Traffic Shapers"
+    subsystem: firewall
+    endpoints:
+      - path: /api/v2/firewall/schedule/time_ranges
+        bulk_delete: true
+        singular_path: /api/v2/firewall/schedule/time_range
+        create_values:
+          month: [7, 8]
+          day: [15, 16]
+          hour: "10:00-18:00"
+        parent: /api/v2/firewall/schedule
+        notes: "Needs schedule parent_id"
+      - path: /api/v2/firewall/traffic_shapers
+        bulk_delete: true
+        singular_path: /api/v2/firewall/traffic_shaper
+        create_values:
+          bandwidth: 100
+          bandwidthtype: "Mb"
+          interface: wan
+          scheduler: HFSC
+          enabled: false
+          qlimit: 50
+          queue: []
+          tbrconfig: 1
+      - path: /api/v2/firewall/traffic_shaper/queues
+        bulk_delete: true
+        singular_path: /api/v2/firewall/traffic_shaper/queue
+        create_values:
+          name: bt_bd61_tsq
+          qlimit: 50
+          bandwidth: 100
+          linkshare_m2: "10%"
+        parent: /api/v2/firewall/traffic_shaper
+        notes: "Needs traffic shaper parent_id"
+      # /api/v2/firewall/traffic_shaper/limiters has no DELETE method (only GET+PUT) — skip
+      - path: /api/v2/firewall/traffic_shaper/limiter/queues
+        bulk_delete: true
+        singular_path: /api/v2/firewall/traffic_shaper/limiter/queue
+        create_values:
+          name: bt_bd61_limq
+          aqm: droptail
+        parent: /api/v2/firewall/traffic_shaper/limiter
+        notes: "Needs limiter parent_id"
+      - path: /api/v2/firewall/traffic_shaper/limiter/bandwidths
+        bulk_delete: true
+        singular_path: /api/v2/firewall/traffic_shaper/limiter/bandwidth
+        create_values:
+          bw: 50
+          bwscale: "Mb"
+        parent: /api/v2/firewall/traffic_shaper/limiter
+        notes: "Needs limiter parent_id"
+    notes: |
+      Sub-resource bulk deletes. Create parents first, then sub-resources, then bulk delete.
+      Order: schedule → time_ranges (bulk delete) → schedule cleanup.
+      Shaper → queues (bulk delete) → shaper cleanup.
+      Limiter → limiter queues + bandwidths (bulk delete) → limiter cleanup.
+
+  - number: 62
+    title: "Bulk Delete — Interface + Routing"
+    subsystem: interface
+    endpoints:
+      - path: /api/v2/interface/vlans
+        bulk_delete: true
+        singular_path: /api/v2/interface/vlan
+        create_values:
+          if: em2
+          tag: 300
+          pcp: 0
+      - path: /api/v2/interface/gres
+        bulk_delete: true
+        singular_path: /api/v2/interface/gre
+        create_values:
+          if: wan
+          remote_addr: "198.51.100.1"
+          tunnel_local_addr: "10.255.0.1"
+          tunnel_remote_addr: "10.255.0.2"
+          tunnel_remote_addr6: ""
+      - path: /api/v2/interface/groups
+        bulk_delete: true
+        singular_path: /api/v2/interface/group
+        create_values:
+          ifname: bt62grp
+          members: ["wan"]
+      - path: /api/v2/interface/laggs
+        bulk_delete: true
+        singular_path: /api/v2/interface/lagg
+        create_values:
+          members: ["em2"]
+          proto: none
+      - path: /api/v2/interfaces
+        bulk_delete: true
+        singular_path: /api/v2/interface
+        notes: "Bulk delete network interfaces — careful, may include system interfaces"
+      - path: /api/v2/routing/gateways
+        bulk_delete: true
+        singular_path: /api/v2/routing/gateway
+        create_values:
+          name: bt_bd62_gw
+          gateway: "10.0.2.1"
+          interface: wan
+          ipprotocol: inet
+          latencylow: 200
+          latencyhigh: 500
+          losslow: 10
+          losshigh: 20
+          loss_interval: 2000
+          time_period: 60000
+          interval: 500
+          alert_interval: 1000
+      - path: /api/v2/routing/gateway/groups
+        bulk_delete: true
+        singular_path: /api/v2/routing/gateway/group
+        create_values:
+          name: bt_bd62_gg
+          descr: bulk delete group
+          priorities:
+            - gateway: bt_bd62_gw
+              tier: 1
+        notes: "Needs gateway created first"
+      - path: /api/v2/routing/gateway/group/priorities
+        bulk_delete: true
+        singular_path: /api/v2/routing/gateway/group/priority
+        create_values:
+          gateway: bt_bd62_gw
+          tier: 2
+        parent: /api/v2/routing/gateway/group
+        notes: "Needs gateway group parent_id"
+      - path: /api/v2/routing/static_routes
+        bulk_delete: true
+        singular_path: /api/v2/routing/static_route
+        create_values:
+          network: "10.200.0.0/24"
+          gateway: bt_bd62_gw
+        notes: "Needs gateway name"
+    notes: |
+      Bulk delete interface and routing collections.
+      Order: create gateway → group → priorities → static routes.
+      Bulk delete: priorities → group → static routes → gateway.
+      VLANs use em2. LAGGs use em2. Network interfaces bulk delete should be last.
+
+  - number: 63
+    title: "Bulk Delete — DNS + DHCP Services"
+    subsystem: services
+    endpoints:
+      - path: /api/v2/services/dns_resolver/host_overrides
+        bulk_delete: true
+        singular_path: /api/v2/services/dns_resolver/host_override
+        create_values:
+          host: bt-bd63-ho
+          domain: example.com
+          ip: ["10.99.63.1"]
+          aliases: []
+      - path: /api/v2/services/dns_resolver/host_override/aliases
+        bulk_delete: true
+        singular_path: /api/v2/services/dns_resolver/host_override/alias
+        create_values:
+          host: testalias63
+          domain: alias63.example.com
+        parent: /api/v2/services/dns_resolver/host_override
+        notes: "Needs host override parent_id"
+      - path: /api/v2/services/dns_resolver/domain_overrides
+        bulk_delete: true
+        singular_path: /api/v2/services/dns_resolver/domain_override
+        create_values:
+          domain: bt-bd63.example.com
+          ip: "10.99.63.2"
+      - path: /api/v2/services/dns_resolver/access_lists
+        bulk_delete: true
+        singular_path: /api/v2/services/dns_resolver/access_list
+        create_values:
+          action: allow
+          name: bt_bd63_dnsacl
+          networks: []
+      - path: /api/v2/services/dns_resolver/access_list/networks
+        bulk_delete: true
+        singular_path: /api/v2/services/dns_resolver/access_list/network
+        create_values:
+          network: "10.63.0.0"
+          mask: 16
+        parent: /api/v2/services/dns_resolver/access_list
+        notes: "Needs access list parent_id"
+      - path: /api/v2/services/dns_forwarder/host_overrides
+        bulk_delete: true
+        singular_path: /api/v2/services/dns_forwarder/host_override
+        create_values:
+          domain: example.com
+          host: bt-bd63-fho
+          ip: "10.99.63.3"
+          aliases: []
+      - path: /api/v2/services/dns_forwarder/host_override/aliases
+        bulk_delete: true
+        singular_path: /api/v2/services/dns_forwarder/host_override/alias
+        create_values:
+          host: testalias63f
+          domain: alias63f.example.com
+        parent: /api/v2/services/dns_forwarder/host_override
+        notes: "Needs host override parent_id"
+      - path: /api/v2/services/dhcp_server/address_pools
+        bulk_delete: true
+        singular_path: /api/v2/services/dhcp_server/address_pool
+        create_values:
+          range_from: "192.168.1.220"
+          range_to: "192.168.1.230"
+        notes: "Uses static parent_id 'lan'"
+      - path: /api/v2/services/dhcp_server/static_mappings
+        bulk_delete: true
+        singular_path: /api/v2/services/dhcp_server/static_mapping
+        create_values:
+          mac: "AA:BB:CC:DD:EE:63"
+          ipaddr: "192.168.1.245"
+        notes: "Uses static parent_id 'lan'"
+      - path: /api/v2/services/dhcp_server/custom_options
+        bulk_delete: true
+        singular_path: /api/v2/services/dhcp_server/custom_option
+        create_values:
+          number: 253
+          type_: text
+          value: "http://bd63.example.com"
+        notes: "Uses static parent_id 'lan'"
+    notes: |
+      Bulk delete DNS resolver, DNS forwarder, and DHCP sub-resources.
+      DNS sub-resources: create parent → sub-resource → bulk delete sub → delete parent.
+      DHCP sub-resources use static parent_id='lan'.
+
+  - number: 64
+    title: "Bulk Delete — BIND + ACME + Small Services"
+    subsystem: services
+    endpoints:
+      - path: /api/v2/services/bind/access_lists
+        bulk_delete: true
+        singular_path: /api/v2/services/bind/access_list
+        create_values:
+          entries:
+            - value: "10.64.0.0/8"
+              description: bd64 entry
+          name: bt_bd64_bacl
+      - path: /api/v2/services/bind/access_list/entries
+        bulk_delete: true
+        singular_path: /api/v2/services/bind/access_list/entry
+        create_values:
+          value: "10.64.1.0/16"
+        parent: /api/v2/services/bind/access_list
+        notes: "Needs BIND access list parent_id"
+      - path: /api/v2/services/bind/views
+        bulk_delete: true
+        singular_path: /api/v2/services/bind/view
+        create_values:
+          name: bt_bd64_view
+      - path: /api/v2/services/bind/zones
+        bulk_delete: true
+        singular_path: /api/v2/services/bind/zone
+        create_values:
+          name: bt-bd64.example.com
+          nameserver: ns1.example.com
+          mail: admin.example.com
+          serial: 2024010101
+          forwarders: []
+          baseip: "10.99.64.0"
+      - path: /api/v2/services/bind/sync/remote_hosts
+        bulk_delete: true
+        singular_path: /api/v2/services/bind/sync/remote_host
+        create_values:
+          syncdestinenable: false
+          syncdesttimeout: "120"
+          syncprotocol: http
+          ipaddress: "10.99.64.60"
+          syncport: "80"
+          username: admin
+          password: pfsense
+      - path: /api/v2/services/acme/account_keys
+        bulk_delete: true
+        singular_path: /api/v2/services/acme/account_key
+        create_values:
+          name: bt_bd64_key
+          email: "bd64@example.com"
+          acmeserver: "letsencrypt-staging-2"
+      - path: /api/v2/services/acme/certificates
+        bulk_delete: true
+        singular_path: /api/v2/services/acme/certificate
+        create_values:
+          name: bt_bd64_cert
+          acmeserver: "letsencrypt-staging-2"
+          a_domainlist:
+            - name: bd64.example.com
+              method: standalone
+      - path: /api/v2/services/cron/jobs
+        bulk_delete: true
+        singular_path: /api/v2/services/cron/job
+        create_values:
+          command: "/bin/echo bt_bd64_cron"
+          who: root
+          minute: "30"
+          hour: "3"
+          mday: "*"
+          month: "*"
+          wday: "*"
+      - path: /api/v2/services/ntp/time_servers
+        bulk_delete: true
+        singular_path: /api/v2/services/ntp/time_server
+        create_values:
+          timeserver: time.bd64.example.com
+          type_: server
+          prefer: false
+          noselect: false
+          ispool: false
+      - path: /api/v2/services/service_watchdogs
+        bulk_delete: true
+        singular_path: /api/v2/services/service_watchdog
+        create_values:
+          name: sshd
+    notes: |
+      Bulk delete BIND, ACME, cron, NTP, and service watchdog collections.
+      Enable BIND settings first if needed.
+      BIND sub-resources: create parent → entry → bulk delete entries → delete parent.
+
+  - number: 65
+    title: "Bulk Delete — FreeRADIUS + HAProxy"
+    subsystem: services
+    endpoints:
+      - path: /api/v2/services/freeradius/clients
+        bulk_delete: true
+        singular_path: /api/v2/services/freeradius/client
+        create_values:
+          addr: "10.99.65.90"
+          shortname: bt_bd65_frcl
+          secret: TestSecret65
+      - path: /api/v2/services/freeradius/interfaces
+        bulk_delete: true
+        singular_path: /api/v2/services/freeradius/interface
+        create_values:
+          addr: "127.0.0.1"
+          ip_version: ipaddr
+      - path: /api/v2/services/freeradius/users
+        bulk_delete: true
+        singular_path: /api/v2/services/freeradius/user
+        create_values:
+          username: bt_bd65_fruser
+          password: TestPass65
+          motp_secret: ""
+          motp_pin: ""
+      - path: /api/v2/services/haproxy/files
+        bulk_delete: true
+        singular_path: /api/v2/services/haproxy/file
+        create_values:
+          name: bt_bd65_file
+          content: "PCFET0NUWVBFIGh0bWw+"
+      - path: /api/v2/services/haproxy/backends
+        bulk_delete: true
+        singular_path: /api/v2/services/haproxy/backend
+        create_values:
+          name: bt_bd65_be
+          agent_port: "0"
+          persist_cookie_name: SRVID
+      - path: /api/v2/services/haproxy/backend/acls
+        bulk_delete: true
+        singular_path: /api/v2/services/haproxy/backend/acl
+        create_values:
+          name: bt_bd65_bacl
+          expression: host_starts_with
+          value: bd65.example.com
+        parent: /api/v2/services/haproxy/backend
+        notes: "Needs backend parent_id"
+      - path: /api/v2/services/haproxy/backend/actions
+        bulk_delete: true
+        singular_path: /api/v2/services/haproxy/backend/action
+        create_values:
+          action: http-request_lua
+          lua_function: bd65_func
+          acl: bt_bd65_bacl
+        parent: /api/v2/services/haproxy/backend
+        notes: "Needs backend parent_id + ACL"
+      - path: /api/v2/services/haproxy/backend/servers
+        bulk_delete: true
+        singular_path: /api/v2/services/haproxy/backend/server
+        create_values:
+          name: bt_bd65_bsrv
+          address: "10.99.65.50"
+          port: "8065"
+        parent: /api/v2/services/haproxy/backend
+        notes: "Needs backend parent_id"
+      - path: /api/v2/services/haproxy/backend/errorfiles
+        bulk_delete: true
+        singular_path: /api/v2/services/haproxy/backend/error_file
+        create_values:
+          errorcode: 503
+          errorfile: bt_bd65_file
+        parent: /api/v2/services/haproxy/backend
+        notes: "Needs backend parent_id + HAProxy file"
+      - path: /api/v2/services/haproxy/frontends
+        bulk_delete: true
+        singular_path: /api/v2/services/haproxy/frontend
+        create_values:
+          name: bt_bd65_fe
+          type_: http
+      - path: /api/v2/services/haproxy/frontend/acls
+        bulk_delete: true
+        singular_path: /api/v2/services/haproxy/frontend/acl
+        create_values:
+          name: bt_bd65_facl
+          expression: host_starts_with
+          value: bd65fe.example.com
+        parent: /api/v2/services/haproxy/frontend
+        notes: "Needs frontend parent_id"
+      - path: /api/v2/services/haproxy/frontend/actions
+        bulk_delete: true
+        singular_path: /api/v2/services/haproxy/frontend/action
+        create_values:
+          action: http-request_lua
+          lua_function: bd65fe_func
+          acl: bt_bd65_facl
+        parent: /api/v2/services/haproxy/frontend
+        notes: "Needs frontend parent_id + ACL"
+      - path: /api/v2/services/haproxy/frontend/addresses
+        bulk_delete: true
+        singular_path: /api/v2/services/haproxy/frontend/address
+        create_values:
+          extaddr: custom
+          extaddr_custom: "10.99.65.80:80"
+        parent: /api/v2/services/haproxy/frontend
+        notes: "Needs frontend parent_id"
+      - path: /api/v2/services/haproxy/frontend/certificates
+        bulk_delete: true
+        singular_path: /api/v2/services/haproxy/frontend/certificate
+        create_values: {}
+        parent: /api/v2/services/haproxy/frontend
+        notes: "Needs frontend parent_id"
+      - path: /api/v2/services/haproxy/frontend/error_files
+        bulk_delete: true
+        singular_path: /api/v2/services/haproxy/frontend/error_file
+        create_values:
+          errorcode: 503
+          errorfile: bt_bd65_file
+        parent: /api/v2/services/haproxy/frontend
+        notes: "Needs frontend parent_id + HAProxy file"
+    notes: |
+      Bulk delete FreeRADIUS and HAProxy collections.
+      HAProxy: create backend/frontend → sub-resources → bulk delete sub-resources → delete parents.
+      HAProxy sub-resources need parent_id from their parent backend/frontend.
+      Backend actions need an ACL created first.
+      Error files need HAProxy file resource.
+
+  - number: 66
+    title: "Bulk Delete — System + Users + Auth"
+    subsystem: system
+    endpoints:
+      - path: /api/v2/system/tunables
+        bulk_delete: true
+        singular_path: /api/v2/system/tunable
+        create_values:
+          tunable: net.inet.tcp.tso
+          value: "0"
+      - path: /api/v2/system/certificate_authorities
+        bulk_delete: true
+        singular_path: /api/v2/system/certificate_authority
+        notes: "Bulk delete all CAs — may include system CAs"
+      - path: /api/v2/system/certificates
+        bulk_delete: true
+        singular_path: /api/v2/system/certificate
+        notes: "Bulk delete all certificates — may include system certs"
+      - path: /api/v2/system/crls
+        bulk_delete: true
+        singular_path: /api/v2/system/crl
+        notes: "Bulk delete all CRLs"
+      - path: /api/v2/users
+        bulk_delete: true
+        singular_path: /api/v2/user
+        create_values:
+          username: bt_bd66_user
+          password: Testpass66!Abc
+      - path: /api/v2/user/groups
+        bulk_delete: true
+        singular_path: /api/v2/user/group
+        create_values:
+          name: bt_bd66_group
+          scope: local
+      - path: /api/v2/user/auth_servers
+        bulk_delete: true
+        singular_path: /api/v2/user/auth_server
+        create_values:
+          type_: ldap
+          name: bt_bd66_ldap
+          host: "10.99.66.7"
+          ldap_port: "389"
+          ldap_urltype: "Standard TCP"
+          ldap_protver: 3
+          ldap_scope: one
+          ldap_basedn: "dc=example,dc=com"
+          ldap_authcn: "ou=people,dc=example,dc=com"
+          ldap_extended_enabled: false
+          ldap_attr_user: uid
+          ldap_attr_group: cn
+          ldap_attr_member: member
+          ldap_attr_groupobj: posixGroup
+          ldap_timeout: 25
+      - path: /api/v2/auth/keys
+        bulk_delete: true
+        singular_path: /api/v2/auth/key
+        notes: "Bulk delete all API keys — WARNING: may lock you out! Only clear test keys."
+      - path: /api/v2/diagnostics/config_history/revisions
+        bulk_delete: true
+        singular_path: /api/v2/diagnostics/config_history/revision
+        notes: "Bulk delete config history revisions"
+    notes: |
+      Bulk delete system, user, auth, and diagnostics collections.
+      WARNING: Deleting all API keys locks you out. Deleting all CAs/certs may break HTTPS.
+      Tester should be careful — create throwaway resources and only bulk-delete those.
+      For CAs/certs/CRLs: may bulk delete empty or only delete test resources.
+      For auth/keys: the tester should skip this if it would lock out API access.
+
+  - number: 67
+    title: "Bulk Delete — VPN + Status"
+    subsystem: vpn
+    endpoints:
+      - path: /api/v2/vpn/ipsec/phase1s
+        bulk_delete: true
+        singular_path: /api/v2/vpn/ipsec/phase1
+        create_values:
+          iketype: ikev2
+          protocol: inet
+          interface: wan
+          remote_gateway: "10.99.67.20"
+          authentication_method: pre_shared_key
+          pre_shared_key: TestPSK67
+          myid_type: myaddress
+          peerid_type: peeraddress
+      - path: /api/v2/vpn/ipsec/phase1/encryptions
+        bulk_delete: true
+        singular_path: /api/v2/vpn/ipsec/phase1/encryption
+        create_values:
+          encryption_algorithm_name: aes
+          encryption_algorithm_keylen: 256
+          hash_algorithm: sha256
+          dhgroup: 14
+        parent: /api/v2/vpn/ipsec/phase1
+        notes: "Needs phase1 parent_id"
+      - path: /api/v2/vpn/ipsec/phase2s
+        bulk_delete: true
+        singular_path: /api/v2/vpn/ipsec/phase2
+        create_values:
+          mode: tunnel
+          localid_type: network
+          localid_address: "10.67.0.0"
+          localid_netbits: 24
+          remoteid_type: network
+          remoteid_address: "10.200.67.0"
+          remoteid_netbits: 24
+          protocol: esp
+        notes: "Needs ikeid from phase1"
+      - path: /api/v2/vpn/ipsec/phase2/encryptions
+        bulk_delete: true
+        singular_path: /api/v2/vpn/ipsec/phase2/encryption
+        create_values:
+          encryption_algorithm_name: aes
+          encryption_algorithm_keylen: 256
+          hash_algorithm: sha256
+        parent: /api/v2/vpn/ipsec/phase2
+        notes: "Needs phase2 parent_id"
+      - path: /api/v2/vpn/openvpn/servers
+        bulk_delete: true
+        singular_path: /api/v2/vpn/openvpn/server
+        create_values:
+          mode: p2p_tls
+          protocol: UDP4
+          dev_mode: tun
+          interface: wan
+          local_port: "11967"
+          tunnel_network: "10.167.0.0/24"
+        notes: "May need CA/cert for TLS mode"
+      - path: /api/v2/vpn/openvpn/clients
+        bulk_delete: true
+        singular_path: /api/v2/vpn/openvpn/client
+        create_values:
+          mode: p2p_tls
+          protocol: UDP4
+          dev_mode: tun
+          interface: wan
+          server_addr: "10.99.67.30"
+          server_port: "1194"
+      - path: /api/v2/vpn/openvpn/csos
+        bulk_delete: true
+        singular_path: /api/v2/vpn/openvpn/cso
+        create_values:
+          common_name: bt_bd67_cso
+          tunnel_network: "10.167.1.0/24"
+      - path: /api/v2/vpn/openvpn/client_export/configs
+        bulk_delete: true
+        singular_path: /api/v2/vpn/openvpn/client_export/config
+        notes: "May need OVPN server setup first"
+      - path: /api/v2/vpn/wireguard/tunnels
+        bulk_delete: true
+        singular_path: /api/v2/vpn/wireguard/tunnel
+        create_values:
+          name: bt_bd67_tun
+          listenport: "51867"
+          privatekey: "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY="
+          addresses: []
+      - path: /api/v2/vpn/wireguard/tunnel/addresses
+        bulk_delete: true
+        singular_path: /api/v2/vpn/wireguard/tunnel/address
+        create_values:
+          address: "10.167.0.1"
+          mask: 24
+        parent: /api/v2/vpn/wireguard/tunnel
+        notes: "Needs tunnel parent_id"
+      - path: /api/v2/vpn/wireguard/peers
+        bulk_delete: true
+        singular_path: /api/v2/vpn/wireguard/peer
+        create_values:
+          publickey: "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY="
+        notes: "Needs tunnel name for tun field"
+      - path: /api/v2/vpn/wireguard/peer/allowed_ips
+        bulk_delete: true
+        singular_path: /api/v2/vpn/wireguard/peer/allowed_ip
+        create_values:
+          address: "10.200.67.0"
+          mask: 24
+        parent: /api/v2/vpn/wireguard/peer
+        notes: "Needs peer parent_id"
+      - path: /api/v2/status/dhcp_server/leases
+        bulk_delete: true
+        notes: "Bulk delete DHCP leases — no create needed"
+      - path: /api/v2/status/openvpn/server/connections
+        bulk_delete: true
+        notes: "Bulk delete OVPN connections — may be empty if no OVPN server"
+    notes: |
+      Bulk delete VPN and status collections.
+      IPsec: create P1 → P1 enc → P2 → P2 enc → bulk delete in reverse.
+      OpenVPN: may need CA/cert chain for TLS mode servers.
+      WireGuard: tunnel → addresses + peers → allowed_ips → bulk delete in reverse.
+      Status endpoints (leases, connections) may be empty — just call DELETE anyway.
 
   # ── Adversarial tasks (40-44) ──────────────────────────────────────────────
 

@@ -5,10 +5,10 @@
 **Objective**: Exercise all tools in the diagnostics subsystem through CRUD lifecycle, settings, and actions.
 
 **Tools to exercise** (9):
-- `pfsense_post_/api/v2/diagnostics/arp_table/entry`
-- `pfsense_post_/api/v2/diagnostics/config_history/revision`
-- `pfsense_post_/api/v2/diagnostics/table`
-- `pfsense_post_/api/v2/firewall/state`
+- `pfsense_delete_diagnostics_arp_table_entry`
+- `pfsense_delete_diagnostics_config_history_revision`
+- `pfsense_delete_diagnostics_table`
+- `pfsense_delete_firewall_state`
 - `pfsense_create_system_restapi_access_list_entry`
 - `pfsense_get_system_restapi_access_list_entry`
 - `pfsense_update_system_restapi_access_list_entry`
@@ -16,13 +16,13 @@
 - `pfsense_create_auth_key`
 
 **Steps**:
-1. **Execute** `pfsense_post_/api/v2/diagnostics/arp_table/entry` with `confirm=True` (List ARP table first, pick an entry, DELETE it by ID.):
+1. **Execute** `pfsense_delete_diagnostics_arp_table_entry` with `confirm=True` (List ARP table first, pick an entry, DELETE it by ID.):
 (no parameters needed)
-2. **Execute** `pfsense_post_/api/v2/diagnostics/config_history/revision` with `confirm=True` (List config history revisions, DELETE one by ID.):
+2. **Execute** `pfsense_delete_diagnostics_config_history_revision` with `confirm=True` (List config history revisions, DELETE one by ID.):
 (no parameters needed)
-3. **Execute** `pfsense_post_/api/v2/diagnostics/table` with `confirm=True` (List PF tables, pick 'virusprot', DELETE entries from it.):
+3. **Execute** `pfsense_delete_diagnostics_table` with `confirm=True` (List PF tables, pick 'virusprot', DELETE entries from it.):
 (no parameters needed)
-4. **Execute** `pfsense_post_/api/v2/firewall/state` with `confirm=True` (List firewall states, DELETE one by ID (if any exist).):
+4. **Execute** `pfsense_delete_firewall_state` with `confirm=True` (List firewall states, DELETE one by ID (if any exist).):
 (no parameters needed)
 5. **Create** using `pfsense_create_system_restapi_access_list_entry` with `confirm=True`:
     - `type_`: `allow`

@@ -267,7 +267,8 @@ def generate_action_steps(
     notes = ep.get("notes", "")
     needs_basic_auth = ep.get("needs_basic_auth", False)
 
-    action_tool = get_tool_name(tool_map, path, "post")
+    method = ep.get("action_method", "post")
+    action_tool = get_tool_name(tool_map, path, method)
 
     auth_note = " **Note: requires BasicAuth (admin:pfsense), not API key.**" if needs_basic_auth else ""
     extra_note = f" ({notes})" if notes else ""
@@ -337,6 +338,61 @@ def generate_replace_steps(
     # GET again to verify
     all_steps.append(
         f"{step_num}. **List** again using `{list_tool}` — verify nothing changed"
+    )
+    step_num += 1
+
+    return step_num
+
+
+def generate_bulk_delete_steps(
+    ep: dict,
+    tool_map: dict,
+    step_num: int,
+    all_steps: list[str],
+    tools_exercised: list[str],
+) -> int:
+    """Generate bulk delete steps: create resource → list → bulk DELETE → verify. Returns next step number."""
+    plural_path = ep["path"]
+    singular_path = ep.get("singular_path", plural_path.rstrip("s"))  # Heuristic: remove trailing 's'
+    notes = ep.get("notes", "")
+    create_values = ep.get("create_values", {})
+    parent_note = ""
+    if ep.get("parent"):
+        parent_note = f" (use parent_id from the parent resource)"
+
+    extra_note = f" ({notes})" if notes else ""
+
+    # Find tools
+    delete_plural_tool = get_tool_name(tool_map, plural_path, "delete")
+    list_tool = get_tool_name(tool_map, plural_path, "get")
+    create_tool = get_tool_name(tool_map, singular_path, "post")
+
+    # Step 1: Create a resource via singular POST (if create_values provided)
+    if create_values:
+        vals_str = format_values(create_values, indent=2)
+        all_steps.append(
+            f"{step_num}. **Create** a test resource using `{create_tool}` with `confirm=True`{parent_note}:\n{vals_str}"
+        )
+        tools_exercised.append(create_tool)
+        step_num += 1
+
+    # Step 2: List to verify it exists
+    all_steps.append(
+        f"{step_num}. **List** using `{list_tool}` — verify resource exists{extra_note}"
+    )
+    tools_exercised.append(list_tool)
+    step_num += 1
+
+    # Step 3: Bulk delete
+    all_steps.append(
+        f"{step_num}. **Bulk delete** using `{delete_plural_tool}` with `confirm=True` — delete ALL resources in this collection"
+    )
+    tools_exercised.append(delete_plural_tool)
+    step_num += 1
+
+    # Step 4: List again to verify empty
+    all_steps.append(
+        f"{step_num}. **List** using `{list_tool}` — verify collection is empty"
     )
     step_num += 1
 
@@ -413,6 +469,8 @@ def generate_systematic_task(task: dict, tool_map: dict, task_num: str) -> str:
             ep_type = "read_only"
         elif ep.get("replace", False):
             ep_type = "replace"
+        elif ep.get("bulk_delete", False):
+            ep_type = "bulk_delete"
         elif ep.get("setup_only", False):
             ep_type = "crud"  # Use CRUD generator but with setup_only flag
 
@@ -438,6 +496,10 @@ def generate_systematic_task(task: dict, tool_map: dict, task_num: str) -> str:
             )
         elif ep_type == "replace":
             step_num = generate_replace_steps(
+                ep, tool_map, step_num, all_steps, tools_exercised
+            )
+        elif ep_type == "bulk_delete":
+            step_num = generate_bulk_delete_steps(
                 ep, tool_map, step_num, all_steps, tools_exercised
             )
 
