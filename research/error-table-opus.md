@@ -1,6 +1,6 @@
 # Known pfSense API Bugs
 
-All 16 bugs independently verified via Opus 4.6 diagnostic runs. 0 generator bugs remain.
+16 bugs identified so far, independently verified via Opus 4.6 diagnostic runs against pfSense CE 2.8.1 + REST API v2.7.1. All appear to be upstream pfSense issues rather than generator bugs, though we may be wrong — if you hit something new, use `pfsense_report_issue` to let us know.
 
 ## Summary
 
@@ -50,10 +50,10 @@ All 6 return: `500 MODEL_CANNOT_GET_CONFIG_PATH_WITHOUT_PARENT_MODEL`
 
 ## Generator Error History
 
-Prior to generator fixes, Opus 4.6 had 15 first-attempt errors. All 12 generator-fixable errors were eliminated:
+Prior to generator fixes, Opus 4.6 had 15 first-attempt errors across 670 tested tools. 12 were traced to generator issues and fixed:
 
 - 8 conditional required field downgrades (detect "only available when" in descriptions)
 - 2 BasicAuth endpoint warnings (auth/key and auth/jwt flagged in docstrings)
 - 2 docstring improvements (PF table names, IPsec hash enum prefix)
 
-Result: **0 generator bugs, 0 Claude Code bugs, 0 OpenAPI spec issues** — only the 16 unfixable pfSense upstream bugs above remain.
+After fixes, the Opus diagnostic run showed no remaining generator or spec issues — the only failures observed were the 16 upstream bugs above. Testing was thorough but not exhaustive; edge cases may exist that our test suite didn't cover.
