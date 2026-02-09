@@ -661,61 +661,16 @@ This loop is what took us from 15 Opus errors → 3 (all pfSense bugs). Apply it
 
 **Expected yield**: +80 tools (5 blocked by pfSense bugs) → 660/677 (97.5%)
 
-### Sprint 5: Destructive / Ephemeral VM Tests
+### TODO: Ephemeral VM Tests for Remaining 9 Tools
 
-**Goal**: Cover the remaining ~7 tools that require special handling.
+9 uncovered tools need ephemeral one-shot VMs or infrastructure changes (halt, reboot, webgui, restapi version, system packages, sync, OVPN connection) — low priority at 98.7% coverage.
 
-**Approach**: Use ephemeral one-shot VMs. Each test boots a fresh golden image copy, runs one destructive operation, and discards the VM.
-
-| Tool | Test Strategy |
-|------|--------------|
-| `pfsense_post_diagnostics_reboot` | Boot VM → reboot → wait for API → verify. Discard VM. |
-| `pfsense_post_diagnostics_halt_system` | Boot VM → halt → verify VM stopped. Discard VM. |
-| `pfsense_update_system_web_gui_settings` | Boot VM → change port → verify API on new port → discard. |
-| `pfsense_update_system_restapi_version` | Boot VM → attempt version change → record result → discard. |
-| `pfsense_get_services_ha_proxy_settings_dns_resolver` | Known 500 bug — run, record failure, classify as pfSense bug. |
-| `pfsense_get_services_ha_proxy_settings_email_mailer` | Known 500 bug — run, record failure, classify as pfSense bug. |
-| `pfsense_create_system_restapi_settings_sync` | Needs BasicAuth + HA — may remain untestable without HA peer. |
-
-**Implementation**: Modify `run-bank-test.sh` (or new `run-destructive-test.sh`) to:
-1. Copy golden → ephemeral disk per task
-2. Boot VM per task
-3. Run single task
-4. Kill VM, discard disk
-5. Repeat for next task
-
-**Expected yield**: +4-5 tools (2 are known pfSense 500 bugs, 1 needs HA) → 665/677 (98.2%)
-
-### Sprint 6: Final Sweep + Documentation
-
-**Goal**: Achieve maximum coverage, document everything.
-
-**Steps**:
-1. Re-run `analyze-results.py` across ALL runs — get definitive coverage number
-2. For any remaining uncovered tools, categorize as: permanently blocked (pfSense bug), infrastructure limitation (QEMU/HA), or missing test (add it)
-3. Run final full-suite Opus pass to confirm all tasks green
-4. Update CLAUDE.md coverage numbers, MCP best practices with any new findings
-5. Create `research/final-coverage-report.md` with per-tool status
-6. Save all failure analyses from sprints 1-5 into `research/` folder
-
-### Sprint Execution Order
-
-```
-Sprint 1 → Sprint 2+3 (parallel, independent) → Sprint 4 → Sprint 5 → Sprint 6
-```
-
-Sprints 2 and 3 can overlap since they target different task files. Sprint 4 (bulk deletes) must come after 2+3 since some bulk deletes need resources from sub-resource tasks. Sprint 5 needs a modified test harness. Sprint 6 is final documentation.
-
-### Estimated Coverage Progression
+### Coverage Progression (Actual)
 
 | After Sprint | Tools Covered | Coverage | Delta |
 |-------------|--------------|---------|-------|
-| Baseline | 514 | 75.9% | — |
-| Sprint 1 (PUT/replace) | 534 | 78.9% | +20 |
-| Sprint 2+3 (CRUD + deletes) | 580 | 85.7% | +46 |
-| Sprint 4 (bulk deletes) | 660 | 97.5% | +80 |
-| Sprint 5 (destructive) | 665 | 98.2% | +5 |
-| Sprint 6 (sweep) | ~668 | 98.7% | +3 |
-| **Theoretical max** | **670** | **98.9%** | — |
-
-7 tools permanently untestable. 2 of those are pfSense 500 bugs that we document but can't fix.
+| Baseline | 504 | 74.4% | — |
+| Sprint 1 (PUT/replace) | 544 | 80.4% | +40 |
+| Sprint 2 (sub-resource CRUD) | 579 | 85.5% | +35 |
+| Sprint 3 (bulk DELETEs) | 641 | 94.7% | +62 |
+| Sprint 4 (recoverable + HAProxy) | **668** | **98.7%** | +27 |
