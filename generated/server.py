@@ -746,7 +746,7 @@ async def pfsense_create_firewall_alias(
 
 @mcp.tool()
 async def pfsense_update_firewall_alias(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     address: list[str] | None = None,
     descr: str | None = None,
@@ -1019,7 +1019,7 @@ async def pfsense_create_firewall_nat_one_to_one_mapping(
 
 @mcp.tool()
 async def pfsense_update_firewall_nat_one_to_one_mapping(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     descr: str | None = None,
     destination: str | None = None,
@@ -1308,7 +1308,7 @@ async def pfsense_create_firewall_nat_outbound_mapping(
 
 @mcp.tool()
 async def pfsense_update_firewall_nat_outbound_mapping(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     descr: str | None = None,
     destination: str | None = None,
@@ -1659,7 +1659,7 @@ async def pfsense_create_firewall_nat_port_forward(
 
 @mcp.tool()
 async def pfsense_update_firewall_nat_port_forward(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     associated_rule_id: str | None = None,
     descr: str | None = None,
@@ -2012,7 +2012,7 @@ async def pfsense_create_firewall_rule(
 
 @mcp.tool()
 async def pfsense_update_firewall_rule(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     ackqueue: str | None = None,
     defaultqueue: str | None = None,
@@ -2313,7 +2313,7 @@ async def pfsense_create_firewall_schedule(
 
 @mcp.tool()
 async def pfsense_update_firewall_schedule(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     descr: str | None = None,
     name: str | None = None,
@@ -2448,7 +2448,7 @@ async def pfsense_create_firewall_schedule_time_range(
 
 @mcp.tool()
 async def pfsense_update_firewall_schedule_time_range(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     day: list[int] | None = None,
@@ -2909,7 +2909,7 @@ async def pfsense_create_firewall_traffic_shaper(
 
 @mcp.tool()
 async def pfsense_update_firewall_traffic_shaper(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     bandwidth: int | None = None,
     bandwidthtype: str | None = None,
@@ -3060,7 +3060,7 @@ async def pfsense_create_firewall_traffic_shaper_limiter_bandwidth(
 
 @mcp.tool()
 async def pfsense_update_firewall_traffic_shaper_limiter_bandwidth(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     bw: int | None = None,
@@ -3436,7 +3436,7 @@ async def pfsense_create_firewall_traffic_shaper_limiter(
 
 @mcp.tool()
 async def pfsense_update_firewall_traffic_shaper_limiter(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     aqm: str | None = None,
     bandwidth: list[dict[str, Any]] | None = None,
@@ -3867,7 +3867,7 @@ async def pfsense_create_firewall_traffic_shaper_limiter_queue(
 
 @mcp.tool()
 async def pfsense_update_firewall_traffic_shaper_limiter_queue(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     aqm: str | None = None,
@@ -4342,7 +4342,7 @@ async def pfsense_create_firewall_traffic_shaper_queue(
 
 @mcp.tool()
 async def pfsense_update_firewall_traffic_shaper_queue(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     bandwidth: int | None = None,
@@ -4792,7 +4792,7 @@ async def pfsense_create_firewall_virtual_ip(
 
 @mcp.tool()
 async def pfsense_update_firewall_virtual_ip(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     advbase: int | None = None,
     advskew: int | None = None,
@@ -5109,7 +5109,7 @@ async def pfsense_create_interface_bridge(
 
 @mcp.tool()
 async def pfsense_update_interface_bridge(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     descr: str | None = None,
     members: list[str] | None = None,
@@ -5286,7 +5286,7 @@ async def pfsense_create_interface_gre(
 
 @mcp.tool()
 async def pfsense_update_interface_gre(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     add_static_route: bool | None = None,
     descr: str | None = None,
@@ -5498,7 +5498,7 @@ async def pfsense_create_interface_group(
 
 @mcp.tool()
 async def pfsense_update_interface_group(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     descr: str | None = None,
     ifname: str | None = None,
@@ -5719,7 +5719,7 @@ async def pfsense_create_interface_lagg(
 
 @mcp.tool()
 async def pfsense_update_interface_lagg(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     descr: str | None = None,
     failovermaster: str | None = None,
@@ -5919,7 +5919,7 @@ async def pfsense_create_interface_vlan(
 
 @mcp.tool()
 async def pfsense_update_interface_vlan(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     descr: str | None = None,
     if_: str | None = None,
@@ -6267,7 +6267,7 @@ async def pfsense_create_network_interface(
 
 @mcp.tool()
 async def pfsense_update_network_interface(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     adv_dhcp_config_advanced: bool | None = None,
     adv_dhcp_config_file_override: bool | None = None,
@@ -6762,7 +6762,7 @@ async def pfsense_create_routing_gateway(
 
 @mcp.tool()
 async def pfsense_update_routing_gateway(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     action_disable: bool | None = None,
     alert_interval: int | None = None,
@@ -6969,7 +6969,7 @@ async def pfsense_create_routing_gateway_group(
 
 @mcp.tool()
 async def pfsense_update_routing_gateway_group(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     descr: str | None = None,
     name: str | None = None,
@@ -7169,7 +7169,7 @@ async def pfsense_create_routing_gateway_group_priority(
 
 @mcp.tool()
 async def pfsense_update_routing_gateway_group_priority(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     gateway: str | None = None,
@@ -7434,7 +7434,7 @@ async def pfsense_create_routing_static_route(
 
 @mcp.tool()
 async def pfsense_update_routing_static_route(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     descr: str | None = None,
     disabled: bool | None = None,
@@ -7631,7 +7631,7 @@ async def pfsense_create_services_acme_account_key(
 
 @mcp.tool()
 async def pfsense_update_services_acme_account_key(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     accountkey: str | None = None,
     acmeserver: str | None = None,
@@ -7899,7 +7899,7 @@ async def pfsense_create_services_acme_certificate_action(
 
 @mcp.tool()
 async def pfsense_update_services_acme_certificate_action(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     command: str | None = None,
@@ -9193,7 +9193,7 @@ async def pfsense_create_services_acme_certificate_domain(
 
 @mcp.tool()
 async def pfsense_update_services_acme_certificate_domain(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     ULTRA_PWD: str | None = None,
@@ -10515,7 +10515,7 @@ async def pfsense_create_services_acme_certificate(
 
 @mcp.tool()
 async def pfsense_update_services_acme_certificate(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     a_actionlist: list[dict[str, Any]] | None = None,
     a_domainlist: list[dict[str, Any]] | None = None,
@@ -10900,7 +10900,7 @@ async def pfsense_create_services_bind_access_list(
 
 @mcp.tool()
 async def pfsense_update_services_bind_access_list(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     description: str | None = None,
     entries: list[dict[str, Any]] | None = None,
@@ -11076,7 +11076,7 @@ async def pfsense_create_services_bind_access_list_entry(
 
 @mcp.tool()
 async def pfsense_update_services_bind_access_list_entry(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     description: str | None = None,
@@ -11393,7 +11393,7 @@ async def pfsense_create_services_bind_sync_remote_host(
 
 @mcp.tool()
 async def pfsense_update_services_bind_sync_remote_host(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     ipaddress: str | None = None,
     password: str | None = None,
@@ -11654,7 +11654,7 @@ async def pfsense_create_services_bind_view(
 
 @mcp.tool()
 async def pfsense_update_services_bind_view(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     allow_recursion: list[str] | None = None,
     bind_custom_options: str | None = None,
@@ -11968,7 +11968,7 @@ async def pfsense_create_services_bind_zone(
 
 @mcp.tool()
 async def pfsense_update_services_bind_zone(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     allowquery: list[str] | None = None,
     allowtransfer: list[str] | None = None,
@@ -12198,7 +12198,7 @@ async def pfsense_create_services_bind_zone_record(
 
 @mcp.tool()
 async def pfsense_update_services_bind_zone_record(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     name: str | None = None,
@@ -12420,7 +12420,7 @@ async def pfsense_create_services_cron_job(
 
 @mcp.tool()
 async def pfsense_update_services_cron_job(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     command: str | None = None,
     hour: str | None = None,
@@ -12740,7 +12740,7 @@ async def pfsense_create_services_dhcp_server_address_pool(
 
 @mcp.tool()
 async def pfsense_update_services_dhcp_server_address_pool(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     defaultleasetime: int | None = None,
@@ -13047,7 +13047,7 @@ async def pfsense_create_services_dhcp_server_custom_option(
 
 @mcp.tool()
 async def pfsense_update_services_dhcp_server_custom_option(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     number: int | None = None,
@@ -13335,7 +13335,7 @@ async def pfsense_create_services_dhcp_server(
 
 @mcp.tool()
 async def pfsense_update_services_dhcp_server(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     defaultleasetime: int | None = None,
     denyunknown: str | None = None,
@@ -13602,7 +13602,7 @@ async def pfsense_create_services_dhcp_server_static_mapping(
 
 @mcp.tool()
 async def pfsense_update_services_dhcp_server_static_mapping(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     arp_table_static_entry: bool | None = None,
@@ -13934,7 +13934,7 @@ async def pfsense_create_services_dns_forwarder_host_override_alias(
 
 @mcp.tool()
 async def pfsense_update_services_dns_forwarder_host_override_alias(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     description: str | None = None,
@@ -14138,7 +14138,7 @@ async def pfsense_create_services_dns_forwarder_host_override(
 
 @mcp.tool()
 async def pfsense_update_services_dns_forwarder_host_override(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     aliases: list[dict[str, Any]] | None = None,
     descr: str | None = None,
@@ -14363,7 +14363,7 @@ async def pfsense_create_services_dns_resolver_access_list(
 
 @mcp.tool()
 async def pfsense_update_services_dns_resolver_access_list(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     action: str | None = None,
     description: str | None = None,
@@ -14498,7 +14498,7 @@ async def pfsense_create_services_dns_resolver_access_list_network(
 
 @mcp.tool()
 async def pfsense_update_services_dns_resolver_access_list_network(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     description: str | None = None,
@@ -14820,7 +14820,7 @@ async def pfsense_create_services_dns_resolver_domain_override(
 
 @mcp.tool()
 async def pfsense_update_services_dns_resolver_domain_override(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     descr: str | None = None,
     domain: str | None = None,
@@ -15049,7 +15049,7 @@ async def pfsense_create_services_dns_resolver_host_override_alias(
 
 @mcp.tool()
 async def pfsense_update_services_dns_resolver_host_override_alias(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     descr: str | None = None,
@@ -15253,7 +15253,7 @@ async def pfsense_create_services_dns_resolver_host_override(
 
 @mcp.tool()
 async def pfsense_update_services_dns_resolver_host_override(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     aliases: list[dict[str, Any]] | None = None,
     descr: str | None = None,
@@ -15609,7 +15609,7 @@ async def pfsense_create_services_free_radius_client(
 
 @mcp.tool()
 async def pfsense_update_services_free_radius_client(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     addr: str | None = None,
     description: str | None = None,
@@ -15843,7 +15843,7 @@ async def pfsense_create_services_free_radius_interface(
 
 @mcp.tool()
 async def pfsense_update_services_free_radius_interface(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     addr: str | None = None,
     description: str | None = None,
@@ -16077,7 +16077,7 @@ async def pfsense_create_services_free_radius_user(
 
 @mcp.tool()
 async def pfsense_update_services_free_radius_user(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     description: str | None = None,
     framed_ip_address: str | None = None,
@@ -16350,7 +16350,7 @@ async def pfsense_create_services_ha_proxy_backend_acl(
 
 @mcp.tool()
 async def pfsense_update_services_ha_proxy_backend_acl(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     casesensitive: bool | None = None,
@@ -16606,7 +16606,7 @@ async def pfsense_create_services_ha_proxy_backend_action(
 
 @mcp.tool()
 async def pfsense_update_services_ha_proxy_backend_action(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     acl: str | None = None,
@@ -17062,7 +17062,7 @@ async def pfsense_create_services_ha_proxy_backend(
 
 @mcp.tool()
 async def pfsense_update_services_ha_proxy_backend(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     acls: list[dict[str, Any]] | None = None,
     actions: list[dict[str, Any]] | None = None,
@@ -17401,7 +17401,7 @@ async def pfsense_create_services_ha_proxy_backend_error_file(
 
 @mcp.tool()
 async def pfsense_update_services_ha_proxy_backend_error_file(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     errorcode: int | None = None,
@@ -17617,7 +17617,7 @@ async def pfsense_create_services_ha_proxy_backend_server(
 
 @mcp.tool()
 async def pfsense_update_services_ha_proxy_backend_server(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     address: str | None = None,
@@ -17919,7 +17919,7 @@ async def pfsense_create_services_ha_proxy_file(
 
 @mcp.tool()
 async def pfsense_update_services_ha_proxy_file(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     content: str | None = None,
     name: str | None = None,
@@ -18144,7 +18144,7 @@ async def pfsense_create_services_ha_proxy_frontend_acl(
 
 @mcp.tool()
 async def pfsense_update_services_ha_proxy_frontend_acl(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     casesensitive: bool | None = None,
@@ -18400,7 +18400,7 @@ async def pfsense_create_services_ha_proxy_frontend_action(
 
 @mcp.tool()
 async def pfsense_update_services_ha_proxy_frontend_action(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     acl: str | None = None,
@@ -18656,7 +18656,7 @@ async def pfsense_create_services_ha_proxy_frontend_address(
 
 @mcp.tool()
 async def pfsense_update_services_ha_proxy_frontend_address(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     exaddr_advanced: str | None = None,
@@ -18856,7 +18856,7 @@ async def pfsense_create_services_ha_proxy_frontend_certificate(
 
 @mcp.tool()
 async def pfsense_update_services_ha_proxy_frontend_certificate(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     ssl_certificate: str | None = None,
@@ -19116,7 +19116,7 @@ async def pfsense_create_services_ha_proxy_frontend(
 
 @mcp.tool()
 async def pfsense_update_services_ha_proxy_frontend(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     a_actionitems: list[dict[str, Any]] | None = None,
     a_errorfiles: list[dict[str, Any]] | None = None,
@@ -19315,7 +19315,7 @@ async def pfsense_create_services_ha_proxy_frontend_error_file(
 
 @mcp.tool()
 async def pfsense_update_services_ha_proxy_frontend_error_file(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     errorcode: int | None = None,
@@ -19593,7 +19593,7 @@ async def pfsense_create_services_ha_proxy_settings_dns_resolver(
 
 @mcp.tool()
 async def pfsense_update_services_ha_proxy_settings_dns_resolver(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     name: str | None = None,
     port: str | None = None,
@@ -19777,7 +19777,7 @@ async def pfsense_create_services_ha_proxy_settings_email_mailer(
 
 @mcp.tool()
 async def pfsense_update_services_ha_proxy_settings_email_mailer(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     mailserver: str | None = None,
     mailserverport: str | None = None,
@@ -20199,7 +20199,7 @@ async def pfsense_create_services_ntp_time_server(
 
 @mcp.tool()
 async def pfsense_update_services_ntp_time_server(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     noselect: bool | None = None,
     prefer: bool | None = None,
@@ -20440,7 +20440,7 @@ async def pfsense_create_services_service_watchdog(
 
 @mcp.tool()
 async def pfsense_update_services_service_watchdog(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     name: str | None = None,
     notify: bool | None = None,
@@ -21474,7 +21474,7 @@ async def pfsense_list_status_open_vpn_servers(
 
 @mcp.tool()
 async def pfsense_create_status_service(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     action: str | None = None,
 ) -> dict[str, Any] | list[Any] | str:
@@ -21613,7 +21613,7 @@ async def pfsense_create_system_crl(
 
 @mcp.tool()
 async def pfsense_update_system_crl(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     caref: str | None = None,
     cert: list[dict[str, Any]] | None = None,
@@ -21771,7 +21771,7 @@ async def pfsense_create_system_crl_revoked_certificate(
 
 @mcp.tool()
 async def pfsense_update_system_crl_revoked_certificate(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     caref: str | None = None,
@@ -22049,7 +22049,7 @@ async def pfsense_create_system_certificate_authority(
 
 @mcp.tool()
 async def pfsense_update_system_certificate_authority(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     crt: str | None = None,
     descr: str | None = None,
@@ -22295,7 +22295,7 @@ async def pfsense_create_system_certificate(
 
 @mcp.tool()
 async def pfsense_update_system_certificate(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     crt: str | None = None,
     descr: str | None = None,
@@ -23237,7 +23237,7 @@ async def pfsense_create_system_restapi_access_list_entry(
 
 @mcp.tool()
 async def pfsense_update_system_restapi_access_list_entry(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     descr: str | None = None,
     network: str | None = None,
@@ -23563,7 +23563,7 @@ async def pfsense_create_system_tunable(
 
 @mcp.tool()
 async def pfsense_update_system_tunable(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     descr: str | None = None,
     tunable: str | None = None,
@@ -23927,7 +23927,7 @@ async def pfsense_create_user_auth_server(
 
 @mcp.tool()
 async def pfsense_update_user_auth_server(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     host: str | None = None,
     ldap_allow_unauthenticated: bool | None = None,
@@ -24257,7 +24257,7 @@ async def pfsense_create_user(
 
 @mcp.tool()
 async def pfsense_update_user(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     authorizedkeys: str | None = None,
     cert: list[str] | None = None,
@@ -24399,7 +24399,7 @@ async def pfsense_create_user_group(
 
 @mcp.tool()
 async def pfsense_update_user_group(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     description: str | None = None,
     member: list[str] | None = None,
@@ -24710,7 +24710,7 @@ async def pfsense_create_vpni_psec_phase1_encryption(
 
 @mcp.tool()
 async def pfsense_update_vpni_psec_phase1_encryption(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     dhgroup: int | None = None,
@@ -25026,7 +25026,7 @@ async def pfsense_create_vpni_psec_phase1(
 
 @mcp.tool()
 async def pfsense_update_vpni_psec_phase1(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     authentication_method: str | None = None,
     caref: str | None = None,
@@ -25355,7 +25355,7 @@ async def pfsense_create_vpni_psec_phase2_encryption(
 
 @mcp.tool()
 async def pfsense_update_vpni_psec_phase2_encryption(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     keylen: int | None = None,
@@ -25623,7 +25623,7 @@ async def pfsense_create_vpni_psec_phase2(
 
 @mcp.tool()
 async def pfsense_update_vpni_psec_phase2(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     descr: str | None = None,
     disabled: bool | None = None,
@@ -26005,7 +26005,7 @@ async def pfsense_create_vpn_open_vpncso(
 
 @mcp.tool()
 async def pfsense_update_vpn_open_vpncso(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     block: bool | None = None,
     common_name: str | None = None,
@@ -26461,7 +26461,7 @@ async def pfsense_create_vpn_open_vpn_client(
 
 @mcp.tool()
 async def pfsense_update_vpn_open_vpn_client(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     allow_compression: str | None = None,
     auth_pass: str | None = None,
@@ -26839,7 +26839,7 @@ async def pfsense_create_vpn_open_vpn_client_export_config(
 
 @mcp.tool()
 async def pfsense_update_vpn_open_vpn_client_export_config(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     advancedoptions: str | None = None,
     bindmode: str | None = None,
@@ -27063,7 +27063,7 @@ async def pfsense_delete_vpn_open_vpn_client_export_configs(
 
 @mcp.tool()
 async def pfsense_create_vpn_open_vpn_client_export(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     advancedoptions: str | None = None,
     bindmode: str | None = 'nobind',
@@ -27575,7 +27575,7 @@ async def pfsense_create_vpn_open_vpn_server(
 
 @mcp.tool()
 async def pfsense_update_vpn_open_vpn_server(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     allow_compression: str | None = None,
     authmode: list[str] | None = None,
@@ -28058,7 +28058,7 @@ async def pfsense_create_vpn_wire_guard_peer_allowed_ip(
 
 @mcp.tool()
 async def pfsense_update_vpn_wire_guard_peer_allowed_ip(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     address: str | None = None,
@@ -28274,7 +28274,7 @@ async def pfsense_create_vpn_wire_guard_peer(
 
 @mcp.tool()
 async def pfsense_update_vpn_wire_guard_peer(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     allowedips: list[dict[str, Any]] | None = None,
     descr: str | None = None,
@@ -28581,7 +28581,7 @@ async def pfsense_create_vpn_wire_guard_tunnel_address(
 
 @mcp.tool()
 async def pfsense_update_vpn_wire_guard_tunnel_address(
-    id: int,
+    id: str | int,
     parent_id: str | int,
     confirm: bool = False,
     address: str | None = None,
@@ -28785,7 +28785,7 @@ async def pfsense_create_vpn_wire_guard_tunnel(
 
 @mcp.tool()
 async def pfsense_update_vpn_wire_guard_tunnel(
-    id: int,
+    id: str | int,
     confirm: bool = False,
     addresses: list[dict[str, Any]] | None = None,
     descr: str | None = None,

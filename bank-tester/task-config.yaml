@@ -1539,10 +1539,10 @@ tasks:
         parent_id_field: parent_id
         create_values:
           action: http-request_lua
-          name: bt_sys51_bact
+          lua_function: test_func
           acl: bt_sys51_bacl
-        update_field: name
-        update_value: bt_sys51_bact_upd
+        update_field: lua_function
+        update_value: updated_func
       - path: /api/v2/services/haproxy/backend/error_file
         crud: true
         parent: /api/v2/services/haproxy/backend

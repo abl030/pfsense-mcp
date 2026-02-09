@@ -59,12 +59,12 @@
     - `value`: `test.example.com`
 3. **Create** using `pfsense_create_services_ha_proxy_backend_action` with `confirm=True` (use the `parent_id` from the parent resource created earlier):
     - `action`: `http-request_lua`
-    - `name`: `bt_sys51_bact`
+    - `lua_function`: `test_func`
     - `acl`: `bt_sys51_bacl`
 4. **List** using `pfsense_list_services_ha_proxy_backend_actions` — verify the created resource appears
 5. **Get** using `pfsense_get_services_ha_proxy_backend_action` with the ID from the create response
-6. **Update** using `pfsense_update_services_ha_proxy_backend_action` with `confirm=True` — set `name` to `bt_sys51_bact_upd`
-7. **Get** again using `pfsense_get_services_ha_proxy_backend_action` — verify `name` was updated
+6. **Update** using `pfsense_update_services_ha_proxy_backend_action` with `confirm=True` — set `lua_function` to `updated_func`
+7. **Get** again using `pfsense_get_services_ha_proxy_backend_action` — verify `lua_function` was updated
 8. **Create** using `pfsense_create_services_ha_proxy_backend_error_file` with `confirm=True` (use the `parent_id` from the parent resource created earlier):
     - `errorcode`: `503`
     - `errorfile`: `bt_sys51_file`

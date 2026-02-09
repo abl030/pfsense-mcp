@@ -188,10 +188,12 @@ def extract_tool_parameters(
 
                 safe = _safe_name(prop_name)
                 python_type = _openapi_type_to_python(resolved_prop)
-                # parent_id in request bodies is typed as "integer" in the spec,
-                # but the API actually accepts string interface names (e.g., "lan")
-                # for DHCP and other sub-resources. Normalize to match query params.
-                if prop_name == "parent_id" and python_type == "int":
+                # parent_id and id in request bodies are typed as "integer" in the
+                # spec, but the API actually accepts string identifiers (e.g., "lan"
+                # for DHCP parent_id, "opt1" for network interface id). The GET/DELETE
+                # query params use oneOf[integer, string] for the same fields.
+                # Normalize body params to match.
+                if prop_name in ("parent_id", "id") and python_type == "int":
                     python_type = "str | int"
                 params.append(
                     ToolParameter(
