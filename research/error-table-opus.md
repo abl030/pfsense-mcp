@@ -1,6 +1,6 @@
 # Known pfSense API Bugs
 
-16 bugs identified so far, independently verified via Opus 4.6 diagnostic runs against pfSense CE 2.8.1 + REST API v2.7.1. All appear to be upstream pfSense issues rather than generator bugs, though we may be wrong — if you hit something new, use `pfsense_report_issue` to let us know.
+17 bugs identified so far, independently verified via Opus 4.6 diagnostic runs against pfSense CE 2.8.1 + REST API v2.7.1. All appear to be upstream pfSense issues rather than generator bugs, though we may be wrong — if you hit something new, use `pfsense_report_issue` to let us know.
 
 ## Summary
 
@@ -8,8 +8,9 @@
 |----------|-------|
 | PUT/Replace failures | 7 |
 | HAProxy singular operations | 6 |
+| Service status | 1 |
 | Other | 3 |
-| **Total** | **16** |
+| **Total** | **17** |
 
 ## PUT/Replace Failures (7)
 
@@ -47,6 +48,14 @@ All 6 return: `500 MODEL_CANNOT_GET_CONFIG_PATH_WITHOUT_PARENT_MODEL`
 | 14 | `update_firewall_traffic_shaper_limiter_queue` | 500: `ecn` references non-existent `sched` field | Limiter queue model inherits `ecn` condition from parent limiter, but `sched` only exists on parent |
 | 15 | `update_services_free_radius_user` | PATCH requires `password` even when unchanged | API validates ALL required fields on PATCH, not just submitted ones |
 | 16 | `update_system_certificate_revocation_list` | CRL fields immutable after creation | PATCH endpoint exists but rejects changes (fields not marked readOnly in spec) |
+
+## Service Status (1)
+
+The REST API `Service` model reads `enabled`/`status` from raw `get_services()` array entries, which lack these keys for package-installed services. The `BooleanField` defaults to `false`, so all 4 package services report as disabled and stopped even when running. See `research/service-status-bug.md` for full writeup.
+
+| # | Tool | Affected Services | Root Cause |
+|---|------|-------------------|-----------|
+| 17 | `list_status_services` | named, radiusd, haproxy, wireguard | `Service.inc` model reads missing keys from `get_services()` array instead of calling `is_service_enabled()` / `is_service_running()` |
 
 ## Generator Error History
 

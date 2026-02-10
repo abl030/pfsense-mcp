@@ -74,6 +74,10 @@ def _gen_docstring(tool: ToolContext) -> str:
         doc_lines.append("")
         doc_lines.append(f"    WARNING: {tool.danger_warning}")
 
+    if tool.docstring_note:
+        doc_lines.append("")
+        doc_lines.append(f"    {tool.docstring_note}")
+
     # Bulk DELETE hint — plural DELETE endpoints require at least one query filter
     if tool.method == "delete" and any(p.name == "query" for p in tool.parameters):
         doc_lines.append("")

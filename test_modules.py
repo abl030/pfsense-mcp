@@ -30,7 +30,7 @@ _REPO_ROOT = Path(__file__).resolve().parent
 _spec = load_spec(_REPO_ROOT / "openapi-spec.json")
 _contexts = build_tool_contexts(_spec)
 
-ALWAYS_ON = 1  # pfsense_report_issue — never gated
+ALWAYS_ON = 2  # pfsense_report_issue + pfsense_get_overview — never gated
 
 MODULE_COUNTS: dict[str, dict[str, int]] = {}
 for _mod in MODULE_ORDER:
@@ -98,6 +98,7 @@ class TestModuleCounts:
         info = _get_tools("")
         assert info["count"] == ALWAYS_ON
         assert "pfsense_report_issue" in info["names"]
+        assert "pfsense_get_overview" in info["names"]
 
     @pytest.mark.parametrize("mod", MODULE_ORDER)
     def test_single_module(self, mod: str):
@@ -168,18 +169,20 @@ class TestToolPresence:
     """Verify the right tools are registered for each configuration."""
 
     def test_always_on_everywhere(self):
-        """pfsense_report_issue is present in every configuration."""
+        """Always-on tools are present in every configuration."""
+        _always_on = {"pfsense_report_issue", "pfsense_get_overview"}
+
         # Empty modules
         info = _get_tools("")
-        assert "pfsense_report_issue" in info["names"]
+        assert _always_on <= set(info["names"])
 
         # Single module
         info = _get_tools("firewall")
-        assert "pfsense_report_issue" in info["names"]
+        assert _always_on <= set(info["names"])
 
         # Read-only
         info = _get_tools("status", "true")
-        assert "pfsense_report_issue" in info["names"]
+        assert _always_on <= set(info["names"])
 
     @pytest.mark.parametrize("mod", MODULE_ORDER)
     def test_module_tools_present(self, mod: str):
@@ -194,7 +197,7 @@ class TestToolPresence:
     def test_module_excludes_others(self, mod: str):
         """Loading one module doesn't leak tools from other modules."""
         info = _get_tools(mod)
-        tool_set = set(info["names"]) - {"pfsense_report_issue"}
+        tool_set = set(info["names"]) - {"pfsense_report_issue", "pfsense_get_overview"}
         expected_tools = {c.tool_name for c in _contexts if c.module == mod}
         extra = tool_set - expected_tools
         assert not extra, f"Module {mod} has extra tools: {extra}"

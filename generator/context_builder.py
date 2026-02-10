@@ -107,6 +107,16 @@ _PARAM_DESCRIPTION_HINTS: dict[tuple[str, str], str] = {
     ),
 }
 
+# Per-tool docstring notes — appended after the danger warning block.
+# key = operationId, value = note text for the generated docstring.
+_TOOL_DOCSTRING_NOTES: dict[str, str] = {
+    "getStatusServicesEndpoint": (
+        "NOTE: Package-installed services (WireGuard, HAProxy, BIND, FreeRADIUS) "
+        "always report enabled=false and status=false due to a REST API bug. "
+        "Use pfsense_get_overview for accurate service status."
+    ),
+}
+
 # Subsystem prefixes that require an explicit "apply" call after mutations.
 _APPLY_SUBSYSTEMS = [
     "/api/v2/firewall/virtual_ip",
@@ -155,6 +165,7 @@ class ToolContext:
     has_request_body: bool
     body_params: list[ToolParameter]  # params that go in JSON body
     query_params: list[ToolParameter]  # params that go in URL query
+    docstring_note: str | None = None  # Extra note appended to docstring
 
 
 def _path_to_module(path: str) -> str:
@@ -298,6 +309,9 @@ def build_tool_contexts(spec: dict[str, Any]) -> list[ToolContext]:
         # Derive module from path
         module = _path_to_module(op.path)
 
+        # Per-tool docstring note
+        docstring_note = _TOOL_DOCSTRING_NOTES.get(op.operation_id)
+
         contexts.append(
             ToolContext(
                 tool_name=tool_name,
@@ -315,6 +329,7 @@ def build_tool_contexts(spec: dict[str, Any]) -> list[ToolContext]:
                 is_dangerous=is_dangerous,
                 danger_warning=danger_warning,
                 requires_basic_auth=op.requires_basic_auth,
+                docstring_note=docstring_note,
                 has_request_body=has_request_body,
                 body_params=body_params,
                 query_params=query_params,

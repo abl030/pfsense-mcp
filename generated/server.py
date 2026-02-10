@@ -141,6 +141,49 @@ async def pfsense_report_issue(
         f"--body '{escaped_body}'"
     )
 
+@mcp.tool()
+async def pfsense_get_overview() -> dict[str, Any]:
+    """Get a concise pfSense system overview: version, interfaces, gateways, and services.
+
+    Calls multiple status endpoints in parallel and returns a unified summary.
+    Service status for package-installed services (WireGuard, HAProxy, BIND,
+    FreeRADIUS) is annotated because the REST API incorrectly reports them as
+    disabled/stopped due to a known bug in the Service model.
+
+    If this tool returns an unexpected error, call pfsense_report_issue to report it.
+    """
+    import asyncio as _asyncio
+
+    _BUGGY_SERVICES = {"wireguard", "haproxy", "named", "radiusd"}
+
+    version_coro = _client.request("GET", "/api/v2/system/version")
+    interfaces_coro = _client.request("GET", "/api/v2/status/interfaces")
+    gateways_coro = _client.request("GET", "/api/v2/status/gateways")
+    services_coro = _client.request("GET", "/api/v2/status/services")
+
+    version, interfaces, gateways, services = await _asyncio.gather(
+        version_coro, interfaces_coro, gateways_coro, services_coro,
+    )
+
+    # Annotate package services affected by the REST API Service model bug
+    if isinstance(services, list):
+        for svc in services:
+            if isinstance(svc, dict) and svc.get("name") in _BUGGY_SERVICES:
+                svc["_note"] = (
+                    "REST API bug: enabled/status fields are always false for "
+                    "package-installed services. The service may actually be "
+                    "running. Use diagnostics/command_prompt with "
+                    "is_service_running() for accurate status."
+                )
+
+    return {
+        "version": version,
+        "interfaces": interfaces,
+        "gateways": gateways,
+        "services": services,
+    }
+
+
 
 
 
@@ -29260,6 +29303,8 @@ if "status" in _PFSENSE_MODULES:
         sort_order: str | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/status/services
+
+        NOTE: Package-installed services (WireGuard, HAProxy, BIND, FreeRADIUS) always report enabled=false and status=false due to a REST API bug. Use pfsense_get_overview for accurate service status.
 
         limit: The number of objects to obtain at once. Set to 0 for no limit.
         offset: The starting point in the dataset to begin fetching objects.

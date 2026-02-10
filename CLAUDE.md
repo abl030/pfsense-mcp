@@ -74,7 +74,7 @@ nix develop -c python -m generator    # regenerate generated/server.py
 - `context_builder.py` maps each API path to one of 19 modules via `_PATH_TO_MODULE` (longest-prefix match)
 - `codegen.py` groups tools by `(module, is_mutation)` and wraps in `if` blocks
 - `server.py.j2` parses `PFSENSE_MODULES` (comma-separated, default: all) and `PFSENSE_READ_ONLY` (default: false)
-- `pfsense_report_issue` is always registered (never gated)
+- `pfsense_report_issue` and `pfsense_get_overview` are always registered (never gated)
 - `test_modules.py` derives all expected values from the spec — zero hardcoded counts
 
 ```bash
@@ -136,7 +136,7 @@ Supports 8 endpoint types: `crud`, `bulk_delete`, `read_only`, `replace`, `actio
 | `pfsense_create_system_restapi_settings_sync` | Requires BasicAuth + HA peer |
 | `pfsense_delete_status_openvpn_server_connection` | Requires active OVPN client |
 
-### Known pfSense API bugs (16 tools)
+### Known pfSense API bugs (17 bugs)
 
 All independently verified via Opus diagnostic runs. 0 generator bugs remain.
 
@@ -144,14 +144,16 @@ All independently verified via Opus diagnostic runs. 0 generator bugs remain.
 
 **HAProxy singular operations (6)**: `get_config_path()` → `get_parent_model()` fails for dns_resolver and email_mailer sub-resources. LIST, CREATE, and bulk DELETE work fine.
 
+**Service status (1)**: `Service` model reads `enabled`/`status` from raw `get_services()` array — missing keys for package services default to `false`. Affects named, radiusd, haproxy, wireguard. Docstring warning added; `pfsense_get_overview` annotates affected services.
+
 **Other (3)**: Limiter queue ecn condition references parent model field. FreeRADIUS PATCH requires password even for unrelated changes. CRL fields immutable after creation (not marked readOnly in spec).
 
 ### Summary
 
 | Category | Count |
 |----------|-------|
-| Working | **654** |
-| pfSense API bug | **16** |
+| Working | **653** |
+| pfSense API bug | **17** |
 | Untested | **7** |
 | **Total** | **677** |
 
@@ -177,8 +179,8 @@ gotify-ping "pfSense MCP" "Task complete / Need input — check session"
 ### Issue #2: Tool naming — RESOLVED in v1.1.0
 Fixed `_camel_to_snake` in `naming.py`: compound word map (`HAProxy`→`haproxy`, `WireGuard`→`wireguard`, `IPsec`→`ipsec`, `OpenVPN`→`openvpn`, `GraphQL`→`graphql`) + plural acronym handling (`VLANs`→`vlans`, `CRLs`→`crls`, etc.). 198 of 677 tool names changed. Golden file regression test in `test_naming.py` (60 tests) + `tests/expected_tool_names.json`.
 
-### Issue #3: Add `pfsense_get_overview` composite tool
-Hand-written tool in `server.py.j2` (like `pfsense_report_issue`) that calls multiple endpoints and returns a concise summary. Self-contained — one sprint.
+### Issue #3: Add `pfsense_get_overview` composite tool — RESOLVED in v1.2.0
+Hand-written tool in `server.py.j2` (like `pfsense_report_issue`). Calls 4 status endpoints in parallel (version, interfaces, gateways, services), annotates package services affected by the Service model bug. Always registered, not module-gated.
 
-### Issue #4: WireGuard service status shows disabled despite active tunnels
-pfSense reports WireGuard service as `enabled: false, status: false` because 2.8 uses kernel module, not a service daemon. Options: docstring note, or composite status tool that cross-references tunnel/gateway state. Could bundle with #3.
+### Issue #4: Service status bug for package-installed services — RESOLVED in v1.2.0
+Not WireGuard-specific — affects all 4 package-installed services (WireGuard, HAProxy, BIND, FreeRADIUS). Root cause: REST API `Service` model reads `enabled`/`status` from raw `get_services()` array where package services lack these keys, defaulting to `false`. Docstring warning added to `list_status_services`, `pfsense_get_overview` annotates affected services. Full writeup in `research/service-status-bug.md`.
