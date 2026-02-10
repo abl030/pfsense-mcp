@@ -145,7 +145,7 @@ PFSENSE_MODULES=status,diagnostics
 PFSENSE_READ_ONLY=true
 ```
 
-`pfsense_report_issue` is always registered regardless of module selection.
+`pfsense_report_issue` and `pfsense_get_overview` are always registered regardless of module selection.
 
 ### Prerequisites
 
@@ -177,6 +177,10 @@ pfsense_create_firewall_alias(name="blocked_ips", type="host", address=["1.2.3.4
 # Actually creates it
 pfsense_create_firewall_alias(name="blocked_ips", type="host", address=["1.2.3.4"], confirm=True)
 ```
+
+### System Overview
+
+`pfsense_get_overview` calls 4 status endpoints in parallel and returns a unified summary: version info, interface status, gateway health, and service state. Package-installed services (WireGuard, HAProxy, BIND, FreeRADIUS) are annotated with a warning because the REST API incorrectly reports them as disabled/stopped due to a [known bug](research/service-status-bug.md) in the Service model.
 
 ### Error Reporting
 
@@ -217,8 +221,8 @@ This project uses **AI-driven integration testing**: a "tester Claude" consumes 
 |--------|-------|
 | Generated tools | 677 |
 | Tools tested | **670 (99.0%)** |
-| Tools working | 654 |
-| pfSense API bugs | 16 |
+| Tools working | 653 |
+| pfSense API bugs | 17 |
 | Untested (safety/infra blocked) | 7 |
 | Test runs | 13 |
 | Tasks | 53 (all PASS) |
@@ -227,12 +231,13 @@ Coverage verified programmatically via `analyze-results.py` across all test runs
 
 ### First-attempt success
 
-Of the 670 tools tested, **654 succeeded on the first attempt** with no parameter corrections needed. The AI consumer found the right tool, used the right parameters, and got a successful response — guided only by tool names and docstrings.
+Of the 670 tools tested, **653 succeeded on the first attempt** with no parameter corrections needed. The AI consumer found the right tool, used the right parameters, and got a successful response — guided only by tool names and docstrings.
 
-The remaining 16 failures are all pfSense REST API bugs (not generator bugs):
+The remaining 17 failures are all pfSense REST API bugs (not generator bugs):
 - 7 PUT/replace operations fail due to package PHP functions not loaded in REST API context
 - 6 HAProxy settings sub-resource operations fail due to parent model framework bug
 - 3 PATCH operations fail due to conditional field validation issues in pfSense
+- 1 Service model bug reports package services as disabled/stopped (affects 4 services)
 
 See `research/` for detailed failure analysis and root cause classifications.
 
