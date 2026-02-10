@@ -12,7 +12,7 @@
 - `pfsense_create_system_certificate_renew`
 - `pfsense_create_system_certificate_signing_request_sign`
 - `pfsense_create_status_service`
-- `pfsense_get_status_open_vpn_server_connection`
+- `pfsense_get_status_openvpn_server_connection`
 
 **Steps**:
 1. **Execute** `pfsense_create_system_certificate_authority_generate` with `confirm=True`:
@@ -49,7 +49,7 @@
 (no parameters needed)
 7. **Execute** `pfsense_create_status_service` with `confirm=True` (Restart sshd service via POST.):
     - `name`: `sshd`
-8. **Read** using `pfsense_get_status_open_vpn_server_connection` (Get singular OVPN server connection — may 404 if none active)
+8. **Read** using `pfsense_get_status_openvpn_server_connection` (Get singular OVPN server connection — may 404 if none active)
 
 **Important notes**:
 PKI actions: renew CA, renew cert, sign CSR. All need refids from generated resources.

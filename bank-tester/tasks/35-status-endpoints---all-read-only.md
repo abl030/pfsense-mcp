@@ -12,9 +12,9 @@
 - `pfsense_get_status_carp`
 - `pfsense_update_status_carp`
 - `pfsense_list_status_dhcp_server_leases`
-- `pfsense_list_status_i_psec_s_as`
-- `pfsense_list_status_open_vpn_servers`
-- `pfsense_list_status_open_vpn_clients`
+- `pfsense_list_status_ipsec_sas`
+- `pfsense_list_status_openvpn_servers`
+- `pfsense_list_status_openvpn_clients`
 - `pfsense_list_status_logs_system`
 - `pfsense_list_status_logs_firewall`
 - `pfsense_list_status_logs_dhcp`
@@ -32,9 +32,9 @@
 7. **Get settings** again using `pfsense_get_status_carp` — verify `maintenance_mode` was updated
 8. **Restore** using `pfsense_update_status_carp` with `confirm=True` — set `maintenance_mode` back to `False`
 9. **Read** using `pfsense_list_status_dhcp_server_leases`
-10. **Read** using `pfsense_list_status_i_psec_s_as`
-11. **Read** using `pfsense_list_status_open_vpn_servers`
-12. **Read** using `pfsense_list_status_open_vpn_clients`
+10. **Read** using `pfsense_list_status_ipsec_sas`
+11. **Read** using `pfsense_list_status_openvpn_servers`
+12. **Read** using `pfsense_list_status_openvpn_clients`
 13. **Read** using `pfsense_list_status_logs_system` (Use limit parameter to avoid huge responses)
 14. **Read** using `pfsense_list_status_logs_firewall`
 15. **Read** using `pfsense_list_status_logs_dhcp`

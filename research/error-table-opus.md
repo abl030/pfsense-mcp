@@ -31,12 +31,12 @@ Package apply hooks reference PHP functions not loaded in REST API context, plus
 
 | # | Tool | Operation |
 |---|------|-----------|
-| 8 | `get_services_ha_proxy_dns_resolver` | GET singular |
-| 9 | `update_services_ha_proxy_dns_resolver` | PATCH singular |
-| 10 | `delete_services_ha_proxy_dns_resolver` | DELETE singular |
-| 11 | `get_services_ha_proxy_email_mailer` | GET singular |
-| 12 | `update_services_ha_proxy_email_mailer` | PATCH singular |
-| 13 | `delete_services_ha_proxy_email_mailer` | DELETE singular |
+| 8 | `get_services_haproxy_dns_resolver` | GET singular |
+| 9 | `update_services_haproxy_dns_resolver` | PATCH singular |
+| 10 | `delete_services_haproxy_dns_resolver` | DELETE singular |
+| 11 | `get_services_haproxy_email_mailer` | GET singular |
+| 12 | `update_services_haproxy_email_mailer` | PATCH singular |
+| 13 | `delete_services_haproxy_email_mailer` | DELETE singular |
 
 All 6 return: `500 MODEL_CANNOT_GET_CONFIG_PATH_WITHOUT_PARENT_MODEL`
 

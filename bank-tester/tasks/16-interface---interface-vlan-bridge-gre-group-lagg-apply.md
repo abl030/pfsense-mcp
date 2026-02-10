@@ -6,7 +6,7 @@
 
 **Tools to exercise** (28):
 - `pfsense_create_interface_vlan`
-- `pfsense_list_interface_vla_ns`
+- `pfsense_list_interface_vlans`
 - `pfsense_get_interface_vlan`
 - `pfsense_update_interface_vlan`
 - `pfsense_delete_interface_vlan`
@@ -16,7 +16,7 @@
 - `pfsense_update_interface_bridge`
 - `pfsense_delete_interface_bridge`
 - `pfsense_create_interface_gre`
-- `pfsense_list_interface_gr_es`
+- `pfsense_list_interface_gres`
 - `pfsense_get_interface_gre`
 - `pfsense_update_interface_gre`
 - `pfsense_delete_interface_gre`
@@ -26,7 +26,7 @@
 - `pfsense_update_interface_group`
 - `pfsense_delete_interface_group`
 - `pfsense_create_interface_lagg`
-- `pfsense_list_interface_lag_gs`
+- `pfsense_list_interface_laggs`
 - `pfsense_get_interface_lagg`
 - `pfsense_update_interface_lagg`
 - `pfsense_delete_interface_lagg`
@@ -40,7 +40,7 @@
     - `tag`: `100`
     - `pcp`: `0`
     - `descr`: `bt_sys16_vlan`
-2. **List** using `pfsense_list_interface_vla_ns` — verify the created resource appears
+2. **List** using `pfsense_list_interface_vlans` — verify the created resource appears
 3. **Get** using `pfsense_get_interface_vlan` with the ID from the create response
 4. **Update** using `pfsense_update_interface_vlan` with `confirm=True` — set `descr` to `Updated VLAN`
 5. **Get** again using `pfsense_get_interface_vlan` — verify `descr` was updated
@@ -58,7 +58,7 @@
     - `tunnel_remote_addr`: `10.255.0.2`
     - `tunnel_remote_addr6`: ``
     - `descr`: `bt_sys16_gre`
-12. **List** using `pfsense_list_interface_gr_es` — verify the created resource appears
+12. **List** using `pfsense_list_interface_gres` — verify the created resource appears
 13. **Get** using `pfsense_get_interface_gre` with the ID from the create response
 14. **Update** using `pfsense_update_interface_gre` with `confirm=True` — set `descr` to `Updated GRE`
 15. **Get** again using `pfsense_get_interface_gre` — verify `descr` was updated
@@ -74,7 +74,7 @@
     - `members`: `['em2']`
     - `proto`: `none`
     - `descr`: `bt_sys16_lagg`
-22. **List** using `pfsense_list_interface_lag_gs` — verify the created resource appears
+22. **List** using `pfsense_list_interface_laggs` — verify the created resource appears
 23. **Get** using `pfsense_get_interface_lagg` with the ID from the create response
 24. **Update** using `pfsense_update_interface_lagg` with `confirm=True` — set `descr` to `Updated LAGG`
 25. **Get** again using `pfsense_get_interface_lagg` — verify `descr` was updated

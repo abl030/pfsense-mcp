@@ -9,6 +9,8 @@ Auto-generated MCP server for the pfSense REST API v2. 677 tools generated from 
 3. **Test against the VM, not production**. The golden image exists for this purpose.
 4. **Expect scripts are fragile but working**. Do not change timing, patterns, or shortcuts unless something breaks.
 5. **Always use `nix develop -c`** for ALL commands that need qemu, curl, python, pytest, expect, or any dev tool.
+6. **Testing must be automated**. Every feature/fix needs a pytest suite or equivalent that runs without human intervention. No manual-only verification — if it can't be `pytest`'d, write a script.
+7. **Sprint progress lives in CLAUDE.md**. When work spans multiple sessions, document sprint plans, progress, and outcomes here so future sessions have full context.
 
 ## Repository Structure
 
@@ -132,7 +134,7 @@ Supports 8 endpoint types: `crud`, `bulk_delete`, `read_only`, `replace`, `actio
 | `pfsense_update_system_restapi_version` | Breaks API connectivity |
 | `pfsense_delete_system_packages` | Risk of removing REST API itself |
 | `pfsense_create_system_restapi_settings_sync` | Requires BasicAuth + HA peer |
-| `pfsense_delete_status_open_vpn_server_connection` | Requires active OVPN client |
+| `pfsense_delete_status_openvpn_server_connection` | Requires active OVPN client |
 
 ### Known pfSense API bugs (16 tools)
 
@@ -169,3 +171,14 @@ Long autonomous tasks ping via Gotify:
 ```bash
 gotify-ping "pfSense MCP" "Task complete / Need input — check session"
 ```
+
+## Open Issues
+
+### Issue #2: Tool naming — RESOLVED in v1.1.0
+Fixed `_camel_to_snake` in `naming.py`: compound word map (`HAProxy`→`haproxy`, `WireGuard`→`wireguard`, `IPsec`→`ipsec`, `OpenVPN`→`openvpn`, `GraphQL`→`graphql`) + plural acronym handling (`VLANs`→`vlans`, `CRLs`→`crls`, etc.). 198 of 677 tool names changed. Golden file regression test in `test_naming.py` (60 tests) + `tests/expected_tool_names.json`.
+
+### Issue #3: Add `pfsense_get_overview` composite tool
+Hand-written tool in `server.py.j2` (like `pfsense_report_issue`) that calls multiple endpoints and returns a concise summary. Self-contained — one sprint.
+
+### Issue #4: WireGuard service status shows disabled despite active tunnels
+pfSense reports WireGuard service as `enabled: false, status: false` because 2.8 uses kernel module, not a service daemon. Options: docstring note, or composite status tool that cross-references tunnel/gateway state. Could bundle with #3.

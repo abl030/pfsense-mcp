@@ -8,7 +8,7 @@
 - `pfsense_create_system_certificate_authority_generate`
 - `pfsense_create_system_certificate_generate`
 - `pfsense_create_system_crl`
-- `pfsense_list_system_cr_ls`
+- `pfsense_list_system_crls`
 - `pfsense_get_system_crl`
 - `pfsense_update_system_crl`
 - `pfsense_delete_system_crl`
@@ -42,7 +42,7 @@
     - `descr`: `bt_sys53_crl`
     - `method`: `internal`
     - `text`: ``
-4. **List** using `pfsense_list_system_cr_ls` — verify the created resource appears
+4. **List** using `pfsense_list_system_crls` — verify the created resource appears
 5. **Get** using `pfsense_get_system_crl` with the ID from the create response
 6. **Update** using `pfsense_update_system_crl` with `confirm=True` — set `descr` to `Updated CRL`
 7. **Get** again using `pfsense_get_system_crl` — verify `descr` was updated

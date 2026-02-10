@@ -6,17 +6,17 @@
 
 **Tools to exercise** (26):
 - `pfsense_create_interface_vlan`
-- `pfsense_list_interface_vla_ns`
-- `pfsense_delete_interface_vla_ns`
+- `pfsense_list_interface_vlans`
+- `pfsense_delete_interface_vlans`
 - `pfsense_create_interface_gre`
-- `pfsense_list_interface_gr_es`
-- `pfsense_delete_interface_gr_es`
+- `pfsense_list_interface_gres`
+- `pfsense_delete_interface_gres`
 - `pfsense_create_interface_group`
 - `pfsense_list_interface_groups`
 - `pfsense_delete_interface_groups`
 - `pfsense_create_interface_lagg`
-- `pfsense_list_interface_lag_gs`
-- `pfsense_delete_interface_lag_gs`
+- `pfsense_list_interface_laggs`
+- `pfsense_delete_interface_laggs`
 - `pfsense_list_network_interfaces`
 - `pfsense_delete_network_interfaces`
 - `pfsense_create_routing_gateway`
@@ -37,18 +37,18 @@
     - `if`: `em2`
     - `tag`: `300`
     - `pcp`: `0`
-2. **List** using `pfsense_list_interface_vla_ns` — verify resource exists
-3. **Bulk delete** using `pfsense_delete_interface_vla_ns` with `confirm=True` — use `query` parameter to filter (e.g., `query={"id": "<id>"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={"name": "<name>"}` from the list results)
-4. **List** using `pfsense_list_interface_vla_ns` — verify collection is empty
+2. **List** using `pfsense_list_interface_vlans` — verify resource exists
+3. **Bulk delete** using `pfsense_delete_interface_vlans` with `confirm=True` — use `query` parameter to filter (e.g., `query={"id": "<id>"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={"name": "<name>"}` from the list results)
+4. **List** using `pfsense_list_interface_vlans` — verify collection is empty
 5. **Create** a test resource using `pfsense_create_interface_gre` with `confirm=True`:
     - `if`: `wan`
     - `remote_addr`: `198.51.100.1`
     - `tunnel_local_addr`: `10.255.0.1`
     - `tunnel_remote_addr`: `10.255.0.2`
     - `tunnel_remote_addr6`: ``
-6. **List** using `pfsense_list_interface_gr_es` — verify resource exists
-7. **Bulk delete** using `pfsense_delete_interface_gr_es` with `confirm=True` — use `query` parameter to filter (e.g., `query={"id": "<id>"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={"name": "<name>"}` from the list results)
-8. **List** using `pfsense_list_interface_gr_es` — verify collection is empty
+6. **List** using `pfsense_list_interface_gres` — verify resource exists
+7. **Bulk delete** using `pfsense_delete_interface_gres` with `confirm=True` — use `query` parameter to filter (e.g., `query={"id": "<id>"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={"name": "<name>"}` from the list results)
+8. **List** using `pfsense_list_interface_gres` — verify collection is empty
 9. **Create** a test resource using `pfsense_create_interface_group` with `confirm=True`:
     - `ifname`: `bt62grp`
     - `members`: `['wan']`
@@ -58,9 +58,9 @@
 13. **Create** a test resource using `pfsense_create_interface_lagg` with `confirm=True`:
     - `members`: `['em2']`
     - `proto`: `none`
-14. **List** using `pfsense_list_interface_lag_gs` — verify resource exists
-15. **Bulk delete** using `pfsense_delete_interface_lag_gs` with `confirm=True` — use `query` parameter to filter (e.g., `query={"id": "<id>"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={"name": "<name>"}` from the list results)
-16. **List** using `pfsense_list_interface_lag_gs` — verify collection is empty
+14. **List** using `pfsense_list_interface_laggs` — verify resource exists
+15. **Bulk delete** using `pfsense_delete_interface_laggs` with `confirm=True` — use `query` parameter to filter (e.g., `query={"id": "<id>"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={"name": "<name>"}` from the list results)
+16. **List** using `pfsense_list_interface_laggs` — verify collection is empty
 17. **List** using `pfsense_list_network_interfaces` — verify resource exists (Bulk delete network interfaces — careful, may include system interfaces)
 18. **Bulk delete** using `pfsense_delete_network_interfaces` with `confirm=True` — use `query` parameter to filter (e.g., `query={"id": "<id>"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={"name": "<name>"}` from the list results)
 19. **List** using `pfsense_list_network_interfaces` — verify collection is empty

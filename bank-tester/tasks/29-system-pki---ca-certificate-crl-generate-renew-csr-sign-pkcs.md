@@ -15,7 +15,7 @@
 - `pfsense_update_system_certificate`
 - `pfsense_delete_system_certificate`
 - `pfsense_create_system_crl`
-- `pfsense_list_system_cr_ls`
+- `pfsense_list_system_crls`
 - `pfsense_get_system_crl`
 - `pfsense_delete_system_crl`
 - `pfsense_create_system_certificate_authority_generate`
@@ -43,7 +43,7 @@
     - `descr`: `bt_sys29_crl`
     - `method`: `internal`
     - `text`: ``
-11. **List** using `pfsense_list_system_cr_ls` — verify the created resource appears
+11. **List** using `pfsense_list_system_crls` — verify the created resource appears
 12. **Get** using `pfsense_get_system_crl` with the ID from the create response
 13. **Execute** `pfsense_create_system_certificate_authority_generate` with `confirm=True`:
     - `descr`: `bt_sys29_gen_ca`

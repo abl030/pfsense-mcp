@@ -39,13 +39,33 @@ _ACTION_PATHS = {
 }
 
 
+_COMPOUND_WORDS = {
+    "WireGuard": "wireguard",
+    "OpenVPN": "openvpn",
+    "IPsec": "ipsec",
+    "HAProxy": "haproxy",
+    "GraphQL": "graphql",
+}
+
+
 def _camel_to_snake(name: str) -> str:
-    """Convert CamelCase to snake_case, preserving acronyms."""
-    # Insert underscore before uppercase letters that follow lowercase or digits
+    """Convert CamelCase to snake_case, preserving compound words and acronyms."""
+    # Step 1: Replace compound words with placeholder tokens
+    for compound, replacement in _COMPOUND_WORDS.items():
+        name = name.replace(compound, "_" + replacement + "_")
+
+    # Step 2: Uppercase trailing 's' on plural acronyms (VLANs→VLANS)
+    name = re.sub(r"([A-Z]{2,})s(?=[A-Z]|$|_)", lambda m: m.group(1) + "S", name)
+
+    # Step 3: Standard CamelCase splitting
     s = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", name)
-    # Insert underscore between consecutive uppercase and a following lowercase
     s = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1_\2", s)
-    return s.lower()
+    s = s.lower()
+
+    # Step 4: Clean up double underscores and leading/trailing underscores
+    s = re.sub(r"_+", "_", s)
+    s = s.strip("_")
+    return s
 
 
 def _is_plural_endpoint(path: str, param_names: list[str]) -> bool:

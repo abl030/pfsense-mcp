@@ -12,8 +12,8 @@
 - `pfsense_delete_system_certificate_authorities`
 - `pfsense_list_system_certificates`
 - `pfsense_delete_system_certificates`
-- `pfsense_list_system_cr_ls`
-- `pfsense_delete_system_cr_ls`
+- `pfsense_list_system_crls`
+- `pfsense_delete_system_crls`
 - `pfsense_create_user`
 - `pfsense_list_users`
 - `pfsense_delete_users`
@@ -41,9 +41,9 @@
 8. **List** using `pfsense_list_system_certificates` — verify resource exists (Bulk delete all certificates — may include system certs)
 9. **Bulk delete** using `pfsense_delete_system_certificates` with `confirm=True` — use `query` parameter to filter (e.g., `query={"id": "<id>"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={"name": "<name>"}` from the list results)
 10. **List** using `pfsense_list_system_certificates` — verify collection is empty
-11. **List** using `pfsense_list_system_cr_ls` — verify resource exists (Bulk delete all CRLs)
-12. **Bulk delete** using `pfsense_delete_system_cr_ls` with `confirm=True` — use `query` parameter to filter (e.g., `query={"id": "<id>"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={"name": "<name>"}` from the list results)
-13. **List** using `pfsense_list_system_cr_ls` — verify collection is empty
+11. **List** using `pfsense_list_system_crls` — verify resource exists (Bulk delete all CRLs)
+12. **Bulk delete** using `pfsense_delete_system_crls` with `confirm=True` — use `query` parameter to filter (e.g., `query={"id": "<id>"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={"name": "<name>"}` from the list results)
+13. **List** using `pfsense_list_system_crls` — verify collection is empty
 14. **Create** a test resource using `pfsense_create_user` with `confirm=True`:
     - `username`: `bt_bd66_user`
     - `password`: `Testpass66!Abc`

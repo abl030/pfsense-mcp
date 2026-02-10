@@ -7,7 +7,7 @@
 **Tools to exercise** (3):
 - `pfsense_create_auth_key`
 - `pfsense_post_auth_jwt`
-- `pfsense_create_graph_ql`
+- `pfsense_create_graphql`
 
 **Steps**:
 1. **Execute** `pfsense_create_auth_key` with `confirm=True` **Note: requires BasicAuth (admin:pfsense), not API key.** (Requires BasicAuth (admin:pfsense), not API key):
@@ -15,7 +15,7 @@
     - `length_bytes`: `16`
 2. **Execute** `pfsense_post_auth_jwt` with `confirm=True` **Note: requires BasicAuth (admin:pfsense), not API key.** (Requires BasicAuth (admin:pfsense), not API key):
 (no parameters needed)
-3. **Execute** `pfsense_create_graph_ql` with `confirm=True` (Returns raw {data: ...} — NOT standard response envelope):
+3. **Execute** `pfsense_create_graphql` with `confirm=True` (Returns raw {data: ...} — NOT standard response envelope):
     - `query`: `{ __schema { queryType { name } } }`
 
 **Important notes**:

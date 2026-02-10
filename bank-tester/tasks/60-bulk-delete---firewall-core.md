@@ -24,8 +24,8 @@
 - `pfsense_list_firewall_schedules`
 - `pfsense_delete_firewall_schedules`
 - `pfsense_create_firewall_virtual_ip`
-- `pfsense_list_firewall_virtual_i_ps`
-- `pfsense_delete_firewall_virtual_i_ps`
+- `pfsense_list_firewall_virtual_ips`
+- `pfsense_delete_firewall_virtual_ips`
 - `pfsense_list_firewall_states`
 - `pfsense_delete_firewall_states`
 
@@ -88,9 +88,9 @@
     - `interface`: `wan`
     - `subnet`: `10.99.60.100`
     - `subnet_bits`: `32`
-26. **List** using `pfsense_list_firewall_virtual_i_ps` — verify resource exists
-27. **Bulk delete** using `pfsense_delete_firewall_virtual_i_ps` with `confirm=True` — use `query` parameter to filter (e.g., `query={"id": "<id>"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={"name": "<name>"}` from the list results)
-28. **List** using `pfsense_list_firewall_virtual_i_ps` — verify collection is empty
+26. **List** using `pfsense_list_firewall_virtual_ips` — verify resource exists
+27. **Bulk delete** using `pfsense_delete_firewall_virtual_ips` with `confirm=True` — use `query` parameter to filter (e.g., `query={"id": "<id>"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={"name": "<name>"}` from the list results)
+28. **List** using `pfsense_list_firewall_virtual_ips` — verify collection is empty
 29. **List** using `pfsense_list_firewall_states` — verify resource exists (Bulk clear all firewall states — no create needed, states auto-generate)
 30. **Bulk delete** using `pfsense_delete_firewall_states` with `confirm=True` — use `query` parameter to filter (e.g., `query={"id": "<id>"}` where `<id>` is the ID of the created resource from step 1, or use any field filter like `query={"name": "<name>"}` from the list results)
 31. **List** using `pfsense_list_firewall_states` — verify collection is empty

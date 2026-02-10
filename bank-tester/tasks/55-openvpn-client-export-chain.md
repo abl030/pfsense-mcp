@@ -7,14 +7,14 @@
 **Tools to exercise** (10):
 - `pfsense_create_system_certificate_authority_generate`
 - `pfsense_create_system_certificate_generate`
-- `pfsense_create_vpn_open_vpn_server`
-- `pfsense_delete_vpn_open_vpn_server`
-- `pfsense_create_vpn_open_vpn_client_export_config`
-- `pfsense_list_vpn_open_vpn_client_export_configs`
-- `pfsense_get_vpn_open_vpn_client_export_config`
-- `pfsense_update_vpn_open_vpn_client_export_config`
-- `pfsense_delete_vpn_open_vpn_client_export_config`
-- `pfsense_create_vpn_open_vpn_client_export`
+- `pfsense_create_vpn_openvpn_server`
+- `pfsense_delete_vpn_openvpn_server`
+- `pfsense_create_vpn_openvpn_client_export_config`
+- `pfsense_list_vpn_openvpn_client_export_configs`
+- `pfsense_get_vpn_openvpn_client_export_config`
+- `pfsense_update_vpn_openvpn_client_export_config`
+- `pfsense_delete_vpn_openvpn_client_export_config`
+- `pfsense_create_vpn_openvpn_client_export`
 
 **Steps**:
 1. **Execute** `pfsense_create_system_certificate_authority_generate` with `confirm=True`:
@@ -37,7 +37,7 @@
     - `dn_commonname`: `ovpn-server.test`
     - `lifetime`: `365`
     - `type_`: `server`
-3. **Create** using `pfsense_create_vpn_open_vpn_server` with `confirm=True`:
+3. **Create** using `pfsense_create_vpn_openvpn_server` with `confirm=True`:
     - `mode`: `server_tls`
     - `protocol`: `UDP4`
     - `dev_mode`: `tun`
@@ -53,7 +53,7 @@
     - `dn_commonname`: `ovpn-user.test`
     - `lifetime`: `365`
     - `type_`: `user`
-5. **Create** using `pfsense_create_vpn_open_vpn_client_export_config` with `confirm=True`:
+5. **Create** using `pfsense_create_vpn_openvpn_client_export_config` with `confirm=True`:
     - `server`: ``
     - `pkcs11providers`: `[]`
     - `pkcs11id`: ``
@@ -63,11 +63,11 @@
     - `useproxypass`: `False`
     - `proxyuser`: ``
     - `proxypass`: ``
-6. **List** using `pfsense_list_vpn_open_vpn_client_export_configs` — verify the created resource appears
-7. **Get** using `pfsense_get_vpn_open_vpn_client_export_config` with the ID from the create response
-8. **Update** using `pfsense_update_vpn_open_vpn_client_export_config` with `confirm=True` — set `pass` to `testpass`
-9. **Get** again using `pfsense_get_vpn_open_vpn_client_export_config` — verify `pass` was updated
-10. **Execute** `pfsense_create_vpn_open_vpn_client_export` with `confirm=True` (Export type must be 'confinline' (not 'inline'). Needs client_export config ID + certref.):
+6. **List** using `pfsense_list_vpn_openvpn_client_export_configs` — verify the created resource appears
+7. **Get** using `pfsense_get_vpn_openvpn_client_export_config` with the ID from the create response
+8. **Update** using `pfsense_update_vpn_openvpn_client_export_config` with `confirm=True` — set `pass` to `testpass`
+9. **Get** again using `pfsense_get_vpn_openvpn_client_export_config` — verify `pass` was updated
+10. **Execute** `pfsense_create_vpn_openvpn_client_export` with `confirm=True` (Export type must be 'confinline' (not 'inline'). Needs client_export config ID + certref.):
     - `type`: `confinline`
 
 **Important notes**:
@@ -77,7 +77,7 @@ local_port must be string. Export type is 'confinline'.
 Cleanup: export config → OVPN server → certs → CA.
 
 **Cleanup** (reverse order):
-- Delete using `pfsense_delete_vpn_open_vpn_client_export_config` with `confirm=True` (ID from create step)
-- Delete setup resource at `/api/v2/vpn/openvpn/server` using `pfsense_delete_vpn_open_vpn_server` with `confirm=True`
+- Delete using `pfsense_delete_vpn_openvpn_client_export_config` with `confirm=True` (ID from create step)
+- Delete setup resource at `/api/v2/vpn/openvpn/server` using `pfsense_delete_vpn_openvpn_server` with `confirm=True`
 
 **Expected outcome**: All 10 tools exercised successfully.

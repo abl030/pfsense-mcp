@@ -980,7 +980,7 @@ if "firewall" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_firewall_virtual_i_ps(
+    async def pfsense_list_firewall_virtual_ips(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -4739,7 +4739,7 @@ if "firewall" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_firewall_virtual_i_ps(
+    async def pfsense_delete_firewall_virtual_ips(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -4911,7 +4911,7 @@ if "interface" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_interface_gr_es(
+    async def pfsense_list_interface_gres(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -5023,7 +5023,7 @@ if "interface" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_interface_lag_gs(
+    async def pfsense_list_interface_laggs(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -5079,7 +5079,7 @@ if "interface" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_interface_vla_ns(
+    async def pfsense_list_interface_vlans(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -5455,7 +5455,7 @@ if "interface" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_interface_gr_es(
+    async def pfsense_delete_interface_gres(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -5802,7 +5802,7 @@ if "interface" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_interface_lag_gs(
+    async def pfsense_delete_interface_laggs(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -5958,7 +5958,7 @@ if "interface" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_interface_vla_ns(
+    async def pfsense_delete_interface_vlans(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -7585,7 +7585,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_vpn_wire_guard_apply_status(
+    async def pfsense_get_vpn_wireguard_apply_status(
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/vpn/wireguard/apply
 
@@ -7598,7 +7598,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_vpn_wire_guard_peer_allowed_ip(
+    async def pfsense_get_vpn_wireguard_peer_allowed_ip(
         id: str | int,
         parent_id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
@@ -7622,7 +7622,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_vpn_wire_guard_peer_allowed_i_ps(
+    async def pfsense_list_vpn_wireguard_peer_allowed_ips(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -7658,7 +7658,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_vpn_wire_guard_peer(
+    async def pfsense_get_vpn_wireguard_peer(
         id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/vpn/wireguard/peer
@@ -7678,7 +7678,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_vpn_wire_guard_peers(
+    async def pfsense_list_vpn_wireguard_peers(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -7714,7 +7714,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_vpn_wire_guard_settings(
+    async def pfsense_get_vpn_wireguard_settings(
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/vpn/wireguard/settings
 
@@ -7727,7 +7727,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_vpn_wire_guard_tunnel_address(
+    async def pfsense_get_vpn_wireguard_tunnel_address(
         id: str | int,
         parent_id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
@@ -7751,7 +7751,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_vpn_wire_guard_tunnel_addresses(
+    async def pfsense_list_vpn_wireguard_tunnel_addresses(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -7787,7 +7787,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_vpn_wire_guard_tunnel(
+    async def pfsense_get_vpn_wireguard_tunnel(
         id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/vpn/wireguard/tunnel
@@ -7807,7 +7807,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_vpn_wire_guard_tunnels(
+    async def pfsense_list_vpn_wireguard_tunnels(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -7846,7 +7846,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_vpn_wire_guard_apply(
+    async def pfsense_vpn_wireguard_apply(
         confirm: bool = False,
     ) -> dict[str, Any] | list[Any] | str:
         """POST /api/v2/vpn/wireguard/apply
@@ -7865,7 +7865,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_vpn_wire_guard_peer_allowed_ip(
+    async def pfsense_create_vpn_wireguard_peer_allowed_ip(
         address: str,
         mask: int,
         parent_id: str | int,
@@ -7906,7 +7906,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_vpn_wire_guard_peer_allowed_ip(
+    async def pfsense_update_vpn_wireguard_peer_allowed_ip(
         id: str | int,
         parent_id: str | int,
         confirm: bool = False,
@@ -7951,7 +7951,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_vpn_wire_guard_peer_allowed_ip(
+    async def pfsense_delete_vpn_wireguard_peer_allowed_ip(
         id: str | int,
         parent_id: str | int,
         confirm: bool = False,
@@ -7984,7 +7984,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_vpn_wire_guard_peer_allowed_i_ps(
+    async def pfsense_delete_vpn_wireguard_peer_allowed_ips(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -8025,7 +8025,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_vpn_wire_guard_peer(
+    async def pfsense_create_vpn_wireguard_peer(
         publickey: str,
         confirm: bool = False,
         allowedips: list[dict[str, Any]] | None = None,
@@ -8086,7 +8086,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_vpn_wire_guard_peer(
+    async def pfsense_update_vpn_wireguard_peer(
         id: str | int,
         confirm: bool = False,
         allowedips: list[dict[str, Any]] | None = None,
@@ -8151,7 +8151,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_vpn_wire_guard_peer(
+    async def pfsense_delete_vpn_wireguard_peer(
         id: str | int,
         confirm: bool = False,
         apply: bool | None = False,
@@ -8184,7 +8184,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_replace_vpn_wire_guard_peers(
+    async def pfsense_replace_vpn_wireguard_peers(
         items: list[dict[str, Any]],
         confirm: bool = False,
     ) -> dict[str, Any] | list[Any] | str:
@@ -8211,7 +8211,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_vpn_wire_guard_peers(
+    async def pfsense_delete_vpn_wireguard_peers(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -8252,7 +8252,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_vpn_wire_guard_settings(
+    async def pfsense_update_vpn_wireguard_settings(
         confirm: bool = False,
         enable: bool | None = None,
         hide_peers: bool | None = None,
@@ -8305,7 +8305,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_vpn_wire_guard_tunnel_address(
+    async def pfsense_create_vpn_wireguard_tunnel_address(
         address: str,
         mask: int,
         parent_id: str | int,
@@ -8346,7 +8346,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_vpn_wire_guard_tunnel_address(
+    async def pfsense_update_vpn_wireguard_tunnel_address(
         id: str | int,
         parent_id: str | int,
         confirm: bool = False,
@@ -8391,7 +8391,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_vpn_wire_guard_tunnel_address(
+    async def pfsense_delete_vpn_wireguard_tunnel_address(
         id: str | int,
         parent_id: str | int,
         confirm: bool = False,
@@ -8424,7 +8424,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_vpn_wire_guard_tunnel_addresses(
+    async def pfsense_delete_vpn_wireguard_tunnel_addresses(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -8465,7 +8465,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_vpn_wire_guard_tunnel(
+    async def pfsense_create_vpn_wireguard_tunnel(
         privatekey: str,
         confirm: bool = False,
         addresses: list[dict[str, Any]] | None = None,
@@ -8514,7 +8514,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_vpn_wire_guard_tunnel(
+    async def pfsense_update_vpn_wireguard_tunnel(
         id: str | int,
         confirm: bool = False,
         addresses: list[dict[str, Any]] | None = None,
@@ -8567,7 +8567,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_vpn_wire_guard_tunnel(
+    async def pfsense_delete_vpn_wireguard_tunnel(
         id: str | int,
         confirm: bool = False,
         apply: bool | None = False,
@@ -8600,7 +8600,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_replace_vpn_wire_guard_tunnels(
+    async def pfsense_replace_vpn_wireguard_tunnels(
         items: list[dict[str, Any]],
         confirm: bool = False,
     ) -> dict[str, Any] | list[Any] | str:
@@ -8627,7 +8627,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_vpn_wire_guard_tunnels(
+    async def pfsense_delete_vpn_wireguard_tunnels(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -8674,7 +8674,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_vpn_open_vpncso(
+    async def pfsense_get_vpn_openvpn_cso(
         id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/vpn/openvpn/cso
@@ -8694,7 +8694,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_vpn_open_vpncs_os(
+    async def pfsense_list_vpn_openvpn_csos(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -8730,7 +8730,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_vpn_open_vpn_client(
+    async def pfsense_get_vpn_openvpn_client(
         id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/vpn/openvpn/client
@@ -8750,7 +8750,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_vpn_open_vpn_client_export_config(
+    async def pfsense_get_vpn_openvpn_client_export_config(
         id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/vpn/openvpn/client_export/config
@@ -8770,7 +8770,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_vpn_open_vpn_client_export_configs(
+    async def pfsense_list_vpn_openvpn_client_export_configs(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -8806,7 +8806,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_vpn_open_vpn_clients(
+    async def pfsense_list_vpn_openvpn_clients(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -8842,7 +8842,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_vpn_open_vpn_server(
+    async def pfsense_get_vpn_openvpn_server(
         id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/vpn/openvpn/server
@@ -8862,7 +8862,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_vpn_open_vpn_servers(
+    async def pfsense_list_vpn_openvpn_servers(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -8901,7 +8901,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_vpn_open_vpncso(
+    async def pfsense_create_vpn_openvpn_cso(
         common_name: str,
         confirm: bool = False,
         block: bool | None = None,
@@ -9031,7 +9031,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_vpn_open_vpncso(
+    async def pfsense_update_vpn_openvpn_cso(
         id: str | int,
         confirm: bool = False,
         block: bool | None = None,
@@ -9165,7 +9165,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_vpn_open_vpncso(
+    async def pfsense_delete_vpn_openvpn_cso(
         id: str | int,
         confirm: bool = False,
     ) -> dict[str, Any] | list[Any] | str:
@@ -9191,7 +9191,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_vpn_open_vpncs_os(
+    async def pfsense_delete_vpn_openvpn_csos(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -9229,7 +9229,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_vpn_open_vpn_client(
+    async def pfsense_create_vpn_openvpn_client(
         caref: str,
         data_ciphers: list[str],
         data_ciphers_fallback: str,
@@ -9451,7 +9451,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_vpn_open_vpn_client(
+    async def pfsense_update_vpn_openvpn_client(
         id: str | int,
         confirm: bool = False,
         allow_compression: str | None = None,
@@ -9677,7 +9677,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_vpn_open_vpn_client(
+    async def pfsense_delete_vpn_openvpn_client(
         id: str | int,
         confirm: bool = False,
     ) -> dict[str, Any] | list[Any] | str:
@@ -9703,7 +9703,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_vpn_open_vpn_client_export_config(
+    async def pfsense_create_vpn_openvpn_client_export_config(
         server: int,
         confirm: bool = False,
         advancedoptions: str | None = None,
@@ -9817,7 +9817,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_vpn_open_vpn_client_export_config(
+    async def pfsense_update_vpn_openvpn_client_export_config(
         id: str | int,
         confirm: bool = False,
         advancedoptions: str | None = None,
@@ -9935,7 +9935,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_vpn_open_vpn_client_export_config(
+    async def pfsense_delete_vpn_openvpn_client_export_config(
         id: str | int,
         confirm: bool = False,
     ) -> dict[str, Any] | list[Any] | str:
@@ -9961,7 +9961,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_replace_vpn_open_vpn_client_export_configs(
+    async def pfsense_replace_vpn_openvpn_client_export_configs(
         items: list[dict[str, Any]],
         confirm: bool = False,
     ) -> dict[str, Any] | list[Any] | str:
@@ -9985,7 +9985,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_vpn_open_vpn_client_export_configs(
+    async def pfsense_delete_vpn_openvpn_client_export_configs(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -10023,7 +10023,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_vpn_open_vpn_client_export(
+    async def pfsense_create_vpn_openvpn_client_export(
         id: str | int,
         confirm: bool = False,
         advancedoptions: str | None = None,
@@ -10153,7 +10153,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_vpn_open_vpn_clients(
+    async def pfsense_delete_vpn_openvpn_clients(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -10191,7 +10191,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_vpn_open_vpn_server(
+    async def pfsense_create_vpn_openvpn_server(
         caref: str,
         certref: str,
         data_ciphers: list[str],
@@ -10497,7 +10497,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_vpn_open_vpn_server(
+    async def pfsense_update_vpn_openvpn_server(
         id: str | int,
         confirm: bool = False,
         allow_compression: str | None = None,
@@ -10807,7 +10807,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_vpn_open_vpn_server(
+    async def pfsense_delete_vpn_openvpn_server(
         id: str | int,
         confirm: bool = False,
     ) -> dict[str, Any] | list[Any] | str:
@@ -10833,7 +10833,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_vpn_open_vpn_servers(
+    async def pfsense_delete_vpn_openvpn_servers(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -10877,7 +10877,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_vpni_psec_apply_status(
+    async def pfsense_get_vpn_ipsec_apply_status(
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/vpn/ipsec/apply
 
@@ -10890,7 +10890,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_vpni_psec_phase1_encryption(
+    async def pfsense_get_vpn_ipsec_phase1_encryption(
         id: str | int,
         parent_id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
@@ -10914,7 +10914,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_vpni_psec_phase1_encryptions(
+    async def pfsense_list_vpn_ipsec_phase1_encryptions(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -10950,7 +10950,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_vpni_psec_phase1(
+    async def pfsense_get_vpn_ipsec_phase1(
         id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/vpn/ipsec/phase1
@@ -10970,7 +10970,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_vpni_psec_phase1s(
+    async def pfsense_list_vpn_ipsec_phase1s(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -11006,7 +11006,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_vpni_psec_phase2_encryption(
+    async def pfsense_get_vpn_ipsec_phase2_encryption(
         id: str | int,
         parent_id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
@@ -11030,7 +11030,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_vpni_psec_phase2_encryptions(
+    async def pfsense_list_vpn_ipsec_phase2_encryptions(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -11066,7 +11066,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_vpni_psec_phase2(
+    async def pfsense_get_vpn_ipsec_phase2(
         id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/vpn/ipsec/phase2
@@ -11086,7 +11086,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_vpni_psec_phase2s(
+    async def pfsense_list_vpn_ipsec_phase2s(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -11125,7 +11125,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_vpni_psec_apply(
+    async def pfsense_vpn_ipsec_apply(
         confirm: bool = False,
     ) -> dict[str, Any] | list[Any] | str:
         """POST /api/v2/vpn/ipsec/apply
@@ -11144,7 +11144,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_vpni_psec_phase1_encryption(
+    async def pfsense_create_vpn_ipsec_phase1_encryption(
         dhgroup: int,
         encryption_algorithm_name: str,
         hash_algorithm: str,
@@ -11193,7 +11193,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_vpni_psec_phase1_encryption(
+    async def pfsense_update_vpn_ipsec_phase1_encryption(
         id: str | int,
         parent_id: str | int,
         confirm: bool = False,
@@ -11246,7 +11246,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_vpni_psec_phase1_encryption(
+    async def pfsense_delete_vpn_ipsec_phase1_encryption(
         id: str | int,
         parent_id: str | int,
         confirm: bool = False,
@@ -11283,7 +11283,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_vpni_psec_phase1_encryptions(
+    async def pfsense_delete_vpn_ipsec_phase1_encryptions(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -11324,7 +11324,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_vpni_psec_phase1(
+    async def pfsense_create_vpn_ipsec_phase1(
         authentication_method: str,
         encryption: list[dict[str, Any]],
         iketype: str,
@@ -11473,7 +11473,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_vpni_psec_phase1(
+    async def pfsense_update_vpn_ipsec_phase1(
         id: str | int,
         confirm: bool = False,
         authentication_method: str | None = None,
@@ -11626,7 +11626,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_vpni_psec_phase1(
+    async def pfsense_delete_vpn_ipsec_phase1(
         id: str | int,
         confirm: bool = False,
         apply: bool | None = False,
@@ -11659,7 +11659,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_replace_vpni_psec_phase1s(
+    async def pfsense_replace_vpn_ipsec_phase1s(
         items: list[dict[str, Any]],
         confirm: bool = False,
     ) -> dict[str, Any] | list[Any] | str:
@@ -11686,7 +11686,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_vpni_psec_phase1s(
+    async def pfsense_delete_vpn_ipsec_phase1s(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -11727,7 +11727,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_vpni_psec_phase2_encryption(
+    async def pfsense_create_vpn_ipsec_phase2_encryption(
         name: str,
         parent_id: str | int,
         confirm: bool = False,
@@ -11764,7 +11764,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_vpni_psec_phase2_encryption(
+    async def pfsense_update_vpn_ipsec_phase2_encryption(
         id: str | int,
         parent_id: str | int,
         confirm: bool = False,
@@ -11805,7 +11805,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_vpni_psec_phase2_encryption(
+    async def pfsense_delete_vpn_ipsec_phase2_encryption(
         id: str | int,
         parent_id: str | int,
         confirm: bool = False,
@@ -11842,7 +11842,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_vpni_psec_phase2_encryptions(
+    async def pfsense_delete_vpn_ipsec_phase2_encryptions(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -11883,7 +11883,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_vpni_psec_phase2(
+    async def pfsense_create_vpn_ipsec_phase2(
         hash_algorithm_option: list[str],
         ikeid: int,
         mode: str,
@@ -11996,7 +11996,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_vpni_psec_phase2(
+    async def pfsense_update_vpn_ipsec_phase2(
         id: str | int,
         confirm: bool = False,
         descr: str | None = None,
@@ -12113,7 +12113,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_vpni_psec_phase2(
+    async def pfsense_delete_vpn_ipsec_phase2(
         id: str | int,
         confirm: bool = False,
         apply: bool | None = False,
@@ -12146,7 +12146,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_replace_vpni_psec_phase2s(
+    async def pfsense_replace_vpn_ipsec_phase2s(
         items: list[dict[str, Any]],
         confirm: bool = False,
     ) -> dict[str, Any] | list[Any] | str:
@@ -12173,7 +12173,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_vpni_psec_phase2s(
+    async def pfsense_delete_vpn_ipsec_phase2s(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -15436,7 +15436,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_services_ha_proxy_apply_status(
+    async def pfsense_get_services_haproxy_apply_status(
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/haproxy/apply
 
@@ -15449,7 +15449,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_services_ha_proxy_backend_acl(
+    async def pfsense_get_services_haproxy_backend_acl(
         id: str | int,
         parent_id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
@@ -15473,7 +15473,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_services_ha_proxy_backend_ac_ls(
+    async def pfsense_list_services_haproxy_backend_acls(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -15509,7 +15509,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_services_ha_proxy_backend_action(
+    async def pfsense_get_services_haproxy_backend_action(
         id: str | int,
         parent_id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
@@ -15533,7 +15533,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_services_ha_proxy_backend_actions(
+    async def pfsense_list_services_haproxy_backend_actions(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -15569,7 +15569,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_services_ha_proxy_backend(
+    async def pfsense_get_services_haproxy_backend(
         id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/haproxy/backend
@@ -15589,7 +15589,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_services_ha_proxy_backend_error_file(
+    async def pfsense_get_services_haproxy_backend_error_file(
         id: str | int,
         parent_id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
@@ -15613,7 +15613,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_services_ha_proxy_backend_error_files(
+    async def pfsense_list_services_haproxy_backend_error_files(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -15649,7 +15649,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_services_ha_proxy_backend_server(
+    async def pfsense_get_services_haproxy_backend_server(
         id: str | int,
         parent_id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
@@ -15673,7 +15673,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_services_ha_proxy_backend_servers(
+    async def pfsense_list_services_haproxy_backend_servers(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -15709,7 +15709,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_services_ha_proxy_backends(
+    async def pfsense_list_services_haproxy_backends(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -15745,7 +15745,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_services_ha_proxy_file(
+    async def pfsense_get_services_haproxy_file(
         id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/haproxy/file
@@ -15765,7 +15765,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_services_ha_proxy_files(
+    async def pfsense_list_services_haproxy_files(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -15801,7 +15801,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_services_ha_proxy_frontend_acl(
+    async def pfsense_get_services_haproxy_frontend_acl(
         id: str | int,
         parent_id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
@@ -15825,7 +15825,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_services_ha_proxy_frontend_ac_ls(
+    async def pfsense_list_services_haproxy_frontend_acls(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -15861,7 +15861,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_services_ha_proxy_frontend_action(
+    async def pfsense_get_services_haproxy_frontend_action(
         id: str | int,
         parent_id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
@@ -15885,7 +15885,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_services_ha_proxy_frontend_actions(
+    async def pfsense_list_services_haproxy_frontend_actions(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -15921,7 +15921,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_services_ha_proxy_frontend_address(
+    async def pfsense_get_services_haproxy_frontend_address(
         id: str | int,
         parent_id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
@@ -15945,7 +15945,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_services_ha_proxy_frontend_addresses(
+    async def pfsense_list_services_haproxy_frontend_addresses(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -15981,7 +15981,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_services_ha_proxy_frontend_certificate(
+    async def pfsense_get_services_haproxy_frontend_certificate(
         id: str | int,
         parent_id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
@@ -16005,7 +16005,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_services_ha_proxy_frontend_certificates(
+    async def pfsense_list_services_haproxy_frontend_certificates(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -16041,7 +16041,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_services_ha_proxy_frontend(
+    async def pfsense_get_services_haproxy_frontend(
         id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/haproxy/frontend
@@ -16061,7 +16061,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_services_ha_proxy_frontend_error_file(
+    async def pfsense_get_services_haproxy_frontend_error_file(
         id: str | int,
         parent_id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
@@ -16085,7 +16085,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_services_ha_proxy_frontend_error_files(
+    async def pfsense_list_services_haproxy_frontend_error_files(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -16121,7 +16121,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_services_ha_proxy_frontends(
+    async def pfsense_list_services_haproxy_frontends(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -16157,7 +16157,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_services_ha_proxy_settings_dns_resolver(
+    async def pfsense_get_services_haproxy_settings_dns_resolver(
         id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/haproxy/settings/dns_resolver
@@ -16177,7 +16177,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_services_ha_proxy_settings_dns_resolvers(
+    async def pfsense_list_services_haproxy_settings_dns_resolvers(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -16213,7 +16213,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_services_ha_proxy_settings_email_mailer(
+    async def pfsense_get_services_haproxy_settings_email_mailer(
         id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/haproxy/settings/email_mailer
@@ -16233,7 +16233,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_services_ha_proxy_settings_email_mailers(
+    async def pfsense_list_services_haproxy_settings_email_mailers(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -16269,7 +16269,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_services_ha_proxy_settings(
+    async def pfsense_get_services_haproxy_settings(
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/haproxy/settings
 
@@ -16285,7 +16285,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_services_ha_proxy_apply(
+    async def pfsense_services_haproxy_apply(
         confirm: bool = False,
     ) -> dict[str, Any] | list[Any] | str:
         """POST /api/v2/services/haproxy/apply
@@ -16304,7 +16304,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_services_ha_proxy_backend_acl(
+    async def pfsense_create_services_haproxy_backend_acl(
         expression: str,
         name: str,
         parent_id: str | int,
@@ -16353,7 +16353,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_services_ha_proxy_backend_acl(
+    async def pfsense_update_services_haproxy_backend_acl(
         id: str | int,
         parent_id: str | int,
         confirm: bool = False,
@@ -16406,7 +16406,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_backend_acl(
+    async def pfsense_delete_services_haproxy_backend_acl(
         id: str | int,
         parent_id: str | int,
         confirm: bool = False,
@@ -16439,7 +16439,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_backend_ac_ls(
+    async def pfsense_delete_services_haproxy_backend_acls(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -16480,7 +16480,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_services_ha_proxy_backend_action(
+    async def pfsense_create_services_haproxy_backend_action(
         acl: str,
         action: str,
         parent_id: str | int,
@@ -16569,7 +16569,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_services_ha_proxy_backend_action(
+    async def pfsense_update_services_haproxy_backend_action(
         id: str | int,
         parent_id: str | int,
         confirm: bool = False,
@@ -16662,7 +16662,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_backend_action(
+    async def pfsense_delete_services_haproxy_backend_action(
         id: str | int,
         parent_id: str | int,
         confirm: bool = False,
@@ -16695,7 +16695,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_backend_actions(
+    async def pfsense_delete_services_haproxy_backend_actions(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -16736,7 +16736,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_services_ha_proxy_backend(
+    async def pfsense_create_services_haproxy_backend(
         name: str,
         confirm: bool = False,
         acls: list[dict[str, Any]] | None = None,
@@ -16989,7 +16989,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_services_ha_proxy_backend(
+    async def pfsense_update_services_haproxy_backend(
         id: str | int,
         confirm: bool = False,
         acls: list[dict[str, Any]] | None = None,
@@ -17246,7 +17246,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_backend(
+    async def pfsense_delete_services_haproxy_backend(
         id: str | int,
         confirm: bool = False,
     ) -> dict[str, Any] | list[Any] | str:
@@ -17275,7 +17275,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_services_ha_proxy_backend_error_file(
+    async def pfsense_create_services_haproxy_backend_error_file(
         errorcode: int,
         errorfile: str,
         parent_id: str | int,
@@ -17312,7 +17312,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_services_ha_proxy_backend_error_file(
+    async def pfsense_update_services_haproxy_backend_error_file(
         id: str | int,
         parent_id: str | int,
         confirm: bool = False,
@@ -17353,7 +17353,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_backend_error_file(
+    async def pfsense_delete_services_haproxy_backend_error_file(
         id: str | int,
         parent_id: str | int,
         confirm: bool = False,
@@ -17386,7 +17386,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_backend_error_files(
+    async def pfsense_delete_services_haproxy_backend_error_files(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -17427,7 +17427,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_services_ha_proxy_backend_server(
+    async def pfsense_create_services_haproxy_backend_server(
         address: str,
         name: str,
         parent_id: str | int,
@@ -17488,7 +17488,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_services_ha_proxy_backend_server(
+    async def pfsense_update_services_haproxy_backend_server(
         id: str | int,
         parent_id: str | int,
         confirm: bool = False,
@@ -17553,7 +17553,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_backend_server(
+    async def pfsense_delete_services_haproxy_backend_server(
         id: str | int,
         parent_id: str | int,
         confirm: bool = False,
@@ -17586,7 +17586,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_backend_servers(
+    async def pfsense_delete_services_haproxy_backend_servers(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -17627,7 +17627,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_replace_services_ha_proxy_backends(
+    async def pfsense_replace_services_haproxy_backends(
         items: list[dict[str, Any]],
         confirm: bool = False,
     ) -> dict[str, Any] | list[Any] | str:
@@ -17654,7 +17654,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_backends(
+    async def pfsense_delete_services_haproxy_backends(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -17695,7 +17695,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_services_ha_proxy_file(
+    async def pfsense_create_services_haproxy_file(
         content: str,
         name: str,
         confirm: bool = False,
@@ -17732,7 +17732,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_services_ha_proxy_file(
+    async def pfsense_update_services_haproxy_file(
         id: str | int,
         confirm: bool = False,
         content: str | None = None,
@@ -17773,7 +17773,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_file(
+    async def pfsense_delete_services_haproxy_file(
         id: str | int,
         confirm: bool = False,
     ) -> dict[str, Any] | list[Any] | str:
@@ -17802,7 +17802,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_replace_services_ha_proxy_files(
+    async def pfsense_replace_services_haproxy_files(
         items: list[dict[str, Any]],
         confirm: bool = False,
     ) -> dict[str, Any] | list[Any] | str:
@@ -17829,7 +17829,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_files(
+    async def pfsense_delete_services_haproxy_files(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -17870,7 +17870,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_services_ha_proxy_frontend_acl(
+    async def pfsense_create_services_haproxy_frontend_acl(
         expression: str,
         name: str,
         parent_id: str | int,
@@ -17919,7 +17919,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_services_ha_proxy_frontend_acl(
+    async def pfsense_update_services_haproxy_frontend_acl(
         id: str | int,
         parent_id: str | int,
         confirm: bool = False,
@@ -17972,7 +17972,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_frontend_acl(
+    async def pfsense_delete_services_haproxy_frontend_acl(
         id: str | int,
         parent_id: str | int,
         confirm: bool = False,
@@ -18005,7 +18005,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_frontend_ac_ls(
+    async def pfsense_delete_services_haproxy_frontend_acls(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -18046,7 +18046,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_services_ha_proxy_frontend_action(
+    async def pfsense_create_services_haproxy_frontend_action(
         acl: str,
         action: str,
         parent_id: str | int,
@@ -18135,7 +18135,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_services_ha_proxy_frontend_action(
+    async def pfsense_update_services_haproxy_frontend_action(
         id: str | int,
         parent_id: str | int,
         confirm: bool = False,
@@ -18228,7 +18228,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_frontend_action(
+    async def pfsense_delete_services_haproxy_frontend_action(
         id: str | int,
         parent_id: str | int,
         confirm: bool = False,
@@ -18261,7 +18261,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_frontend_actions(
+    async def pfsense_delete_services_haproxy_frontend_actions(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -18302,7 +18302,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_services_ha_proxy_frontend_address(
+    async def pfsense_create_services_haproxy_frontend_address(
         extaddr: str,
         parent_id: str | int,
         confirm: bool = False,
@@ -18351,7 +18351,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_services_ha_proxy_frontend_address(
+    async def pfsense_update_services_haproxy_frontend_address(
         id: str | int,
         parent_id: str | int,
         confirm: bool = False,
@@ -18404,7 +18404,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_frontend_address(
+    async def pfsense_delete_services_haproxy_frontend_address(
         id: str | int,
         parent_id: str | int,
         confirm: bool = False,
@@ -18437,7 +18437,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_frontend_addresses(
+    async def pfsense_delete_services_haproxy_frontend_addresses(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -18478,7 +18478,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_services_ha_proxy_frontend_certificate(
+    async def pfsense_create_services_haproxy_frontend_certificate(
         parent_id: str | int,
         confirm: bool = False,
         ssl_certificate: str | None = None,
@@ -18511,7 +18511,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_services_ha_proxy_frontend_certificate(
+    async def pfsense_update_services_haproxy_frontend_certificate(
         id: str | int,
         parent_id: str | int,
         confirm: bool = False,
@@ -18548,7 +18548,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_frontend_certificate(
+    async def pfsense_delete_services_haproxy_frontend_certificate(
         id: str | int,
         parent_id: str | int,
         confirm: bool = False,
@@ -18581,7 +18581,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_frontend_certificates(
+    async def pfsense_delete_services_haproxy_frontend_certificates(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -18622,7 +18622,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_services_ha_proxy_frontend(
+    async def pfsense_create_services_haproxy_frontend(
         name: str,
         type_: str,
         confirm: bool = False,
@@ -18735,7 +18735,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_services_ha_proxy_frontend(
+    async def pfsense_update_services_haproxy_frontend(
         id: str | int,
         confirm: bool = False,
         a_actionitems: list[dict[str, Any]] | None = None,
@@ -18852,7 +18852,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_frontend(
+    async def pfsense_delete_services_haproxy_frontend(
         id: str | int,
         confirm: bool = False,
     ) -> dict[str, Any] | list[Any] | str:
@@ -18881,7 +18881,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_services_ha_proxy_frontend_error_file(
+    async def pfsense_create_services_haproxy_frontend_error_file(
         errorcode: int,
         errorfile: str,
         parent_id: str | int,
@@ -18918,7 +18918,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_services_ha_proxy_frontend_error_file(
+    async def pfsense_update_services_haproxy_frontend_error_file(
         id: str | int,
         parent_id: str | int,
         confirm: bool = False,
@@ -18959,7 +18959,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_frontend_error_file(
+    async def pfsense_delete_services_haproxy_frontend_error_file(
         id: str | int,
         parent_id: str | int,
         confirm: bool = False,
@@ -18992,7 +18992,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_frontend_error_files(
+    async def pfsense_delete_services_haproxy_frontend_error_files(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -19033,7 +19033,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_replace_services_ha_proxy_frontends(
+    async def pfsense_replace_services_haproxy_frontends(
         items: list[dict[str, Any]],
         confirm: bool = False,
     ) -> dict[str, Any] | list[Any] | str:
@@ -19060,7 +19060,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_frontends(
+    async def pfsense_delete_services_haproxy_frontends(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -19101,7 +19101,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_services_ha_proxy_settings_dns_resolver(
+    async def pfsense_create_services_haproxy_settings_dns_resolver(
         name: str,
         server: str,
         confirm: bool = False,
@@ -19138,7 +19138,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_services_ha_proxy_settings_dns_resolver(
+    async def pfsense_update_services_haproxy_settings_dns_resolver(
         id: str | int,
         confirm: bool = False,
         name: str | None = None,
@@ -19179,7 +19179,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_settings_dns_resolver(
+    async def pfsense_delete_services_haproxy_settings_dns_resolver(
         id: str | int,
         confirm: bool = False,
     ) -> dict[str, Any] | list[Any] | str:
@@ -19208,7 +19208,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_settings_dns_resolvers(
+    async def pfsense_delete_services_haproxy_settings_dns_resolvers(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -19249,7 +19249,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_services_ha_proxy_settings_email_mailer(
+    async def pfsense_create_services_haproxy_settings_email_mailer(
         mailserver: str,
         name: str,
         confirm: bool = False,
@@ -19286,7 +19286,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_services_ha_proxy_settings_email_mailer(
+    async def pfsense_update_services_haproxy_settings_email_mailer(
         id: str | int,
         confirm: bool = False,
         mailserver: str | None = None,
@@ -19327,7 +19327,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_settings_email_mailer(
+    async def pfsense_delete_services_haproxy_settings_email_mailer(
         id: str | int,
         confirm: bool = False,
     ) -> dict[str, Any] | list[Any] | str:
@@ -19356,7 +19356,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_services_ha_proxy_settings_email_mailers(
+    async def pfsense_delete_services_haproxy_settings_email_mailers(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -19397,7 +19397,7 @@ if "services_haproxy" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_update_services_ha_proxy_settings(
+    async def pfsense_update_services_haproxy_settings(
         confirm: bool = False,
         advanced: str | None = None,
         carpdev: str | None = None,
@@ -26249,7 +26249,7 @@ if "system" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_system_cr_ls(
+    async def pfsense_list_system_crls(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -27009,7 +27009,7 @@ if "system" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_system_cr_ls(
+    async def pfsense_delete_system_crls(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -28699,7 +28699,7 @@ if "status" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_status_i_psec_child_sa(
+    async def pfsense_get_status_ipsec_child_sa(
         id: str | int,
         parent_id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
@@ -28723,7 +28723,7 @@ if "status" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_status_i_psec_child_s_as(
+    async def pfsense_list_status_ipsec_child_sas(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -28759,7 +28759,7 @@ if "status" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_status_i_psec_s_as(
+    async def pfsense_list_status_ipsec_sas(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -28939,7 +28939,7 @@ if "status" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_status_logs_open_vpn(
+    async def pfsense_list_status_logs_openvpn(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -29060,7 +29060,7 @@ if "status" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_status_open_vpn_clients(
+    async def pfsense_list_status_openvpn_clients(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -29096,7 +29096,7 @@ if "status" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_status_open_vpn_server_connection(
+    async def pfsense_get_status_openvpn_server_connection(
         id: str | int,
         parent_id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
@@ -29120,7 +29120,7 @@ if "status" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_status_open_vpn_server_connections(
+    async def pfsense_list_status_openvpn_server_connections(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -29156,7 +29156,7 @@ if "status" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_get_status_open_vpn_server_route(
+    async def pfsense_get_status_openvpn_server_route(
         id: str | int,
         parent_id: str | int,
     ) -> dict[str, Any] | list[Any] | str:
@@ -29180,7 +29180,7 @@ if "status" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_status_open_vpn_server_routes(
+    async def pfsense_list_status_openvpn_server_routes(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -29216,7 +29216,7 @@ if "status" in _PFSENSE_MODULES:
 
 
     @mcp.tool()
-    async def pfsense_list_status_open_vpn_servers(
+    async def pfsense_list_status_openvpn_servers(
         limit: int | None = 0,
         offset: int | None = 0,
         sort_by: list[str] | None = None,
@@ -29530,7 +29530,7 @@ if "status" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_status_open_vpn_server_connection(
+    async def pfsense_delete_status_openvpn_server_connection(
         id: str | int,
         parent_id: str | int,
         confirm: bool = False,
@@ -29560,7 +29560,7 @@ if "status" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_delete_status_open_vpn_server_connections(
+    async def pfsense_delete_status_openvpn_server_connections(
         confirm: bool = False,
         limit: int | None = 0,
         offset: int | None = 0,
@@ -30086,7 +30086,7 @@ if "diagnostics" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
 
 
     @mcp.tool()
-    async def pfsense_create_graph_ql(
+    async def pfsense_create_graphql(
         confirm: bool = False,
         query: str | None = None,
         variables: dict[str, Any] | None = None,

@@ -53,12 +53,12 @@
 - `pfsense_replace_services_free_radius_interfaces`
 - `pfsense_list_services_free_radius_users`
 - `pfsense_replace_services_free_radius_users`
-- `pfsense_list_services_ha_proxy_backends`
-- `pfsense_replace_services_ha_proxy_backends`
-- `pfsense_list_services_ha_proxy_files`
-- `pfsense_replace_services_ha_proxy_files`
-- `pfsense_list_services_ha_proxy_frontends`
-- `pfsense_replace_services_ha_proxy_frontends`
+- `pfsense_list_services_haproxy_backends`
+- `pfsense_replace_services_haproxy_backends`
+- `pfsense_list_services_haproxy_files`
+- `pfsense_replace_services_haproxy_files`
+- `pfsense_list_services_haproxy_frontends`
+- `pfsense_replace_services_haproxy_frontends`
 - `pfsense_list_services_ntp_time_servers`
 - `pfsense_replace_services_ntp_time_servers`
 - `pfsense_list_services_service_watchdogs`
@@ -71,16 +71,16 @@
 - `pfsense_replace_user_auth_servers`
 - `pfsense_list_user_groups`
 - `pfsense_replace_user_groups`
-- `pfsense_list_vpni_psec_phase1s`
-- `pfsense_replace_vpni_psec_phase1s`
-- `pfsense_list_vpni_psec_phase2s`
-- `pfsense_replace_vpni_psec_phase2s`
-- `pfsense_list_vpn_open_vpn_client_export_configs`
-- `pfsense_replace_vpn_open_vpn_client_export_configs`
-- `pfsense_list_vpn_wire_guard_peers`
-- `pfsense_replace_vpn_wire_guard_peers`
-- `pfsense_list_vpn_wire_guard_tunnels`
-- `pfsense_replace_vpn_wire_guard_tunnels`
+- `pfsense_list_vpn_ipsec_phase1s`
+- `pfsense_replace_vpn_ipsec_phase1s`
+- `pfsense_list_vpn_ipsec_phase2s`
+- `pfsense_replace_vpn_ipsec_phase2s`
+- `pfsense_list_vpn_openvpn_client_export_configs`
+- `pfsense_replace_vpn_openvpn_client_export_configs`
+- `pfsense_list_vpn_wireguard_peers`
+- `pfsense_replace_vpn_wireguard_peers`
+- `pfsense_list_vpn_wireguard_tunnels`
+- `pfsense_replace_vpn_wireguard_tunnels`
 
 **Steps**:
 1. **List** current resources using `pfsense_list_firewall_aliases`
@@ -155,15 +155,15 @@
 70. **List** current resources using `pfsense_list_services_free_radius_users`
 71. **Replace** using `pfsense_replace_services_free_radius_users` with `confirm=True` — PUT the same data back (safe no-op). Pass the full list from the previous step as the request body.
 72. **List** again using `pfsense_list_services_free_radius_users` — verify nothing changed
-73. **List** current resources using `pfsense_list_services_ha_proxy_backends`
-74. **Replace** using `pfsense_replace_services_ha_proxy_backends` with `confirm=True` — PUT the same data back (safe no-op). Pass the full list from the previous step as the request body.
-75. **List** again using `pfsense_list_services_ha_proxy_backends` — verify nothing changed
-76. **List** current resources using `pfsense_list_services_ha_proxy_files`
-77. **Replace** using `pfsense_replace_services_ha_proxy_files` with `confirm=True` — PUT the same data back (safe no-op). Pass the full list from the previous step as the request body.
-78. **List** again using `pfsense_list_services_ha_proxy_files` — verify nothing changed
-79. **List** current resources using `pfsense_list_services_ha_proxy_frontends`
-80. **Replace** using `pfsense_replace_services_ha_proxy_frontends` with `confirm=True` — PUT the same data back (safe no-op). Pass the full list from the previous step as the request body.
-81. **List** again using `pfsense_list_services_ha_proxy_frontends` — verify nothing changed
+73. **List** current resources using `pfsense_list_services_haproxy_backends`
+74. **Replace** using `pfsense_replace_services_haproxy_backends` with `confirm=True` — PUT the same data back (safe no-op). Pass the full list from the previous step as the request body.
+75. **List** again using `pfsense_list_services_haproxy_backends` — verify nothing changed
+76. **List** current resources using `pfsense_list_services_haproxy_files`
+77. **Replace** using `pfsense_replace_services_haproxy_files` with `confirm=True` — PUT the same data back (safe no-op). Pass the full list from the previous step as the request body.
+78. **List** again using `pfsense_list_services_haproxy_files` — verify nothing changed
+79. **List** current resources using `pfsense_list_services_haproxy_frontends`
+80. **Replace** using `pfsense_replace_services_haproxy_frontends` with `confirm=True` — PUT the same data back (safe no-op). Pass the full list from the previous step as the request body.
+81. **List** again using `pfsense_list_services_haproxy_frontends` — verify nothing changed
 82. **List** current resources using `pfsense_list_services_ntp_time_servers`
 83. **Replace** using `pfsense_replace_services_ntp_time_servers` with `confirm=True` — PUT the same data back (safe no-op). Pass the full list from the previous step as the request body.
 84. **List** again using `pfsense_list_services_ntp_time_servers` — verify nothing changed
@@ -182,21 +182,21 @@
 97. **List** current resources using `pfsense_list_user_groups`
 98. **Replace** using `pfsense_replace_user_groups` with `confirm=True` — PUT the same data back (safe no-op). Pass the full list from the previous step as the request body.
 99. **List** again using `pfsense_list_user_groups` — verify nothing changed
-100. **List** current resources using `pfsense_list_vpni_psec_phase1s`
-101. **Replace** using `pfsense_replace_vpni_psec_phase1s` with `confirm=True` — PUT the same data back (safe no-op). Pass the full list from the previous step as the request body.
-102. **List** again using `pfsense_list_vpni_psec_phase1s` — verify nothing changed
-103. **List** current resources using `pfsense_list_vpni_psec_phase2s`
-104. **Replace** using `pfsense_replace_vpni_psec_phase2s` with `confirm=True` — PUT the same data back (safe no-op). Pass the full list from the previous step as the request body.
-105. **List** again using `pfsense_list_vpni_psec_phase2s` — verify nothing changed
-106. **List** current resources using `pfsense_list_vpn_open_vpn_client_export_configs`
-107. **Replace** using `pfsense_replace_vpn_open_vpn_client_export_configs` with `confirm=True` — PUT the same data back (safe no-op). Pass the full list from the previous step as the request body.
-108. **List** again using `pfsense_list_vpn_open_vpn_client_export_configs` — verify nothing changed
-109. **List** current resources using `pfsense_list_vpn_wire_guard_peers`
-110. **Replace** using `pfsense_replace_vpn_wire_guard_peers` with `confirm=True` — PUT the same data back (safe no-op). Pass the full list from the previous step as the request body.
-111. **List** again using `pfsense_list_vpn_wire_guard_peers` — verify nothing changed
-112. **List** current resources using `pfsense_list_vpn_wire_guard_tunnels`
-113. **Replace** using `pfsense_replace_vpn_wire_guard_tunnels` with `confirm=True` — PUT the same data back (safe no-op). Pass the full list from the previous step as the request body.
-114. **List** again using `pfsense_list_vpn_wire_guard_tunnels` — verify nothing changed
+100. **List** current resources using `pfsense_list_vpn_ipsec_phase1s`
+101. **Replace** using `pfsense_replace_vpn_ipsec_phase1s` with `confirm=True` — PUT the same data back (safe no-op). Pass the full list from the previous step as the request body.
+102. **List** again using `pfsense_list_vpn_ipsec_phase1s` — verify nothing changed
+103. **List** current resources using `pfsense_list_vpn_ipsec_phase2s`
+104. **Replace** using `pfsense_replace_vpn_ipsec_phase2s` with `confirm=True` — PUT the same data back (safe no-op). Pass the full list from the previous step as the request body.
+105. **List** again using `pfsense_list_vpn_ipsec_phase2s` — verify nothing changed
+106. **List** current resources using `pfsense_list_vpn_openvpn_client_export_configs`
+107. **Replace** using `pfsense_replace_vpn_openvpn_client_export_configs` with `confirm=True` — PUT the same data back (safe no-op). Pass the full list from the previous step as the request body.
+108. **List** again using `pfsense_list_vpn_openvpn_client_export_configs` — verify nothing changed
+109. **List** current resources using `pfsense_list_vpn_wireguard_peers`
+110. **Replace** using `pfsense_replace_vpn_wireguard_peers` with `confirm=True` — PUT the same data back (safe no-op). Pass the full list from the previous step as the request body.
+111. **List** again using `pfsense_list_vpn_wireguard_peers` — verify nothing changed
+112. **List** current resources using `pfsense_list_vpn_wireguard_tunnels`
+113. **Replace** using `pfsense_replace_vpn_wireguard_tunnels` with `confirm=True` — PUT the same data back (safe no-op). Pass the full list from the previous step as the request body.
+114. **List** again using `pfsense_list_vpn_wireguard_tunnels` — verify nothing changed
 
 **Important notes**:
 PUT replace operations: GET current → PUT same data back → verify (safe no-op).

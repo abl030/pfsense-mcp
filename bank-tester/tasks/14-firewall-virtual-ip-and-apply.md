@@ -6,7 +6,7 @@
 
 **Tools to exercise** (7):
 - `pfsense_create_firewall_virtual_ip`
-- `pfsense_list_firewall_virtual_i_ps`
+- `pfsense_list_firewall_virtual_ips`
 - `pfsense_get_firewall_virtual_ip`
 - `pfsense_update_firewall_virtual_ip`
 - `pfsense_delete_firewall_virtual_ip`
@@ -20,7 +20,7 @@
     - `subnet`: `10.99.99.100`
     - `subnet_bits`: `32`
     - `descr`: `bt_sys14_vip`
-2. **List** using `pfsense_list_firewall_virtual_i_ps` — verify the created resource appears
+2. **List** using `pfsense_list_firewall_virtual_ips` — verify the created resource appears
 3. **Get** using `pfsense_get_firewall_virtual_ip` with the ID from the create response
 4. **Update** using `pfsense_update_firewall_virtual_ip` with `confirm=True` — set `descr` to `Updated VIP`
 5. **Get** again using `pfsense_get_firewall_virtual_ip` — verify `descr` was updated
