@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 from .codegen import render, write_output
-from .context_builder import build_tool_contexts
+from .context_builder import MODULE_ORDER, build_tool_contexts
 from .loader import load_spec
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -50,6 +50,15 @@ def main() -> None:
     with_apply = sum(1 for c in contexts if c.needs_apply)
     print(f"  {reads} read-only, {mutations} mutations")
     print(f"  {dangerous} dangerous, {with_apply} need apply")
+
+    # Module breakdown
+    print("  Module breakdown:")
+    for mod in MODULE_ORDER:
+        mod_reads = sum(1 for c in contexts if c.module == mod and not c.is_mutation)
+        mod_writes = sum(1 for c in contexts if c.module == mod and c.is_mutation)
+        mod_total = mod_reads + mod_writes
+        if mod_total:
+            print(f"    {mod}: {mod_total} tools ({mod_reads} read, {mod_writes} write)")
 
     # --- Generate server ---
     print("Rendering server...")

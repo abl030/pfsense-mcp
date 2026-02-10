@@ -84,6 +84,19 @@ class PfSenseClient:
 
 _client = PfSenseClient()
 
+# --- Module and read-only gating ---
+_ALL_MODULES = {{ all_modules }}
+_PFSENSE_MODULES = set(
+    m.strip()
+    for m in os.environ.get("PFSENSE_MODULES", ",".join(sorted(_ALL_MODULES))).split(",")
+    if m.strip()
+)
+_PFSENSE_READ_ONLY = os.environ.get("PFSENSE_READ_ONLY", "false").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+
 
 @mcp.tool()
 async def pfsense_report_issue(
@@ -128,4 +141,4 @@ async def pfsense_report_issue(
         f"--body '{escaped_body}'"
     )
 
-{{ tool_code }}
+{{ module_code }}

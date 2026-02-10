@@ -14,6 +14,44 @@ from .loader import Operation, load_spec, parse_operations
 from .naming import operation_id_to_tool_name
 from .schema_parser import ToolParameter, extract_tool_parameters
 
+# Canonical module ordering — used for code generation and env var docs.
+MODULE_ORDER = [
+    "firewall", "interface", "routing",
+    "vpn_wireguard", "vpn_openvpn", "vpn_ipsec",
+    "services_dhcp", "services_dns_resolver", "services_dns_forwarder",
+    "services_haproxy", "services_bind", "services_freeradius", "services_acme",
+    "services_misc",
+    "system", "status", "diagnostics", "user", "auth",
+]
+
+_ALL_MODULES = set(MODULE_ORDER)
+
+# Longest-prefix-first path → module mapping.
+# Order matters: more specific prefixes must come before shorter ones.
+_PATH_TO_MODULE = [
+    ("/api/v2/vpn/wireguard", "vpn_wireguard"),
+    ("/api/v2/vpn/openvpn", "vpn_openvpn"),
+    ("/api/v2/vpn/ipsec", "vpn_ipsec"),
+    ("/api/v2/services/dhcp_server", "services_dhcp"),
+    ("/api/v2/services/dhcp_relay", "services_dhcp"),
+    ("/api/v2/services/dns_resolver", "services_dns_resolver"),
+    ("/api/v2/services/dns_forwarder", "services_dns_forwarder"),
+    ("/api/v2/services/haproxy", "services_haproxy"),
+    ("/api/v2/services/bind", "services_bind"),
+    ("/api/v2/services/freeradius", "services_freeradius"),
+    ("/api/v2/services/acme", "services_acme"),
+    ("/api/v2/services/", "services_misc"),
+    ("/api/v2/firewall", "firewall"),
+    ("/api/v2/interface", "interface"),
+    ("/api/v2/routing", "routing"),
+    ("/api/v2/system", "system"),
+    ("/api/v2/status", "status"),
+    ("/api/v2/diagnostics", "diagnostics"),
+    ("/api/v2/user", "user"),
+    ("/api/v2/auth", "auth"),
+    ("/api/v2/graphql", "diagnostics"),
+]
+
 # Per-endpoint parameter description enhancements.
 # key = (operationId, param_name), value = text to append to description.
 _PARAM_DESCRIPTION_HINTS: dict[tuple[str, str], str] = {
@@ -103,6 +141,7 @@ class ToolContext:
     operation_id: str
     method: str  # "get", "post", "patch", "put", "delete"
     path: str  # e.g. "/api/v2/firewall/alias"
+    module: str  # e.g. "firewall", "vpn_wireguard", "services_dhcp"
     description: str
     parameters: list[ToolParameter]
     is_mutation: bool  # POST/PATCH/PUT/DELETE
@@ -116,6 +155,14 @@ class ToolContext:
     has_request_body: bool
     body_params: list[ToolParameter]  # params that go in JSON body
     query_params: list[ToolParameter]  # params that go in URL query
+
+
+def _path_to_module(path: str) -> str:
+    """Map an API path to its module name via longest-prefix match."""
+    for prefix, module in _PATH_TO_MODULE:
+        if path.startswith(prefix):
+            return module
+    raise ValueError(f"No module mapping for path: {path}")
 
 
 def _find_apply_info(
@@ -248,12 +295,16 @@ def build_tool_contexts(spec: dict[str, Any]) -> list[ToolContext]:
             danger_warning,
         )
 
+        # Derive module from path
+        module = _path_to_module(op.path)
+
         contexts.append(
             ToolContext(
                 tool_name=tool_name,
                 operation_id=op.operation_id,
                 method=op.method,
                 path=op.path,
+                module=module,
                 description=description,
                 parameters=params,
                 is_mutation=is_mutation,

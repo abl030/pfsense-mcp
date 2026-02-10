@@ -25,6 +25,7 @@ templates/
   server.py.j2               # FastMCP server template
 generated/
   server.py                  # The MCP server (677 tools — never hand-edit)
+test_modules.py              # Spec-derived pytest suite for module/read-only gating (85 tests)
 bank-tester/                 # AI-driven integration test suite
   run-bank-test.sh           # Orchestrator: boot VM → run tasks → collect results
   generate-tasks.py          # Auto-generate task files from spec + task-config.yaml
@@ -51,6 +52,8 @@ nix develop -c python -m generator    # regenerate generated/server.py
 
 ### Key patterns in generated code:
 - **FastMCP** server with `PfSenseClient` (httpx + X-API-Key auth)
+- **Module gating**: tools wrapped in `if "module" in _PFSENSE_MODULES:` blocks (19 modules)
+- **Read-only mode**: mutation tools additionally gated on `not _PFSENSE_READ_ONLY`
 - **Confirmation gates**: all mutations require `confirm=True`
 - **Apply reminders**: docstrings note when `{subsystem}_apply` is needed
 - **Dangerous endpoint warnings**: halt, reboot, command_prompt, etc.
@@ -64,6 +67,17 @@ nix develop -c python -m generator    # regenerate generated/server.py
 - Large integers (>= 2^53) replaced with `None`
 - HTML stripped from descriptions
 - Bulk DELETE tools include query parameter hint in docstring
+
+### Module system (`PFSENSE_MODULES` + `PFSENSE_READ_ONLY`):
+- `context_builder.py` maps each API path to one of 19 modules via `_PATH_TO_MODULE` (longest-prefix match)
+- `codegen.py` groups tools by `(module, is_mutation)` and wraps in `if` blocks
+- `server.py.j2` parses `PFSENSE_MODULES` (comma-separated, default: all) and `PFSENSE_READ_ONLY` (default: false)
+- `pfsense_report_issue` is always registered (never gated)
+- `test_modules.py` derives all expected values from the spec — zero hardcoded counts
+
+```bash
+nix develop -c python -m pytest test_modules.py -v    # 85 tests, ~2 min
+```
 
 ## VM Test Infrastructure
 

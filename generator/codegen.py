@@ -14,7 +14,7 @@ from typing import Any
 
 import jinja2
 
-from .context_builder import ToolContext
+from .context_builder import MODULE_ORDER, ToolContext
 from .schema_parser import ToolParameter
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -208,24 +208,66 @@ def _gen_tool_function(tool: ToolContext) -> str:
     return "\n".join(parts)
 
 
+def _indent(code: str, spaces: int = 4) -> str:
+    """Indent non-empty lines by the given number of spaces."""
+    prefix = " " * spaces
+    return "\n".join(
+        prefix + line if line.strip() else line
+        for line in code.split("\n")
+    )
+
+
 def render(contexts: list[ToolContext]) -> str:
-    """Render the complete server file."""
+    """Render the complete server file, grouped by module."""
     env = jinja2.Environment(
         loader=jinja2.FileSystemLoader(str(TEMPLATE_DIR)),
         keep_trailing_newline=True,
     )
     template = env.get_template("server.py.j2")
 
-    # Generate all tool functions
-    tool_functions = []
+    # Group contexts by module
+    by_module: dict[str, list[ToolContext]] = {m: [] for m in MODULE_ORDER}
     for ctx in contexts:
-        tool_functions.append(_gen_tool_function(ctx))
+        by_module[ctx.module].append(ctx)
 
-    tool_code = "\n\n\n".join(tool_functions)
+    # Build module-grouped code
+    sections: list[str] = []
+    for module in MODULE_ORDER:
+        tools = by_module[module]
+        if not tools:
+            continue
+
+        reads = [t for t in tools if not t.is_mutation]
+        writes = [t for t in tools if t.is_mutation]
+
+        section_comment = (
+            f"# === Module: {module} "
+            f"({len(tools)} tools: {len(reads)} read, {len(writes)} write) ==="
+        )
+        sections.append(section_comment)
+
+        # Read-only tools: gated on module membership only
+        if reads:
+            read_code = "\n\n\n".join(_gen_tool_function(t) for t in reads)
+            sections.append(f'if "{module}" in _PFSENSE_MODULES:')
+            sections.append(_indent(read_code))
+
+        # Mutation tools: gated on module membership AND not read-only
+        if writes:
+            write_code = "\n\n\n".join(_gen_tool_function(t) for t in writes)
+            sections.append(f'if "{module}" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:')
+            sections.append(_indent(write_code))
+
+    module_code = "\n\n\n".join(sections)
+
+    # Generate the _ALL_MODULES set literal for the template
+    from .context_builder import _ALL_MODULES
+    all_modules_repr = "{" + ", ".join(repr(m) for m in sorted(_ALL_MODULES)) + "}"
 
     return template.render(
         tool_count=len(contexts),
-        tool_code="\n\n\n" + tool_code + "\n",
+        module_code="\n\n\n" + module_code + "\n",
+        all_modules=all_modules_repr,
     )
 
 
