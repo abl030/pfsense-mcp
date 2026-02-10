@@ -30,7 +30,7 @@ _REPO_ROOT = Path(__file__).resolve().parent
 _spec = load_spec(_REPO_ROOT / "openapi-spec.json")
 _contexts = build_tool_contexts(_spec)
 
-ALWAYS_ON = 2  # pfsense_report_issue + pfsense_get_overview — never gated
+ALWAYS_ON = 3  # pfsense_report_issue + pfsense_get_overview + pfsense_search_tools — never gated
 
 MODULE_COUNTS: dict[str, dict[str, int]] = {}
 for _mod in MODULE_ORDER:
@@ -99,6 +99,7 @@ class TestModuleCounts:
         assert info["count"] == ALWAYS_ON
         assert "pfsense_report_issue" in info["names"]
         assert "pfsense_get_overview" in info["names"]
+        assert "pfsense_search_tools" in info["names"]
 
     @pytest.mark.parametrize("mod", MODULE_ORDER)
     def test_single_module(self, mod: str):
@@ -170,7 +171,7 @@ class TestToolPresence:
 
     def test_always_on_everywhere(self):
         """Always-on tools are present in every configuration."""
-        _always_on = {"pfsense_report_issue", "pfsense_get_overview"}
+        _always_on = {"pfsense_report_issue", "pfsense_get_overview", "pfsense_search_tools"}
 
         # Empty modules
         info = _get_tools("")
@@ -197,7 +198,7 @@ class TestToolPresence:
     def test_module_excludes_others(self, mod: str):
         """Loading one module doesn't leak tools from other modules."""
         info = _get_tools(mod)
-        tool_set = set(info["names"]) - {"pfsense_report_issue", "pfsense_get_overview"}
+        tool_set = set(info["names"]) - {"pfsense_report_issue", "pfsense_get_overview", "pfsense_search_tools"}
         expected_tools = {c.tool_name for c in _contexts if c.module == mod}
         extra = tool_set - expected_tools
         assert not extra, f"Module {mod} has extra tools: {extra}"

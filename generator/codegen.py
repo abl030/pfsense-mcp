@@ -14,7 +14,7 @@ from typing import Any
 
 import jinja2
 
-from .context_builder import MODULE_ORDER, ToolContext
+from .context_builder import MODULE_ORDER, ToolContext, build_tool_index
 from .schema_parser import ToolParameter
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -221,6 +221,14 @@ def _indent(code: str, spaces: int = 4) -> str:
     )
 
 
+def _format_tool_index(index: list[dict]) -> str:
+    """Format tool index as Python literal lines for embedding in template."""
+    lines = []
+    for entry in index:
+        lines.append(f"    {repr(entry)},")
+    return "\n".join(lines)
+
+
 def render(contexts: list[ToolContext]) -> str:
     """Render the complete server file, grouped by module."""
     env = jinja2.Environment(
@@ -268,10 +276,16 @@ def render(contexts: list[ToolContext]) -> str:
     from .context_builder import _ALL_MODULES
     all_modules_repr = "{" + ", ".join(repr(m) for m in sorted(_ALL_MODULES)) + "}"
 
+    # Build tool index for pfsense_search_tools
+    tool_index = build_tool_index(contexts)
+    tool_index_code = _format_tool_index(tool_index)
+
     return template.render(
         tool_count=len(contexts),
         module_code="\n\n\n" + module_code + "\n",
         all_modules=all_modules_repr,
+        tool_index_code=tool_index_code,
+        tool_index_count=len(tool_index),
     )
 
 

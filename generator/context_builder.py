@@ -115,6 +115,15 @@ _TOOL_DOCSTRING_NOTES: dict[str, str] = {
         "always report enabled=false and status=false due to a REST API bug. "
         "Use pfsense_get_overview for accurate service status."
     ),
+    "getFirewallRulesEndpoint": (
+        "NOTE: Rules reference firewall aliases by name (e.g. source='MY_ALIAS'). "
+        "To resolve alias names to their actual IPs/networks, call "
+        "pfsense_list_firewall_aliases and match by name."
+    ),
+    "getServicesDHCPServerStaticMappingsEndpoint": (
+        "NOTE: Results include static mappings from ALL interfaces. Use the parent_id "
+        "parameter to filter by interface (e.g. parent_id='lan' or parent_id='opt3')."
+    ),
 }
 
 # Subsystem prefixes that require an explicit "apply" call after mutations.
@@ -337,3 +346,78 @@ def build_tool_contexts(spec: dict[str, Any]) -> list[ToolContext]:
         )
 
     return contexts
+
+
+# ---------------------------------------------------------------------------
+# Tool index for discovery
+# ---------------------------------------------------------------------------
+
+_GENERIC_PARAMS = frozenset({
+    "id", "limit", "offset", "sort_by", "sort_order", "query",
+    "confirm", "parent_id", "items",
+})
+
+
+def build_tool_index(
+    contexts: list[ToolContext],
+) -> list[dict[str, str | list[str]]]:
+    """Build a searchable tool index for the pfsense_search_tools discovery tool.
+
+    Each entry: name, module, method, desc (one-line summary), kw (keywords).
+    Keywords derived from tool name, module, path segments, and field names.
+    Rebuilds automatically when the generator runs — zero manual maintenance.
+    """
+    index: list[dict[str, str | list[str]]] = []
+    for ctx in contexts:
+        kw: set[str] = set()
+
+        # Tool name parts (skip "pfsense" prefix)
+        kw.update(ctx.tool_name.split("_")[1:])
+
+        # Module parts
+        kw.update(ctx.module.split("_"))
+
+        # Path segments after /api/v2/
+        path_tail = ctx.path.replace("/api/v2/", "")
+        kw.update(seg for seg in path_tail.split("/") if seg)
+
+        # Body param names (first 10, skip generic)
+        for p in ctx.body_params[:10]:
+            if p.name not in _GENERIC_PARAMS:
+                kw.add(p.name)
+
+        # One-line summary
+        desc = ctx.description.split("\n")[0].strip()
+
+        index.append({
+            "name": ctx.tool_name,
+            "module": ctx.module,
+            "method": ctx.method,
+            "desc": desc,
+            "kw": sorted(kw),
+        })
+
+    # Always-on tools (not in the spec, hand-maintained)
+    index.append({
+        "name": "pfsense_report_issue",
+        "module": "_always_on",
+        "method": "none",
+        "desc": "Report an unexpected pfSense MCP tool error by composing a GitHub issue command",
+        "kw": ["bug", "error", "github", "issue", "report"],
+    })
+    index.append({
+        "name": "pfsense_get_overview",
+        "module": "_always_on",
+        "method": "get",
+        "desc": "Get a concise pfSense system overview: version, interfaces, gateways, and services",
+        "kw": ["gateways", "interfaces", "overview", "services", "status", "summary", "version"],
+    })
+    index.append({
+        "name": "pfsense_search_tools",
+        "module": "_always_on",
+        "method": "none",
+        "desc": "Search for pfSense tools by keyword to discover available operations",
+        "kw": ["discover", "find", "help", "list", "search", "tools"],
+    })
+
+    return index

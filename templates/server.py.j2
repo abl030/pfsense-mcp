@@ -17,7 +17,15 @@ from typing import Any
 import httpx
 from fastmcp import FastMCP
 
-mcp = FastMCP("pfSense")
+mcp = FastMCP(
+    "pfSense",
+    instructions=(
+        "pfSense firewall management. {{ tool_count }} tools available. "
+        "Call pfsense_search_tools first to find the right tool by keyword "
+        "before browsing the full tool list. "
+        "Call pfsense_get_overview for system status."
+    ),
+)
 
 
 class PfSenseClient:
@@ -183,5 +191,59 @@ async def pfsense_get_overview() -> dict[str, Any]:
         "services": services,
     }
 
+
+# --- Tool index for discovery ({{ tool_index_count }} entries, auto-generated) ---
+_TOOL_INDEX = [
+{{ tool_index_code }}
+]
+
+
+@mcp.tool()
+async def pfsense_search_tools(
+    query: str,
+    module: str | None = None,
+    limit: int = 25,
+) -> list[dict[str, Any]]:
+    """Search for pfSense tools by keyword. Call this first to discover which tools to use.
+
+    Uses AND logic: all space-separated terms must match.
+    Returns tool name, module, HTTP method, description, and whether the tool
+    is currently registered (respects PFSENSE_MODULES and PFSENSE_READ_ONLY).
+
+    query: Space-separated search terms (e.g. 'dhcp static mapping')
+    module: Optional module filter (e.g. 'firewall', 'vpn_wireguard', 'services_dhcp')
+    limit: Max results to return (default 25)
+    """
+    terms = query.lower().split()
+    if not terms:
+        return []
+    results: list[dict[str, Any]] = []
+    for entry in _TOOL_INDEX:
+        if module and entry["module"] != module:
+            continue
+        searchable = (
+            f"{entry['name']} {entry['module']} {entry['desc']} "
+            f"{' '.join(entry['kw'])}"
+        ).lower()
+        if all(t in searchable for t in terms):
+            # Determine if tool is currently registered
+            if entry["module"] == "_always_on":
+                registered = True
+            else:
+                is_mut = entry["method"] in ("post", "patch", "put", "delete")
+                registered = (
+                    entry["module"] in _PFSENSE_MODULES
+                    and (not is_mut or not _PFSENSE_READ_ONLY)
+                )
+            results.append({
+                "name": entry["name"],
+                "module": entry["module"],
+                "method": entry["method"],
+                "description": entry["desc"],
+                "registered": registered,
+            })
+            if len(results) >= limit:
+                break
+    return results
 
 {{ module_code }}
