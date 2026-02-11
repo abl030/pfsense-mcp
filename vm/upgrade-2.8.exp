@@ -207,6 +207,20 @@ expect {
     }
 }
 
+# Re-swap .default too — toolchain install may have recreated 2.7.2.default
+puts "\n==> Phase 4.5: Re-swapping .default file (post-toolchain)..."
+send "rm -f /usr/local/etc/pfSense/pkg/repos/pfSense-repo-2.7.2.default && touch /usr/local/etc/pfSense/pkg/repos/pfSense-repo-2_8_1.default\r"
+set timeout 30
+expect {
+    -re "home\\.arpa" {
+        puts "\n==> .default re-swapped to 2_8_1"
+    }
+    timeout {
+        puts "\n==> TIMEOUT re-swapping .default"
+        exit 1
+    }
+}
+
 # ---- Phase 5: Run pfSense-upgrade ----
 # -U: skip pfSense-repoc-static (which would reset repo back to 2.7.2)
 # -y: auto-confirm all prompts
@@ -288,6 +302,164 @@ if {$need_respawn} {
         }
         timeout {
             puts "\n==> TIMEOUT waiting for console menu after respawn"
+            exit 1
+        }
+    }
+}
+
+# ---- Phase 6.5: Force base upgrade via pkg-static ----
+# After the 2-stage reboot, the kernel is FreeBSD 15 (2.8.1) but the base
+# packages are still FreeBSD 14 (2.7.2). The dynamically-linked `pkg` is
+# broken (needs libmd.so.7 which doesn't exist in the FreeBSD 14 base).
+# The boot process also reset ABI/repo/.default back to 2.7.2.
+# Fix: use pkg-static (statically linked) to force-upgrade all packages.
+
+puts "\n==> Phase 6.5: Opening shell for base upgrade..."
+send "8\r"
+set timeout 60
+expect {
+    -re "home\\.arpa" {
+        puts "\n==> Shell ready for base upgrade"
+    }
+    timeout {
+        puts "\n==> TIMEOUT waiting for shell"
+        exit 1
+    }
+}
+
+puts "\n==> Re-applying IGNORE_OSVERSION..."
+send "setenv IGNORE_OSVERSION yes\r"
+set timeout 30
+expect {
+    -re "home\\.arpa" {
+        puts "\n==> IGNORE_OSVERSION set"
+    }
+    timeout {
+        puts "\n==> TIMEOUT setting IGNORE_OSVERSION"
+        exit 1
+    }
+}
+
+puts "\n==> Re-overriding pkg.conf ABI..."
+send "printf 'ABI=FreeBSD:15:amd64\\nALTABI=freebsd:15:x86:64\\n' > /usr/local/etc/pkg.conf\r"
+set timeout 30
+expect {
+    -re "home\\.arpa" {
+        puts "\n==> pkg.conf ABI overridden"
+    }
+    timeout {
+        puts "\n==> TIMEOUT overriding pkg.conf"
+        exit 1
+    }
+}
+
+puts "\n==> Re-forcing repo symlink..."
+send "ln -sf /usr/local/etc/pfSense/pkg/repos/pfSense-repo-2_8_1.conf /usr/local/etc/pkg/repos/pfSense.conf\r"
+set timeout 30
+expect {
+    -re "home\\.arpa" {
+        puts "\n==> Repo symlink forced"
+    }
+    timeout {
+        puts "\n==> TIMEOUT forcing symlink"
+        exit 1
+    }
+}
+
+puts "\n==> Re-swapping .default file..."
+send "rm -f /usr/local/etc/pfSense/pkg/repos/pfSense-repo-2.7.2.default && touch /usr/local/etc/pfSense/pkg/repos/pfSense-repo-2_8_1.default\r"
+set timeout 30
+expect {
+    -re "home\\.arpa" {
+        puts "\n==> .default swapped"
+    }
+    timeout {
+        puts "\n==> TIMEOUT swapping .default"
+        exit 1
+    }
+}
+
+puts "\n==> Updating pkg database..."
+send "pkg-static update -f\r"
+set timeout 120
+expect {
+    "Ignore the mismatch" {
+        puts "\n==> FATAL: IGNORE_OSVERSION not set!"
+        exit 1
+    }
+    -re "home\\.arpa" {
+        puts "\n==> pkg database updated"
+    }
+    timeout {
+        puts "\n==> TIMEOUT updating pkg database"
+        exit 1
+    }
+}
+
+puts "\n==> Running pkg-static upgrade -fy (this may take 10-15 minutes)..."
+send "pkg-static upgrade -fy\r"
+set timeout 1200
+expect {
+    "Ignore the mismatch" {
+        puts "\n==> FATAL: IGNORE_OSVERSION not set!"
+        exit 1
+    }
+    "Your packages are up to date" {
+        puts "\n==> WARNING: Packages report up to date — ABI/repo override may have failed"
+        # Wait for prompt
+        expect -re "home\\.arpa"
+    }
+    -re "home\\.arpa" {
+        puts "\n==> Package upgrade complete"
+    }
+    timeout {
+        puts "\n==> TIMEOUT during package upgrade (20 min exceeded)"
+        exit 1
+    }
+}
+
+# Reboot to apply base upgrade
+puts "\n==> Phase 6.5: Rebooting after base upgrade..."
+send "reboot\r"
+set timeout 600
+set need_respawn_2 0
+expect {
+    -re "Enter an option:" {
+        puts "\n==> System rebooted after base upgrade"
+    }
+    eof {
+        puts "\n==> QEMU exited after base upgrade reboot"
+        set need_respawn_2 1
+    }
+    timeout {
+        puts "\n==> TIMEOUT waiting for reboot after base upgrade"
+        exit 1
+    }
+}
+
+if {$need_respawn_2} {
+    puts "\n==> Re-spawning QEMU after base upgrade..."
+    sleep 2
+    spawn qemu-system-x86_64 \
+        -m 2048 \
+        -enable-kvm \
+        -drive file=$disk,if=virtio,format=qcow2 \
+        -device virtio-rng-pci \
+        -nographic \
+        -netdev user,id=wan0,net=10.0.2.0/24,hostfwd=tcp::18443-:443,hostfwd=tcp::12222-:22 \
+        -device e1000,netdev=wan0,mac=52:54:00:00:00:01 \
+        -netdev user,id=lan0,net=10.0.3.0/24 \
+        -device e1000,netdev=lan0,mac=52:54:00:00:00:02 \
+        -netdev user,id=opt0,net=10.0.4.0/24 \
+        -device e1000,netdev=opt0,mac=52:54:00:00:00:03
+
+    set timeout 600
+    expect {
+        -re "Enter an option:" {
+            puts "\n==> Post-base-upgrade console ready (after respawn)"
+        }
+        timeout {
+            puts "\n==> TIMEOUT waiting for console after respawn"
             exit 1
         }
     }
