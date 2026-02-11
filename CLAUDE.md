@@ -91,6 +91,26 @@ bash vm/setup.sh    # install.exp → firstboot.exp → upgrade-2.8.exp → gold
 
 Config: 3 e1000 NICs (WAN/LAN/spare), 2GB RAM, VirtIO RNG, QEMU user-mode networking.
 
+### Boot rule: NEVER boot the golden image directly
+Always `cp vm/golden.qcow2 vm/test-boot.qcow2` (or equivalent) and boot the copy. The golden image is the pristine reference — booting it dirties it with runtime state. Do NOT use qcow2 overlays/backing files either; a plain `cp` keeps things simple and avoids backing-file corruption issues we've hit before.
+
+```bash
+# Boot a disposable copy for testing:
+cp vm/golden.qcow2 vm/test-boot.qcow2
+nix develop -c qemu-system-x86_64 \
+    -m 2048 -enable-kvm \
+    -drive file=vm/test-boot.qcow2,if=virtio,format=qcow2 \
+    -device virtio-rng-pci \
+    -display none -serial file:vm/serial-output.log \
+    -netdev user,id=wan0,net=10.0.2.0/24,hostfwd=tcp::18443-:443,hostfwd=tcp::12222-:22 \
+    -device e1000,netdev=wan0,mac=52:54:00:00:00:01 \
+    -netdev user,id=lan0,net=10.0.3.0/24 \
+    -device e1000,netdev=lan0,mac=52:54:00:00:00:02 \
+    -netdev user,id=opt0,net=10.0.4.0/24 \
+    -device e1000,netdev=opt0,mac=52:54:00:00:00:03 \
+    -daemonize -pidfile vm/qemu.pid -monitor none
+```
+
 ### Rebuild shortcuts:
 ```bash
 # Full rebuild:
