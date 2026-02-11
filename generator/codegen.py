@@ -50,6 +50,11 @@ def _gen_signature(tool: ToolContext) -> str:
             else:
                 lines.append(f"    {p.name}: {p.python_type} | None = None,")
 
+    # List tools get extra fields/query params for client-side filtering
+    if tool.is_list_tool:
+        lines.append("    fields: str | None = None,")
+        lines.append("    query: dict[str, Any] | None = None,")
+
     lines.append(") -> dict[str, Any] | list[Any] | str:")
 
     return "\n".join(lines)
@@ -119,6 +124,21 @@ def _gen_docstring(tool: ToolContext) -> str:
                 else:
                     desc = f"Valid values: [{enum_str}]"
             doc_lines.append(f"    {p.name}: {desc}")
+
+    # List tool extras: fields/query param docs and known fields
+    if tool.is_list_tool:
+        doc_lines.append("")
+        doc_lines.append(
+            "    fields: Comma-separated list of fields to return (e.g. 'id,name,address'). "
+            "Reduces response size. The 'id' field is always included."
+        )
+        doc_lines.append(
+            "    query: Client-side row filter dict (e.g. {'name': 'foo'}). "
+            "Only rows where all key-value pairs match are returned."
+        )
+        if tool.response_fields:
+            fields_str = ", ".join(tool.response_fields)
+            doc_lines.append(f"    Known fields: {fields_str}")
 
     doc_lines.append("")
     doc_lines.append(
@@ -191,9 +211,15 @@ def _gen_body(tool: ToolContext) -> str:
     if tool.has_request_body:
         call_args.append("        json_body=body,")
 
-    lines.append("    return await _client.request(")
-    lines.extend(call_args)
-    lines.append("    )")
+    if tool.is_list_tool:
+        lines.append("    result = await _client.request(")
+        lines.extend(call_args)
+        lines.append("    )")
+        lines.append("    return _filter_response(result, fields, query)")
+    else:
+        lines.append("    return await _client.request(")
+        lines.extend(call_args)
+        lines.append("    )")
 
     return "\n".join(lines)
 

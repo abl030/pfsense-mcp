@@ -12,7 +12,7 @@ from typing import Any
 
 from .loader import Operation, load_spec, parse_operations
 from .naming import operation_id_to_tool_name
-from .schema_parser import ToolParameter, extract_tool_parameters
+from .schema_parser import ToolParameter, extract_tool_parameters, extract_response_fields
 
 # Canonical module ordering — used for code generation and env var docs.
 MODULE_ORDER = [
@@ -175,6 +175,8 @@ class ToolContext:
     body_params: list[ToolParameter]  # params that go in JSON body
     query_params: list[ToolParameter]  # params that go in URL query
     docstring_note: str | None = None  # Extra note appended to docstring
+    is_list_tool: bool = False  # True for pfsense_list_* tools
+    response_fields: list[str] | None = None  # Known response fields for list tools
 
 
 def _path_to_module(path: str) -> str:
@@ -321,6 +323,12 @@ def build_tool_contexts(spec: dict[str, Any]) -> list[ToolContext]:
         # Per-tool docstring note
         docstring_note = _TOOL_DOCSTRING_NOTES.get(op.operation_id)
 
+        # List tool detection and response field extraction
+        is_list_tool = tool_name.startswith("pfsense_list_")
+        response_fields = None
+        if is_list_tool:
+            response_fields = extract_response_fields(spec, op)
+
         contexts.append(
             ToolContext(
                 tool_name=tool_name,
@@ -342,6 +350,8 @@ def build_tool_contexts(spec: dict[str, Any]) -> list[ToolContext]:
                 has_request_body=has_request_body,
                 body_params=body_params,
                 query_params=query_params,
+                is_list_tool=is_list_tool,
+                response_fields=response_fields,
             )
         )
 

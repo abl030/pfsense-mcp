@@ -92,6 +92,29 @@ class PfSenseClient:
 
 _client = PfSenseClient()
 
+
+def _filter_response(
+    result: Any, fields: str | None, query: dict[str, Any] | None
+) -> Any:
+    """Apply client-side field selection and row filtering to list responses."""
+    if not isinstance(result, list):
+        return result
+    if query is not None:
+        result = [
+            item for item in result
+            if isinstance(item, dict) and all(
+                str(item.get(k)) == str(v) for k, v in query.items()
+            )
+        ]
+    if fields is not None:
+        selected = {f.strip() for f in fields.split(",")}
+        selected.add("id")
+        result = [
+            {k: v for k, v in item.items() if k in selected}
+            for item in result if isinstance(item, dict)
+        ]
+    return result
+
 # --- Module and read-only gating ---
 _ALL_MODULES = {'auth', 'diagnostics', 'firewall', 'interface', 'routing', 'services_acme', 'services_bind', 'services_dhcp', 'services_dns_forwarder', 'services_dns_resolver', 'services_freeradius', 'services_haproxy', 'services_misc', 'status', 'system', 'user', 'vpn_ipsec', 'vpn_openvpn', 'vpn_wireguard'}
 _PFSENSE_MODULES = set(
@@ -974,6 +997,8 @@ if "firewall" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/firewall/aliases
 
@@ -982,6 +1007,10 @@ if "firewall" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: address, descr, detail, id, name, type
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -996,11 +1025,12 @@ if "firewall" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/firewall/aliases",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -1043,6 +1073,8 @@ if "firewall" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/firewall/nat/one_to_one/mappings
 
@@ -1051,6 +1083,10 @@ if "firewall" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: descr, destination, disabled, external, id, interface, ipprotocol, natreflection, nobinat, source
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -1065,11 +1101,12 @@ if "firewall" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/firewall/nat/one_to_one/mappings",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -1099,6 +1136,8 @@ if "firewall" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/firewall/nat/outbound/mappings
 
@@ -1107,6 +1146,10 @@ if "firewall" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: descr, destination, destination_port, disabled, id, interface, nat_port, nonat, nosync, poolopts, protocol, source, source_hash_key, source_port, static_nat_port, target, target_subnet
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -1121,11 +1164,12 @@ if "firewall" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/firewall/nat/outbound/mappings",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -1168,6 +1212,8 @@ if "firewall" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/firewall/nat/port_forwards
 
@@ -1176,6 +1222,10 @@ if "firewall" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: associated_rule_id, created_by, created_time, descr, destination, destination_port, disabled, id, interface, ipprotocol, local_port, natreflection, nordr, nosync, protocol, source, source_port, target, updated_by, updated_time
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -1190,11 +1240,12 @@ if "firewall" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/firewall/nat/port_forwards",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -1224,6 +1275,8 @@ if "firewall" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/firewall/rules
 
@@ -1234,6 +1287,10 @@ if "firewall" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: ackqueue, associated_rule_id, created_by, created_time, defaultqueue, descr, destination, destination_port, direction, disabled, dnpipe, floating, gateway, icmptype, id, interface, ipprotocol, log, pdnpipe, protocol, quick, sched, source, source_port, statetype, tag, tcp_flags_any, tcp_flags_out_of, tcp_flags_set, tracker, type, updated_by, updated_time
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -1248,11 +1305,12 @@ if "firewall" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/firewall/rules",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -1306,6 +1364,8 @@ if "firewall" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/firewall/schedule/time_ranges
 
@@ -1315,6 +1375,10 @@ if "firewall" in _PFSENSE_MODULES:
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: day, hour, id, month, parent_id, position, rangedescr
+
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
         params: dict[str, Any] = {}
@@ -1328,11 +1392,12 @@ if "firewall" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/firewall/schedule/time_ranges",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -1342,6 +1407,8 @@ if "firewall" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/firewall/schedules
 
@@ -1350,6 +1417,10 @@ if "firewall" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: active, descr, id, name, schedlabel, timerange
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -1364,11 +1435,12 @@ if "firewall" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/firewall/schedules",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -1398,6 +1470,8 @@ if "firewall" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/firewall/states
 
@@ -1406,6 +1480,10 @@ if "firewall" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: age, bytes_in, bytes_out, bytes_total, destination, direction, expires_in, id, interface, packets_in, packets_out, packets_total, protocol, source, state
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -1420,11 +1498,12 @@ if "firewall" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/firewall/states",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -1491,6 +1570,8 @@ if "firewall" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/firewall/traffic_shaper/limiter/bandwidths
 
@@ -1499,6 +1580,10 @@ if "firewall" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: bw, bwscale, bwsched, id, parent_id
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -1513,11 +1598,12 @@ if "firewall" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/firewall/traffic_shaper/limiter/bandwidths",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -1571,6 +1657,8 @@ if "firewall" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/firewall/traffic_shaper/limiter/queues
 
@@ -1580,6 +1668,10 @@ if "firewall" in _PFSENSE_MODULES:
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: aqm, buckets, description, ecn, enabled, id, mask, maskbits, maskbitsv6, name, number, param_codel_interval, param_codel_target, param_gred_max_p, param_gred_max_th, param_gred_min_th, param_gred_w_q, param_pie_alpha, param_pie_beta, param_pie_max_burst, param_pie_max_ecnth, param_pie_target, param_pie_tupdate, param_red_max_p, param_red_max_th, param_red_min_th, param_red_w_q, parent_id, pie_capdrop, pie_onoff, pie_pderand, pie_qdelay, plr, qlimit, weight
+
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
         params: dict[str, Any] = {}
@@ -1593,11 +1685,12 @@ if "firewall" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/firewall/traffic_shaper/limiter/queues",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -1607,6 +1700,8 @@ if "firewall" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/firewall/traffic_shaper/limiters
 
@@ -1615,6 +1710,10 @@ if "firewall" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: aqm, bandwidth, buckets, delay, description, ecn, enabled, id, mask, maskbits, maskbitsv6, name, number, param_codel_interval, param_codel_target, param_fq_codel_flows, param_fq_codel_interval, param_fq_codel_limit, param_fq_codel_quantum, param_fq_codel_target, param_fq_pie_alpha, param_fq_pie_beta, param_fq_pie_flows, param_fq_pie_limit, param_fq_pie_max_burst, param_fq_pie_max_ecnth, param_fq_pie_quantum, param_fq_pie_target, param_fq_pie_tupdate, param_gred_max_p, param_gred_max_th, param_gred_min_th, param_gred_w_q, param_pie_alpha, param_pie_beta, param_pie_max_burst, param_pie_max_ecnth, param_pie_target, param_pie_tupdate, param_red_max_p, param_red_max_th, param_red_min_th, param_red_w_q, pie_capdrop, pie_onoff, pie_pderand, pie_qdelay, plr, qlimit, queue, sched
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -1629,11 +1728,12 @@ if "firewall" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/firewall/traffic_shaper/limiters",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -1667,6 +1767,8 @@ if "firewall" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/firewall/traffic_shaper/queues
 
@@ -1676,6 +1778,10 @@ if "firewall" in _PFSENSE_MODULES:
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: bandwidth, bandwidthtype, borrow, buckets, codel, default, description, ecn, enabled, hogs, id, interface, linkshare, linkshare_d, linkshare_m1, linkshare_m2, name, parent_id, priority, qlimit, realtime, realtime_d, realtime_m1, realtime_m2, red, rio, upperlimit, upperlimit_d, upperlimit_m1, upperlimit_m2
+
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
         params: dict[str, Any] = {}
@@ -1689,11 +1795,12 @@ if "firewall" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/firewall/traffic_shaper/queues",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -1703,6 +1810,8 @@ if "firewall" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/firewall/traffic_shapers
 
@@ -1711,6 +1820,10 @@ if "firewall" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: bandwidth, bandwidthtype, enabled, id, interface, name, qlimit, queue, scheduler, tbrconfig
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -1725,11 +1838,12 @@ if "firewall" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/firewall/traffic_shapers",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -1772,6 +1886,8 @@ if "firewall" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/firewall/virtual_ips
 
@@ -1780,6 +1896,10 @@ if "firewall" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: advbase, advskew, carp_mode, carp_peer, carp_status, descr, id, interface, mode, noexpand, password, subnet, subnet_bits, type, uniqid, vhid
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -1794,11 +1914,12 @@ if "firewall" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/firewall/virtual_ips",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
 if "firewall" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
@@ -5591,6 +5712,8 @@ if "interface" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/interface/available_interfaces
 
@@ -5599,6 +5722,10 @@ if "interface" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: dmesg, id, if, in_use_by, mac
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -5613,11 +5740,12 @@ if "interface" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/interface/available_interfaces",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -5647,6 +5775,8 @@ if "interface" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/interface/bridges
 
@@ -5655,6 +5785,10 @@ if "interface" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: bridgeif, descr, id, members
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -5669,11 +5803,12 @@ if "interface" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/interface/bridges",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -5703,6 +5838,8 @@ if "interface" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/interface/gres
 
@@ -5711,6 +5848,10 @@ if "interface" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: add_static_route, descr, greif, id, if, remote_addr, tunnel_local_addr, tunnel_local_addr6, tunnel_remote_addr, tunnel_remote_addr6, tunnel_remote_net, tunnel_remote_net6
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -5725,11 +5866,12 @@ if "interface" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/interface/gres",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -5759,6 +5901,8 @@ if "interface" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/interface/groups
 
@@ -5767,6 +5911,10 @@ if "interface" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: descr, id, ifname, members
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -5781,11 +5929,12 @@ if "interface" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/interface/groups",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -5815,6 +5964,8 @@ if "interface" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/interface/laggs
 
@@ -5823,6 +5974,10 @@ if "interface" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: descr, failovermaster, id, lacptimeout, lagghash, laggif, members, proto
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -5837,11 +5992,12 @@ if "interface" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/interface/laggs",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -5871,6 +6027,8 @@ if "interface" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/interface/vlans
 
@@ -5879,6 +6037,10 @@ if "interface" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: descr, id, if, pcp, tag, vlanif
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -5893,11 +6055,12 @@ if "interface" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/interface/vlans",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -5927,6 +6090,8 @@ if "interface" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/interfaces
 
@@ -5935,6 +6100,10 @@ if "interface" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: adv_dhcp_config_advanced, adv_dhcp_config_file_override, adv_dhcp_config_file_override_path, adv_dhcp_option_modifiers, adv_dhcp_pt_backoff_cutoff, adv_dhcp_pt_initial_interval, adv_dhcp_pt_reboot, adv_dhcp_pt_retry, adv_dhcp_pt_select_timeout, adv_dhcp_pt_timeout, adv_dhcp_pt_values, adv_dhcp_request_options, adv_dhcp_required_options, adv_dhcp_send_options, alias_address, alias_subnet, blockbogons, blockpriv, descr, dhcphostname, dhcprejectfrom, enable, gateway, gateway_6rd, gatewayv6, id, if, ipaddr, ipaddrv6, ipv6usev4iface, media, mediaopt, mss, mtu, prefix_6rd, prefix_6rd_v4plen, slaacusev4iface, spoofmac, subnet, subnetv6, track6_interface, track6_prefix_id_hex, typev4, typev6
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -5949,11 +6118,12 @@ if "interface" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/interfaces",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
 if "interface" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
@@ -7332,6 +7502,8 @@ if "routing" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/routing/gateway/group/priorities
 
@@ -7340,6 +7512,10 @@ if "routing" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: gateway, id, parent_id, tier, virtual_ip
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -7354,11 +7530,12 @@ if "routing" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/routing/gateway/group/priorities",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -7392,6 +7569,8 @@ if "routing" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/routing/gateway/groups
 
@@ -7401,6 +7580,10 @@ if "routing" in _PFSENSE_MODULES:
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: descr, id, ipprotocol, name, priorities, trigger
+
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
         params: dict[str, Any] = {}
@@ -7414,11 +7597,12 @@ if "routing" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/routing/gateway/groups",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -7428,6 +7612,8 @@ if "routing" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/routing/gateways
 
@@ -7436,6 +7622,10 @@ if "routing" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: action_disable, alert_interval, data_payload, descr, disabled, dpinger_dont_add_static_route, force_down, gateway, gw_down_kill_states, id, interface, interval, ipprotocol, latencyhigh, latencylow, loss_interval, losshigh, losslow, monitor, monitor_disable, name, nonlocalgateway, time_period, weight
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -7450,11 +7640,12 @@ if "routing" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/routing/gateways",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -7484,6 +7675,8 @@ if "routing" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/routing/static_routes
 
@@ -7492,6 +7685,10 @@ if "routing" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: descr, disabled, gateway, id, network
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -7506,11 +7703,12 @@ if "routing" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/routing/static_routes",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
 if "routing" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
@@ -8414,6 +8612,8 @@ if "vpn_wireguard" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/vpn/wireguard/peer/allowed_ips
 
@@ -8422,6 +8622,10 @@ if "vpn_wireguard" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: address, descr, id, mask, parent_id
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -8436,11 +8640,12 @@ if "vpn_wireguard" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/vpn/wireguard/peer/allowed_ips",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -8470,6 +8675,8 @@ if "vpn_wireguard" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/vpn/wireguard/peers
 
@@ -8478,6 +8685,10 @@ if "vpn_wireguard" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: allowedips, descr, enabled, endpoint, id, persistentkeepalive, port, presharedkey, publickey, tun
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -8492,11 +8703,12 @@ if "vpn_wireguard" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/vpn/wireguard/peers",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -8543,6 +8755,8 @@ if "vpn_wireguard" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/vpn/wireguard/tunnel/addresses
 
@@ -8551,6 +8765,10 @@ if "vpn_wireguard" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: address, descr, id, mask, parent_id
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -8565,11 +8783,12 @@ if "vpn_wireguard" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/vpn/wireguard/tunnel/addresses",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -8599,6 +8818,8 @@ if "vpn_wireguard" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/vpn/wireguard/tunnels
 
@@ -8607,6 +8828,10 @@ if "vpn_wireguard" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: addresses, descr, enabled, id, listenport, mtu, name, privatekey, publickey
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -8621,11 +8846,12 @@ if "vpn_wireguard" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/vpn/wireguard/tunnels",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
 if "vpn_wireguard" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
@@ -9486,6 +9712,8 @@ if "vpn_openvpn" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/vpn/openvpn/csos
 
@@ -9494,6 +9722,10 @@ if "vpn_openvpn" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: block, common_name, custom_options, description, disable, dns_domain, dns_server1, dns_server2, dns_server3, dns_server4, gwredir, id, local_network, local_networkv6, netbios_enable, netbios_ntype, netbios_scope, ntp_server1, ntp_server2, push_reset, remote_network, remote_networkv6, remove_options, server_list, tunnel_network, tunnel_networkv6, wins_server1, wins_server2
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -9508,11 +9740,12 @@ if "vpn_openvpn" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/vpn/openvpn/csos",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -9562,6 +9795,8 @@ if "vpn_openvpn" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/vpn/openvpn/client_export/configs
 
@@ -9571,6 +9806,10 @@ if "vpn_openvpn" in _PFSENSE_MODULES:
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: advancedoptions, bindmode, blockoutsidedns, id, legacy, p12encryption, pass, pkcs11id, pkcs11providers, proxyaddr, proxypass, proxyport, proxyuser, server, silent, useaddr, useaddr_hostname, usepass, usepkcs11, useproxy, useproxypass, useproxytype, usetoken, verifyservercn
+
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
         params: dict[str, Any] = {}
@@ -9584,11 +9823,12 @@ if "vpn_openvpn" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/vpn/openvpn/client_export/configs",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -9598,6 +9838,8 @@ if "vpn_openvpn" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/vpn/openvpn/clients
 
@@ -9606,6 +9848,10 @@ if "vpn_openvpn" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: allow_compression, auth_pass, auth_retry_none, auth_user, caref, certref, create_gw, custom_options, data_ciphers, data_ciphers_fallback, description, dev_mode, digest, disable, dns_add, exit_notify, id, inactive_seconds, interface, keepalive_interval, keepalive_timeout, local_port, mode, passtos, ping_action, ping_action_seconds, ping_method, ping_seconds, protocol, proxy_addr, proxy_authtype, proxy_passwd, proxy_port, proxy_user, remote_cert_tls, remote_network, remote_networkv6, route_no_exec, route_no_pull, server_addr, server_port, sndrcvbuf, tls, tls_type, tlsauth_keydir, topology, tunnel_network, tunnel_networkv6, udp_fast_io, use_shaper, verbosity_level, vpnid, vpnif
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -9620,11 +9866,12 @@ if "vpn_openvpn" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/vpn/openvpn/clients",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -9654,6 +9901,8 @@ if "vpn_openvpn" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/vpn/openvpn/servers
 
@@ -9662,6 +9911,10 @@ if "vpn_openvpn" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: allow_compression, authmode, caref, cert_depth, certref, client2client, connlimit, create_gw, custom_options, data_ciphers, data_ciphers_fallback, description, dev_mode, dh_length, digest, disable, dns_domain, dns_server1, dns_server2, dns_server3, dns_server4, duplicate_cn, dynamic_ip, ecdh_curve, gwredir, gwredir6, id, inactive_seconds, interface, keepalive_interval, keepalive_timeout, local_network, local_networkv6, local_port, maxclients, mode, netbios_enable, netbios_ntype, netbios_scope, ntp_server1, ntp_server2, passtos, ping_action, ping_action_push, ping_action_seconds, ping_method, ping_push, ping_seconds, protocol, push_blockoutsidedns, push_register_dns, remote_cert_tls, remote_network, remote_networkv6, serverbridge_dhcp, serverbridge_dhcp_end, serverbridge_dhcp_start, serverbridge_interface, serverbridge_routegateway, sndrcvbuf, strictusercn, tls, tls_type, tlsauth_keydir, topology, tunnel_network, tunnel_networkv6, use_tls, username_as_common_name, verbosity_level, vpnid, vpnif, wins_server1, wins_server2
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -9676,11 +9929,12 @@ if "vpn_openvpn" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/vpn/openvpn/servers",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
 if "vpn_openvpn" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
@@ -11706,6 +11960,8 @@ if "vpn_ipsec" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/vpn/ipsec/phase1/encryptions
 
@@ -11714,6 +11970,10 @@ if "vpn_ipsec" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: dhgroup, encryption_algorithm_keylen, encryption_algorithm_name, hash_algorithm, id, parent_id, prf_algorithm
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -11728,11 +11988,12 @@ if "vpn_ipsec" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/vpn/ipsec/phase1/encryptions",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -11762,6 +12023,8 @@ if "vpn_ipsec" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/vpn/ipsec/phase1s
 
@@ -11770,6 +12033,10 @@ if "vpn_ipsec" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: authentication_method, caref, certref, closeaction, descr, disabled, dpd_delay, dpd_maxfail, encryption, gw_duplicates, id, ikeid, ikeport, iketype, interface, lifetime, mobike, mode, myid_data, myid_type, nat_traversal, nattport, peerid_data, peerid_type, pre_shared_key, prfselect_enable, protocol, rand_time, reauth_time, rekey_time, remote_gateway, splitconn, startaction
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -11784,11 +12051,12 @@ if "vpn_ipsec" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/vpn/ipsec/phase1s",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -11822,6 +12090,8 @@ if "vpn_ipsec" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/vpn/ipsec/phase2/encryptions
 
@@ -11830,6 +12100,10 @@ if "vpn_ipsec" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: id, keylen, name, parent_id
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -11844,11 +12118,12 @@ if "vpn_ipsec" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/vpn/ipsec/phase2/encryptions",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -11878,6 +12153,8 @@ if "vpn_ipsec" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/vpn/ipsec/phase2s
 
@@ -11886,6 +12163,10 @@ if "vpn_ipsec" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: descr, disabled, encryption_algorithm_option, hash_algorithm_option, id, ikeid, keepalive, lifetime, localid_address, localid_netbits, localid_type, mode, natlocalid_address, natlocalid_netbits, natlocalid_type, pfsgroup, pinghost, protocol, rand_time, rekey_time, remoteid_address, remoteid_netbits, remoteid_type, reqid, uniqid
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -11900,11 +12181,12 @@ if "vpn_ipsec" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/vpn/ipsec/phase2s",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
 if "vpn_ipsec" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
@@ -13049,6 +13331,8 @@ if "services_dhcp" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/dhcp_server/address_pools
 
@@ -13057,6 +13341,10 @@ if "services_dhcp" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: defaultleasetime, denyunknown, dnsserver, domain, domainsearchlist, gateway, id, ignorebootp, ignoreclientuids, mac_allow, mac_deny, maxleasetime, ntpserver, parent_id, range_from, range_to, winsserver
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -13071,11 +13359,12 @@ if "services_dhcp" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/dhcp_server/address_pools",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -13122,6 +13411,8 @@ if "services_dhcp" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/dhcp_server/custom_options
 
@@ -13130,6 +13421,10 @@ if "services_dhcp" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: id, number, parent_id, type, value
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -13144,11 +13439,12 @@ if "services_dhcp" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/dhcp_server/custom_options",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -13202,6 +13498,8 @@ if "services_dhcp" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/dhcp_server/static_mappings
 
@@ -13213,6 +13511,10 @@ if "services_dhcp" in _PFSENSE_MODULES:
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: arp_table_static_entry, cid, defaultleasetime, descr, dnsserver, domain, domainsearchlist, gateway, hostname, id, ipaddr, mac, maxleasetime, ntpserver, parent_id, winsserver
+
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
         params: dict[str, Any] = {}
@@ -13226,11 +13528,12 @@ if "services_dhcp" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/dhcp_server/static_mappings",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -13240,6 +13543,8 @@ if "services_dhcp" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/dhcp_servers
 
@@ -13248,6 +13553,10 @@ if "services_dhcp" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: defaultleasetime, denyunknown, dhcpleaseinlocaltime, disablepingcheck, dnsserver, domain, domainsearchlist, enable, failover_peerip, gateway, id, ignorebootp, ignoreclientuids, interface, mac_allow, mac_deny, maxleasetime, nonak, ntpserver, numberoptions, pool, range_from, range_to, staticarp, staticmap, statsgraph, winsserver
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -13262,11 +13571,12 @@ if "services_dhcp" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/dhcp_servers",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
 if "services_dhcp" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
@@ -14414,6 +14724,8 @@ if "services_dns_resolver" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/dns_resolver/access_list/networks
 
@@ -14423,6 +14735,10 @@ if "services_dns_resolver" in _PFSENSE_MODULES:
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: description, id, mask, network, parent_id
+
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
         params: dict[str, Any] = {}
@@ -14436,11 +14752,12 @@ if "services_dns_resolver" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/dns_resolver/access_list/networks",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -14450,6 +14767,8 @@ if "services_dns_resolver" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/dns_resolver/access_lists
 
@@ -14458,6 +14777,10 @@ if "services_dns_resolver" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: action, description, id, name, networks
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -14472,11 +14795,12 @@ if "services_dns_resolver" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/dns_resolver/access_lists",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -14519,6 +14843,8 @@ if "services_dns_resolver" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/dns_resolver/domain_overrides
 
@@ -14527,6 +14853,10 @@ if "services_dns_resolver" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: descr, domain, forward_tls_upstream, id, ip, tls_hostname
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -14541,11 +14871,12 @@ if "services_dns_resolver" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/dns_resolver/domain_overrides",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -14579,6 +14910,8 @@ if "services_dns_resolver" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/dns_resolver/host_override/aliases
 
@@ -14587,6 +14920,10 @@ if "services_dns_resolver" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: descr, domain, host, id, parent_id
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -14601,11 +14938,12 @@ if "services_dns_resolver" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/dns_resolver/host_override/aliases",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -14635,6 +14973,8 @@ if "services_dns_resolver" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/dns_resolver/host_overrides
 
@@ -14643,6 +14983,10 @@ if "services_dns_resolver" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: aliases, descr, domain, host, id, ip
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -14657,11 +15001,12 @@ if "services_dns_resolver" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/dns_resolver/host_overrides",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -15751,6 +16096,8 @@ if "services_dns_forwarder" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/dns_forwarder/host_override/aliases
 
@@ -15759,6 +16106,10 @@ if "services_dns_forwarder" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: description, domain, host, id, parent_id
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -15773,11 +16124,12 @@ if "services_dns_forwarder" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/dns_forwarder/host_override/aliases",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -15807,6 +16159,8 @@ if "services_dns_forwarder" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/dns_forwarder/host_overrides
 
@@ -15815,6 +16169,10 @@ if "services_dns_forwarder" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: aliases, descr, domain, host, id, ip
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -15829,11 +16187,12 @@ if "services_dns_forwarder" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/dns_forwarder/host_overrides",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
 if "services_dns_forwarder" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
@@ -16267,6 +16626,8 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/haproxy/backend/acls
 
@@ -16275,6 +16636,10 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: casesensitive, expression, id, name, not, parent_id, value
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -16289,11 +16654,12 @@ if "services_haproxy" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/haproxy/backend/acls",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -16327,6 +16693,8 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/haproxy/backend/actions
 
@@ -16335,6 +16703,10 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: acl, action, customaction, deny_status, find, fmt, id, lua_function, name, parent_id, path, realm, reason, replace, rule, server, status
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -16349,11 +16721,12 @@ if "services_haproxy" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/haproxy/backend/actions",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -16407,6 +16780,8 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/haproxy/backend/errorfiles
 
@@ -16415,6 +16790,10 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: errorcode, errorfile, id, parent_id
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -16429,11 +16808,12 @@ if "services_haproxy" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/haproxy/backend/errorfiles",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -16467,6 +16847,8 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/haproxy/backend/servers
 
@@ -16476,6 +16858,10 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: address, advanced, id, name, parent_id, port, serverid, ssl, sslserververify, status, weight
+
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
         params: dict[str, Any] = {}
@@ -16489,11 +16875,12 @@ if "services_haproxy" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/haproxy/backend/servers",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -16503,6 +16890,8 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/haproxy/backends
 
@@ -16511,6 +16900,10 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: acls, actions, advanced, advanced_backend, agent_checks, agent_inter, agent_port, balance, balance_uridepth, balance_urilen, balance_uriwhole, check_type, checkinter, connection_timeout, cookie_attribute_secure, email_level, email_to, errorfiles, haproxy_cookie_domains, haproxy_cookie_dynamic_cookie_key, haproxy_cookie_maxidle, haproxy_cookie_maxlife, httpcheck_method, id, log_health_checks, monitor_domain, monitor_httpversion, monitor_uri, monitor_username, name, persist_cookie_cachable, persist_cookie_enabled, persist_cookie_httponly, persist_cookie_mode, persist_cookie_name, persist_cookie_postonly, persist_cookie_secure, persist_stick_cookiename, persist_stick_expire, persist_stick_length, persist_stick_tablesize, persist_sticky_type, retries, server_timeout, servers, stats_admin, stats_desc, stats_enabled, stats_node, stats_password, stats_realm, stats_refresh, stats_scope, stats_uri, stats_username, strict_transport_security, transparent_clientip, transparent_interface
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -16525,11 +16918,12 @@ if "services_haproxy" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/haproxy/backends",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -16559,6 +16953,8 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/haproxy/files
 
@@ -16567,6 +16963,10 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: content, id, name, type
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -16581,11 +16981,12 @@ if "services_haproxy" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/haproxy/files",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -16619,6 +17020,8 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/haproxy/frontend/acls
 
@@ -16627,6 +17030,10 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: casesensitive, expression, id, name, not, parent_id, value
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -16641,11 +17048,12 @@ if "services_haproxy" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/haproxy/frontend/acls",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -16679,6 +17087,8 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/haproxy/frontend/actions
 
@@ -16687,6 +17097,10 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: acl, action, backend, customaction, deny_status, find, fmt, id, lua_function, name, parent_id, path, realm, reason, replace, rule, status
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -16701,11 +17115,12 @@ if "services_haproxy" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/haproxy/frontend/actions",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -16739,6 +17154,8 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/haproxy/frontend/addresses
 
@@ -16747,6 +17164,10 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: exaddr_advanced, extaddr, extaddr_custom, extaddr_port, extaddr_ssl, id, parent_id
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -16761,11 +17182,12 @@ if "services_haproxy" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/haproxy/frontend/addresses",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -16799,6 +17221,8 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/haproxy/frontend/certificates
 
@@ -16807,6 +17231,10 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: id, parent_id, ssl_certificate
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -16821,11 +17249,12 @@ if "services_haproxy" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/haproxy/frontend/certificates",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -16879,6 +17308,8 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/haproxy/frontend/error_files
 
@@ -16888,6 +17319,10 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: errorcode, errorfile, id, parent_id
+
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
         params: dict[str, Any] = {}
@@ -16901,11 +17336,12 @@ if "services_haproxy" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/haproxy/frontend/error_files",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -16915,6 +17351,8 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/haproxy/frontends
 
@@ -16923,6 +17361,10 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: a_actionitems, a_errorfiles, a_extaddr, advanced, advanced_bind, backend_serverpool, client_timeout, descr, dontlog_normal, dontlognull, forwardfor, ha_acls, ha_certificates, httpclose, id, log_detailed, log_separate_errors, max_connections, name, socket_stats, ssloffloadcert, status, type
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -16937,11 +17379,12 @@ if "services_haproxy" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/haproxy/frontends",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -16971,6 +17414,8 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/haproxy/settings/dns_resolvers
 
@@ -16979,6 +17424,10 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: id, name, parent_id, port, server
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -16993,11 +17442,12 @@ if "services_haproxy" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/haproxy/settings/dns_resolvers",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -17027,6 +17477,8 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/haproxy/settings/email_mailers
 
@@ -17035,6 +17487,10 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: id, mailserver, mailserverport, name, parent_id
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -17049,11 +17505,12 @@ if "services_haproxy" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/haproxy/settings/email_mailers",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -20346,6 +20803,8 @@ if "services_bind" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/bind/access_list/entries
 
@@ -20354,6 +20813,10 @@ if "services_bind" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: description, id, parent_id, value
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -20368,11 +20831,12 @@ if "services_bind" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/bind/access_list/entries",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -20406,6 +20870,8 @@ if "services_bind" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/bind/access_lists
 
@@ -20414,6 +20880,10 @@ if "services_bind" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: description, entries, id, name
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -20428,11 +20898,12 @@ if "services_bind" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/bind/access_lists",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -20475,6 +20946,8 @@ if "services_bind" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/bind/sync/remote_hosts
 
@@ -20483,6 +20956,10 @@ if "services_bind" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: id, ipaddress, password, syncdestinenable, syncport, syncprotocol, username
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -20497,11 +20974,12 @@ if "services_bind" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/bind/sync/remote_hosts",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -20544,6 +21022,8 @@ if "services_bind" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/bind/views
 
@@ -20552,6 +21032,10 @@ if "services_bind" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: allow_recursion, bind_custom_options, descr, id, match_clients, name, recursion
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -20566,11 +21050,12 @@ if "services_bind" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/bind/views",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -20624,6 +21109,8 @@ if "services_bind" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/bind/zones
 
@@ -20632,6 +21119,10 @@ if "services_bind" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: allowquery, allowtransfer, allowupdate, backupkeys, baseip, custom, customzonerecords, description, disabled, dnssec, enable_updatepolicy, expire, forwarders, id, mail, minimum, name, nameserver, records, refresh, regdhcpstatic, retry, reversev4, reversev6, rpz, serial, slaveip, ttl, type, updatepolicy, view
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -20646,11 +21137,12 @@ if "services_bind" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/bind/zones",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
 if "services_bind" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
@@ -21983,6 +22475,8 @@ if "services_freeradius" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/freeradius/clients
 
@@ -21991,6 +22485,10 @@ if "services_freeradius" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: addr, description, id, ip_version, maxconn, msgauth, naslogin, naspassword, nastype, proto, secret, shortname
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -22005,11 +22503,12 @@ if "services_freeradius" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/freeradius/clients",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -22039,6 +22538,8 @@ if "services_freeradius" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/freeradius/interfaces
 
@@ -22047,6 +22548,10 @@ if "services_freeradius" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: addr, description, id, ip_version, port, type
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -22061,11 +22566,12 @@ if "services_freeradius" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/freeradius/interfaces",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -22095,6 +22601,8 @@ if "services_freeradius" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/freeradius/users
 
@@ -22103,6 +22611,10 @@ if "services_freeradius" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: description, framed_ip_address, framed_ip_netmask, id, motp_authmethod, motp_enable, motp_offset, motp_pin, motp_secret, password, password_encryption, username
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -22117,11 +22629,12 @@ if "services_freeradius" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/freeradius/users",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
 if "services_freeradius" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
@@ -22784,6 +23297,8 @@ if "services_acme" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/acme/account_key/registrations
 
@@ -22793,6 +23308,10 @@ if "services_acme" in _PFSENSE_MODULES:
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: id, name, status
+
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
         params: dict[str, Any] = {}
@@ -22806,11 +23325,12 @@ if "services_acme" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/acme/account_key/registrations",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -22820,6 +23340,8 @@ if "services_acme" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/acme/account_keys
 
@@ -22828,6 +23350,10 @@ if "services_acme" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: accountkey, acmeserver, descr, email, id, name
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -22842,11 +23368,12 @@ if "services_acme" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/acme/account_keys",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -22924,6 +23451,8 @@ if "services_acme" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/acme/certificate/issuances
 
@@ -22933,6 +23462,10 @@ if "services_acme" in _PFSENSE_MODULES:
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: certificate, id, last_updated, result_log, status
+
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
         params: dict[str, Any] = {}
@@ -22946,11 +23479,12 @@ if "services_acme" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/acme/certificate/issuances",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -22960,6 +23494,8 @@ if "services_acme" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/acme/certificate/renewals
 
@@ -22969,6 +23505,10 @@ if "services_acme" in _PFSENSE_MODULES:
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: certificate, id, last_updated, result_log, status
+
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
         params: dict[str, Any] = {}
@@ -22982,11 +23522,12 @@ if "services_acme" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/acme/certificate/renewals",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -22996,6 +23537,8 @@ if "services_acme" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/acme/certificates
 
@@ -23004,6 +23547,10 @@ if "services_acme" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: a_actionlist, a_domainlist, acmeaccount, descr, dnssleep, id, keylength, keypaste, name, oscpstaple, preferredchain, renewafter, status
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -23018,11 +23565,12 @@ if "services_acme" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/acme/certificates",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -26146,6 +26694,8 @@ if "services_misc" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/cron/jobs
 
@@ -26154,6 +26704,10 @@ if "services_misc" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: command, hour, id, mday, minute, month, wday, who
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -26168,11 +26722,12 @@ if "services_misc" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/cron/jobs",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -26215,6 +26770,8 @@ if "services_misc" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/ntp/time_servers
 
@@ -26223,6 +26780,10 @@ if "services_misc" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: id, noselect, prefer, timeserver, type
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -26237,11 +26798,12 @@ if "services_misc" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/ntp/time_servers",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -26284,6 +26846,8 @@ if "services_misc" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/services/service_watchdogs
 
@@ -26292,6 +26856,10 @@ if "services_misc" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: description, enabled, id, name, notify
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -26306,11 +26874,12 @@ if "services_misc" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/services/service_watchdogs",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
 if "services_misc" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
@@ -27043,6 +27612,8 @@ if "system" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/system/crls
 
@@ -27052,6 +27623,10 @@ if "system" in _PFSENSE_MODULES:
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: caref, cert, descr, id, lifetime, method, refid, serial, text
+
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
         params: dict[str, Any] = {}
@@ -27065,11 +27640,12 @@ if "system" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/system/crls",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -27079,6 +27655,8 @@ if "system" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/system/certificate_authorities
 
@@ -27087,6 +27665,10 @@ if "system" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: crt, descr, id, prv, randomserial, refid, serial, trust
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -27101,11 +27683,12 @@ if "system" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/system/certificate_authorities",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -27155,6 +27738,8 @@ if "system" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/system/certificates
 
@@ -27163,6 +27748,10 @@ if "system" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: caref, crt, csr, descr, id, prv, refid, type
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -27177,11 +27766,12 @@ if "system" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/system/certificates",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -27225,15 +27815,21 @@ if "system" in _PFSENSE_MODULES:
 
     @mcp.tool()
     async def pfsense_list_system_notifications_email_settings(
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/system/notifications/email_settings
 
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/system/notifications/email_settings",
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -27243,6 +27839,8 @@ if "system" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/system/package/available
 
@@ -27251,6 +27849,10 @@ if "system" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: deps, descr, id, installed, name, shortname, version
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -27265,11 +27867,12 @@ if "system" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/system/package/available",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -27299,6 +27902,8 @@ if "system" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/system/packages
 
@@ -27308,6 +27913,10 @@ if "system" in _PFSENSE_MODULES:
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: descr, id, installed_version, latest_version, name, shortname, update_available
+
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
         params: dict[str, Any] = {}
@@ -27321,11 +27930,12 @@ if "system" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/system/packages",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -27335,6 +27945,8 @@ if "system" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/system/restapi/access_list
 
@@ -27343,6 +27955,10 @@ if "system" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: descr, id, network, sched, type, users, weight
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -27357,11 +27973,12 @@ if "system" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/system/restapi/access_list",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -27450,6 +28067,8 @@ if "system" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/system/tunables
 
@@ -27458,6 +28077,10 @@ if "system" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: descr, id, tunable, value
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -27472,11 +28095,12 @@ if "system" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/system/tunables",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -29421,6 +30045,8 @@ if "status" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/status/dhcp_server/leases
 
@@ -29430,6 +30056,10 @@ if "status" in _PFSENSE_MODULES:
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: active_status, descr, ends, hostname, id, if, ip, mac, online_status, starts
+
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
         params: dict[str, Any] = {}
@@ -29443,11 +30073,12 @@ if "status" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/status/dhcp_server/leases",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -29457,6 +30088,8 @@ if "status" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/status/gateways
 
@@ -29465,6 +30098,10 @@ if "status" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: delay, id, loss, monitorip, name, srcip, status, stddev, substatus
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -29479,11 +30116,12 @@ if "status" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/status/gateways",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -29517,6 +30155,8 @@ if "status" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/status/ipsec/child_sas
 
@@ -29526,6 +30166,10 @@ if "status" in _PFSENSE_MODULES:
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: bytes_in, bytes_out, dh_group, encap, encr_alg, encr_keysize, id, install_time, integ_alg, life_time, local_ts, mode, name, packets_in, packets_out, parent_id, protocol, rekey_time, remote_ts, reqid, spi_in, spi_out, state, uniqueid, use_in, use_out
+
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
         params: dict[str, Any] = {}
@@ -29539,11 +30183,12 @@ if "status" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/status/ipsec/child_sas",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -29553,6 +30198,8 @@ if "status" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/status/ipsec/sas
 
@@ -29562,6 +30209,10 @@ if "status" in _PFSENSE_MODULES:
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: child_sas, con_id, dh_group, encr_alg, encr_keysize, established, id, initiator_spi, integ_alg, local_host, local_id, local_port, nat_any, nat_remote, prf_alg, rekey_time, remote_host, remote_id, remote_port, responder_spi, state, uniqueid, version
+
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
         params: dict[str, Any] = {}
@@ -29575,11 +30226,12 @@ if "status" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/status/ipsec/sas",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -29589,6 +30241,8 @@ if "status" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/status/interfaces
 
@@ -29598,6 +30252,10 @@ if "status" in _PFSENSE_MODULES:
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: collisions, descr, dhcplink, enable, gateway, gatewayv6, hwif, id, inbytes, inbytespass, inerrs, inpkts, inpktspass, ipaddr, ipaddrv6, linklocal, macaddr, media, mtu, name, outbytes, outbytespass, outerrs, outpkts, outpktspass, status, subnet, subnetv6
+
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
         params: dict[str, Any] = {}
@@ -29611,11 +30269,12 @@ if "status" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/status/interfaces",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -29625,6 +30284,8 @@ if "status" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/status/logs/auth
 
@@ -29634,6 +30295,10 @@ if "status" in _PFSENSE_MODULES:
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: id, text
+
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
         params: dict[str, Any] = {}
@@ -29647,11 +30312,12 @@ if "status" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/status/logs/auth",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -29661,6 +30327,8 @@ if "status" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/status/logs/dhcp
 
@@ -29670,6 +30338,10 @@ if "status" in _PFSENSE_MODULES:
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: id, text
+
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
         params: dict[str, Any] = {}
@@ -29683,11 +30355,12 @@ if "status" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/status/logs/dhcp",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -29697,6 +30370,8 @@ if "status" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/status/logs/firewall
 
@@ -29706,6 +30381,10 @@ if "status" in _PFSENSE_MODULES:
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: id, text
+
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
         params: dict[str, Any] = {}
@@ -29719,11 +30398,12 @@ if "status" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/status/logs/firewall",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -29733,6 +30413,8 @@ if "status" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/status/logs/openvpn
 
@@ -29742,6 +30424,10 @@ if "status" in _PFSENSE_MODULES:
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: id, text
+
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
         params: dict[str, Any] = {}
@@ -29755,11 +30441,12 @@ if "status" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/status/logs/openvpn",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -29769,6 +30456,8 @@ if "status" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/status/logs/packages/restapi
 
@@ -29777,6 +30466,10 @@ if "status" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: id, text
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -29791,11 +30484,12 @@ if "status" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/status/logs/packages/restapi",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -29818,6 +30512,8 @@ if "status" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/status/logs/system
 
@@ -29827,6 +30523,10 @@ if "status" in _PFSENSE_MODULES:
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: id, text
+
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
         params: dict[str, Any] = {}
@@ -29840,11 +30540,12 @@ if "status" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/status/logs/system",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -29854,6 +30555,8 @@ if "status" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/status/openvpn/clients
 
@@ -29862,6 +30565,10 @@ if "status" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: connect_time, id, local_host, local_port, mgmt, name, port, remote_host, remote_port, state, state_detail, status, virtual_addr, virtual_addr6, vpnid
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -29876,11 +30583,12 @@ if "status" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/status/openvpn/clients",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -29914,6 +30622,8 @@ if "status" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/status/openvpn/server/connections
 
@@ -29922,6 +30632,10 @@ if "status" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: bytes_recv, bytes_sent, cipher, client_id, common_name, connect_time, connect_time_unix, id, parent_id, peer_id, remote_host, user_name, virtual_addr, virtual_addr6
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -29936,11 +30650,12 @@ if "status" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/status/openvpn/server/connections",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -29974,6 +30689,8 @@ if "status" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/status/openvpn/server/routes
 
@@ -29983,6 +30700,10 @@ if "status" in _PFSENSE_MODULES:
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: common_name, id, last_time, parent_id, remote_host, virtual_addr
+
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
         params: dict[str, Any] = {}
@@ -29996,11 +30717,12 @@ if "status" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/status/openvpn/server/routes",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -30010,6 +30732,8 @@ if "status" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/status/openvpn/servers
 
@@ -30018,6 +30742,10 @@ if "status" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: conns, id, mgmt, mode, name, port, routes, vpnid
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -30032,11 +30760,12 @@ if "status" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/status/openvpn/servers",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -30046,6 +30775,8 @@ if "status" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/status/services
 
@@ -30057,6 +30788,10 @@ if "status" in _PFSENSE_MODULES:
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: action, description, enabled, id, name, status
+
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
         params: dict[str, Any] = {}
@@ -30070,11 +30805,12 @@ if "status" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/status/services",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -30430,6 +31166,8 @@ if "diagnostics" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/diagnostics/arp_table
 
@@ -30438,6 +31176,10 @@ if "diagnostics" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: dnsresolve, expires, hostname, id, interface, ip_address, mac_address, permanent, type
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -30452,11 +31194,12 @@ if "diagnostics" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/diagnostics/arp_table",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -30506,6 +31249,8 @@ if "diagnostics" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/diagnostics/config_history/revisions
 
@@ -30514,6 +31259,10 @@ if "diagnostics" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: description, filesize, id, time, version
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -30528,11 +31277,12 @@ if "diagnostics" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/diagnostics/config_history/revisions",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -30562,6 +31312,8 @@ if "diagnostics" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/diagnostics/tables
 
@@ -30570,6 +31322,10 @@ if "diagnostics" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: entries, id
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -30584,11 +31340,12 @@ if "diagnostics" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/diagnostics/tables",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
 if "diagnostics" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
@@ -30941,6 +31698,8 @@ if "user" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/user/auth_servers
 
@@ -30949,6 +31708,10 @@ if "user" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: host, id, ldap_allow_unauthenticated, ldap_attr_group, ldap_attr_groupobj, ldap_attr_member, ldap_attr_user, ldap_authcn, ldap_basedn, ldap_binddn, ldap_bindpw, ldap_caref, ldap_extended_enabled, ldap_extended_query, ldap_nostrip_at, ldap_pam_groupdn, ldap_port, ldap_protver, ldap_rfc2307, ldap_rfc2307_userdn, ldap_scope, ldap_timeout, ldap_urltype, ldap_utf8, name, radius_acct_port, radius_auth_port, radius_nasip_attribute, radius_protocol, radius_secret, radius_timeout, refid, type
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -30963,11 +31726,12 @@ if "user" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/user/auth_servers",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -31017,6 +31781,8 @@ if "user" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/user/groups
 
@@ -31026,6 +31792,10 @@ if "user" in _PFSENSE_MODULES:
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: description, gid, id, member, name, priv, scope
+
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
         params: dict[str, Any] = {}
@@ -31039,11 +31809,12 @@ if "user" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/user/groups",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
     @mcp.tool()
@@ -31053,6 +31824,8 @@ if "user" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/users
 
@@ -31061,6 +31834,10 @@ if "user" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: authorizedkeys, cert, descr, disabled, expires, id, ipsecpsk, name, password, priv, scope, uid
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -31075,11 +31852,12 @@ if "user" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/users",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
 if "user" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
@@ -31842,6 +32620,8 @@ if "auth" in _PFSENSE_MODULES:
         sort_by: list[str] | None = None,
         sort_flags: str | None = None,
         sort_order: str | None = None,
+        fields: str | None = None,
+        query: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/auth/keys
 
@@ -31850,6 +32630,10 @@ if "auth" in _PFSENSE_MODULES:
         sort_by: The fields to sort response data by.
         sort_flags: The sort flag to use to customize the behavior of the sort. Valid values: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_LOCALE_STRING', 'SORT_NATURAL', 'SORT_FLAG_CASE']
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
+
+        fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
+        query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
+        Known fields: descr, hash, hash_algo, id, key, length_bytes, username
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -31864,11 +32648,12 @@ if "auth" in _PFSENSE_MODULES:
             params["sort_flags"] = sort_flags
         if sort_order is not None:
             params["sort_order"] = sort_order
-        return await _client.request(
+        result = await _client.request(
             "GET",
             "/api/v2/auth/keys",
             params=params,
         )
+        return _filter_response(result, fields, query)
 
 
 if "auth" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:

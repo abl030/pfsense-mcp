@@ -10,7 +10,8 @@ Auto-generated MCP server for the pfSense REST API v2. 677 tools generated from 
 4. **Expect scripts are fragile but working**. Do not change timing, patterns, or shortcuts unless something breaks.
 5. **Always use `nix develop -c`** for ALL commands that need qemu, curl, python, pytest, expect, or any dev tool.
 6. **Testing must be automated**. Every feature/fix needs a pytest suite or equivalent that runs without human intervention. No manual-only verification — if it can't be `pytest`'d, write a script.
-7. **Sprint progress lives in CLAUDE.md**. When work spans multiple sessions, document sprint plans, progress, and outcomes here so future sessions have full context.
+7. **Add tests with features**. When adding new functionality, always write automated tests in the same change. Tests verify the feature works and prevent regressions.
+8. **Sprint progress lives in CLAUDE.md**. When work spans multiple sessions, document sprint plans, progress, and outcomes here so future sessions have full context.
 
 ## Repository Structure
 
@@ -28,6 +29,7 @@ templates/
 generated/
   server.py                  # The MCP server (677 tools — never hand-edit)
 test_modules.py              # Spec-derived pytest suite for module/read-only gating (85 tests)
+test_list_tools.py           # Tests for list tool field selection, row filtering, known-fields (19 tests)
 bank-tester/                 # AI-driven integration test suite
   run-bank-test.sh           # Orchestrator: boot VM → run tasks → collect results
   generate-tasks.py          # Auto-generate task files from spec + task-config.yaml
@@ -60,6 +62,7 @@ nix develop -c python -m generator    # regenerate generated/server.py
 - **Apply reminders**: docstrings note when `{subsystem}_apply` is needed
 - **Dangerous endpoint warnings**: halt, reboot, command_prompt, etc.
 - **BasicAuth detection**: endpoints requiring username/password auth are flagged
+- **List tool enhancements**: 109 `pfsense_list_*` tools get `fields` (field selection) and `query` (row filtering) params, plus "Known fields" in docstrings. Filtering via `_filter_response()` helper in template.
 
 ### Generator fixes applied (context for future work):
 - Conditional required fields downgraded to optional when description says "only available when"

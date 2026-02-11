@@ -226,6 +226,30 @@ def extract_tool_parameters(
     return params
 
 
+def extract_response_fields(
+    spec: dict[str, Any], operation: Operation
+) -> list[str] | None:
+    """Extract sorted field names from a list endpoint's response schema.
+
+    Returns the property names if the response data is an array of objects,
+    otherwise returns None.
+    """
+    if operation.response_schema is None:
+        return None
+
+    schema = operation.response_schema
+    if schema.get("type") != "array":
+        return None
+
+    items = schema.get("items", {})
+    resolved_items = resolve_schema(spec, items)
+    properties = resolved_items.get("properties", {})
+    if not properties:
+        return None
+
+    return sorted(properties.keys())
+
+
 def _clean_description(desc: str) -> str:
     """Clean HTML tags and whitespace from descriptions."""
     import re

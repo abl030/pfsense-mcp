@@ -92,6 +92,29 @@ class PfSenseClient:
 
 _client = PfSenseClient()
 
+
+def _filter_response(
+    result: Any, fields: str | None, query: dict[str, Any] | None
+) -> Any:
+    """Apply client-side field selection and row filtering to list responses."""
+    if not isinstance(result, list):
+        return result
+    if query is not None:
+        result = [
+            item for item in result
+            if isinstance(item, dict) and all(
+                str(item.get(k)) == str(v) for k, v in query.items()
+            )
+        ]
+    if fields is not None:
+        selected = {f.strip() for f in fields.split(",")}
+        selected.add("id")
+        result = [
+            {k: v for k, v in item.items() if k in selected}
+            for item in result if isinstance(item, dict)
+        ]
+    return result
+
 # --- Module and read-only gating ---
 _ALL_MODULES = {{ all_modules }}
 _PFSENSE_MODULES = set(
