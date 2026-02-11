@@ -166,6 +166,20 @@ PFSENSE_READ_ONLY=true
 | **Diagnostics** | 15 | ARP table, pf tables, ping, command prompt, config history |
 | **Auth** | 6 | API keys, JWT tokens, GraphQL |
 
+### List Tool Filtering
+
+All 109 `pfsense_list_*` tools support two optional parameters for client-side filtering:
+
+- **`fields`** — Comma-separated field names to return (e.g. `"id,name,address"`). Reduces response size. The `id` field is always included.
+- **`query`** — Dict of key-value pairs for row filtering (e.g. `{"type": "host"}`). Only rows where all pairs match are returned.
+
+Each tool's docstring includes a **Known fields** line listing all available fields, so AI consumers know what to filter on without making a discovery call first.
+
+```
+# Get just names and addresses of host-type aliases
+pfsense_list_firewall_aliases(fields="name,address", query={"type": "host"})
+```
+
 ### Safety: Confirmation Gate
 
 All mutations require `confirm=True`. Without it, you get a dry-run preview:
@@ -248,8 +262,14 @@ Traditional pytest tested the HTTP API directly — it verified the API works bu
 ### Running the tests
 
 ```bash
-# Module gating tests (no VM needed — fast, spec-derived, 85 tests)
+# All unit tests (no VM needed — 164 tests)
+nix develop -c python -m pytest -v
+
+# Module gating tests (85 tests)
 nix develop -c python -m pytest test_modules.py -v
+
+# List tool filtering tests (19 tests)
+nix develop -c python -m pytest test_list_tools.py -v
 
 # Integration tests (requires pfSense VM)
 nix develop -c bash vm/setup.sh                                  # build golden image (one-time)
