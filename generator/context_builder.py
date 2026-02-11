@@ -124,6 +124,17 @@ _TOOL_DOCSTRING_NOTES: dict[str, str] = {
         "NOTE: Results include static mappings from ALL interfaces. Use the parent_id "
         "parameter to filter by interface (e.g. parent_id='lan' or parent_id='opt3')."
     ),
+    "postVPNWireGuardTunnelEndpoint": (
+        "NOTE: WireGuard tunnel addresses and interface addresses are independent configs. "
+        "After creating a tunnel, assign it to an interface via the interface endpoint. "
+        "The interface IP (not the tunnel address) determines the actual runtime address. "
+        "Keep both in sync to avoid confusion."
+    ),
+    "getVPNWireGuardTunnelsEndpoint": (
+        "NOTE: Tunnel addresses shown here may differ from the runtime interface addresses. "
+        "The interface config (see pfsense_list_interfaces) determines the actual IP. "
+        "Both configs are independent — pfSense does not enforce consistency between them."
+    ),
 }
 
 # Subsystem prefixes that require an explicit "apply" call after mutations.

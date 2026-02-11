@@ -8823,6 +8823,8 @@ if "vpn_wireguard" in _PFSENSE_MODULES:
     ) -> dict[str, Any] | list[Any] | str:
         """GET /api/v2/vpn/wireguard/tunnels
 
+        NOTE: Tunnel addresses shown here may differ from the runtime interface addresses. The interface config (see pfsense_list_interfaces) determines the actual IP. Both configs are independent — pfSense does not enforce consistency between them.
+
         limit: The number of objects to obtain at once. Set to 0 for no limit.
         offset: The starting point in the dataset to begin fetching objects.
         sort_by: The fields to sort response data by.
@@ -9487,6 +9489,8 @@ if "vpn_wireguard" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
         mtu: int | None = 1420,
     ) -> dict[str, Any] | list[Any] | str:
         """POST /api/v2/vpn/wireguard/tunnel
+
+        NOTE: WireGuard tunnel addresses and interface addresses are independent configs. After creating a tunnel, assign it to an interface via the interface endpoint. The interface IP (not the tunnel address) determines the actual runtime address. Keep both in sync to avoid confusion.
 
         Note: Call pfsense_vpn_wireguard_apply after this to apply changes.
 
