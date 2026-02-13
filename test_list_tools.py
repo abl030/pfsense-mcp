@@ -4,8 +4,9 @@ Tests for list tool field selection, row filtering, and known-fields docstrings.
 Verifies that:
 1. _filter_response() correctly filters fields and rows
 2. All pfsense_list_* tools have fields/query params in their signature
-3. List tools with array responses have "Known fields" in their docstring
-4. extract_response_fields() works correctly against the spec
+3. All pfsense_list_* tools pass `query` through as server-side URL filters
+4. List tools with array responses have "Known fields" in their docstring
+5. extract_response_fields() works correctly against the spec
 
 Usage:
     nix develop -c python -m pytest test_list_tools.py -v
@@ -194,6 +195,7 @@ for name, tool in list_tools.items():
         "has_fields": "fields" in params,
         "has_query": "query" in params,
         "has_filter_call": "_filter_response" in source,
+        "has_server_query_passthrough": "params.update(query)" in source,
         "has_known_fields": "Known fields:" in (fn.__doc__ or ""),
     }
 print(json.dumps(results))
@@ -235,6 +237,12 @@ class TestGeneratedListTools:
     def test_all_list_tools_call_filter_response(self, tool_info):
         missing = [n for n, info in tool_info.items() if not info["has_filter_call"]]
         assert not missing, f"List tools missing _filter_response call: {missing}"
+
+    def test_all_list_tools_pass_query_server_side(self, tool_info):
+        missing = [
+            n for n, info in tool_info.items() if not info["has_server_query_passthrough"]
+        ]
+        assert not missing, f"List tools missing server-side query passthrough: {missing}"
 
     def test_most_list_tools_have_known_fields(self, tool_info):
         """108 of 109 list tools should have Known fields in docstring."""

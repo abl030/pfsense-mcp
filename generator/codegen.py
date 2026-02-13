@@ -133,8 +133,9 @@ def _gen_docstring(tool: ToolContext) -> str:
             "Reduces response size. The 'id' field is always included."
         )
         doc_lines.append(
-            "    query: Client-side row filter dict (e.g. {'name': 'foo'}). "
-            "Only rows where all key-value pairs match are returned."
+            "    query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are "
+            "also forwarded as URL query params for server-side filtering when supported. "
+            "Rows are additionally filtered client-side so behavior is consistent."
         )
         if tool.response_fields:
             known_fields = list(tool.response_fields)
@@ -183,8 +184,10 @@ def _gen_body(tool: ToolContext) -> str:
     lines = []
 
     # Query params dict
-    if tool.query_params:
+    has_params = bool(tool.query_params) or tool.is_list_tool
+    if has_params:
         lines.append("    params: dict[str, Any] = {}")
+    if tool.query_params:
         for p in tool.query_params:
             api_key = p.api_name or p.name
             if api_key == "query":
@@ -196,6 +199,12 @@ def _gen_body(tool: ToolContext) -> str:
             else:
                 lines.append(f"    if {p.name} is not None:")
                 lines.append(f'        params["{api_key}"] = {p.name}')
+
+    # For list tools, forward `query` keys as server-side URL filters.
+    # `_filter_response` still applies `query` client-side after the API call.
+    if tool.is_list_tool:
+        lines.append("    if query is not None:")
+        lines.append("        params.update(query)")
 
     # Request body
     if tool.has_request_body and tool.method != "put":
@@ -212,7 +221,7 @@ def _gen_body(tool: ToolContext) -> str:
         f'        "{tool.method.upper()}",',
         f'        "{tool.path}",',
     ]
-    if tool.query_params:
+    if has_params:
         call_args.append("        params=params,")
     if tool.has_request_body:
         call_args.append("        json_body=body,")
