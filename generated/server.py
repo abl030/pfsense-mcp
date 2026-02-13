@@ -115,6 +115,62 @@ def _filter_response(
         ]
     return result
 
+
+async def _enrich_firewall_rules_with_interface_descr(result: Any) -> Any:
+    """Attach `interface_descr` to firewall rule rows using /api/v2/interfaces."""
+    if not isinstance(result, list):
+        return result
+
+    interface_ids: set[str] = set()
+    for item in result:
+        if not isinstance(item, dict):
+            continue
+        iface = item.get("interface")
+        if isinstance(iface, str):
+            for part in iface.split(","):
+                token = part.strip()
+                if token:
+                    interface_ids.add(token)
+        elif isinstance(iface, list):
+            for part in iface:
+                token = str(part).strip()
+                if token:
+                    interface_ids.add(token)
+
+    if not interface_ids:
+        return result
+
+    interfaces = await _client.request("GET", "/api/v2/interfaces")
+    if not isinstance(interfaces, list):
+        return result
+
+    interface_map: dict[str, str] = {}
+    for iface in interfaces:
+        if not isinstance(iface, dict):
+            continue
+        iface_id = iface.get("id")
+        iface_descr = iface.get("descr")
+        if iface_id is not None and isinstance(iface_descr, str) and iface_descr.strip():
+            interface_map[str(iface_id)] = iface_descr
+
+    if not interface_map:
+        return result
+
+    for item in result:
+        if not isinstance(item, dict):
+            continue
+        iface = item.get("interface")
+        if isinstance(iface, str):
+            parts = [part.strip() for part in iface.split(",") if part.strip()]
+            if parts:
+                item["interface_descr"] = ", ".join(interface_map.get(part, part) for part in parts)
+        elif isinstance(iface, list):
+            parts = [str(part).strip() for part in iface if str(part).strip()]
+            if parts:
+                item["interface_descr"] = [interface_map.get(part, part) for part in parts]
+
+    return result
+
 # --- Module and read-only gating ---
 _ALL_MODULES = {'auth', 'diagnostics', 'firewall', 'interface', 'routing', 'services_acme', 'services_bind', 'services_dhcp', 'services_dns_forwarder', 'services_dns_resolver', 'services_freeradius', 'services_haproxy', 'services_misc', 'status', 'system', 'user', 'vpn_ipsec', 'vpn_openvpn', 'vpn_wireguard'}
 _PFSENSE_MODULES = set(
@@ -1290,7 +1346,7 @@ if "firewall" in _PFSENSE_MODULES:
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
         query: Client-side row filter dict (e.g. {'name': 'foo'}). Only rows where all key-value pairs match are returned.
-        Known fields: ackqueue, associated_rule_id, created_by, created_time, defaultqueue, descr, destination, destination_port, direction, disabled, dnpipe, floating, gateway, icmptype, id, interface, ipprotocol, log, pdnpipe, protocol, quick, sched, source, source_port, statetype, tag, tcp_flags_any, tcp_flags_out_of, tcp_flags_set, tracker, type, updated_by, updated_time
+        Known fields: ackqueue, associated_rule_id, created_by, created_time, defaultqueue, descr, destination, destination_port, direction, disabled, dnpipe, floating, gateway, icmptype, id, interface, ipprotocol, log, pdnpipe, protocol, quick, sched, source, source_port, statetype, tag, tcp_flags_any, tcp_flags_out_of, tcp_flags_set, tracker, type, updated_by, updated_time, interface_descr
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -1310,6 +1366,7 @@ if "firewall" in _PFSENSE_MODULES:
             "/api/v2/firewall/rules",
             params=params,
         )
+        result = await _enrich_firewall_rules_with_interface_descr(result)
         return _filter_response(result, fields, query)
 
 

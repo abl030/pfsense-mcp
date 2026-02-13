@@ -115,6 +115,62 @@ def _filter_response(
         ]
     return result
 
+
+async def _enrich_firewall_rules_with_interface_descr(result: Any) -> Any:
+    """Attach `interface_descr` to firewall rule rows using /api/v2/interfaces."""
+    if not isinstance(result, list):
+        return result
+
+    interface_ids: set[str] = set()
+    for item in result:
+        if not isinstance(item, dict):
+            continue
+        iface = item.get("interface")
+        if isinstance(iface, str):
+            for part in iface.split(","):
+                token = part.strip()
+                if token:
+                    interface_ids.add(token)
+        elif isinstance(iface, list):
+            for part in iface:
+                token = str(part).strip()
+                if token:
+                    interface_ids.add(token)
+
+    if not interface_ids:
+        return result
+
+    interfaces = await _client.request("GET", "/api/v2/interfaces")
+    if not isinstance(interfaces, list):
+        return result
+
+    interface_map: dict[str, str] = {}
+    for iface in interfaces:
+        if not isinstance(iface, dict):
+            continue
+        iface_id = iface.get("id")
+        iface_descr = iface.get("descr")
+        if iface_id is not None and isinstance(iface_descr, str) and iface_descr.strip():
+            interface_map[str(iface_id)] = iface_descr
+
+    if not interface_map:
+        return result
+
+    for item in result:
+        if not isinstance(item, dict):
+            continue
+        iface = item.get("interface")
+        if isinstance(iface, str):
+            parts = [part.strip() for part in iface.split(",") if part.strip()]
+            if parts:
+                item["interface_descr"] = ", ".join(interface_map.get(part, part) for part in parts)
+        elif isinstance(iface, list):
+            parts = [str(part).strip() for part in iface if str(part).strip()]
+            if parts:
+                item["interface_descr"] = [interface_map.get(part, part) for part in parts]
+
+    return result
+
 # --- Module and read-only gating ---
 _ALL_MODULES = {{ all_modules }}
 _PFSENSE_MODULES = set(

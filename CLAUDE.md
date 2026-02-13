@@ -8,7 +8,7 @@ Auto-generated MCP server for the pfSense REST API v2. 677 tools generated from 
 2. **`openapi-spec.json` is the single source of truth**. All type information, parameter names, and endpoint structure come from the spec.
 3. **Test against the VM, not production**. The golden image exists for this purpose.
 4. **Expect scripts are fragile but working**. Do not change timing, patterns, or shortcuts unless something breaks.
-5. **Always use `nix develop -c`** for ALL commands that need qemu, curl, python, pytest, expect, or any dev tool.
+5. **Always use `nix develop -c`** as the default wrapper for repo commands (including `python -m generator`, `pytest`, qemu/expect scripts, and any tooling that touches this project).
 6. **Testing must be automated**. Every feature/fix needs a pytest suite or equivalent that runs without human intervention. No manual-only verification — if it can't be `pytest`'d, write a script.
 7. **Add tests with features**. When adding new functionality, always write automated tests in the same change. Tests verify the feature works and prevent regressions.
 8. **Sprint progress lives in CLAUDE.md**. When work spans multiple sessions, document sprint plans, progress, and outcomes here so future sessions have full context.

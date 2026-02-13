@@ -137,7 +137,13 @@ def _gen_docstring(tool: ToolContext) -> str:
             "Only rows where all key-value pairs match are returned."
         )
         if tool.response_fields:
-            fields_str = ", ".join(tool.response_fields)
+            known_fields = list(tool.response_fields)
+            if (
+                tool.tool_name == "pfsense_list_firewall_rules"
+                and "interface_descr" not in known_fields
+            ):
+                known_fields.append("interface_descr")
+            fields_str = ", ".join(known_fields)
             doc_lines.append(f"    Known fields: {fields_str}")
 
     doc_lines.append("")
@@ -215,6 +221,8 @@ def _gen_body(tool: ToolContext) -> str:
         lines.append("    result = await _client.request(")
         lines.extend(call_args)
         lines.append("    )")
+        if tool.tool_name == "pfsense_list_firewall_rules":
+            lines.append("    result = await _enrich_firewall_rules_with_interface_descr(result)")
         lines.append("    return _filter_response(result, fields, query)")
     else:
         lines.append("    return await _client.request(")
