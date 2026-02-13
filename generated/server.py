@@ -1065,7 +1065,7 @@ if "firewall" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: address, descr, detail, id, name, type
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -1143,7 +1143,7 @@ if "firewall" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: descr, destination, disabled, external, id, interface, ipprotocol, natreflection, nobinat, source
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -1208,7 +1208,7 @@ if "firewall" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: descr, destination, destination_port, disabled, id, interface, nat_port, nonat, nosync, poolopts, protocol, source, source_hash_key, source_port, static_nat_port, target, target_subnet
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -1286,7 +1286,7 @@ if "firewall" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: associated_rule_id, created_by, created_time, descr, destination, destination_port, disabled, id, interface, ipprotocol, local_port, natreflection, nordr, nosync, protocol, source, source_port, target, updated_by, updated_time
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -1353,7 +1353,7 @@ if "firewall" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: ackqueue, associated_rule_id, created_by, created_time, defaultqueue, descr, destination, destination_port, direction, disabled, dnpipe, floating, gateway, icmptype, id, interface, ipprotocol, log, pdnpipe, protocol, quick, sched, source, source_port, statetype, tag, tcp_flags_any, tcp_flags_out_of, tcp_flags_set, tracker, type, updated_by, updated_time, interface_descr
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -1443,7 +1443,7 @@ if "firewall" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: day, hour, id, month, parent_id, position, rangedescr
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -1488,7 +1488,7 @@ if "firewall" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: active, descr, id, name, schedlabel, timerange
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -1553,7 +1553,7 @@ if "firewall" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: age, bytes_in, bytes_out, bytes_total, destination, direction, expires_in, id, interface, packets_in, packets_out, packets_total, protocol, source, state
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -1655,7 +1655,7 @@ if "firewall" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: bw, bwscale, bwsched, id, parent_id
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -1744,7 +1744,7 @@ if "firewall" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: aqm, buckets, description, ecn, enabled, id, mask, maskbits, maskbitsv6, name, number, param_codel_interval, param_codel_target, param_gred_max_p, param_gred_max_th, param_gred_min_th, param_gred_w_q, param_pie_alpha, param_pie_beta, param_pie_max_burst, param_pie_max_ecnth, param_pie_target, param_pie_tupdate, param_red_max_p, param_red_max_th, param_red_min_th, param_red_w_q, parent_id, pie_capdrop, pie_onoff, pie_pderand, pie_qdelay, plr, qlimit, weight
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -1789,7 +1789,7 @@ if "firewall" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: aqm, bandwidth, buckets, delay, description, ecn, enabled, id, mask, maskbits, maskbitsv6, name, number, param_codel_interval, param_codel_target, param_fq_codel_flows, param_fq_codel_interval, param_fq_codel_limit, param_fq_codel_quantum, param_fq_codel_target, param_fq_pie_alpha, param_fq_pie_beta, param_fq_pie_flows, param_fq_pie_limit, param_fq_pie_max_burst, param_fq_pie_max_ecnth, param_fq_pie_quantum, param_fq_pie_target, param_fq_pie_tupdate, param_gred_max_p, param_gred_max_th, param_gred_min_th, param_gred_w_q, param_pie_alpha, param_pie_beta, param_pie_max_burst, param_pie_max_ecnth, param_pie_target, param_pie_tupdate, param_red_max_p, param_red_max_th, param_red_min_th, param_red_w_q, pie_capdrop, pie_onoff, pie_pderand, pie_qdelay, plr, qlimit, queue, sched
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -1858,7 +1858,7 @@ if "firewall" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: bandwidth, bandwidthtype, borrow, buckets, codel, default, description, ecn, enabled, hogs, id, interface, linkshare, linkshare_d, linkshare_m1, linkshare_m2, name, parent_id, priority, qlimit, realtime, realtime_d, realtime_m1, realtime_m2, red, rio, upperlimit, upperlimit_d, upperlimit_m1, upperlimit_m2
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -1903,7 +1903,7 @@ if "firewall" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: bandwidth, bandwidthtype, enabled, id, interface, name, qlimit, queue, scheduler, tbrconfig
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -1981,7 +1981,7 @@ if "firewall" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: advbase, advskew, carp_mode, carp_peer, carp_status, descr, id, interface, mode, noexpand, password, subnet, subnet_bits, type, uniqid, vhid
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -5809,7 +5809,7 @@ if "interface" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: dmesg, id, if, in_use_by, mac
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -5874,7 +5874,7 @@ if "interface" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: bridgeif, descr, id, members
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -5939,7 +5939,7 @@ if "interface" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: add_static_route, descr, greif, id, if, remote_addr, tunnel_local_addr, tunnel_local_addr6, tunnel_remote_addr, tunnel_remote_addr6, tunnel_remote_net, tunnel_remote_net6
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -6004,7 +6004,7 @@ if "interface" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: descr, id, ifname, members
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -6069,7 +6069,7 @@ if "interface" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: descr, failovermaster, id, lacptimeout, lagghash, laggif, members, proto
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -6134,7 +6134,7 @@ if "interface" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: descr, id, if, pcp, tag, vlanif
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -6199,7 +6199,7 @@ if "interface" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: adv_dhcp_config_advanced, adv_dhcp_config_file_override, adv_dhcp_config_file_override_path, adv_dhcp_option_modifiers, adv_dhcp_pt_backoff_cutoff, adv_dhcp_pt_initial_interval, adv_dhcp_pt_reboot, adv_dhcp_pt_retry, adv_dhcp_pt_select_timeout, adv_dhcp_pt_timeout, adv_dhcp_pt_values, adv_dhcp_request_options, adv_dhcp_required_options, adv_dhcp_send_options, alias_address, alias_subnet, blockbogons, blockpriv, descr, dhcphostname, dhcprejectfrom, enable, gateway, gateway_6rd, gatewayv6, id, if, ipaddr, ipaddrv6, ipv6usev4iface, media, mediaopt, mss, mtu, prefix_6rd, prefix_6rd_v4plen, slaacusev4iface, spoofmac, subnet, subnetv6, track6_interface, track6_prefix_id_hex, typev4, typev6
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -7613,7 +7613,7 @@ if "routing" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: gateway, id, parent_id, tier, virtual_ip
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -7682,7 +7682,7 @@ if "routing" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: descr, id, ipprotocol, name, priorities, trigger
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -7727,7 +7727,7 @@ if "routing" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: action_disable, alert_interval, data_payload, descr, disabled, dpinger_dont_add_static_route, force_down, gateway, gw_down_kill_states, id, interface, interval, ipprotocol, latencyhigh, latencylow, loss_interval, losshigh, losslow, monitor, monitor_disable, name, nonlocalgateway, time_period, weight
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -7792,7 +7792,7 @@ if "routing" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: descr, disabled, gateway, id, network
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -8731,7 +8731,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: address, descr, id, mask, parent_id
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -8796,7 +8796,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: allowedips, descr, enabled, endpoint, id, persistentkeepalive, port, presharedkey, publickey, tun
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -8878,7 +8878,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: address, descr, id, mask, parent_id
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -8945,7 +8945,7 @@ if "vpn_wireguard" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: addresses, descr, enabled, id, listenport, mtu, name, privatekey, publickey
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -9843,7 +9843,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: block, common_name, custom_options, description, disable, dns_domain, dns_server1, dns_server2, dns_server3, dns_server4, gwredir, id, local_network, local_networkv6, netbios_enable, netbios_ntype, netbios_scope, ntp_server1, ntp_server2, push_reset, remote_network, remote_networkv6, remove_options, server_list, tunnel_network, tunnel_networkv6, wins_server1, wins_server2
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -9928,7 +9928,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: advancedoptions, bindmode, blockoutsidedns, id, legacy, p12encryption, pass, pkcs11id, pkcs11providers, proxyaddr, proxypass, proxyport, proxyuser, server, silent, useaddr, useaddr_hostname, usepass, usepkcs11, useproxy, useproxypass, useproxytype, usetoken, verifyservercn
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -9973,7 +9973,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: allow_compression, auth_pass, auth_retry_none, auth_user, caref, certref, create_gw, custom_options, data_ciphers, data_ciphers_fallback, description, dev_mode, digest, disable, dns_add, exit_notify, id, inactive_seconds, interface, keepalive_interval, keepalive_timeout, local_port, mode, passtos, ping_action, ping_action_seconds, ping_method, ping_seconds, protocol, proxy_addr, proxy_authtype, proxy_passwd, proxy_port, proxy_user, remote_cert_tls, remote_network, remote_networkv6, route_no_exec, route_no_pull, server_addr, server_port, sndrcvbuf, tls, tls_type, tlsauth_keydir, topology, tunnel_network, tunnel_networkv6, udp_fast_io, use_shaper, verbosity_level, vpnid, vpnif
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -10038,7 +10038,7 @@ if "vpn_openvpn" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: allow_compression, authmode, caref, cert_depth, certref, client2client, connlimit, create_gw, custom_options, data_ciphers, data_ciphers_fallback, description, dev_mode, dh_length, digest, disable, dns_domain, dns_server1, dns_server2, dns_server3, dns_server4, duplicate_cn, dynamic_ip, ecdh_curve, gwredir, gwredir6, id, inactive_seconds, interface, keepalive_interval, keepalive_timeout, local_network, local_networkv6, local_port, maxclients, mode, netbios_enable, netbios_ntype, netbios_scope, ntp_server1, ntp_server2, passtos, ping_action, ping_action_push, ping_action_seconds, ping_method, ping_push, ping_seconds, protocol, push_blockoutsidedns, push_register_dns, remote_cert_tls, remote_network, remote_networkv6, serverbridge_dhcp, serverbridge_dhcp_end, serverbridge_dhcp_start, serverbridge_interface, serverbridge_routegateway, sndrcvbuf, strictusercn, tls, tls_type, tlsauth_keydir, topology, tunnel_network, tunnel_networkv6, use_tls, username_as_common_name, verbosity_level, vpnid, vpnif, wins_server1, wins_server2
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -12099,7 +12099,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: dhgroup, encryption_algorithm_keylen, encryption_algorithm_name, hash_algorithm, id, parent_id, prf_algorithm
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -12164,7 +12164,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: authentication_method, caref, certref, closeaction, descr, disabled, dpd_delay, dpd_maxfail, encryption, gw_duplicates, id, ikeid, ikeport, iketype, interface, lifetime, mobike, mode, myid_data, myid_type, nat_traversal, nattport, peerid_data, peerid_type, pre_shared_key, prfselect_enable, protocol, rand_time, reauth_time, rekey_time, remote_gateway, splitconn, startaction
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -12233,7 +12233,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: id, keylen, name, parent_id
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -12298,7 +12298,7 @@ if "vpn_ipsec" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: descr, disabled, encryption_algorithm_option, hash_algorithm_option, id, ikeid, keepalive, lifetime, localid_address, localid_netbits, localid_type, mode, natlocalid_address, natlocalid_netbits, natlocalid_type, pfsgroup, pinghost, protocol, rand_time, rekey_time, remoteid_address, remoteid_netbits, remoteid_type, reqid, uniqid
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -13478,7 +13478,7 @@ if "services_dhcp" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: defaultleasetime, denyunknown, dnsserver, domain, domainsearchlist, gateway, id, ignorebootp, ignoreclientuids, mac_allow, mac_deny, maxleasetime, ntpserver, parent_id, range_from, range_to, winsserver
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -13560,7 +13560,7 @@ if "services_dhcp" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: id, number, parent_id, type, value
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -13651,7 +13651,7 @@ if "services_dhcp" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: arp_table_static_entry, cid, defaultleasetime, descr, dnsserver, domain, domainsearchlist, gateway, hostname, id, ipaddr, mac, maxleasetime, ntpserver, parent_id, winsserver
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -13696,7 +13696,7 @@ if "services_dhcp" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: defaultleasetime, denyunknown, dhcpleaseinlocaltime, disablepingcheck, dnsserver, domain, domainsearchlist, enable, failover_peerip, gateway, id, ignorebootp, ignoreclientuids, interface, mac_allow, mac_deny, maxleasetime, nonak, ntpserver, numberoptions, pool, range_from, range_to, staticarp, staticmap, statsgraph, winsserver
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -14879,7 +14879,7 @@ if "services_dns_resolver" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: description, id, mask, network, parent_id
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -14924,7 +14924,7 @@ if "services_dns_resolver" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: action, description, id, name, networks
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -15002,7 +15002,7 @@ if "services_dns_resolver" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: descr, domain, forward_tls_upstream, id, ip, tls_hostname
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -15071,7 +15071,7 @@ if "services_dns_resolver" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: descr, domain, host, id, parent_id
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -15136,7 +15136,7 @@ if "services_dns_resolver" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: aliases, descr, domain, host, id, ip
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -16261,7 +16261,7 @@ if "services_dns_forwarder" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: description, domain, host, id, parent_id
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -16326,7 +16326,7 @@ if "services_dns_forwarder" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: aliases, descr, domain, host, id, ip
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -16795,7 +16795,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: casesensitive, expression, id, name, not, parent_id, value
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -16864,7 +16864,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: acl, action, customaction, deny_status, find, fmt, id, lua_function, name, parent_id, path, realm, reason, replace, rule, server, status
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -16953,7 +16953,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: errorcode, errorfile, id, parent_id
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -17022,7 +17022,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: address, advanced, id, name, parent_id, port, serverid, ssl, sslserververify, status, weight
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -17067,7 +17067,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: acls, actions, advanced, advanced_backend, agent_checks, agent_inter, agent_port, balance, balance_uridepth, balance_urilen, balance_uriwhole, check_type, checkinter, connection_timeout, cookie_attribute_secure, email_level, email_to, errorfiles, haproxy_cookie_domains, haproxy_cookie_dynamic_cookie_key, haproxy_cookie_maxidle, haproxy_cookie_maxlife, httpcheck_method, id, log_health_checks, monitor_domain, monitor_httpversion, monitor_uri, monitor_username, name, persist_cookie_cachable, persist_cookie_enabled, persist_cookie_httponly, persist_cookie_mode, persist_cookie_name, persist_cookie_postonly, persist_cookie_secure, persist_stick_cookiename, persist_stick_expire, persist_stick_length, persist_stick_tablesize, persist_sticky_type, retries, server_timeout, servers, stats_admin, stats_desc, stats_enabled, stats_node, stats_password, stats_realm, stats_refresh, stats_scope, stats_uri, stats_username, strict_transport_security, transparent_clientip, transparent_interface
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -17132,7 +17132,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: content, id, name, type
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -17201,7 +17201,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: casesensitive, expression, id, name, not, parent_id, value
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -17270,7 +17270,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: acl, action, backend, customaction, deny_status, find, fmt, id, lua_function, name, parent_id, path, realm, reason, replace, rule, status
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -17339,7 +17339,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: exaddr_advanced, extaddr, extaddr_custom, extaddr_port, extaddr_ssl, id, parent_id
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -17408,7 +17408,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: id, parent_id, ssl_certificate
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -17497,7 +17497,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: errorcode, errorfile, id, parent_id
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -17542,7 +17542,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: a_actionitems, a_errorfiles, a_extaddr, advanced, advanced_bind, backend_serverpool, client_timeout, descr, dontlog_normal, dontlognull, forwardfor, ha_acls, ha_certificates, httpclose, id, log_detailed, log_separate_errors, max_connections, name, socket_stats, ssloffloadcert, status, type
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -17607,7 +17607,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: id, name, parent_id, port, server
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -17672,7 +17672,7 @@ if "services_haproxy" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: id, mailserver, mailserverport, name, parent_id
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -21000,7 +21000,7 @@ if "services_bind" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: description, id, parent_id, value
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -21069,7 +21069,7 @@ if "services_bind" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: description, entries, id, name
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -21147,7 +21147,7 @@ if "services_bind" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: id, ipaddress, password, syncdestinenable, syncport, syncprotocol, username
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -21225,7 +21225,7 @@ if "services_bind" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: allow_recursion, bind_custom_options, descr, id, match_clients, name, recursion
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -21314,7 +21314,7 @@ if "services_bind" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: allowquery, allowtransfer, allowupdate, backupkeys, baseip, custom, customzonerecords, description, disabled, dnssec, enable_updatepolicy, expire, forwarders, id, mail, minimum, name, nameserver, records, refresh, regdhcpstatic, retry, reversev4, reversev6, rpz, serial, slaveip, ttl, type, updatepolicy, view
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -22682,7 +22682,7 @@ if "services_freeradius" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: addr, description, id, ip_version, maxconn, msgauth, naslogin, naspassword, nastype, proto, secret, shortname
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -22747,7 +22747,7 @@ if "services_freeradius" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: addr, description, id, ip_version, port, type
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -22812,7 +22812,7 @@ if "services_freeradius" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: description, framed_ip_address, framed_ip_netmask, id, motp_authmethod, motp_enable, motp_offset, motp_pin, motp_secret, password, password_encryption, username
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -23510,7 +23510,7 @@ if "services_acme" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: id, name, status
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -23555,7 +23555,7 @@ if "services_acme" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: accountkey, acmeserver, descr, email, id, name
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -23668,7 +23668,7 @@ if "services_acme" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: certificate, id, last_updated, result_log, status
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -23713,7 +23713,7 @@ if "services_acme" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: certificate, id, last_updated, result_log, status
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -23758,7 +23758,7 @@ if "services_acme" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: a_actionlist, a_domainlist, acmeaccount, descr, dnssleep, id, keylength, keypaste, name, oscpstaple, preferredchain, renewafter, status
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -26917,7 +26917,7 @@ if "services_misc" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: command, hour, id, mday, minute, month, wday, who
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -26995,7 +26995,7 @@ if "services_misc" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: id, noselect, prefer, timeserver, type
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -27073,7 +27073,7 @@ if "services_misc" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: description, enabled, id, name, notify
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -27841,7 +27841,7 @@ if "system" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: caref, cert, descr, id, lifetime, method, refid, serial, text
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -27886,7 +27886,7 @@ if "system" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: crt, descr, id, prv, randomserial, refid, serial, trust
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -27971,7 +27971,7 @@ if "system" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: caref, crt, csr, descr, id, prv, refid, type
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -28044,7 +28044,7 @@ if "system" in _PFSENSE_MODULES:
         """GET /api/v2/system/notifications/email_settings
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -28078,7 +28078,7 @@ if "system" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: deps, descr, id, installed, name, shortname, version
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -28143,7 +28143,7 @@ if "system" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: descr, id, installed_version, latest_version, name, shortname, update_available
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -28188,7 +28188,7 @@ if "system" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: descr, id, network, sched, type, users, weight
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -28312,7 +28312,7 @@ if "system" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: descr, id, tunable, value
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -30292,7 +30292,7 @@ if "status" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: active_status, descr, ends, hostname, id, if, ip, mac, online_status, starts
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -30337,7 +30337,7 @@ if "status" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: delay, id, loss, monitorip, name, srcip, status, stddev, substatus
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -30406,7 +30406,7 @@ if "status" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: bytes_in, bytes_out, dh_group, encap, encr_alg, encr_keysize, id, install_time, integ_alg, life_time, local_ts, mode, name, packets_in, packets_out, parent_id, protocol, rekey_time, remote_ts, reqid, spi_in, spi_out, state, uniqueid, use_in, use_out
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -30451,7 +30451,7 @@ if "status" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: child_sas, con_id, dh_group, encr_alg, encr_keysize, established, id, initiator_spi, integ_alg, local_host, local_id, local_port, nat_any, nat_remote, prf_alg, rekey_time, remote_host, remote_id, remote_port, responder_spi, state, uniqueid, version
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -30496,7 +30496,7 @@ if "status" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: collisions, descr, dhcplink, enable, gateway, gatewayv6, hwif, id, inbytes, inbytespass, inerrs, inpkts, inpktspass, ipaddr, ipaddrv6, linklocal, macaddr, media, mtu, name, outbytes, outbytespass, outerrs, outpkts, outpktspass, status, subnet, subnetv6
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -30541,7 +30541,7 @@ if "status" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: id, text
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -30586,7 +30586,7 @@ if "status" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: id, text
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -30631,7 +30631,7 @@ if "status" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: id, text
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -30676,7 +30676,7 @@ if "status" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: id, text
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -30721,7 +30721,7 @@ if "status" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: id, text
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -30779,7 +30779,7 @@ if "status" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: id, text
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -30824,7 +30824,7 @@ if "status" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: connect_time, id, local_host, local_port, mgmt, name, port, remote_host, remote_port, state, state_detail, status, virtual_addr, virtual_addr6, vpnid
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -30893,7 +30893,7 @@ if "status" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: bytes_recv, bytes_sent, cipher, client_id, common_name, connect_time, connect_time_unix, id, parent_id, peer_id, remote_host, user_name, virtual_addr, virtual_addr6
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -30962,7 +30962,7 @@ if "status" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: common_name, id, last_time, parent_id, remote_host, virtual_addr
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -31007,7 +31007,7 @@ if "status" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: conns, id, mgmt, mode, name, port, routes, vpnid
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -31054,7 +31054,7 @@ if "status" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: action, description, enabled, id, name, status
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -31445,7 +31445,7 @@ if "diagnostics" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: dnsresolve, expires, hostname, id, interface, ip_address, mac_address, permanent, type
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -31530,7 +31530,7 @@ if "diagnostics" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: description, filesize, id, time, version
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -31595,7 +31595,7 @@ if "diagnostics" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: entries, id
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -31983,7 +31983,7 @@ if "user" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: host, id, ldap_allow_unauthenticated, ldap_attr_group, ldap_attr_groupobj, ldap_attr_member, ldap_attr_user, ldap_authcn, ldap_basedn, ldap_binddn, ldap_bindpw, ldap_caref, ldap_extended_enabled, ldap_extended_query, ldap_nostrip_at, ldap_pam_groupdn, ldap_port, ldap_protver, ldap_rfc2307, ldap_rfc2307_userdn, ldap_scope, ldap_timeout, ldap_urltype, ldap_utf8, name, radius_acct_port, radius_auth_port, radius_nasip_attribute, radius_protocol, radius_secret, radius_timeout, refid, type
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -32068,7 +32068,7 @@ if "user" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: description, gid, id, member, name, priv, scope
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -32113,7 +32113,7 @@ if "user" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: authorizedkeys, cert, descr, disabled, expires, id, ipsecpsk, name, password, priv, scope, uid
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -32911,7 +32911,7 @@ if "auth" in _PFSENSE_MODULES:
         sort_order: The order to sort response data by. Valid values: ['SORT_ASC', 'SORT_DESC']
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
-        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent.
+        query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
         Known fields: descr, hash, hash_algo, id, key, length_bytes, username
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.

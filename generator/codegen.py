@@ -135,7 +135,10 @@ def _gen_docstring(tool: ToolContext) -> str:
         doc_lines.append(
             "    query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are "
             "also forwarded as URL query params for server-side filtering when supported. "
-            "Rows are additionally filtered client-side so behavior is consistent."
+            "Rows are additionally filtered client-side so behavior is consistent. "
+            "Pass query as an object/dict, not a JSON-encoded string. Matching uses "
+            "exact string-coerced equality; list-valued fields must match the field's "
+            "exact value shape."
         )
         if tool.response_fields:
             known_fields = list(tool.response_fields)
