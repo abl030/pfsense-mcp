@@ -1,0 +1,50 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "name": "io.github.abl030/pfsense-mcp",
+  "description": "AI-generated MCP server for the pfSense REST API v2 — 677 tools covering firewall rules, NAT, VPN (IPsec, WireGuard, OpenVPN), services (DHCP, DNS, HAProxy, BIND, FreeRADIUS, ACME), routing, certificates, users, diagnostics, and more. Auto-generated from the official OpenAPI spec. 99% first-attempt success rate verified by AI-driven integration testing.",
+  "repository": {
+    "url": "https://github.com/abl030/pfsense-mcp",
+    "source": "github"
+  },
+  "version_detail": {
+    "version": "0.1.0",
+    "release_date": "2026-02-15"
+  },
+  "packages": [
+    {
+      "registry_type": "pip",
+      "name": "pfsense-mcp",
+      "version": "0.1.0",
+      "runtime": "python",
+      "environment_variables": [
+        {
+          "name": "PFSENSE_HOST",
+          "description": "pfSense hostname or IP (include https://)",
+          "required": true
+        },
+        {
+          "name": "PFSENSE_API_KEY",
+          "description": "REST API key (create in System > REST API > Keys)",
+          "required": true
+        },
+        {
+          "name": "PFSENSE_VERIFY_SSL",
+          "description": "Verify SSL certificates",
+          "required": false,
+          "default": "false"
+        },
+        {
+          "name": "PFSENSE_MODULES",
+          "description": "Comma-separated list of modules to enable (default: all)",
+          "required": false
+        },
+        {
+          "name": "PFSENSE_READ_ONLY",
+          "description": "Strip all mutation tools (POST/PATCH/PUT/DELETE)",
+          "required": false,
+          "default": "false"
+        }
+      ]
+    }
+  ]
+}

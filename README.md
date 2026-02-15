@@ -1,5 +1,7 @@
 # pfSense MCP Server
 
+<!-- mcp-name: io.github.abl030/pfsense-mcp -->
+
 > *"I've configured a lot of pfSense firewalls, but I've never had all 677 API endpoints at my fingertips before. I just said 'create a WireGuard tunnel with a peer' and it worked on the first try."*
 > — Claude, after discovering this MCP server
 
@@ -48,7 +50,14 @@ Quick test without installing:
 PFSENSE_HOST=https://192.168.1.1 PFSENSE_API_KEY=your-key nix run github:abl030/pfsense-mcp
 ```
 
-### Option 2: uv (non-Nix)
+### Option 2: pip / PyPI
+
+```bash
+pip install pfsense-mcp
+pfsense-mcp  # starts the MCP server on stdio
+```
+
+### Option 3: uv (from source)
 
 ```bash
 git clone https://github.com/abl030/pfsense-mcp.git

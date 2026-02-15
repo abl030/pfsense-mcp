@@ -1,19 +1,48 @@
 [project]
 name = "pfsense-mcp"
 version = "0.1.0"
-description = "AI-generated MCP server for the pfSense REST API v2"
+description = "AI-generated MCP server for the pfSense REST API v2 — 677 tools"
 requires-python = ">=3.11"
+license = {text = "MIT"}
+readme = "README.md"
+authors = [
+    {name = "abl030"},
+]
+keywords = ["mcp", "pfsense", "firewall", "ai", "model-context-protocol", "fastmcp"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: System :: Networking :: Firewalls",
+    "Topic :: System :: Systems Administration",
+]
 dependencies = [
     "fastmcp>=2.0",
     "httpx>=0.27",
-    "jinja2>=3.1",
 ]
+
+[project.urls]
+Homepage = "https://github.com/abl030/pfsense-mcp"
+Repository = "https://github.com/abl030/pfsense-mcp"
+Issues = "https://github.com/abl030/pfsense-mcp/issues"
+
+[project.scripts]
+pfsense-mcp = "pfsense_mcp.__main__:main"
 
 [project.optional-dependencies]
 dev = [
+    "jinja2>=3.1",
     "pytest>=8.0",
 ]
 
 [build-system]
 requires = ["setuptools>=70"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["pfsense_mcp*"]
