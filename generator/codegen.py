@@ -60,6 +60,14 @@ def _gen_signature(tool: ToolContext) -> str:
     return "\n".join(lines)
 
 
+_KNOWN_FIELD_EXAMPLES: dict[tuple[str, str], str] = {
+    ("pfsense_list_system_package_available", "name"): 'e.g. "pfSense-pkg-Cron"',
+    ("pfsense_list_system_package_available", "shortname"): 'e.g. "Cron"',
+    ("pfsense_list_system_packages", "name"): 'e.g. "pfSense-pkg-Cron"',
+    ("pfsense_list_system_packages", "shortname"): 'e.g. "Cron"',
+}
+
+
 def _gen_docstring(tool: ToolContext) -> str:
     """Generate the docstring."""
     # Keep docstring concise: just the API ref line
@@ -147,7 +155,11 @@ def _gen_docstring(tool: ToolContext) -> str:
                 and "interface_descr" not in known_fields
             ):
                 known_fields.append("interface_descr")
-            fields_str = ", ".join(known_fields)
+            field_parts = []
+            for f in known_fields:
+                example = _KNOWN_FIELD_EXAMPLES.get((tool.tool_name, f))
+                field_parts.append(f"{f} ({example})" if example else f)
+            fields_str = ", ".join(field_parts)
             doc_lines.append(f"    Known fields: {fields_str}")
 
     doc_lines.append("")

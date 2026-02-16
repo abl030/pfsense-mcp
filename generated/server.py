@@ -27598,7 +27598,7 @@ if "services_misc" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
     ) -> dict[str, Any] | list[Any] | str:
         """POST /api/v2/services/service_watchdog
 
-        name: The name of the service to be watched.
+        name: The name of the service to be watched. Use the `name` field from pfsense_list_status_services to find valid service names (e.g. 'syslogd', 'dpinger', 'ntpd').
         notify: Enable or disable notifications being sent when Service Watchdogs finds this service stopped.
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -27630,7 +27630,7 @@ if "services_misc" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:
         """PATCH /api/v2/services/service_watchdog
 
         id: The ID of the object or resource to interact with.
-        name: The name of the service to be watched.
+        name: The name of the service to be watched. Use the `name` field from pfsense_list_status_services to find valid service names (e.g. 'syslogd', 'dpinger', 'ntpd').
         notify: Enable or disable notifications being sent when Service Watchdogs finds this service stopped.
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
@@ -28079,7 +28079,7 @@ if "system" in _PFSENSE_MODULES:
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
         query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
-        Known fields: deps, descr, id, installed, name, shortname, version
+        Known fields: deps, descr, id, installed, name (e.g. "pfSense-pkg-Cron"), shortname (e.g. "Cron"), version
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """
@@ -28144,7 +28144,7 @@ if "system" in _PFSENSE_MODULES:
 
         fields: Comma-separated list of fields to return (e.g. 'id,name,address'). Reduces response size. The 'id' field is always included.
         query: Row filter dict (e.g. {'name': 'foo'}). For list tools, keys are also forwarded as URL query params for server-side filtering when supported. Rows are additionally filtered client-side so behavior is consistent. Pass query as an object/dict, not a JSON-encoded string. Matching uses exact string-coerced equality; list-valued fields must match the field's exact value shape.
-        Known fields: descr, id, installed_version, latest_version, name, shortname, update_available
+        Known fields: descr, id, installed_version, latest_version, name (e.g. "pfSense-pkg-Cron"), shortname (e.g. "Cron"), update_available
 
         If this tool returns an unexpected error, call pfsense_report_issue to report it.
         """

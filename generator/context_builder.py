@@ -105,6 +105,14 @@ _PARAM_DESCRIPTION_HINTS: dict[tuple[str, str], str] = {
         " WARNING: This field is read-only after creation — PATCH will return"
         " FIELD_VALUE_CHANGED_WHEN_NOT_EDITABLE if a different value is sent."
     ),
+    ("postServicesServiceWatchdogEndpoint", "name"): (
+        " Use the `name` field from pfsense_list_status_services to find valid service names"
+        " (e.g. 'syslogd', 'dpinger', 'ntpd')."
+    ),
+    ("patchServicesServiceWatchdogEndpoint", "name"): (
+        " Use the `name` field from pfsense_list_status_services to find valid service names"
+        " (e.g. 'syslogd', 'dpinger', 'ntpd')."
+    ),
 }
 
 # Per-tool docstring notes — appended after the danger warning block.
