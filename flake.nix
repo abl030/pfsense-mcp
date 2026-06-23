@@ -24,7 +24,12 @@
       default = pkgs.writeShellApplication {
         name = "pfsense-mcp";
         runtimeInputs = [pythonEnv];
+        # The generated server defaults bulk replace-all / delete-all tools ON
+        # (faithful to the full API). This deployment turns them OFF by default
+        # — they strip rule attributes on round-trip and have corrupted the live
+        # ruleset. Override per-launch by exporting PFSENSE_ALLOW_BULK=true.
         text = ''
+          export PFSENSE_ALLOW_BULK="''${PFSENSE_ALLOW_BULK:-false}"
           exec fastmcp run ${./generated/server.py}
         '';
       };

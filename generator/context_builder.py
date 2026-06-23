@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from .loader import Operation, load_spec, parse_operations
-from .naming import operation_id_to_tool_name
+from .naming import _is_plural_endpoint, operation_id_to_tool_name
 from .schema_parser import ToolParameter, extract_tool_parameters, extract_response_fields
 
 # Canonical module ordering — used for code generation and env var docs.
@@ -196,6 +196,7 @@ class ToolContext:
     docstring_note: str | None = None  # Extra note appended to docstring
     is_list_tool: bool = False  # True for pfsense_list_* tools
     response_fields: list[str] | None = None  # Known response fields for list tools
+    is_bulk: bool = False  # True for bulk replace-all (PUT) / delete-all (plural DELETE)
 
 
 def _path_to_module(path: str) -> str:
@@ -307,6 +308,13 @@ def build_tool_contexts(spec: dict[str, Any]) -> list[ToolContext]:
         # Mutation detection
         is_mutation = op.method in ("post", "patch", "put", "delete")
 
+        # Bulk detection: PUT is always a plural "replace all" in this API
+        # (singular updates use PATCH); a plural DELETE is a "delete all".
+        # These are the lossy/destructive collection ops we gate off by default.
+        is_bulk = op.method == "put" or (
+            op.method == "delete" and _is_plural_endpoint(op.path, param_names)
+        )
+
         # Apply info
         needs_apply, apply_endpoint, apply_tool_name = _find_apply_info(
             op.path, op.method
@@ -371,6 +379,7 @@ def build_tool_contexts(spec: dict[str, Any]) -> list[ToolContext]:
                 query_params=query_params,
                 is_list_tool=is_list_tool,
                 response_fields=response_fields,
+                is_bulk=is_bulk,
             )
         )
 
@@ -389,14 +398,14 @@ _GENERIC_PARAMS = frozenset({
 
 def build_tool_index(
     contexts: list[ToolContext],
-) -> list[dict[str, str | list[str]]]:
+) -> list[dict[str, str | list[str] | bool]]:
     """Build a searchable tool index for the pfsense_search_tools discovery tool.
 
     Each entry: name, module, method, desc (one-line summary), kw (keywords).
     Keywords derived from tool name, module, path segments, and field names.
     Rebuilds automatically when the generator runs — zero manual maintenance.
     """
-    index: list[dict[str, str | list[str]]] = []
+    index: list[dict[str, str | list[str] | bool]] = []
     for ctx in contexts:
         kw: set[str] = set()
 
@@ -424,6 +433,7 @@ def build_tool_index(
             "method": ctx.method,
             "desc": desc,
             "kw": sorted(kw),
+            "is_bulk": ctx.is_bulk,
         })
 
     # Always-on tools (not in the spec, hand-maintained)

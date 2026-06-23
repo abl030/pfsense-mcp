@@ -208,3 +208,92 @@ class TestToolPresence:
         all_mods = ",".join(sorted(_ALL_MODULES))
         info = _get_tools(all_mods)
         assert len(info["names"]) == len(set(info["names"]))
+
+
+# ---------------------------------------------------------------------------
+# TestBulkGate — verify PFSENSE_ALLOW_BULK drops replace-all / delete-all tools
+# ---------------------------------------------------------------------------
+
+BULK_TOOLS = {c.tool_name for c in _contexts if c.is_bulk}
+
+_HELPER_BULK = """\
+import os, sys, json
+os.environ["PFSENSE_MODULES"] = sys.argv[1]
+os.environ["PFSENSE_ALLOW_BULK"] = sys.argv[2]
+os.environ.setdefault("PFSENSE_HOST", "https://127.0.0.1")
+os.environ.setdefault("PFSENSE_API_KEY", "test")
+sys.path.insert(0, "generated")
+import server as srv
+names = sorted(srv.mcp._tool_manager._tools.keys())
+print(json.dumps({"count": len(names), "names": names}))
+"""
+
+
+def _get_tools_bulk(modules: str, allow_bulk: str) -> dict:
+    """Launch a subprocess with PFSENSE_ALLOW_BULK set and return tool info."""
+    result = subprocess.run(
+        [sys.executable, "-c", _HELPER_BULK, modules, allow_bulk],
+        capture_output=True,
+        text=True,
+        cwd=str(Path(__file__).resolve().parent),
+        timeout=30,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"Helper failed:\n{result.stderr}")
+    return json.loads(result.stdout)
+
+
+class TestBulkGate:
+    """Verify PFSENSE_ALLOW_BULK gates bulk replace-all / delete-all tools."""
+
+    def test_is_bulk_classification(self):
+        """is_bulk is exactly the PUT (replace-all) and plural DELETE ops."""
+        for c in _contexts:
+            if c.method == "put":
+                assert c.is_bulk, f"{c.tool_name}: PUT must be bulk"
+            elif c.method in ("get", "post", "patch"):
+                assert not c.is_bulk, f"{c.tool_name}: {c.method} must not be bulk"
+            # singular DELETE → not bulk; plural DELETE → bulk (covered below)
+        # every bulk tool is named replace_* (PUT) or is a plural delete_* (DELETE)
+        assert BULK_TOOLS, "expected some bulk tools"
+        for name in BULK_TOOLS:
+            ctx = next(c for c in _contexts if c.tool_name == name)
+            assert ctx.method in ("put", "delete")
+
+    def test_singular_crud_never_bulk(self):
+        """Per-object create/update/delete are never classified bulk."""
+        for c in _contexts:
+            if c.tool_name in (
+                "pfsense_create_firewall_rule",
+                "pfsense_update_firewall_rule",
+                "pfsense_delete_firewall_rule",
+                "pfsense_firewall_apply",
+            ):
+                assert not c.is_bulk
+
+    def test_bulk_off_drops_bulk_tools(self):
+        """ALLOW_BULK=false → exactly the bulk tools disappear, nothing else."""
+        all_mods = ",".join(sorted(_ALL_MODULES))
+        off = set(_get_tools_bulk(all_mods, "false")["names"])
+        on = set(_get_tools_bulk(all_mods, "true")["names"])
+        assert on - off == BULK_TOOLS
+        assert not (BULK_TOOLS & off), "no bulk tool may be registered when off"
+
+    def test_bulk_off_keeps_per_object(self):
+        """ALLOW_BULK=false still registers per-object edits + apply."""
+        off = set(_get_tools_bulk("firewall", "false")["names"])
+        for keep in (
+            "pfsense_create_firewall_rule",
+            "pfsense_update_firewall_rule",
+            "pfsense_delete_firewall_rule",
+            "pfsense_firewall_apply",
+        ):
+            assert keep in off, f"{keep} must survive bulk gating"
+        for gone in ("pfsense_replace_firewall_rules", "pfsense_delete_firewall_rules"):
+            assert gone not in off, f"{gone} must be gated off"
+
+    def test_bulk_default_is_on(self):
+        """Unset PFSENSE_ALLOW_BULK → bulk tools present (faithful to full API)."""
+        all_mods = ",".join(sorted(_ALL_MODULES))
+        default = set(_get_tools(all_mods)["names"])  # no ALLOW_BULK in env
+        assert BULK_TOOLS <= default

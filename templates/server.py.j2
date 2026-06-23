@@ -183,6 +183,16 @@ _PFSENSE_READ_ONLY = os.environ.get("PFSENSE_READ_ONLY", "false").lower() in (
     "1",
     "yes",
 )
+# Bulk replace-all (PUT) / delete-all (plural DELETE) tools. These replace an
+# entire collection at once and silently drop any attribute the caller omits
+# (the round-trip strips floating/protocol/port from firewall rules, etc.).
+# Defaults ON to keep this generated server faithful to the full API; deployers
+# who only want safe per-object edits set PFSENSE_ALLOW_BULK=false.
+_PFSENSE_ALLOW_BULK = os.environ.get("PFSENSE_ALLOW_BULK", "true").lower() in (
+    "true",
+    "1",
+    "yes",
+)
 
 
 @mcp.tool()
@@ -313,6 +323,7 @@ async def pfsense_search_tools(
                 registered = (
                     entry["module"] in _PFSENSE_MODULES
                     and (not is_mut or not _PFSENSE_READ_ONLY)
+                    and (not entry.get("is_bulk", False) or _PFSENSE_ALLOW_BULK)
                 )
             results.append({
                 "name": entry["name"],

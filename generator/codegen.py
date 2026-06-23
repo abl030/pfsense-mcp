@@ -322,11 +322,23 @@ def render(contexts: list[ToolContext]) -> str:
             sections.append(f'if "{module}" in _PFSENSE_MODULES:')
             sections.append(_indent(read_code))
 
-        # Mutation tools: gated on module membership AND not read-only
-        if writes:
-            write_code = "\n\n\n".join(_gen_tool_function(t) for t in writes)
+        # Mutation tools: gated on module membership AND not read-only.
+        # Bulk replace-all (PUT) / delete-all (plural DELETE) tools are
+        # additionally gated on _PFSENSE_ALLOW_BULK so they can be dropped
+        # entirely without affecting per-object create/update/delete.
+        non_bulk_writes = [t for t in writes if not t.is_bulk]
+        bulk_writes = [t for t in writes if t.is_bulk]
+        if non_bulk_writes:
+            write_code = "\n\n\n".join(_gen_tool_function(t) for t in non_bulk_writes)
             sections.append(f'if "{module}" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY:')
             sections.append(_indent(write_code))
+        if bulk_writes:
+            bulk_code = "\n\n\n".join(_gen_tool_function(t) for t in bulk_writes)
+            sections.append(
+                f'if "{module}" in _PFSENSE_MODULES and not _PFSENSE_READ_ONLY '
+                f'and _PFSENSE_ALLOW_BULK:'
+            )
+            sections.append(_indent(bulk_code))
 
     module_code = "\n\n\n".join(sections)
 
